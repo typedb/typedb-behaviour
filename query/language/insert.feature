@@ -9,49 +9,46 @@ Feature: TypeQL Insert Query
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-
+    Given connection reset database: typedb
+#    Given connection does not have any database
+#    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
 
-      person sub entity,
+      entity person
         plays employment:employee,
-        owns name,
+        owns name  @card(0..),
         owns age,
         owns ref @key,
         owns email @unique;
 
-      company sub entity,
+      entity company
         plays employment:employer,
         owns name,
         owns ref @key;
 
-      employment sub relation,
+      relation employment
         relates employee,
         relates employer,
         owns ref @key;
 
-      name sub attribute,
+      attribute name
         value string;
 
-      age sub attribute,
+      attribute age
         value long;
 
-      ref sub attribute,
+      attribute ref
         value long;
 
-      email sub attribute,
+      attribute email
         value string;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given set time-zone is: Europe/London
 
   ####################
@@ -65,7 +62,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -84,7 +81,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -105,7 +102,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x has name "Bond"; get;
@@ -130,20 +127,17 @@ Feature: TypeQL Insert Query
 
 
   Scenario: when running multiple identical insert queries in series, new things get created each time
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      breed sub attribute, value string;
-      dog sub entity, owns breed;
+      attribute breed value string;
+      entity dog owns breed;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $x isa dog; get;
@@ -155,7 +149,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa dog; get;
@@ -167,7 +161,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa dog; get;
@@ -179,7 +173,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa dog; get;
@@ -198,20 +192,17 @@ Feature: TypeQL Insert Query
 
 
   Scenario: attempting to insert an instance of an abstract type throws an error
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      factory sub entity, abstract;
-      electronics-factory sub factory;
+      entity factory abstract;
+      entity electronics-factory sub factory;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $x isa factory;
@@ -242,7 +233,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa thing; get;
@@ -267,7 +258,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa thing; get;
@@ -287,7 +278,7 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x has name "John"; get;
@@ -302,14 +293,14 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has name "Kyle", has ref 0;
       """
     Given transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x has name "Kyle"; get;
@@ -328,7 +319,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -344,19 +335,17 @@ Feature: TypeQL Insert Query
 
 
   Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      dog sub entity, owns name;
+      entity dog owns name;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -368,9 +357,8 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $p isa dog; get;
@@ -385,7 +373,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $p isa dog; get;
@@ -394,20 +382,18 @@ Feature: TypeQL Insert Query
 
 
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      <attr> sub attribute, value <type>, owns ref @key;
+      attribute <attr> value <type>, owns ref @key;
       person owns <attr>;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -417,7 +403,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $p isa person, has <attr> $x; get $x;
@@ -453,7 +439,7 @@ $p isa person, has name "Peter
 Parker", has ref 0;
 """
     Given transaction commits
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
 """
 match $p has name "Peter
@@ -476,7 +462,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $p has name "Spiderman"; get;
@@ -491,7 +477,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $p has name "Spiderman"; get;
@@ -509,7 +495,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $p has name "Spiderman"; get;
@@ -524,7 +510,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $p has name "Spiderman"; get;
@@ -535,20 +521,18 @@ get;
 
 
   Scenario: when an attribute owns an attribute, an instance of that attribute can be inserted onto it
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      colour sub attribute, value string, owns hex-value;
-      hex-value sub attribute, value string;
+      attribute colour value string, owns hex-value;
+      attribute hex-value value string;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -556,7 +540,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $c has hex-value "#FF0000"; get;
@@ -571,7 +555,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $c has hex-value "#FF0000"; get;
@@ -582,20 +566,18 @@ get;
 
 
   Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      colour sub attribute, value string, owns hex-value;
-      hex-value sub attribute, value string;
+      attribute colour value string, owns hex-value;
+      attribute hex-value value string;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -603,7 +585,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $c has hex-value "#FF0000"; get;
@@ -618,7 +600,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $c has hex-value "#FF0000"; get;
@@ -629,26 +611,24 @@ get;
 
 
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      residence sub relation,
+      relation residence
         relates resident,
         relates place,
         owns tenure-days,
         owns ref @key;
       person plays residence:resident;
-      address sub attribute, value string, plays residence:place;
-      tenure-days sub attribute, value long;
+      attribute address value string, plays residence:place;
+      attribute tenure-days value long;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -658,7 +638,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $td isa tenure-days; get;
@@ -673,7 +653,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r isa residence, has tenure-days $a; get $a;
@@ -686,9 +666,8 @@ get;
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
@@ -701,16 +680,15 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $p isa person, has name "Lucy", has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $p has age 32; get;
@@ -727,7 +705,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $p has age 32; get;
@@ -750,7 +728,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r (employee: $p) isa employment; get;
@@ -761,26 +739,24 @@ get;
 
 
   Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      residence sub relation,
+      relation residence
         relates resident,
         relates place,
         owns is-permanent,
         owns ref @key;
       person plays residence:resident;
-      address sub attribute, value string, plays residence:place;
-      is-permanent sub attribute, value boolean;
+      attribute address value string, plays residence:place;
+      attribute is-permanent value boolean;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -791,7 +767,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r (place: $addr) isa residence, has is-permanent $perm; get;
@@ -812,7 +788,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -840,7 +816,7 @@ get;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -851,7 +827,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r (employer: $c, employee: $p) isa employment; get;
@@ -872,7 +848,7 @@ get;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -883,7 +859,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r (employer: $c, employee: $p) isa employment; get;
@@ -901,7 +877,7 @@ get;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -912,7 +888,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r (employee: $p, employee: $p) isa employment; get;
@@ -932,19 +908,17 @@ get;
     Then transaction commits
 
   Scenario: a roleplayer can be inserted without explicitly specifying a role when the role is inherited
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      part-time-employment sub employment;
+      relation part-time-employment sub employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Then typeql insert
       """
       insert
@@ -954,9 +928,8 @@ get;
     Then transaction commits
 
   Scenario: when inserting a roleplayer that can play more than one role, an error is thrown
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
@@ -964,9 +937,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert
@@ -984,22 +956,20 @@ get;
 
 
   Scenario: parent types are not necessarily allowed to play the roles that their children play
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      animal sub entity;
-      cat sub animal, plays sphinx-production:model;
-      sphinx-production sub relation, relates model, relates builder;
+      entity animal;
+      entity cat sub animal, plays sphinx-production:model;
+      relation sphinx-production relates model, relates builder;
       person plays sphinx-production:builder;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert
@@ -1030,7 +1000,7 @@ get;
       $x isa employment, has ref 0;
       """
     Then transaction commits
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Given get answers of typeql get
       """
       match
@@ -1052,13 +1022,12 @@ get;
   #TODO: Reenable when rules actually do something
   @ignore
   Scenario: a relation currently inferred by a rule can be explicitly inserted
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      gym-membership sub relation, relates member;
+      relation gym-membership relates member;
       person plays gym-membership:member;
       rule jennifer-has-a-gym-membership:
       when {
@@ -1069,16 +1038,15 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert $p isa person, has name "Jennifer", has ref 0;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match (member: $p) isa gym-membership; get $p; get;
@@ -1092,7 +1060,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match (member: $p) isa gym-membership; get $p; get;
@@ -1112,18 +1080,16 @@ get;
   #######################
 
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $x <value> isa <attr>; get;
@@ -1135,7 +1101,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x <value> isa <attr>; get;
@@ -1154,18 +1120,16 @@ get;
 
 
   Scenario Outline: Attributes of type '<type>' can be inserted via value variables
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $x <value> isa <attr>; get;
@@ -1178,7 +1142,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x <value> isa <attr>; get;
@@ -1197,23 +1161,21 @@ get;
 
 
   Scenario: insert a regex attribute throws error if not conforming to regex
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      person sub entity,
+      entity person
         owns value;
-      value sub attribute,
+      attribute value
         value string,
         regex "\d{2}\.[true][false]";
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert
@@ -1223,19 +1185,17 @@ get;
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     Given set time-zone is: Asia/Calcutta
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
     """
     define
-    test_date sub attribute, value datetime;
+    attribute test_date value datetime;
     """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    When session opens transaction of type: write
+    Given transaction closes
+    When connection open write transaction for database: typedb
     Then typeql insert
       """
       insert
@@ -1244,7 +1204,7 @@ get;
 
     Given set time-zone is: America/Chicago
     Given transaction commits
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa test_date; get;
@@ -1262,7 +1222,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa age; get;
@@ -1273,19 +1233,17 @@ get;
 
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      length sub attribute, value double;
+      attribute length value double;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -1294,7 +1252,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa length; get;
@@ -1306,19 +1264,17 @@ get;
 
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      length sub attribute, value double;
+      attribute length value double;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -1326,7 +1282,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -1334,7 +1290,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa length; get;
@@ -1346,19 +1302,17 @@ get;
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      length sub attribute, value double;
+      attribute length value double;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert
@@ -1367,7 +1321,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa length; get;
@@ -1376,18 +1330,16 @@ get;
 
 
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When get answers of typeql insert
       """
       insert $x <insert> isa <attr>, has ref 0;
@@ -1397,7 +1349,7 @@ get;
       | key:ref:0 |
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x <match> isa <attr>; get;
@@ -1421,18 +1373,16 @@ get;
 
 
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $x <value> isa <attr>, has ref 0;
@@ -1512,7 +1462,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -1547,21 +1497,19 @@ get;
 
 
   Scenario: instances of an inherited key attribute don't have to be unique among instances of a type and its subtypes
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      ref sub attribute, value long;
-      base sub entity, owns ref @key;
-      derived sub base;
+      attribute ref value long;
+      entity base owns ref @key;
+      entity derived sub base;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
 
     When typeql insert
       """
@@ -1572,8 +1520,7 @@ get;
       insert $y isa derived, has ref 0;
       """
 
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
 
     When typeql insert
       """
@@ -1586,22 +1533,20 @@ get;
 
 
   Scenario: instances of an inherited key attribute don't have to be unique among its subtypes
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      ref sub attribute, value long;
-      base sub entity, owns ref @key;
-      derived-a sub base;
-      derived-b sub base;
+      attribute ref value long;
+      entity base owns ref @key;
+      entity derived-a sub base;
+      entity derived-b sub base;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
 
     When typeql insert
       """
@@ -1614,9 +1559,8 @@ get;
 
 
   Scenario: an error is thrown when inserting a second key attribute on an attribute that already has one
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
@@ -1624,16 +1568,15 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       insert $a "john" isa name, has ref 0;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $a "john" isa name, has ref 1;
@@ -1651,7 +1594,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has email "abc@gmail.com"; get;
@@ -1665,7 +1608,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has email "mnp@gmail.com", has email "xyz@gmail.com"; get;
@@ -1682,13 +1625,13 @@ get;
       $x isa person, has ref 0, has email "abc@gmail.com";
       $y isa person, has ref 1, has email "abc@gmail.com";
       """
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has ref 0, has email "abc@gmail.com";
       """
     Then transaction commits
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $y isa person, has ref 1, has email "abc@gmail.com";
@@ -1696,24 +1639,23 @@ get;
 
 
   Scenario: inherited uniqueness is respected
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+
     Given typeql define
       """
       define
-      child sub person;
+      entity child sub person;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa child, has email "abc@gmail.com", has email "xyz@gmail.com", has ref 0;
       """
     Then transaction commits
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $x isa child, has email "abc@gmail.com", has ref 1;
@@ -1721,29 +1663,26 @@ get;
 
 
   Scenario: overridden uniqueness is respected
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      person sub entity, abstract;
-      email sub attribute, value string, abstract;
-      email-outlook sub email, value string;
-      child sub person, owns email-outlook as email;
+      entity person abstract;
+      attribute email value string, abstract;
+      attribute email-outlook sub email, value string;
+      entity child sub person, owns email-outlook as email;
       """
     Given transaction commits
-    Given connection close all sessions
+    Given transaction closes
 
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa child, has email-outlook "abc@outlook.com", has email-outlook "xyz@outlook.com", has ref 0;
       """
     Then transaction commits
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert $x isa child, has email-outloko "abc@outlook.com", has ref 1;
@@ -1751,19 +1690,17 @@ get;
 
 
   Scenario: instances of an inherited unique attribute don't have to be unique among instances of the type and its subtypes
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      child sub person;
-      adult sub person;
+      entity child sub person;
+      entity adult sub person;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1795,20 +1732,18 @@ get;
   ################
 
   Scenario: match-insert triggers one insert per answer of the match clause
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      language sub entity, owns name, owns is-cool, owns ref @key;
-      is-cool sub attribute, value boolean;
+      entity language owns name, owns is-cool, owns ref @key;
+      attribute is-cool value boolean;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1816,8 +1751,7 @@ get;
       $y isa language, has name "Danish", has ref 1;
       """
     Given transaction commits
-
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -1827,7 +1761,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x has is-cool true; get;
@@ -1846,7 +1780,7 @@ get;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql insert
       """
       match
@@ -1863,20 +1797,18 @@ get;
 
 
   Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      height sub attribute, value long;
+      attribute height value long;
       person owns height;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -1886,7 +1818,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       match
@@ -1896,7 +1828,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -1909,20 +1841,18 @@ get;
 
 
   Scenario: if match-insert matches nothing, then nothing is inserted
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      season-ticket-ownership sub relation, relates holder;
+      relation season-ticket-ownership relates holder;
       person plays season-ticket-ownership:holder;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $p isa person; get;
@@ -1937,7 +1867,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $r isa season-ticket-ownership; get;
@@ -1958,7 +1888,7 @@ get;
       | key:ref:0 | key:ref:1 | key:ref:2 |
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $x isa person; get;
@@ -1977,7 +1907,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -2006,7 +1936,7 @@ get;
       | key:ref:0 | key:ref:1 | key:ref:2 | key:ref:3 | key:ref:4 | key:ref:5 | key:ref:6 |
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $r (employee: $x, employer: $c) isa employment; get;
@@ -2025,7 +1955,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $r (employee: $x, employer: $c) isa employment; get;
@@ -2050,7 +1980,7 @@ get;
       | attr:name:Ash  | attr:name:Misty  | attr:name:Brock  |
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given get answers of typeql get
       """
       match $x isa name; get;
@@ -2069,7 +1999,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa name; get;
@@ -2089,7 +2019,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Then typeql insert
       """
       match
@@ -2099,7 +2029,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -2115,7 +2045,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       match
@@ -2126,25 +2056,23 @@ get;
 
 
   Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert; throws exception
       """
       match
@@ -2154,25 +2082,23 @@ get;
       """
 
   Scenario: inserting a new type on an existing instance that is a supertype of its existing type throws
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa child, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert; throws exception
       """
       match
@@ -2182,26 +2108,24 @@ get;
       """
 
   Scenario: inserting a new type on an existing instance that is unrelated to its existing type throws
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-        car sub entity;
+        entity car;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert; throws exception
       """
       match
@@ -2223,7 +2147,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       match
@@ -2236,7 +2160,7 @@ get;
       """
     Given transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -2255,7 +2179,7 @@ get;
       """
       insert $x isa $t;
       """
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert; throws exception
       """
       match
@@ -2265,19 +2189,17 @@ get;
       """
 
   Scenario: variable types in inserts cannot use aliased role types
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      part-time-employment sub employment;
+      relation part-time-employment sub employment;
       """
     Given transaction commits
-    Given connection close all sessions
+    Given transaction closes
 
-    Given connection open data session for database: typedb
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       match
@@ -2295,14 +2217,13 @@ get;
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
       person owns score;
-      score sub attribute, value double;
+      attribute score value double;
       rule ganesh-rule:
       when {
         $x isa person, has score $s;
@@ -2313,9 +2234,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2323,7 +2243,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa name; get;
@@ -2340,7 +2260,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa name; get;
@@ -2351,14 +2271,13 @@ get;
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
       person owns score;
-      score sub attribute, value double;
+      attribute score value double;
       rule copy-scores-to-all-people:
       when {
         $x isa person, has score $s;
@@ -2370,9 +2289,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2381,7 +2299,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has score $score; get;
@@ -2399,7 +2317,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa score; get;
@@ -2421,19 +2339,18 @@ get;
 
   By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
 
-      name-initial sub relation,
+      relation name-initial
         relates lettered-name,
         relates initial;
 
-      score sub attribute, value double;
-      letter sub attribute, value string,
+      attribute score value double;
+      attribute letter value string,
         plays name-initial:initial;
 
       name plays name-initial:lettered-name;
@@ -2449,9 +2366,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2460,7 +2376,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa name; get;
@@ -2480,7 +2396,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql delete
       """
       match
@@ -2490,7 +2406,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -2516,9 +2432,8 @@ get;
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql undefine
       """
       undefine
@@ -2526,15 +2441,15 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     Given typeql define
       """
       define
 
-      contract sub entity,
+      entity contract
         plays employment-contract:contract;
 
-      employment-contract sub relation,
+      relation employment-contract
         relates employment,
         relates contract;
 
@@ -2549,9 +2464,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2560,7 +2474,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa employment; get;
@@ -2577,9 +2491,7 @@ get;
       """
     Then transaction commits
 
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql undefine
       """
       undefine
@@ -2587,7 +2499,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa employment; get;
@@ -2604,59 +2516,57 @@ get;
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
 
-      vertex sub entity,
+      entity vertex
         owns index @key,
         plays link:coordinate,
         plays reachable:coordinate;
 
-      link sub relation, relates coordinate;
+      relation link relates coordinate;
 
-      reachable sub relation,
+      relation reachable
         relates coordinate,
         plays road-proposal:connected-path;
 
-      road-proposal sub relation,
+      relation road-proposal
         relates connected-path,
         plays road-construction:proposal-to-construct;
 
-      road-construction sub relation, relates proposal-to-construct;
+      relation road-construction relates proposal-to-construct;
 
-      index sub attribute, value string;
+      attribute index value string;
 
-      rule a-linked-point-is-reachable:
-      when {
-        ($x, $y) isa link;
-      } then {
-        (coordinate: $x, coordinate: $y) isa reachable;
-      };
-
-      rule a-point-reachable-from-a-linked-point-is-reachable:
-      when {
-        ($x, $z) isa link;
-        ($z, $y) isa reachable;
-      } then {
-        (coordinate: $x, coordinate: $y) isa reachable;
-      };
-
-      rule propose-roads-between-reachable-points:
-      when {
-        $r isa reachable;
-      } then {
-        ($r) isa road-proposal;
-      };
+#      rule a-linked-point-is-reachable:
+#      when {
+#        ($x, $y) isa link;
+#      } then {
+#        (coordinate: $x, coordinate: $y) isa reachable;
+#      };
+#
+#      rule a-point-reachable-from-a-linked-point-is-reachable:
+#      when {
+#        ($x, $z) isa link;
+#        ($z, $y) isa reachable;
+#      } then {
+#        (coordinate: $x, coordinate: $y) isa reachable;
+#      };
+#
+#      rule propose-roads-between-reachable-points:
+#      when {
+#        $r isa reachable;
+#      } then {
+#        ($r) isa road-proposal;
+#      };
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2673,7 +2583,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2686,7 +2596,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql delete
       """
       match
@@ -2697,7 +2607,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
     # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
     # which itself plays a role in the road-construction that we explicitly inserted:
@@ -2723,9 +2633,8 @@ get;
 
 
   Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql undefine
       """
       undefine
@@ -2735,9 +2644,8 @@ get;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2746,7 +2654,7 @@ get;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2758,7 +2666,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2770,7 +2678,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2782,7 +2690,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2794,7 +2702,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2806,7 +2714,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
+    When connection open write transaction for database: typedb
     When typeql insert
       """
       match
@@ -2818,7 +2726,7 @@ get;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person; get;
@@ -2847,7 +2755,7 @@ get;
       $y qwertyuiop;
       """
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has name "Derek"; get;
@@ -2856,19 +2764,17 @@ get;
 
 
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      capacity sub attribute, value long;
+      attribute capacity value long;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -2880,7 +2786,7 @@ get;
       $y isa person, has name "Emily", has capacity 1000;
       """
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has name "Derek"; get;
@@ -2900,7 +2806,7 @@ get;
       $y isa person, has name "Emily", has ref 0;
       """
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x isa person, has name "Derek"; get;
@@ -2913,19 +2819,17 @@ get;
   ##############
 
   Scenario: the 'iid' property is used internally by TypeDB and cannot be manually assigned
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
-      bird sub entity;
+      entity bird;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    When session opens transaction of type: write
+    Given transaction closes
+    When connection open write transaction for database: typedb
     Then typeql insert; throws exception
       """
       insert

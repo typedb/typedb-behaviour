@@ -11,8 +11,7 @@ Feature: TypeQL Get Query with Expressions
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
     Given typeql define
       """
@@ -30,13 +29,10 @@ Feature: TypeQL Get Query with Expressions
       limit-double sub attribute, value double;
       """
     Given transaction commits
-    Given connection close all sessions
 
 
   Scenario: A value variable must have exactly one assignment constraint in the same scope
-    Given connection open data session for database: typedb
-
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "value variable '?v' is never assigned to"
     """
       match
@@ -47,7 +43,7 @@ Feature: TypeQL Get Query with Expressions
         $x, ?v;
       """
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
@@ -60,8 +56,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: A value variable must have exactly one assignment constraint recursively
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
@@ -74,8 +69,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: A value variable's assignment must be in the highest scope
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
@@ -88,9 +82,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Value variable assignments may not form cycles
-    Given connection open data session for database: typedb
-
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "cyclic assignment between value variables was detected"
     """
       match
@@ -100,7 +92,7 @@ Feature: TypeQL Get Query with Expressions
         $x, ?v;
       """
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When typeql get; throws exception containing "cyclic assignment between value variables was detected"
     """
       match
@@ -113,9 +105,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Value variables can cross over into negations
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -125,7 +115,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match
@@ -140,9 +130,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Value variables and concept variables may not share name
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -152,7 +140,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Then typeql get; throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
       """
       match
@@ -163,9 +151,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test unary minus sign
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql insert
       """
       insert
@@ -173,7 +159,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     Then get answers of typeql get
       """
       match
@@ -189,9 +175,7 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test operator definitions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-
+    Given connection open read transaction for database: typedb
     When get answers of typeql get
     """
       match
