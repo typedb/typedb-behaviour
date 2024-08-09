@@ -61,7 +61,8 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01T11:22:33                |
+      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
@@ -79,7 +80,8 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01 11:22:33                |
+      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
@@ -112,7 +114,8 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01 11:22:33                |
+      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
