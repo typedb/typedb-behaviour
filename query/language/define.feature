@@ -301,11 +301,11 @@ Feature: TypeQL Define Query
       """
 
 
-#  Scenario: a type cannot directly subtype 'thing' itself
-#    Then typeql define; fails
-#      """
-#      define column sub thing;
-#      """
+  Scenario: a type definition must specify a kind
+    Then typeql define; fails
+      """
+      define column;
+      """
 
 
   Scenario: an entity type can not have a value type defined
@@ -313,20 +313,6 @@ Feature: TypeQL Define Query
       """
       define entity cream value double;
       """
-
-
-#  Scenario: a type cannot have a 'when' block
-#    Then typeql define; fails
-#      """
-#      define entity gorilla when { $x isa gorilla; };
-#      """
-
-
-#  Scenario: a type cannot have a 'then' block
-#    Then typeql define; fails
-#      """
-#      define entity godzilla then { $x isa godzilla; };
-#      """
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
@@ -848,148 +834,8 @@ Feature: TypeQL Define Query
       """
       define attribute name-in-binary value long, @regex("^(0|1)+$");
       """
-#
-#
-#  Scenario: a newly defined attribute subtype inherits playable roles from its parent type
-#    Given typeql define
-#      """
-#      define
-#      entity car plays car-sales-listing:listed-car;
-#      relation car-sales-listing relates listed-car, relates available-colour;
-#      attribute colour @abstract, value string , plays car-sales-listing:available-colour;
-#      attribute grayscale-colour sub colour;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x plays car-sales-listing:available-colour; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                      |
-#      | label:colour           |
-#      | label:grayscale-colour |
-#
-#
-#  Scenario: a newly defined attribute subtype inherits playable roles from all of its supertypes
-#    Given typeql define
-#      """
-#      define
-#      entity person plays phone-contact:person;
-#      relation phone-contact relates person, relates number;
-#      attribute @abstract phone-number value string, plays phone-contact:number;
-#      attribute @abstract uk-phone-number sub phone-number;
-#      attribute @abstract uk-landline-number sub uk-phone-number;
-#      attribute uk-premium-landline-number sub uk-landline-number;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x plays phone-contact:number; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                                |
-#      | label:phone-number               |
-#      | label:uk-phone-number            |
-#      | label:uk-landline-number         |
-#      | label:uk-premium-landline-number |
-#
-#
-#  Scenario: a newly defined attribute subtype inherits attribute ownerships from its parent type
-#    Given typeql define
-#      """
-#      define
-#      attribute brightness value double;
-#      attribute colour value string, owns brightness @abstract;
-#      attribute grayscale-colour sub colour;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x owns brightness; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                      |
-#      | label:colour           |
-#      | label:grayscale-colour |
-#
-#
-#  Scenario: a newly defined attribute subtype inherits attribute ownerships from all of its supertypes
-#    Given typeql define
-#      """
-#      define
-#      attribute country-calling-code value string;
-#      attribute phone-number value string, owns country-calling-code @abstract;
-#      attribute uk-phone-number sub phone-number @abstract;
-#      attribute uk-landline-number sub uk-phone-number @abstract;
-#      attribute uk-premium-landline-number sub uk-landline-number;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x owns country-calling-code; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                                |
-#      | label:phone-number               |
-#      | label:uk-phone-number            |
-#      | label:uk-landline-number         |
-#      | label:uk-premium-landline-number |
-#
-#
-#  Scenario: a newly defined attribute subtype inherits keys from its parent type
-#    Given typeql define
-#      """
-#      define
-#      attribute hex-value value string;
-#      attribute colour value string, owns hex-value @key @abstract;
-#      attribute grayscale-colour sub colour;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x owns hex-value @key; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                      |
-#      | label:colour           |
-#      | label:grayscale-colour |
-#
-#
-#  Scenario: a newly defined attribute subtype inherits keys from all of its supertypes
-#    Given typeql define
-#      """
-#      define
-#      attribute hex-value value string;
-#      attribute colour value string, owns hex-value @key @abstract;
-#      attribute dark-colour sub colour @abstract;
-#      attribute dark-red-colour sub dark-colour @abstract;
-#      attribute very-dark-red-colour sub dark-red-colour;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x owns hex-value @key; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                          |
-#      | label:colour               |
-#      | label:dark-colour          |
-#      | label:dark-red-colour      |
-#      | label:very-dark-red-colour |
-#
-#
+
+
   Scenario Outline: a type can own a '<value_type>' attribute type
     When typeql define
       """
@@ -1612,7 +1458,7 @@ Feature: TypeQL Define Query
     Given connection open read transaction for database: typedb
     Then get answers of typeql get
       """
-      match $x @regex "^A.*$"; get;
+      match $x @regex("^A.*$"); get;
       """
     Then uniquely identify answer concepts
       | x          |
@@ -1632,7 +1478,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
-      define name @regex "^A.*$";
+      define name @regex("^A.*$");
       """
 
 
@@ -1646,7 +1492,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
-      define house-number @regex "^A.*$";
+      define house-number @regex("^A.*$)";
       """
 
 
@@ -1849,73 +1695,6 @@ Feature: TypeQL Define Query
       define
       person owns phone-nr @key;
       """
-
-
-#  Scenario: defining a rule is idempotent
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule robert-has-nickname-bob:
-#      when {
-#        $p isa person, has name "Robert";
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-#    Then typeql define
-#      """
-#      define
-#      rule robert-has-nickname-bob:
-#      when {
-#        $p isa person, has name "Robert";
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-
-#
-#  Scenario: redefining a rule and querying updates its definition
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule people-bob:
-#      when {
-#        $p isa person;
-#      } then {
-#        $p has nickname "Bob";
-#      };
-#      """
-#    Then transaction commits
-#    Given connection open schema transaction for database: typedb
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string;
-#      person owns nickname;
-#      rule people-bob:
-#      when {
-#        $p has email "bob@gmail.com";
-#      } then {
-#        $p has name "Bob";
-#      };
-#      """
-#    Then transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given typeql insert
-#      """
-#      insert $x isa person, has email "bob@gmail.com";
-#      """
-#    Then transaction commits
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x has name $a; get;
-#      """
-#    Then answer size is: 1
 
 
   #############################
@@ -2406,59 +2185,6 @@ Feature: TypeQL Define Query
       """
 
 
-#  Scenario: two attribute types can own each other in a cycle
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string, owns surname, owns middlename;
-#      attribute surname value string, owns nickname;
-#      attribute middlename value string, owns firstname;
-#      attribute firstname value string, owns surname;
-#      """
-#    Then get answers of typeql get
-#      """
-#      match $attribute a owns $b; $attribute b owns $a; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | a              | b              |
-#      | label:nickname | label:surname  |
-#      | label:surname  | label:nickname |
-#    Then get answers of typeql get
-#      """
-#      match $a owns $b; $b owns $a; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | a              | b              |
-#      | label:nickname | label:surname  |
-#      | label:surname  | label:nickname |
-#
-#  Scenario: many attribute types can own each other in a big cycle
-#    Given typeql define
-#      """
-#      define
-#      attribute nickname value string, owns surname, owns middlename;
-#      attribute surname value string, owns nickname;
-#      attribute middlename value string, owns firstname;
-#      attribute firstname value string, owns surname;
-#      """
-#    Then get answers of typeql get
-#      """
-#      match
-#      $attribute a owns $b;
-#      $attribute b owns $c;
-#      $attribute c owns $d;
-#      $attribute d owns $a;
-#      get;
-#      """
-#    Then uniquely identify answer concepts
-#      | a                | b                | c                | d                |
-#      | label:middlename | label:firstname  | label:surname    | label:nickname   |
-#      | label:firstname  | label:surname    | label:nickname   | label:middlename |
-#      | label:surname    | label:nickname   | label:middlename | label:firstname  |
-#      | label:surname    | label:nickname   | label:surname    | label:nickname   |
-#      | label:nickname   | label:middlename | label:firstname  | label:surname    |
-#      | label:nickname   | label:surname    | label:nickname   | label:surname    |
-
   Scenario: a relation type can relate to a role that it plays itself
     When typeql define
       """
@@ -2475,23 +2201,6 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                        |
       | label:recursive-function |
-#
-#
-#  Scenario: an attribute type can own itself
-#    When typeql define
-#      """
-#      define attribute number-of-letters value long, owns number-of-letters;
-#      """
-#    Then transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql get
-#      """
-#      match $x owns number-of-letters; get;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                       |
-#      | label:number-of-letters |
 
 
   Scenario: two relation types in a type hierarchy can play each other's roles
