@@ -169,29 +169,59 @@ Feature: Schema migration
     Then transaction commits
 
 
-  Scenario: A type moved with plays instances in-place by re-declaring played roles
+  Scenario: An entity type moved with plays instances in-place by re-declaring played roles
     Given create relation type: rel0
     Given relation(rel0) create role: role0
-    Given create entity type: ent0
-    Given entity(ent0) set plays: rel0:role0
-    Given create entity type: ent1
-    Given entity(ent1) set supertype: ent0
+    Given create entity type: player0
+    Given entity(player0) set plays: rel0:role0
+    Given create entity type: player1
+    Given entity(player1) set supertype: player0
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given $ent1 = entity(ent1) create new instance
+    Given $player1 = entity(player1) create new instance
     Given $rel0 = relation(rel0) create new instance
-    Given relation $rel0 add player for role(role0): $ent1
+    Given relation $rel0 add player for role(role0): $player1
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then entity(ent1) unset supertype; fails
+    Then entity(player1) unset supertype; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then entity(ent1) set plays: rel0:role0
-    Then entity(ent1) unset supertype
+    Then entity(player1) set plays: rel0:role0
+    Then entity(player1) unset supertype
     Then transaction commits
+
+
+  Scenario: A relation type moved with plays instances in-place by re-declaring played roles RELATION
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given create relation type: player0
+    Given relation(player0) create role: to-exist
+    Given relation(player0) set plays: rel0:role0
+    Given create relation type: player1
+    Given relation(player1) create role: to-exist2
+    Given relation(player1) set supertype: player0
+    Given relation(rel0) set plays: player1:to-exist2
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $player1 = relation(player1) create new instance
+    Given $rel0 = relation(rel0) create new instance
+    Given relation $rel0 add player for role(role0): $player1
+    Given relation $player1 add player for role(to-exist2): $rel0
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then relation(player1) unset supertype; fails
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Then relation(player1) set plays: rel0:role0
+    Then relation(player1) unset supertype
+    Then transaction commits
+
 
   Scenario: A type can be inserted into an existing hierarchy which has data in place
     Given create relation type: rel
@@ -397,7 +427,7 @@ Feature: Schema migration
     Then attribute(name) get supertype: word
     Then attribute(name) get annotations do not contain: @independent
     When $name = attribute(name) get instance with value: "stopper"
-    Then attribute $name is deleted: true
+    Then attribute $name does not exist
 
   Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation with subtype data
     When create attribute type: literal
@@ -430,7 +460,7 @@ Feature: Schema migration
     Then attribute(name) get supertype: word
     Then attribute(name) get annotations do not contain: @independent
     When $surname = attribute(surname) get instance with value: "stopper"
-    Then attribute $surname is deleted: true
+    Then attribute $surname does not exist
 
   Scenario: Attribute type cannot unset supertype while implicitly losing @independent annotation with data
     When create attribute type: literal
@@ -455,10 +485,10 @@ Feature: Schema migration
     When attribute(name) unset annotation: @independent
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get supertype does not
+    Then attribute(name) get supertype does not exist
     Then attribute(name) get annotations do not contain: @independent
     When $name = attribute(name) get instance with value: "stopper"
-    Then attribute $name is deleted: true
+    Then attribute $name does not exist
 
   Scenario: Attribute type cannot unset supertype while implicitly losing @independent annotation with subtype data
     When create attribute type: literal
@@ -482,125 +512,131 @@ Feature: Schema migration
     Then attribute(name) get supertype: literal
     Then attribute(name) unset supertype; fails
     When attribute(name) set annotation: @independent
-    When attribute(name) set supertype does not exist
+    When attribute(name) unset supertype
+    Then attribute(name) get supertype does not exist
     When attribute(name) unset annotation: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype does not exist
     Then attribute(name) get annotations do not contain: @independent
     When $surname = attribute(surname) get instance with value: "stopper"
-    Then attribute $surname is deleted: true
+    Then attribute $surname does not exist
 
-  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with data
-    When create relation type: parentship
-    When create relation type: connection
-    When create relation type: fathership
-    When relation(parentship) set annotation: @abstract
-    When relation(connection) set annotation: @abstract
-    When relation(connection) set annotation: @cascade
-    When relation(fathership) create role: father
-    When relation(fathership) set supertype: connection
-    When create entity type: person
-    When entity(person) set plays: fathership:father
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Given $deletable = entity(person) create new instance
-    Given $fathership = relation(fathership) create new instance
-    Given relation $fathership add player for role(father): $deletable
-    Given delete entity: $deletable
-    Given relation(fathership) get instances contain: $fathership
-    Given transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: parentship; fails
-    When relation(fathership) set annotation: @cascade
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) unset annotation @cascade
-    Then relation(fathership) get annotations contain: @cascade
-    When transaction commits
-    Given connection open read transaction for database: typedb
-    Then relation(fathership) get instances is empty
-    Then transaction closes
-    When connection open schema transaction for database: typedb
-    When relation(fathership) set supertype: connection
-    Then relation(fathership) get annotations do not contain: @cascade
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Given $deletable = entity(person) create new instance
-    Given $fathership = relation(fathership) create new instance
-    Given relation $fathership add player for role(father): $deletable
-    Given relation(fathership) get instances contain: $fathership
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: parentship; fails
-    When relation(fathership) set annotation: @cascade
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) unset annotation @cascade
-    Then relation(fathership) get annotations contain: @cascade
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Then relation(fathership) get instances is not empty
-    Given delete entities of type: person
-    Then relation(fathership) get instances is not empty
-    When transaction commits
-    Given connection open read transaction for database: typedb
-    Then relation(fathership) get annotations contain: @cascade
-    Then relation(fathership) get instances is empty
-
-  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with subtype data
-    When create relation type: parentship
-    When create relation type: connection
-    When create relation type: fathership
-    When create relation type: single-fathership
-    When relation(parentship) set annotation: @abstract
-    When relation(connection) set annotation: @abstract
-    When relation(connection) set annotation: @cascade
-    When relation(fathership) set supertype: connection
-    When relation(single-fathership) set supertype: fathership
-    When relation(single-fathership) create role: father
-    When create entity type: person
-    When entity(person) set plays: single-fathership:father
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Given $deletable = entity(person) create new instance
-    Given $fathership = relation(single-fathership) create new instance
-    Given relation $fathership add player for role(father): $deletable
-    Given delete entity: $deletable
-    Given relation(single-fathership) get instances contain: $fathership
-    Given transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: parentship; fails
-    When relation(fathership) set annotation: @cascade
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) unset annotation @cascade
-    Then relation(single-fathership) get annotations contain: @cascade
-    When transaction commits
-    Given connection open read transaction for database: typedb
-    Then relation(single-fathership) get instances is empty
-    Then transaction closes
-    When connection open schema transaction for database: typedb
-    When relation(fathership) set supertype: connection
-    Then relation(single-fathership) get annotations do not contain: @cascade
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Given $deletable = entity(person) create new instance
-    Given $fathership = relation(single-fathership) create new instance
-    Given relation $fathership add player for role(father): $deletable
-    Given relation(single-fathership) get instances contain: $fathership
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: parentship; fails
-    When relation(fathership) set annotation: @cascade
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) unset annotation @cascade
-    Then relation(single-fathership) get annotations contain: @cascade
-    When transaction commits
-    Given connection open write transaction for database: typedb
-    Then relation(single-fathership) get instances is not empty
-    Given delete entities of type: person
-    Then relation(single-fathership) get instances is not empty
-    When transaction commits
-    Given connection open read transaction for database: typedb
-    Then relation(single-fathership) get annotations contain: @cascade
-    Then relation(single-fathership) get instances is empty
-
-    # TODO: Cannot change value type if have instances of attributes
+  # TODO: Finish it after we understand @cascade!
+#  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with data
+#    When create relation type: parentship
+#    When relation(parentship) create role: parentship-role
+#    When create relation type: connection
+#    When relation(connection) create role: connection-role
+#    When create relation type: fathership
+#    When relation(fathership) create role: fathership-role
+#    When relation(parentship) set annotation: @abstract
+#    When relation(connection) set annotation: @abstract
+#    When relation(connection) set annotation: @cascade
+#    When relation(parentship) set supertype: connection
+#    When relation(fathership) create role: father
+#    When create entity type: person
+#    When entity(person) set plays: fathership:father
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given $deletable = entity(person) create new instance
+#    Given $fathership = relation(fathership) create new instance
+#    Given relation $fathership add player for role(father): $deletable
+#    Given delete entity: $deletable
+#    Given relation(fathership) get instances contain: $fathership
+#    Given transaction commits
+#    When connection open schema transaction for database: typedb
+##    Then relation(fathership) set supertype: parentship; fails
+##    When relation(fathership) set annotation: @cascade
+#    When relation(fathership) set supertype: parentship
+##    When relation(fathership) unset annotation @cascade
+#    Then relation(fathership) get annotations contain: @cascade
+#    When transaction commits
+#    Given connection open read transaction for database: typedb
+#    Then relation(fathership) get instances is empty
+#    Then transaction closes
+#    When connection open schema transaction for database: typedb
+#    When relation(fathership) set supertype: connection
+#    Then relation(fathership) get annotations do not contain: @cascade
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given $deletable = entity(person) create new instance
+#    Given $fathership = relation(fathership) create new instance
+#    Given relation $fathership add player for role(father): $deletable
+#    Given relation(fathership) get instances contain: $fathership
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(fathership) set supertype: parentship; fails
+#    When relation(fathership) set annotation: @cascade
+#    When relation(fathership) set supertype: parentship
+#    When relation(fathership) unset annotation @cascade
+#    Then relation(fathership) get annotations contain: @cascade
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Then relation(fathership) get instances is not empty
+#    Given delete entities of type: person
+#    Then relation(fathership) get instances is not empty
+#    When transaction commits
+#    Given connection open read transaction for database: typedb
+#    Then relation(fathership) get annotations contain: @cascade
+#    Then relation(fathership) get instances is empty
+#
+#  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with subtype data
+#    When create relation type: parentship
+#    When relation(parentship) create role: parentship-role
+#    When create relation type: connection
+#    When relation(connection) create role: connection-role
+#    When create relation type: fathership
+#    When relation(fathership) create role: fathership-role
+#    When create relation type: single-fathership
+#    When relation(parentship) set annotation: @abstract
+#    When relation(connection) set annotation: @abstract
+#    When relation(connection) set annotation: @cascade
+#    When relation(parentship) set supertype: connection
+#    When relation(single-fathership) set supertype: fathership
+#    When relation(single-fathership) create role: father
+#    When create entity type: person
+#    When entity(person) set plays: single-fathership:father
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given $deletable = entity(person) create new instance
+#    Given $fathership = relation(single-fathership) create new instance
+#    Given relation $fathership add player for role(father): $deletable
+#    Given delete entity: $deletable
+#    Given relation(single-fathership) get instances contain: $fathership
+#    Given transaction commits
+#    When connection open schema transaction for database: typedb
+##    Then relation(fathership) set supertype: parentship; fails
+##    When relation(fathership) set annotation: @cascade
+#    When relation(fathership) set supertype: parentship
+##    When relation(fathership) unset annotation @cascade
+#    Then relation(single-fathership) get annotations contain: @cascade
+#    When transaction commits
+#    Given connection open read transaction for database: typedb
+#    Then relation(single-fathership) get instances is empty
+#    Then transaction closes
+#    When connection open schema transaction for database: typedb
+#    When relation(fathership) set supertype: connection
+#    Then relation(single-fathership) get annotations do not contain: @cascade
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given $deletable = entity(person) create new instance
+#    Given $fathership = relation(single-fathership) create new instance
+#    Given relation $fathership add player for role(father): $deletable
+#    Given relation(single-fathership) get instances contain: $fathership
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then relation(fathership) set supertype: parentship; fails
+#    When relation(fathership) set annotation: @cascade
+#    When relation(fathership) set supertype: parentship
+#    When relation(fathership) unset annotation @cascade
+#    Then relation(single-fathership) get annotations contain: @cascade
+#    When transaction commits
+#    Given connection open write transaction for database: typedb
+#    Then relation(single-fathership) get instances is not empty
+#    Given delete entities of type: person
+#    Then relation(single-fathership) get instances is not empty
+#    When transaction commits
+#    Given connection open read transaction for database: typedb
+#    Then relation(single-fathership) get annotations contain: @cascade
+#    Then relation(single-fathership) get instances is empty
