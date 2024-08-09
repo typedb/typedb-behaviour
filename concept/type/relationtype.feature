@@ -3937,11 +3937,13 @@ Feature: Concept Relation Type and Role Type
     When relation(connection) create role: player
     Then relation(connection) get role(player) get cardinality: @card(1..1)
     When create relation type: parentship
+    When relation(parentship) set supertype: connection
     When relation(parentship) create role: parent
     When relation(parentship) create role: child
     Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     Then relation(parentship) get role(child) get cardinality: @card(1..1)
     When create relation type: fathership
+    When relation(fathership) set supertype: parentship
     When relation(fathership) create role: father
     When relation(fathership) create role: father-2
     Then relation(fathership) get role(father) get cardinality: @card(1..1)
@@ -3975,6 +3977,40 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get cardinality: @card(1..1)
     Then transaction commits
 
+  Scenario: Relates unset annotation @card revalidates cardinality between affected siblings
+    When create relation type: connection
+    When relation(connection) create role: player
+    Then relation(connection) get role(player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) set supertype: connection
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(parentship) get role(child) get cardinality: @card(1..1)
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) create role: father-2
+    Then relation(fathership) get role(father) get cardinality: @card(1..1)
+    Then relation(fathership) get role(father-2) get cardinality: @card(1..1)
+    When relation(parentship) get role(parent) set override: player
+    Then relation(parentship) get role(child) set override: player; fails
+    Then relation(connection) get role(player) set annotation: @card(1..2)
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father-2) set override: parent
+    Then relation(fathership) get role(father) get cardinality: @card(1..2)
+    Then relation(fathership) get role(father-2) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(connection) get role(player) unset annotation: @card; fails
+    When relation(parentship) get role(child) unset override
+    Then relation(connection) get role(player) unset annotation: @card; fails
+    When relation(fathership) get role(father-2) unset override
+    When relation(connection) get role(player) unset annotation: @card
+    Then relation(parentship) get role(parent) get cardinality: @card(1..1)
+    Then relation(fathership) get role(father) get cardinality: @card(1..1)
+    Then transaction commits
 
 ########################
 # relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex

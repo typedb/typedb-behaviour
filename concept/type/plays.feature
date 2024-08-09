@@ -3630,7 +3630,164 @@ Feature: Concept Plays
     Then entity(subscriber) get plays overridden(fathership:father) get label: parentship:parent
     Then entity(subscriber) get plays overridden(fathership:father-2) get label: parentship:parent
 
-    # TODO: Add tests for set override breaking cardinalities
+  Scenario: Plays cannot set override that breaks cardinality between siblings
+    When entity(customer) set supertype: person
+    When entity(subscriber) set supertype: customer
+    When create relation type: connection
+    When relation(connection) create role: player
+    When relation(connection) get role(player) set annotation: @card(0..)
+    When entity(person) set plays: connection:player
+    Then entity(person) get plays(connection:player) get cardinality: @card(0..)
+    When entity(person) get plays(connection:player) set annotation: @card(1..1)
+    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) set supertype: connection
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When entity(customer) set plays: parentship:parent
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(0..)
+    When entity(customer) set plays: parentship:child
+    Then entity(customer) get plays(parentship:child) get cardinality: @card(0..)
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When entity(subscriber) set plays: fathership:father
+    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(0..)
+    When entity(subscriber) set plays: mothership:mother
+    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(0..)
+    When relation(parentship) get role(parent) set override: player
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(mothership) get role(mother) set override: parent
+    When entity(customer) get plays(parentship:parent) set override: connection:player
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then entity(customer) get plays(parentship:child) set override: connection:player; fails
+    When entity(person) get plays(connection:player) set annotation: @card(1..2)
+    When entity(customer) get plays(parentship:child) set override: connection:player
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..2)
+    Then entity(customer) get plays(parentship:child) get cardinality: @card(1..2)
+    When entity(subscriber) get plays(fathership:father) set override: parentship:parent
+    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..2)
+    When entity(subscriber) get plays(mothership:mother) set override: parentship:parent
+    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(connection) create role: bad-player
+    When relation(connection) get role(bad-player) set annotation: @card(0..)
+    When entity(person) set plays: connection:bad-player
+    When entity(person) get plays(connection:bad-player) set annotation: @card(1..1)
+    Then entity(person) get plays(connection:bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: connection:bad-player; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: bad-connection
+    When relation(bad-connection) create role: bad-player
+    When relation(bad-connection) get role(bad-player) set annotation: @card(0..)
+    When create entity type: bad-person
+    When entity(bad-person) set plays: bad-connection:bad-player
+    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(1..1)
+    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    Then entity(customer) set supertype: bad-person; fails
+    When relation(bad-connection) set supertype: connection
+    When entity(bad-person) set supertype: person
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When entity(customer) set supertype: bad-person
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When relation(parentship) set supertype: bad-connection
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    # Cannot set override to player as it hides other overrides. Thus, it's not possible to just change overrides
+    # without unsetting subtype overrides, and card checks are not scary at this point.
+    Then relation(bad-connection) get role(bad-player) set override: player; fails
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then relation(parentship) get role(child) set override: bad-player; fails
+    When entity(customer) get plays(parentship:parent) unset override
+    When entity(customer) get plays(parentship:child) unset override
+    When relation(parentship) get role(parent) set override: bad-player
+    When relation(parentship) get role(child) set override: bad-player
+    # plays of fathership:father and mothership:mother inherit 1..1 cardinality and break it for subscriber together
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When entity(customer) get plays(parentship:child) set override: bad-connection:bad-player
+    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(0..1)
+    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(0..1)
+    When entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player
+    Then transaction commits
+
+  Scenario Outline: Plays unset annotation @card cannot break cardinality between affected siblings
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When create relation type: connection
+    When relation(connection) create role: player
+    When relation(connection) get role(player) set annotation: @card(0..)
+    When <root-type>(<supertype-name>) set plays: connection:player
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..)
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) set supertype: connection
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When <root-type>(<subtype-name>) set plays: parentship:parent
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    When <root-type>(<subtype-name>) set plays: parentship:child
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..)
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When <root-type>(<subtype-name-2>) set plays: fathership:father
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    When <root-type>(<subtype-name-2>) set plays: mothership:mother
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    When relation(parentship) get role(parent) set override: player
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(mothership) get role(mother) set override: parent
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set override: connection:player
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) set override: connection:player; fails
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
+    When <root-type>(<subtype-name>) get plays(parentship:child) set override: connection:player
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get plays(fathership:father) set override: parentship:parent
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get plays(mothership:mother) set override: parentship:parent
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get plays(connection:player) unset annotation: @card
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1); fails
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..2)
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name>) get plays(parentship:parent) unset annotation: @card
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..2)
+    When <root-type>(<supertype-name>) get plays(connection:player) unset annotation: @card
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 |
+      | entity    | person         | customer     | subscriber     |
+      | relation  | description    | registration | profile        |
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace
