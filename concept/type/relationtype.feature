@@ -3439,8 +3439,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) set annotation: @card(0..4); fails
     Then relation(parentship) get role(parent) set annotation: @card(3..3); fails
     Then relation(parentship) get role(parent) set annotation: @card(2..5); fails
-    When relation(parentship) get role(parent) unset annotation: @card
-    Then transaction commits; fails
+    Then relation(parentship) get role(parent) unset annotation: @card; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When relation(parentship) get role(parent) set annotation: @card(1..5)
     When transaction commits

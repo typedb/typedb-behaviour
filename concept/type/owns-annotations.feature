@@ -2224,6 +2224,41 @@ Feature: Concept Owns Annotations
 #      | P2M                                                                   |
 #      | P1Y2M3DT4H5M6.789S                                                    |
 
+  Scenario Outline: Owns @values annotation correctly validates nanoseconds
+    When create attribute type: today
+    When attribute(today) set value type: <value-type>
+    When entity(person) set owns: today
+    When entity(person) get owns(today) set annotation: @values(<first>, <second>)
+    Then entity(person) get owns(today) set annotation: @values(<first>, <first>); fails
+    Then entity(person) get owns(today) set annotation: @values(<second>, <second>); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(today) get annotations contain: @values(<first>, <second>)
+    Then entity(person) get owns(today) get annotations do not contain: @values(<first>, <first>)
+    Then entity(person) get owns(today) get annotations do not contain: @values(<second>, <second>)
+    Then entity(person) get owns(today) set annotation: @values(<first>, <first>); fails
+    Then entity(person) get owns(today) set annotation: @values(<second>, <second>); fails
+    Examples:
+      | value-type  | first                              | second                             |
+      | datetime    | 2024-05-05T16:15:18.8              | 2024-05-05T16:15:18.9              |
+      | datetime    | 2024-05-05T16:15:18.78             | 2024-05-05T16:15:18.79             |
+      | datetime    | 2024-05-05T16:15:18.678            | 2024-05-05T16:15:18.679            |
+      | datetime    | 2024-05-05T16:15:18.5678           | 2024-05-05T16:15:18.5679           |
+      | datetime    | 2024-05-05T16:15:18.45678          | 2024-05-05T16:15:18.45679          |
+      | datetime    | 2024-05-05T16:15:18.345678         | 2024-05-05T16:15:18.345679         |
+      | datetime    | 2024-05-05T16:15:18.2345678        | 2024-05-05T16:15:18.2345679        |
+      | datetime    | 2024-05-05T16:15:18.12345678       | 2024-05-05T16:15:18.12345679       |
+      | datetime    | 2024-05-05T16:15:18.112345678      | 2024-05-05T16:15:18.112345679      |
+      | datetime-tz | 2024-05-05T16:15:18.8+0010         | 2024-05-05T16:15:18.9+0010         |
+      | datetime-tz | 2024-05-05T16:15:18.78+0010        | 2024-05-05T16:15:18.79+0010        |
+      | datetime-tz | 2024-05-05T16:15:18.678+0010       | 2024-05-05T16:15:18.679+0010       |
+      | datetime-tz | 2024-05-05T16:15:18.5678+0010      | 2024-05-05T16:15:18.5679+0010      |
+      | datetime-tz | 2024-05-05T16:15:18.45678+0010     | 2024-05-05T16:15:18.45679+0010     |
+      | datetime-tz | 2024-05-05T16:15:18.345678+0010    | 2024-05-05T16:15:18.345679+0010    |
+      | datetime-tz | 2024-05-05T16:15:18.2345678+0010   | 2024-05-05T16:15:18.2345679+0010   |
+      | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
+      | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
+
   Scenario Outline: Owns can reset @values annotation with the same argument
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -2813,6 +2848,38 @@ Feature: Concept Owns Annotations
       | duration   | P2M                | P1Y2M              |
       | duration   | P1Y2M              | P1Y2M3DT4H5M6.789S |
       | duration   | P1Y2M3DT4H5M6.788S | P1Y2M3DT4H5M6.789S |
+
+  Scenario Outline: Owns @range annotation correctly validates nanoseconds
+    When create attribute type: today
+    When attribute(today) set value type: <value-type>
+    When entity(person) set owns: today
+    When entity(person) get owns(today) set annotation: @range(<from>..<to>)
+    Then entity(person) get owns(today) set annotation: @range(<to>..<from>); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(today) get annotations contain: @range(<from>..<to>)
+    Then entity(person) get owns(today) get annotations do not contain: @range(<to>..<from>)
+    Then entity(person) get owns(today) set annotation: @range(<to>..<from>); fails
+    Examples:
+      | value-type  | from                               | to                                 |
+      | datetime    | 2024-05-05T16:15:18.8              | 2024-05-05T16:15:18.9              |
+      | datetime    | 2024-05-05T16:15:18.78             | 2024-05-05T16:15:18.79             |
+      | datetime    | 2024-05-05T16:15:18.678            | 2024-05-05T16:15:18.679            |
+      | datetime    | 2024-05-05T16:15:18.5678           | 2024-05-05T16:15:18.5679           |
+      | datetime    | 2024-05-05T16:15:18.45678          | 2024-05-05T16:15:18.45679          |
+      | datetime    | 2024-05-05T16:15:18.345678         | 2024-05-05T16:15:18.345679         |
+      | datetime    | 2024-05-05T16:15:18.2345678        | 2024-05-05T16:15:18.2345679        |
+      | datetime    | 2024-05-05T16:15:18.12345678       | 2024-05-05T16:15:18.12345679       |
+      | datetime    | 2024-05-05T16:15:18.112345678      | 2024-05-05T16:15:18.112345679      |
+      | datetime-tz | 2024-05-05T16:15:18.8+0010         | 2024-05-05T16:15:18.9+0010         |
+      | datetime-tz | 2024-05-05T16:15:18.78+0010        | 2024-05-05T16:15:18.79+0010        |
+      | datetime-tz | 2024-05-05T16:15:18.678+0010       | 2024-05-05T16:15:18.679+0010       |
+      | datetime-tz | 2024-05-05T16:15:18.5678+0010      | 2024-05-05T16:15:18.5679+0010      |
+      | datetime-tz | 2024-05-05T16:15:18.45678+0010     | 2024-05-05T16:15:18.45679+0010     |
+      | datetime-tz | 2024-05-05T16:15:18.345678+0010    | 2024-05-05T16:15:18.345679+0010    |
+      | datetime-tz | 2024-05-05T16:15:18.2345678+0010   | 2024-05-05T16:15:18.2345679+0010   |
+      | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
+      | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
     # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
 #  Scenario Outline: Owns cannot set @range annotation without value type
