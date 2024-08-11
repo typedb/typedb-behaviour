@@ -113,10 +113,10 @@ Feature: Data validation
     When relation $m remove player for role(wife): $p
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(marriage) delete role: wife; fails
-    When entity(person) unset plays: marriage:wife
     Then relation(marriage) delete role: wife
     Then relation(marriage) get role(wife) does not exist
+    Then delete relation type: marriage
+    Then relation(marriage) does not exist
     Then transaction commits
 
 
@@ -149,10 +149,10 @@ Feature: Data validation
     When relation $m remove player for role(wife): $p
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(marriage) delete role: wife; fails
-    When entity(person) unset plays: marriage:wife
     Then relation(marriage) delete role: wife
     Then relation(marriage) get role(wife) does not exist
+    Then delete relation type: marriage
+    Then relation(marriage) does not exist
     Then transaction commits
 
 
@@ -290,7 +290,7 @@ Feature: Data validation
     When entity(person) set plays: fathership:father
     Then transaction commits
     When connection open write transaction for database: typedb
-    When relation(fathership) create new instance
+    When $f = relation(fathership) create new instance
     When $p = entity(person) create new instance
     When relation $f add player for role(father): $p
     Then transaction commits
@@ -742,8 +742,9 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(name) set ordering: unordered; fails
     Then entity(person) get owns(name) set ordering: ordered; fails
-    Then entity(person) get owns(email) set ordering: unordered; fails
-    Then entity(person) get owns(email) set ordering: ordered; fails
+    Then entity(person) get owns(email) set ordering: unordered
+    Then entity(person) get owns(email) set ordering: ordered
+    When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(id): 1
     When delete entity: $a
@@ -882,9 +883,11 @@ Feature: Data validation
     Given connection open write transaction for database: typedb
     When $ent0u = entity(ent0u) get instance with key(ref): ent0u
     When $attr0 = attribute(attr0) get instance with value: "attr0"
+    Then entity $ent0u get has contain: $attr0
     When entity $ent0u unset has: $attr0
-    Then entity $ent0u get has is empty
+    Then entity $ent0u get has do not contain: $attr0
     Then transaction commits
+    Given connection open schema transaction for database: typedb
     Then entity(ent0u) get owns(attr0) set annotation: @key; fails
     Then entity(ent0u) get owns(attr0) set annotation: @card(1..1); fails
 
