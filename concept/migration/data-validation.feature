@@ -891,8 +891,499 @@ Feature: Data validation
     Then entity(ent0u) get owns(attr0) set annotation: @key; fails
     Then entity(ent0u) get owns(attr0) set annotation: @card(1..1); fails
 
-    # TODO: Add a test for unique where we have a supertype without unique, subtype with unique, and multiple subsubtypes for it. Supertype can be duplicated
-    # with the subtypes or subsubtypes!
+
+  Scenario: Owns data is validated to be unique for all siblings overriding an owns with @unique
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given attribute(attr0) set annotation: @independent
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr0
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given create entity type: ent2
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) set owns: attr0
+    Given entity(ent1) set owns: attr1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent2) set owns: attr2
+    Given entity(ent2) set supertype: ent0
+    Given entity(ent2) get owns(attr2) set override: attr0
+    Given entity(ent0) get owns(attr0) set annotation: @card(0..)
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent1 = entity(ent1) create new instance with key(ref): ent1
+    Given $ent2 = entity(ent2) create new instance with key(ref): ent2
+    Given $attr1_0 = attribute(attr1) put instance with value: "val1"
+    Given $attr2_0 = attribute(attr2) put instance with value: "val2"
+    Given $attr2_1 = attribute(attr2) put instance with value: "val1"
+    Given entity $ent1 set has: $attr1_0
+    Given entity $ent2 set has: $attr2_0
+    Given entity $ent2 set has: $attr2_1
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @unique; fails
+    When entity(ent1) get owns(attr1) set annotation: @unique
+    When entity(ent2) get owns(attr2) set annotation: @unique
+
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Given $ent1 = entity(ent1) get instance with key(ref): ent1
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr1_0 = attribute(attr1) get instance with value: "val1"
+    Given $attr2_0 = attribute(attr2) get instance with value: "val2"
+    Given $attr2_1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has contain: $attr1_0
+    Then entity $ent2 get has contain: $attr2_0
+    Then entity $ent2 get has contain: $attr2_1
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @unique; fails
+    When entity(ent1) get owns(attr1) unset annotation: @unique
+    When entity(ent2) get owns(attr2) unset annotation: @unique
+    Then entity(ent0) get owns(attr0) set annotation: @unique; fails
+    When transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr2_1 = attribute(attr2) get instance with value: "val1"
+    Given entity $ent2 unset has: $attr2_1
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @unique
+    Then transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr2_1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent2 set has: $attr2_1; fails
+    Given $ent1 = entity(ent1) get instance with key(ref): ent1
+    Given $attr1_0 = attribute(attr1) get instance with value: "val1"
+    When entity $ent1 unset has: $attr1_0
+    Then entity $ent2 set has: $attr2_1
+    Then transaction commits
+
+
+  Scenario: Owns data is validated to be unique for all siblings overriding an owns with @key
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given attribute(attr0) set annotation: @independent
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr0
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given create entity type: ent2
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) set owns: attr0
+    Given entity(ent1) set owns: attr1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent2) set owns: attr2
+    Given entity(ent2) set supertype: ent0
+    Given entity(ent2) get owns(attr2) set override: attr0
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent1 = entity(ent1) create new instance with key(ref): ent1
+    Given $ent2 = entity(ent2) create new instance with key(ref): ent2
+    Given $attr1_0 = attribute(attr1) put instance with value: "val1"
+    Given $attr2_0 = attribute(attr2) put instance with value: "val1"
+    Given entity $ent1 set has: $attr1_0
+    Given entity $ent2 set has: $attr2_0
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @key; fails
+    When entity(ent1) get owns(attr1) set annotation: @key
+    When entity(ent2) get owns(attr2) set annotation: @key
+
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    Given $ent1 = entity(ent1) get instance with key(ref): ent1
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr1_0 = attribute(attr1) get instance with value: "val1"
+    Given $attr2_0 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has contain: $attr1_0
+    Then entity $ent2 get has contain: $attr2_0
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @key; fails
+    When entity(ent1) get owns(attr1) unset annotation: @key
+    When entity(ent2) get owns(attr2) unset annotation: @key
+    Then entity(ent0) get owns(attr0) set annotation: @key; fails
+    When transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr2_0 = attribute(attr2) get instance with value: "val1"
+    Given entity $ent2 unset has: $attr2_0
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @key; fails
+    When transaction closes
+
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr2_1 = attribute(attr2) put instance with value: "val2"
+    When entity $ent2 set has: $attr2_1
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @key
+
+    Then transaction commits
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) get instance with key(ref): ent2
+    Given $attr2_0 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent2 set has: $attr2_0; fails
+    When $attr2_1 = attribute(attr2) get instance with value: "val2"
+    When entity $ent2 unset has: $attr2_1
+    Then entity $ent2 set has: $attr2_0; fails
+    # Wrong cardinality
+    Then transaction commits; fails
+
+
+  Scenario: Owns data is revalidated with set @regex
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent0
+    When create entity type: ent1
+    When entity(ent0) set annotation: @abstract
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @card(0..)
+    When entity(ent1) set owns: attr1
+    When entity(ent1) set owns: attr2
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) get owns(attr1) set override: attr0
+    When entity(ent1) get owns(attr2) set override: attr0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When entity $ent1 set has: $attr1_val
+    When entity $ent1 set has: $attr2_val1
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+"); fails
+    When entity(ent1) get owns(attr2) set annotation: @regex("val\d+")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has contain: $attr1_val
+    Then entity $ent1 get has contain: $attr2_val1
+    When $attr2_val = attribute(attr2) put instance with value: "val"
+    Then entity $ent1 set has: $attr2_val; fails
+    When entity $ent1 unset has: $attr1_val
+    Then entity $ent1 get has do not contain: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d+")
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+")
+    When entity(ent1) get owns(attr1) unset annotation: @regex
+    When entity(ent1) get owns(attr2) unset annotation: @regex
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has do not contain: $attr1_val
+    Then entity $ent1 get has do not contain: $attr2_val
+    Then entity $ent1 get has contain: $attr2_val1
+    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr2_val; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    Then entity $ent1 set has: $attr1_val22
+    Then entity $ent1 set has: $attr2_val22
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When entity(ent0) set owns: attr01
+#    When entity(ent0) get owns(attr01) set annotation: @regex("val.*")
+    When entity(ent0) get owns(attr01) set annotation: @card(0..)
+    When attribute(attr0) set supertype: attr01
+    When entity(ent1) get owns(attr1) set override: attr01
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 set has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent0) get owns(attr01) set annotation: @regex("val\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 unset has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0
+    # To override all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set override: attr01
+    Then transaction commits
+
+
+  Scenario: Owns data is revalidated with set @range
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent0
+    When create entity type: ent1
+    When entity(ent0) set annotation: @abstract
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @card(0..)
+    When entity(ent1) set owns: attr1
+    When entity(ent1) set owns: attr2
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) get owns(attr1) set override: attr0
+    When entity(ent1) get owns(attr2) set override: attr0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When entity $ent1 set has: $attr1_val
+    When entity $ent1 set has: $attr2_val1
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @range("val1".."val9"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails
+    When entity(ent1) get owns(attr2) set annotation: @range("val1".."val9")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has contain: $attr1_val
+    Then entity $ent1 get has contain: $attr2_val1
+    When $attr2_val = attribute(attr2) put instance with value: "val"
+    Then entity $ent1 set has: $attr2_val; fails
+    When entity $ent1 unset has: $attr1_val
+    Then entity $ent1 get has do not contain: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @range("val1".."val9")
+    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9")
+    When entity(ent1) get owns(attr1) unset annotation: @range
+    When entity(ent1) get owns(attr2) unset annotation: @range
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has do not contain: $attr1_val
+    Then entity $ent1 get has do not contain: $attr2_val
+    Then entity $ent1 get has contain: $attr2_val1
+    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr2_val; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    Then entity $ent1 set has: $attr1_val22
+    Then entity $ent1 set has: $attr2_val22
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When attribute(attr01) set value type: string
+    When attribute(attr0) set supertype: attr01
+    When attribute(attr0) unset value type
+    When entity(ent0) set owns: attr01
+    When entity(ent0) get owns(attr01) set annotation: @range("val".."val9999")
+    When entity(ent0) get owns(attr01) set annotation: @card(0..)
+    When entity(ent1) get owns(attr1) set override: attr01
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 set has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent0) get owns(attr01) set annotation: @range("val1".."val9"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 unset has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0
+    # To override all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set override: attr01
+    Then transaction commits
+
+
+  Scenario: Owns data is revalidated with set @values
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent0
+    When create entity type: ent1
+    When entity(ent0) set annotation: @abstract
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @card(0..)
+    When entity(ent1) set owns: attr1
+    When entity(ent1) set owns: attr2
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) get owns(attr1) set override: attr0
+    When entity(ent1) get owns(attr2) set override: attr0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When entity $ent1 set has: $attr1_val
+    When entity $ent1 set has: $attr2_val1
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @values("val1", "val22", "vall"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @values("val1", "val22", "vall"); fails
+    When entity(ent1) get owns(attr2) set annotation: @values("val1", "val22", "vall")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has contain: $attr1_val
+    Then entity $ent1 get has contain: $attr2_val1
+    When $attr2_val = attribute(attr2) put instance with value: "val"
+    Then entity $ent1 set has: $attr2_val; fails
+    When entity $ent1 unset has: $attr1_val
+    Then entity $ent1 get has do not contain: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @values("val1", "val22", "vall")
+    Then entity(ent1) get owns(attr1) set annotation: @values("val1", "val22", "vall")
+    When entity(ent1) get owns(attr1) unset annotation: @values
+    When entity(ent1) get owns(attr2) unset annotation: @values
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then entity $ent1 get has do not contain: $attr1_val
+    Then entity $ent1 get has do not contain: $attr2_val
+    Then entity $ent1 get has contain: $attr2_val1
+    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr2_val; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    Then entity $ent1 set has: $attr1_val22
+    Then entity $ent1 set has: $attr2_val22
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When attribute(attr01) set value type: string
+    When attribute(attr0) set supertype: attr01
+    When attribute(attr0) unset value type
+    When entity(ent0) set owns: attr01
+    When entity(ent0) get owns(attr01) set annotation: @values("val", "vall", "val1", "val22", "val9")
+    When entity(ent0) get owns(attr01) set annotation: @card(0..)
+    When entity(ent1) get owns(attr1) set override: attr01
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 set has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent0) get owns(attr01) set annotation: @values("val1", "val22", "vall"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @values("val1", "val22", "vall"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 unset has: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set override: attr0
+    # To override all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set override: attr01
+    Then transaction commits
+
+
 
   # TODO: Add test when data is invalid while we change any of the new annotations (regex, values, range, independent, ...)
 
