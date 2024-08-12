@@ -379,24 +379,6 @@ Feature: Data validation
     Then delete entity type: ent0; fails
 
 
-  Scenario: Instances of abstract types must not exist
-    Given create entity type: ent0a
-    Given entity(ent0a) set annotation: @abstract
-    Given create entity type: ent0c
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Then entity(ent0a) create new instance; fails
-
-    When transaction closes
-    Given connection open write transaction for database: typedb
-    Then $a = entity(ent0c) create new instance
-    Then transaction commits
-
-    Given connection open write transaction for database: typedb
-    Then entity(ent0c) set annotation: @abstract; fails
-
-
   Scenario: Instances of ownerships not in the schema must not exist
     Given create entity type: ent00
     Given create attribute type: attr00
@@ -787,8 +769,330 @@ Feature: Data validation
 # @annotations update with existing data
 ########################
 
-     # TODO: Make a series of annotations validations on the existing data for each type and capability
-  Scenario: <root-type> types can only commit keys if every instance owns a distinct key
+  Scenario: Instances of abstract entity types must not exist
+    Given create entity type: ent0a
+    Given entity(ent0a) set annotation: @abstract
+    Given create entity type: ent0c
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then entity(ent0a) create new instance; fails
+    Then $a = entity(ent0c) create new instance
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then entity(ent0c) set annotation: @abstract; fails
+
+
+  Scenario: Instances of abstract relation types and role types must not exist
+    Given create entity type: ent0c
+    Given create relation type: rel0a
+    Given relation(rel0a) set annotation: @abstract
+    Given create relation type: rel0c
+    Given relation(rel0a) create role: rol0a
+    Given relation(rel0a) get role(rol0a) set annotation: @abstract
+    Given relation(rel0a) create role: rol0a2
+    Given relation(rel0c) create role: rol0c
+    Then relation(rel0c) get role(rol0c) set annotation: @abstract; fails
+    Given entity(ent0c) set plays: rel0c:rol0c
+    Then entity(ent0c) set plays: rel0a:rol0a; fails
+    Given entity(ent0c) set plays: rel0a:rol0a2
+    Given create relation type: rel0a2
+    Given relation(rel0a2) set supertype: rel0a
+    Given relation(rel0a2) create role: override
+    Given relation(rel0a) get role(rol0a) set annotation: @card(0..)
+    Given relation(rel0a2) get role(override) set override: rol0a
+    Then relation(rel0a2) get roles contain:
+      | rel0a:rol0a2 |
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then relation(rel0a) create new instance; fails
+    Then $e = entity(ent0c) create new instance
+    Then $r = relation(rel0c) create new instance
+    Then relation $r add player for role(rol0c): $e
+    Then $r2 = relation(rel0a2) create new instance
+    Then relation $r2 add player for role(rol0a2): $e
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then relation(rel0c) set annotation: @abstract; fails
+    Then relation(rel0c) get role(rol0c) set annotation: @abstract; fails
+    Then relation(rel0a) get role(rol0a2) set annotation: @abstract; fails
+
+
+  Scenario: Instances of abstract attribute types must not exist
+    Given create attribute type: att0a
+    Given attribute(att0a) set annotation: @independent
+    Given attribute(att0a) set annotation: @abstract
+    Given attribute(att0a) set value type: string
+    Given create attribute type: att0c
+    Given attribute(att0c) set annotation: @independent
+    Given attribute(att0c) set value type: string
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then attribute(att0a) put instance with value: "att0a"; fails
+    Given $att0c = attribute(att0c) put instance with value: "att0c"
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then attribute(att0c) set annotation: @abstract; fails
+
+
+  Scenario: Attribute data is revalidated with set @regex
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @regex("val\d+"); fails
+    Then attribute(attr1) set annotation: @regex("val\d+"); fails
+    When attribute(attr2) set annotation: @regex("val\d+")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: false
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    Then attribute(attr2) put instance with value: "val"; fails
+    When delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @regex("val\d+")
+    Then attribute(attr1) set annotation: @regex("val\d+")
+    When attribute(attr1) unset annotation: @regex
+    When attribute(attr2) unset annotation: @regex
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: true
+    Then attribute $attr2_val is none: true
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    When attribute(attr1) put instance with value: "val"; fails
+    When attribute(attr2) put instance with value: "val"; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When attribute(attr01) set annotation: @independent
+    When attribute(attr01) set value type: string
+    When attribute(attr1) set supertype: attr01
+    When attribute(attr01) set annotation: @regex("val.*")
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0; fails
+    Then attribute(attr01) set annotation: @regex("val\d+"); fails
+    Then attribute(attr1) set annotation: @regex("val\d+"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0
+    Then transaction commits
+
+
+  Scenario: Attribute data is revalidated with set @range
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @range("val1".."val9"); fails
+    Then attribute(attr1) set annotation: @range("val1".."val9"); fails
+    When attribute(attr2) set annotation: @range("val1".."val9")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: false
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    Then attribute(attr2) put instance with value: "val"; fails
+    When delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @range("val1".."val9")
+    Then attribute(attr1) set annotation: @range("val1".."val9")
+    When attribute(attr1) unset annotation: @range
+    When attribute(attr2) unset annotation: @range
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: true
+    Then attribute $attr2_val is none: true
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    When attribute(attr1) put instance with value: "val"; fails
+    When attribute(attr2) put instance with value: "val"; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When attribute(attr01) set annotation: @independent
+    When attribute(attr01) set value type: string
+    When attribute(attr1) set supertype: attr01
+    When attribute(attr01) set annotation: @range("val".."val9999")
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0; fails
+    Then attribute(attr01) set annotation: @range("val1".."val9"); fails
+    Then attribute(attr1) set annotation: @range("val1".."val9"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0
+    Then transaction commits
+
+
+  Scenario: Attribute data is revalidated with set @values
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @values("val1", "val22", "vall"); fails
+    Then attribute(attr1) set annotation: @values("val1", "val22", "vall"); fails
+    When attribute(attr2) set annotation: @values("val1", "val22", "vall")
+
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: false
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    Then attribute(attr2) put instance with value: "val"; fails
+    When delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr0) set annotation: @values("val1", "val22", "vall")
+    Then attribute(attr1) set annotation: @values("val1", "val22", "vall")
+    When attribute(attr1) unset annotation: @values
+    When attribute(attr2) unset annotation: @values
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    When $attr2_val1 = attribute(attr2) get instance with value: "val1"
+    Then attribute $attr1_val is none: true
+    Then attribute $attr2_val is none: true
+    Then attribute $attr2_val1 is none: false
+    Then attribute(attr2) get instances contain: $attr2_val1
+    When attribute(attr1) put instance with value: "val"; fails
+    When attribute(attr2) put instance with value: "val"; fails
+    When $attr1_val22 = attribute(attr1) put instance with value: "val22"
+    When $attr2_val22 = attribute(attr2) put instance with value: "val22"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set annotation: @abstract
+    When attribute(attr01) set annotation: @independent
+    When attribute(attr01) set value type: string
+    When attribute(attr1) set supertype: attr01
+    When attribute(attr01) set annotation: @values("val", "vall", "val1", "val22", "val9")
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0; fails
+    Then attribute(attr01) set annotation: @values("val1", "val22", "vall"); fails
+    Then attribute(attr1) set annotation: @values("val1", "val22", "vall"); fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then delete attribute: $attr1_val
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) set supertype: attr0
+    Then transaction commits
+
+
+  Scenario: Types can only commit keys if every instance owns a distinct key
     When create attribute type: email
     When attribute(email) set value type: string
     When create attribute type: username
@@ -1133,7 +1437,6 @@ Feature: Data validation
     When create attribute type: attr01
     When attribute(attr01) set annotation: @abstract
     When entity(ent0) set owns: attr01
-#    When entity(ent0) get owns(attr01) set annotation: @regex("val.*")
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
     When attribute(attr0) set supertype: attr01
     When entity(ent1) get owns(attr1) set override: attr01
