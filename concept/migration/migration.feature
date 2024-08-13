@@ -366,7 +366,7 @@ Feature: Schema migration
     When entity $bob set has: $gender2
     When entity $bob set has: $common2
     When entity $bob set has: $specific2
-    Given transaction commits
+    When transaction commits
 
     When connection open schema transaction for database: typedb
     When create entity type: male
@@ -413,9 +413,9 @@ Feature: Schema migration
     Then attribute(name) get supertype: word
     When attribute(name) set supertype: literal
     When transaction commits
-    Given connection open write transaction for database: typedb
-    Given attribute(name) put instance with value: "stopper"
-    Given transaction commits
+    When connection open write transaction for database: typedb
+    When attribute(name) put instance with value: "stopper"
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     Then attribute(name) set supertype: word; fails
@@ -446,9 +446,9 @@ Feature: Schema migration
     Then attribute(name) get supertype: word
     When attribute(name) set supertype: literal
     When transaction commits
-    Given connection open write transaction for database: typedb
-    Given attribute(surname) put instance with value: "stopper"
-    Given transaction commits
+    When connection open write transaction for database: typedb
+    When attribute(surname) put instance with value: "stopper"
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     Then attribute(name) set supertype: word; fails
@@ -474,9 +474,9 @@ Feature: Schema migration
     Then attribute(name) get supertype does not exist
     When attribute(name) set supertype: literal
     When transaction commits
-    Given connection open write transaction for database: typedb
-    Given attribute(name) put instance with value: "stopper"
-    Given transaction commits
+    When connection open write transaction for database: typedb
+    When attribute(name) put instance with value: "stopper"
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     Then attribute(name) unset supertype; fails
@@ -505,9 +505,9 @@ Feature: Schema migration
     Then attribute(name) get supertype does not exist
     When attribute(name) set supertype: literal
     When transaction commits
-    Given connection open write transaction for database: typedb
-    Given attribute(surname) put instance with value: "stopper"
-    Given transaction commits
+    When connection open write transaction for database: typedb
+    When attribute(surname) put instance with value: "stopper"
+    When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     Then attribute(name) unset supertype; fails
@@ -538,13 +538,13 @@ Feature: Schema migration
 #    When create entity type: person
 #    When entity(person) set plays: fathership:father
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given $deletable = entity(person) create new instance
-#    Given $fathership = relation(fathership) create new instance
-#    Given relation $fathership add player for role(father): $deletable
-#    Given delete entity: $deletable
-#    Given relation(fathership) get instances contain: $fathership
-#    Given transaction commits
+#    When connection open write transaction for database: typedb
+#    When $deletable = entity(person) create new instance
+#    When $fathership = relation(fathership) create new instance
+#    When relation $fathership add player for role(father): $deletable
+#    When delete entity: $deletable
+#    When relation(fathership) get instances contain: $fathership
+#    When transaction commits
 #    When connection open schema transaction for database: typedb
 ##    Then relation(fathership) set supertype: parentship; fails
 ##    When relation(fathership) set annotation: @cascade
@@ -552,18 +552,18 @@ Feature: Schema migration
 ##    When relation(fathership) unset annotation @cascade
 #    Then relation(fathership) get annotations contain: @cascade
 #    When transaction commits
-#    Given connection open read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then relation(fathership) get instances is empty
 #    Then transaction closes
 #    When connection open schema transaction for database: typedb
 #    When relation(fathership) set supertype: connection
 #    Then relation(fathership) get annotations do not contain: @cascade
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given $deletable = entity(person) create new instance
-#    Given $fathership = relation(fathership) create new instance
-#    Given relation $fathership add player for role(father): $deletable
-#    Given relation(fathership) get instances contain: $fathership
+#    When connection open write transaction for database: typedb
+#    When $deletable = entity(person) create new instance
+#    When $fathership = relation(fathership) create new instance
+#    When relation $fathership add player for role(father): $deletable
+#    When relation(fathership) get instances contain: $fathership
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then relation(fathership) set supertype: parentship; fails
@@ -572,12 +572,12 @@ Feature: Schema migration
 #    When relation(fathership) unset annotation @cascade
 #    Then relation(fathership) get annotations contain: @cascade
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
+#    When connection open write transaction for database: typedb
 #    Then relation(fathership) get instances is not empty
-#    Given delete entities of type: person
+#    When delete entities of type: person
 #    Then relation(fathership) get instances is not empty
 #    When transaction commits
-#    Given connection open read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then relation(fathership) get annotations contain: @cascade
 #    Then relation(fathership) get instances is empty
 #
@@ -598,13 +598,13 @@ Feature: Schema migration
 #    When create entity type: person
 #    When entity(person) set plays: single-fathership:father
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given $deletable = entity(person) create new instance
-#    Given $fathership = relation(single-fathership) create new instance
-#    Given relation $fathership add player for role(father): $deletable
-#    Given delete entity: $deletable
-#    Given relation(single-fathership) get instances contain: $fathership
-#    Given transaction commits
+#    When connection open write transaction for database: typedb
+#    When $deletable = entity(person) create new instance
+#    When $fathership = relation(single-fathership) create new instance
+#    When relation $fathership add player for role(father): $deletable
+#    When delete entity: $deletable
+#    When relation(single-fathership) get instances contain: $fathership
+#    When transaction commits
 #    When connection open schema transaction for database: typedb
 ##    Then relation(fathership) set supertype: parentship; fails
 ##    When relation(fathership) set annotation: @cascade
@@ -612,18 +612,18 @@ Feature: Schema migration
 ##    When relation(fathership) unset annotation @cascade
 #    Then relation(single-fathership) get annotations contain: @cascade
 #    When transaction commits
-#    Given connection open read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then relation(single-fathership) get instances is empty
 #    Then transaction closes
 #    When connection open schema transaction for database: typedb
 #    When relation(fathership) set supertype: connection
 #    Then relation(single-fathership) get annotations do not contain: @cascade
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given $deletable = entity(person) create new instance
-#    Given $fathership = relation(single-fathership) create new instance
-#    Given relation $fathership add player for role(father): $deletable
-#    Given relation(single-fathership) get instances contain: $fathership
+#    When connection open write transaction for database: typedb
+#    When $deletable = entity(person) create new instance
+#    When $fathership = relation(single-fathership) create new instance
+#    When relation $fathership add player for role(father): $deletable
+#    When relation(single-fathership) get instances contain: $fathership
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
 #    Then relation(fathership) set supertype: parentship; fails
@@ -632,11 +632,185 @@ Feature: Schema migration
 #    When relation(fathership) unset annotation @cascade
 #    Then relation(single-fathership) get annotations contain: @cascade
 #    When transaction commits
-#    Given connection open write transaction for database: typedb
+#    When connection open write transaction for database: typedb
 #    Then relation(single-fathership) get instances is not empty
-#    Given delete entities of type: person
+#    When delete entities of type: person
 #    Then relation(single-fathership) get instances is not empty
 #    When transaction commits
-#    Given connection open read transaction for database: typedb
+#    When connection open read transaction for database: typedb
 #    Then relation(single-fathership) get annotations contain: @cascade
 #    Then relation(single-fathership) get instances is empty
+
+
+    # TODO: Write this test similarly to "attribute data is cleaned up if @independent"
+    # when we decide what to do with/without cascade on commit time
+  Scenario: Unplayed relation data is cleaned up if @cascade is set and is persistent if @cascade exists
+
+
+  Scenario: Unowned attribute data is cleaned up if @independent is unset and is persistent if @independent exists
+    When create attribute type: attr0
+    When attribute(attr0) set value type: long
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When attribute(attr2) set annotation: @independent
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent1
+    When entity(ent1) set owns: attr1
+    When entity(ent1) set owns: attr2
+    When entity(ent1) set owns: ref
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1 = attribute(attr1) put instance with value: 198273645
+    When $attr2 = attribute(attr2) put instance with value: 198273645
+    When $attr1_0 = attribute(attr1) put instance with value: 0
+    When $attr2_0 = attribute(attr2) put instance with value: 0
+    When $p = entity(ent1) create new instance with key(ref): p
+    When entity $p set has: $attr1
+    When entity $p set has: $attr2
+    Then attribute(attr1) get instances contain: $attr1
+    Then attribute(attr2) get instances contain: $attr2
+    Then attribute(attr1) get instances contain: $attr1_0
+    Then attribute(attr2) get instances contain: $attr2_0
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_0 = attribute(attr1) get instance with value: 0
+    When $attr2_0 = attribute(attr2) get instance with value: 0
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_0 is none: false
+    Then attribute $attr2_0 is none: false
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_0 = attribute(attr1) get instance with value: 0
+    When $attr2_0 = attribute(attr2) get instance with value: 0
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_0 is none: true
+    Then attribute $attr2_0 is none: false
+    When $p = entity(ent1) get instance with key(ref): p
+    Then entity $p get has contain: $attr1
+    Then entity $p get has contain: $attr2
+    Then entity $p get has do not contain: $attr2_0
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr0) set annotation: @independent
+    When attribute(attr2) unset annotation: @independent
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_0 = attribute(attr1) get instance with value: 0
+    When $attr2_0 = attribute(attr2) get instance with value: 0
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_0 is none: true
+    Then attribute $attr2_0 is none: false
+    When $p = entity(ent1) get instance with key(ref): p
+    Then entity $p get has contain: $attr1
+    Then entity $p get has contain: $attr2
+    Then entity $p get has do not contain: $attr2_0
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr01
+    When attribute(attr01) set value type: long
+    When attribute(attr01) set annotation: @abstract
+    Then attribute(attr1) set supertype: attr01; fails
+    Then attribute(attr2) set supertype: attr01; fails
+    When attribute(attr1) set annotation: @independent
+    When attribute(attr2) set annotation: @independent
+    When attribute(attr1) set supertype: attr01
+    When attribute(attr2) set supertype: attr01
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_0 = attribute(attr1) get instance with value: 0
+    When $attr2_0 = attribute(attr2) get instance with value: 0
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_0 is none: true
+    Then attribute $attr2_0 is none: false
+    When $p = entity(ent1) get instance with key(ref): p
+    Then entity $p get has contain: $attr1
+    Then entity $p get has contain: $attr2
+    Then entity $p get has do not contain: $attr2_0
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) unset annotation: @independent
+    When attribute(attr2) unset annotation: @independent
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_0 = attribute(attr1) get instance with value: 0
+    When $attr2_0 = attribute(attr2) get instance with value: 0
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_0 is none: true
+    Then attribute $attr2_0 is none: true
+    When $p = entity(ent1) get instance with key(ref): p
+    Then entity $p get has contain: $attr1
+    Then entity $p get has contain: $attr2
+    When $attr1_1 = attribute(attr1) put instance with value: 1
+    When $attr2_1 = attribute(attr2) put instance with value: 1
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr0
+    When attribute(attr2) set supertype: attr0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_1 = attribute(attr1) get instance with value: 1
+    When $attr2_1 = attribute(attr2) get instance with value: 1
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_1 is none: true
+    Then attribute $attr2_1 is none: true
+    When $p = entity(ent1) get instance with key(ref): p
+    Then entity $p get has contain: $attr1
+    Then entity $p get has contain: $attr2
+    When $attr1_2 = attribute(attr1) put instance with value: 2
+    When $attr2_2 = attribute(attr2) put instance with value: 2
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_2 = attribute(attr1) get instance with value: 2
+    When $attr2_2 = attribute(attr2) get instance with value: 2
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_2 is none: false
+    Then attribute $attr2_2 is none: false
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr0) unset annotation: @independent
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When $attr1 = attribute(attr1) get instance with value: 198273645
+    When $attr2 = attribute(attr2) get instance with value: 198273645
+    When $attr1_2 = attribute(attr1) get instance with value: 2
+    When $attr2_2 = attribute(attr2) get instance with value: 2
+    Then attribute $attr1 is none: false
+    Then attribute $attr2 is none: false
+    Then attribute $attr1_2 is none: true
+    Then attribute $attr2_2 is none: true
