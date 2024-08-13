@@ -59,7 +59,7 @@ Feature: Concept Ordered Role Players
     When relation $employment set players for role(employee[]): [$alice, $bob]
     When relation $employment add player for role(employer): $company
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $employees = relation $employment get players for role(employee[])
     Then roleplayer $employees[0] is $alice
     Then roleplayer $employees[1] is $bob
@@ -72,7 +72,7 @@ Feature: Concept Ordered Role Players
     When relation $employment set players for role(employee[]): [$alice, $bob]
     When relation $employment add player for role(employer): $company
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation $employment get players for role(employee) contain: $alice
     Then relation $employment get players for role(employee) contain: $bob
 
@@ -84,13 +84,13 @@ Feature: Concept Ordered Role Players
     When relation $employment set players for role(employee[]): [$alice, $bob]
     When relation $employment add player for role(employer): $company
     Then transaction commits
-    When connection opens write transaction for database: typedb
+    When connection open write transaction for database: typedb
     Then $employees = relation $employment get players for role(employee[])
     Then roleplayer $employees[0] is $alice
     Then roleplayer $employees[1] is $bob
     When relation $employment set players for role(employee[]): [$bob, $alice]
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $employees = relation $employment get players for role(employee[])
     Then roleplayer $employees[0] is $bob
     Then roleplayer $employees[1] is $alice
@@ -103,7 +103,7 @@ Feature: Concept Ordered Role Players
     When relation $employment set players for role(employee[]): [$alice, $bob, $alice, $alice, $bob]
     When relation $employment add player for role(employer): $company
     Then transaction commits
-    When connection opens read transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then $employees = relation $employment get players for role(employee[])
     Then roleplayer $employees[0] is $alice
     Then roleplayer $employees[1] is $bob

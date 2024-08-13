@@ -29,14 +29,14 @@ Feature: Concept Ordered Ownership
     When $a = entity(person) create new instance with key(username): alice
     When $main = attribute(email) put instance with value: alice@email.com
     When $alt = attribute(email) put instance with value: alice2@email.com
-    When entity $a set has(email): [$main, $alt]
+    When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
 
   Scenario: Ordered attributes can be retrieved and indexed
     When $a = entity(person) create new instance with key(username): alice
     When $main = attribute(email) put instance with value: alice@email.com
     When $alt = attribute(email) put instance with value: alice2@email.com
-    When entity $a set has(email): [$main, $alt]
+    When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
     When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email)
@@ -47,7 +47,7 @@ Feature: Concept Ordered Ownership
     When $a = entity(person) create new instance with key(username): alice
     When $main = attribute(email) put instance with value: alice@email.com
     When $alt = attribute(email) put instance with value: alice2@email.com
-    When entity $a set has(email): [$main, $alt]
+    When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
     When connection open read transaction for database: typedb
     Then entity $a get has(email) contain: $main
@@ -57,7 +57,7 @@ Feature: Concept Ordered Ownership
     When $a = entity(person) create new instance with key(username): alice
     When $main = attribute(email) put instance with value: alice@email.com
     When $alt = attribute(email) put instance with value: alice2@email.com
-    When entity $a set has(email): [$main, $alt, $main, $main, $alt]
+    When entity $a set has(email[]): [$main, $alt, $main, $main, $alt]
     Then transaction commits
     When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email)
@@ -71,7 +71,7 @@ Feature: Concept Ordered Ownership
     When $a = entity(person) create new instance with key(username): alice
     When $main = attribute(email) put instance with value: alice@email.com
     When $alt = attribute(email) put instance with value: alice2@email.com
-    When entity $a set has(email): [$main, $alt]
+    When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
     When connection open write transaction for database: typedb
     Then $emails = entity $a get has(email)
@@ -81,7 +81,7 @@ Feature: Concept Ordered Ownership
     Then entity $a get has(email) contain: $main
     Then entity $a get has(email) contain: $alt
     Then entity $a get has(email) do not contain: $alt2
-    When entity $a set has(email): [$alt2, $main]
+    When entity $a set has(email[]): [$alt2, $main]
     Then transaction commits
     When connection open read transaction for database: typedb
     Then $emails = entity $a get has(email)

@@ -26,9 +26,9 @@ Feature: Concept Relation
     Given relation(marriage) set owns: date
 
     Given relation(marriage) create role: wife
-    Given relation(marriage) get role(wife) set annotation: @card(0, 1)
+    Given relation(marriage) get role(wife) set annotation: @card(0..1)
     Given relation(marriage) create role: husband
-    Given relation(marriage) get role(husband) set annotation: @card(0, 1)
+    Given relation(marriage) get role(husband) set annotation: @card(0..1)
 
     Given create entity type: person
     Given entity(person) set owns: username
@@ -207,6 +207,8 @@ Feature: Concept Relation
     When relation $m add player for role(wife): $a; fails
 
   Scenario: Cannot create instances of abstract relation type and role type
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @abstract

@@ -206,17 +206,19 @@ Feature: Concept Entity
     When entity $a set has: $email; fails
 
   Scenario: Cannot create instances of abstract entity type
-    When create entity type: person
-    When entity(person) set annotation: @abstract
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create entity type: character
+    When entity(character) set annotation: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
-    Then entity(person) create new instance; fails
+    Then entity(character) create new instance; fails
     When transaction closes
     When connection open schema transaction for database: typedb
-    When entity(person) unset annotation: @abstract
+    When entity(character) unset annotation: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
-    Then entity(person) create new instance
+    Then entity(character) create new instance
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get instances is not empty
+    Then entity(character) get instances is not empty

@@ -38,6 +38,7 @@ Feature: Concept Attribute
     Given attribute(email) set value type: string
     Given attribute(email) set annotation: @independent
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
+    # TODO: Add more more more types here!
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given set time zone: Europe/London
@@ -180,18 +181,20 @@ Feature: Concept Attribute
     Then attribute $x does not exist
 
   Scenario: Cannot create instances of abstract attribute type
-    When create attribute type: name
-    When attribute(name) set value type: string
-    When attribute(name) set annotation: @abstract
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: full-name
+    When attribute(full-name) set value type: string
+    When attribute(full-name) set annotation: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
-    Then attribute(name) put instance with value: "bob"; fails
+    Then attribute(full-name) put instance with value: "bob"; fails
     When transaction closes
     When connection open schema transaction for database: typedb
-    When attribute(name) unset annotation: @abstract
+    When attribute(full-name) unset annotation: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
-    Then attribute(name) put instance with value: "bob"
+    Then attribute(full-name) put instance with value: "bob"
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get instances is not empty
+    Then attribute(full-name) get instances is not empty
