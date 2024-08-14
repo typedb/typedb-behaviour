@@ -213,9 +213,9 @@ Feature: Concept Relation
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @abstract
     When relation(parentship) get role(parent) set annotation: @abstract
-    When create relation type: parentship-player
-    When relation(parentship-player) create role: roleplayer
-    When relation(parentship-player) set plays: parentship:parent
+    When create entity type: parentship-player
+    When entity(parentship-player) set annotation: @abstract
+    When entity(parentship-player) set plays: parentship:parent
     When transaction commits
     When connection open write transaction for database: typedb
     Then relation(parentship) create new instance; fails
@@ -224,6 +224,24 @@ Feature: Concept Relation
     Then relation(parentship) unset annotation: @abstract; fails
     When relation(parentship) get role(parent) unset annotation: @abstract
     When relation(parentship) unset annotation: @abstract
+    When entity(parentship-player) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then $r = relation(parentship) create new instance
+    Then $p = entity(parentship-player) create new instance
+    Then relation $r add player for role(parent): $p
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get instances is not empty
+
+  Scenario: Relations are cleaned up after their players are cleaned up
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: parentship-player
+    When relation(parentship-player) create role: unplayed-role-leading-to-cleanup
+    When relation(parentship-player) set plays: parentship:parent
     When transaction commits
     When connection open write transaction for database: typedb
     Then $r = relation(parentship) create new instance
@@ -231,4 +249,5 @@ Feature: Concept Relation
     Then relation $r add player for role(parent): $p
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get instances is not empty
+    Then relation(parentship-player) get instances is empty
+    Then relation(parentship) get instances is empty

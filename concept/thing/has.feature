@@ -39,7 +39,7 @@ Feature: Concept Ordered Ownership
     When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then $emails = entity $a get has(email)
+    Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
 
@@ -60,7 +60,7 @@ Feature: Concept Ordered Ownership
     When entity $a set has(email[]): [$main, $alt, $main, $main, $alt]
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then $emails = entity $a get has(email)
+    Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
     Then attribute $emails[2] is $main
@@ -74,7 +74,7 @@ Feature: Concept Ordered Ownership
     When entity $a set has(email[]): [$main, $alt]
     Then transaction commits
     When connection open write transaction for database: typedb
-    Then $emails = entity $a get has(email)
+    Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $main
     Then attribute $emails[1] is $alt
     When $alt2 = attribute(email) put instance with value: alice@email.net
@@ -84,7 +84,7 @@ Feature: Concept Ordered Ownership
     When entity $a set has(email[]): [$alt2, $main]
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then $emails = entity $a get has(email)
+    Then $emails = entity $a get has(email[])
     Then attribute $emails[0] is $alt2
     Then attribute $emails[1] is $main
     Then entity $a get has(email) contain: $main

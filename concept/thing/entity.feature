@@ -117,7 +117,8 @@ Feature: Concept Entity
     When $alice = attribute(username) put instance with value: alice
     When $bob = attribute(username) put instance with value: bob
     When entity $a set has: $alice
-    Then entity $a set has: $bob; fails
+    When entity $a set has: $bob
+    Then transaction commits; fails
     When connection open write transaction for database: typedb
     When $a = entity(person) create new instance
     When $alice = attribute(username) put instance with value: alice
@@ -126,7 +127,8 @@ Feature: Concept Entity
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) put instance with value: bob
-    Then entity $a set has: $bob; fails
+    When entity $a set has: $bob
+    Then transaction commits; fails
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance

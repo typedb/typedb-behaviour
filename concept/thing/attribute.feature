@@ -23,11 +23,14 @@ Feature: Concept Attribute
     Given attribute(score) set value type: double
     Given attribute(score) set annotation: @independent
     Given create attribute type: birth-date
-    Given attribute(birth-date) set value type: datetime
+    Given attribute(birth-date) set value type: date
     Given attribute(birth-date) set annotation: @independent
+    Given attribute(event-date) set annotation: @independent
+    Given create attribute type: event-datetime
+    Given attribute(event-datetime) set value type: datetime
+    Given attribute(event-datetime) set annotation: @independent
     Given create attribute type: event-date
     Given attribute(event-date) set value type: datetime-tz
-    Given attribute(event-date) set annotation: @independent
     Given create attribute type: schedule-interval
     Given attribute(schedule-interval) set value type: duration
     Given attribute(schedule-interval) set annotation: @independent
@@ -38,7 +41,6 @@ Feature: Concept Attribute
     Given attribute(email) set value type: string
     Given attribute(email) set annotation: @independent
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
-    # TODO: Add more more more types here!
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given set time zone: Europe/London
@@ -63,7 +65,7 @@ Feature: Concept Attribute
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
       | birth-date        | date        | 1990-01-01T11:22:33                |
-      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
@@ -82,7 +84,7 @@ Feature: Concept Attribute
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
       | birth-date        | date        | 1990-01-01T11:22:33                |
-      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
@@ -116,7 +118,7 @@ Feature: Concept Attribute
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
       | birth-date        | date        | 1990-01-01T11:22:33                |
-      | birth-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
       | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
       | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
@@ -169,8 +171,7 @@ Feature: Concept Attribute
     When connection open read transaction for database: typedb
     When $x = attribute(ephemeral) get instance with value: 1337
     Then attribute $x does not exist
-    # FIXME: read transactions shouldn't commit
-    When transaction commits
+    When transaction closes
 
     When connection open schema transaction for database: typedb
     When attribute(ephemeral) set annotation: @independent
