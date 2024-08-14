@@ -25,12 +25,12 @@ Feature: Concept Attribute
     Given create attribute type: birth-date
     Given attribute(birth-date) set value type: date
     Given attribute(birth-date) set annotation: @independent
-    Given attribute(event-date) set annotation: @independent
     Given create attribute type: event-datetime
     Given attribute(event-datetime) set value type: datetime
     Given attribute(event-datetime) set annotation: @independent
-    Given create attribute type: event-date
-    Given attribute(event-date) set value type: datetime-tz
+    Given create attribute type: global-date
+    Given attribute(global-date) set value type: datetime-tz
+    Given attribute(global-date) set annotation: @independent
     Given create attribute type: schedule-interval
     Given attribute(schedule-interval) set value type: duration
     Given attribute(schedule-interval) set annotation: @independent
@@ -64,10 +64,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-date        | date        | 1990-01-01                         |
       | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
@@ -83,10 +83,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-date        | date        | 1990-01-01                         |
       | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-      | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be deleted
@@ -117,10 +117,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | date        | 1990-01-01T11:22:33                |
+      | birth-date        | date        | 1990-01-01                         |
       | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-      | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario: Attribute with value type string that satisfies the regular expression can be created
@@ -142,17 +142,17 @@ Feature: Concept Attribute
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     When set time zone: Asia/Calcutta
-    When $x = attribute(birth-date) put instance with value: 2001-08-23 08:30:00
+    When $x = attribute(event-datetime) put instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
-    Then attribute $x has type: birth-date
+    Then attribute $x has type: event-datetime
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
     When transaction commits
     When connection open read transaction for database: typedb
     When set time zone: America/Chicago
-    When $x = attribute(birth-date) get instance with value: 2001-08-23 08:30:00
+    When $x = attribute(event-datetime) get instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
-    Then attribute $x has type: birth-date
+    Then attribute $x has type: event-datetime
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
 
@@ -187,6 +187,7 @@ Feature: Concept Attribute
     When create attribute type: full-name
     When attribute(full-name) set value type: string
     When attribute(full-name) set annotation: @abstract
+    When attribute(full-name) set annotation: @independent
     When transaction commits
     When connection open write transaction for database: typedb
     Then attribute(full-name) put instance with value: "bob"; fails
@@ -199,3 +200,4 @@ Feature: Concept Attribute
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(full-name) get instances is not empty
+
