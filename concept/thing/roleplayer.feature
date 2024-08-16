@@ -136,7 +136,12 @@ Feature: Concept Ordered Role Players
     When $vacation = relation(vacation) get instance with key(date): 2024-08-16
     Then relation $vacation does not exist
 
-  # TODO: Test to add roleplayer non-related role
-  # TODO: Test to add roleplayer non-played
+  Scenario: Cannot set roleplayer to relation that doesn't relate this role type and player that doesn't play the role
+    When $company = entity(company) create new instance with key(company-name): acme
+    When $vacation = relation(vacation) create new instance
+    When $employment = relation(employment) create new instance
+    When relation $employment set players for role(employee[]): [$company]; fails
+    When relation $vacation add player for role(employee): $company; fails
+    Then transaction commits
 
-    # TODO: Cascade
+    # TODO: Cascade (when we understand it)
