@@ -24,6 +24,10 @@ Feature: Concept Ordered Role Players
     Given create relation type: employment
     Given relation(employment) set owns: date
 
+    Given create relation type: vacation
+    Given relation(vacation) set owns: date
+    Given relation(vacation) create role: employee, with @card(0..1)
+
     Given relation(employment) create role: employer
     Given relation(employment) create role: employee
     Given relation(employment) get role(employee) set ordering: ordered
@@ -37,6 +41,7 @@ Feature: Concept Ordered Role Players
     Given entity(person) set owns: name
     Given entity(person) get owns(name) set annotation: @key
     Given entity(person) set plays: employment:employee
+    Given entity(person) set plays: vacation:employee
 
     Given transaction commits
 
@@ -110,3 +115,25 @@ Feature: Concept Ordered Role Players
     Then roleplayer $employees[2] is $alice
     Then roleplayer $employees[3] is $alice
     Then roleplayer $employees[4] is $bob
+
+  Scenario: Relations are cleaned up without roleplayers
+    When $alice = entity(person) create new instance with key(name): alice
+    When $vacation = relation(vacation) create new instance with key(date): 2024-08-16
+    When relation $vacation add player for role(employee): $alice
+    When $no-vacation = relation(vacation) create new instance with key(date): 2020-03-23
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $vacation = relation(vacation) get instance with key(date): 2024-08-16
+    When $no-vacation = relation(vacation) get instance with key(date): 2020-03-23
+    Then relation $vacation exists
+    Then relation $no-vacation does not exist
+    When $alice = entity(person) get instance with key(name): alice
+    When relation(vacation) $vacation remove player for role(employee): $alice
+    When $vacation = relation(vacation) get instance with key(date): 2024-08-16
+    Then relation $vacation exists
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    When $vacation = relation(vacation) get instance with key(date): 2024-08-16
+    Then relation $vacation does not exist
+
+    # TODO: Cascade

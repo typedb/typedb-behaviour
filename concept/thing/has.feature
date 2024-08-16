@@ -15,11 +15,18 @@ Feature: Concept Ordered Ownership
     # Write schema for the test scenarios
     Given create attribute type: username
     Given attribute(username) set value type: string
+    Given create attribute type: name
+    Given attribute(name) set value type: string
+    Given attribute(name) set annotation: @independent
+    Given create attribute type: birth-date
+    Given attribute(birth-date) set value type: date
     Given create attribute type: email
     Given attribute(email) set value type: string
     Given create entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns(username) set annotation: @key
+    Given entity(person) set owns: name
+    Given entity(person) set owns: birth-date
     Given entity(person) set owns: email
     Given entity(person) get owns(email) set ordering: ordered
     Given transaction commits
@@ -91,3 +98,30 @@ Feature: Concept Ordered Ownership
     Then entity $a get has(email) do not contain: $alt
     Then entity $a get has(email) contain: $alt2
 
+  Scenario: Non-independent attributes are cleaned up without owners
+    When $p = entity(person) create new instance with key(username): "k"
+    When $b = attribute(birth-date) put instance with value: 2024-01-15
+    When entity $p set has: $b
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(username) get instances is not empty
+    When $p = entity(person) get instance with key(username): "k"
+    When $b = attribute(birth-date) get instance with value: 2024-01-15
+    When entity $p unset has: $b
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(birth-date) get instances is empty
+
+  Scenario: Independent attributes are not cleaned up without owners
+    When $p = entity(person) create new instance with key(username): "k"
+    When $n = attribute(name) put instance with value: "k"
+    When entity $p set has: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(name) get instances is not empty
+    When $p = entity(person) get instance with key(username): "k"
+    When $n = attribute(name) get instance with value: "k"
+    When entity $p unset has: $n
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get instances is not empty

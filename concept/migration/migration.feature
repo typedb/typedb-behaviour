@@ -203,6 +203,7 @@ Feature: Schema migration
     Given create relation type: player1
     Given relation(player1) create role: to-exist2
     Given relation(player1) set supertype: player0
+    Given relation(player1) get role(to-exist2) set override: to-exist
     Given relation(rel0) set plays: player1:to-exist2
     Given transaction commits
 
@@ -214,12 +215,14 @@ Feature: Schema migration
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
+    When relation(player1) get role(to-exist2) unset override
     Then relation(player1) unset supertype; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then relation(player1) set plays: rel0:role0
-    Then relation(player1) unset supertype
+    When relation(player1) set plays: rel0:role0
+    When relation(player1) get role(to-exist2) unset override
+    When relation(player1) unset supertype
     Then transaction commits
 
 

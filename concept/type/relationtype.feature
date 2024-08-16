@@ -2954,6 +2954,16 @@ Feature: Concept Relation Type and Role Type
       | 0    |                     |
       | 1    |                     |
 
+  Scenario: Relates can be created with card in one operation
+    When create relation type: parentship
+    When relation(parentship) create role: parent, with @card(7..9)
+    Then relation(parentship) get role(parent) get annotations contains: @card(7..9)
+    Then relation(parentship) get role(parent) get cardinality: @card(7..9)
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get role(parent) get annotations contains: @card(7..9)
+    Then relation(parentship) get role(parent) get cardinality: @card(7..9)
+
   Scenario Outline: Relation type can set @card annotation on roles with duplicate args (exactly N ownerships)
     When create relation type: parentship
     When relation(parentship) create role: parent

@@ -37,7 +37,7 @@ Feature: Data validation
 
   Scenario: Relation types that have instances cannot be deleted
     When create relation type: marriage
-    When relation(marriage) create role: wife
+    When relation(marriage) create role: wife, with @card(0..1)
     When create entity type: person
     When entity(person) set plays: marriage:wife
     When transaction commits
@@ -92,6 +92,7 @@ Feature: Data validation
     When relation(marriage) create role: wife
     When relation(marriage) create role: husband
     When relation(marriage) get role(husband) set annotation: @card(0..)
+    When relation(marriage) get role(wife) set annotation: @card(0..)
     When relation(marriage) set owns: id
     When create entity type: person
     When entity(person) set plays: marriage:wife
@@ -111,6 +112,7 @@ Feature: Data validation
     When $m = relation(marriage) get instance with key(id): "m"
     When $p = entity(person) get instance with key(id): "p"
     When relation $m remove player for role(wife): $p
+    Then relation $m get players for role(wife) is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) delete role: wife
@@ -147,6 +149,7 @@ Feature: Data validation
     When $m = relation(marriage) get instance with key(id): "m"
     When $p = entity(person) get instance with key(id): "p"
     When relation $m remove player for role(wife): $p
+    Then relation $m get players for role(wife) is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(marriage) delete role: wife
@@ -235,6 +238,7 @@ Feature: Data validation
     When attribute(id) set value type: string
     When create relation type: marriage
     When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set annotation: @card(0..1)
     When relation(marriage) set owns: id
     When create entity type: person
     When entity(person) set plays: marriage:wife
@@ -285,6 +289,7 @@ Feature: Data validation
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set override: parent
     When create entity type: person
     When entity(person) set plays: fathership:father
     Then transaction commits
@@ -294,13 +299,18 @@ Feature: Data validation
     When relation $f add player for role(father): $p
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(parentship) set annotation: @abstract
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) get role(parent) set annotation: @abstract
     Then transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) get annotations contain: @abstract
     Then relation(parentship) get declared annotations contain: @abstract
     Then relation(fathership) get annotations do not contain: @abstract
     Then relation(fathership) get declared annotations do not contain: @abstract
+    Then relation(parentship) get role(parent) get annotations contain: @abstract
+    Then relation(parentship) get role(parent) get declared annotations contain: @abstract
+    Then relation(fathership) get role(father) get annotations do not contain: @abstract
+    Then relation(fathership) get role(father) get declared annotations do not contain: @abstract
     Then relation(fathership) get instances is not empty
 
 
@@ -327,6 +337,7 @@ Feature: Data validation
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set override: parent
     When create entity type: person
     When entity(person) set plays: fathership:father
     Then transaction commits
@@ -336,12 +347,41 @@ Feature: Data validation
     When relation $f add player for role(father): $p
     Then transaction commits
     When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) unset override
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) unset override
     When relation(fathership) unset supertype
     Then delete relation type: parentship
     Then transaction commits
     When connection open read transaction for database: typedb
     Then relation(parentship) does not exist
     Then relation(fathership) get instances is not empty
+
+
+  Scenario: Relation types relates default cardinality can be violated
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) get cardinality: @card(1..1)
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    When create entity type: person
+    When entity(person) set plays: fathership:father
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $f = relation(fathership) create new instance
+    When $p = entity(person) create new instance
+    When relation $f add player for role(father): $p
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(fathership) get role(father) set override: parent
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $f = relation(fathership) create new instance
+    When $p = entity(person) create new instance
+    When relation $f add player for role(father): $p
+    Then transaction commits
 
 
   Scenario: Attribute types can be unset as supertype and deleted when a subtype has instances
@@ -430,7 +470,9 @@ Feature: Data validation
 
     When transaction closes
     Given connection open schema transaction for database: typedb
-    Then relation(rel1) create role: role1
+    # The default card is 1..1 and we have instances of rel1!
+    Then relation(rel1) create role: role1; fails
+    When relation(rel1) create role: role1, with @card(0..1)
     Then relation(rel1) get role(role1) set override: role00; fails
 
 
