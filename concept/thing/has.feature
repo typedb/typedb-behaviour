@@ -125,3 +125,6 @@ Feature: Concept Ordered Ownership
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get instances is not empty
+
+
+  # TODO: Test to add attribute non-owned

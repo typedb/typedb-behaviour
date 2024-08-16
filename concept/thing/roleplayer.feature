@@ -128,12 +128,15 @@ Feature: Concept Ordered Role Players
     Then relation $vacation exists
     Then relation $no-vacation does not exist
     When $alice = entity(person) get instance with key(name): alice
-    When relation(vacation) $vacation remove player for role(employee): $alice
+    When relation $vacation remove player for role(employee): $alice
     When $vacation = relation(vacation) get instance with key(date): 2024-08-16
     Then relation $vacation exists
     Then transaction commits
     When connection open read transaction for database: typedb
     When $vacation = relation(vacation) get instance with key(date): 2024-08-16
     Then relation $vacation does not exist
+
+  # TODO: Test to add roleplayer non-related role
+  # TODO: Test to add roleplayer non-played
 
     # TODO: Cascade
