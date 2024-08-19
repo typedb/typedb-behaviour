@@ -1769,3 +1769,39 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
       | entity    | person         | customer     | subscriber     | datetime-tz |
       | relation  | description    | registration | profile        | double      |
+
+  Scenario Outline: <root-type> type cannot redeclare ownership overriding another attribute type
+    When create attribute type: literal
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set value type: string
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set supertype: literal
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) set owns: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |

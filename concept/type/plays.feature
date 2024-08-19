@@ -1094,6 +1094,42 @@ Feature: Concept Plays
       | entity    | person         | customer     |
       | relation  | description    | registration |
 
+  Scenario Outline: <root-type> type cannot redeclare plays overriding another role type
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set override: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    When <root-type>(<supertype-name>) set plays: fathership:father
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: fathership:father
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @card(1..1)
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
 ########################
 # plays from a list
 ########################
