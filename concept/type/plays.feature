@@ -839,6 +839,18 @@ Feature: Concept Plays
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: locates:located; fails
 
+  Scenario: Relation types can plays their roles
+    When create relation type: parentship
+    When relation(parentship) create role: info
+    When relation(parentship) create role: parent
+    When relation(parentship) set plays: parentship:info
+    Then relation(parentship) get plays contain:
+      | parentship:info |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get plays contain:
+      | parentship:info |
+
     # TODO: Only for typeql
 #  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: surname
@@ -899,7 +911,7 @@ Feature: Concept Plays
       | root-type | type-name   |
       | entity    | person      |
       | relation  | description |
-    
+
   Scenario Outline: Deleting a role does not leave dangling plays declarations for <root-type>
     When create relation type: rel0
     When relation(rel0) create role: role0

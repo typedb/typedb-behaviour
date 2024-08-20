@@ -293,3 +293,97 @@ Feature: Concept Ordered Ownership
       | datetime-tz | 2024-05-05+0100..2024-05-05T16:31:59+0100 | 2024-05-04+0000     | 2024-05-05T16:31:00+0100 |
       | datetime-tz | 2024-05-05+0100..2024-05-05T16:31:59+0100 | 2024-05-05+0010     | 2024-05-05+0100          |
 
+
+  Scenario: Dependent attributes without owners can be seen only before commit
+    Given create attribute type: ind-attr
+    Given create attribute type: dep-attr
+    Given attribute(ind-attr) set annotation: @independent
+    Given attribute(ind-attr) set value type: string
+    Given attribute(dep-attr) set value type: string
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ind-attr
+    Given entity(ent) set owns: dep-attr
+    Given entity(ent) set owns: ref
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent
+    When $dep1 = attribute(dep-attr) put instance with value: "dep1"
+    When $dep2 = attribute(dep-attr) put instance with value: "dep2"
+    When $ind1 = attribute(ind-attr) put instance with value: "ind1"
+    When $ind2 = attribute(ind-attr) put instance with value: "ind2"
+    When entity $ent set has: $dep2
+    When entity $ent set has: $ind2
+    When $get_dep1 = attribute(dep-attr) get instance with value: "dep1"
+    When $get_dep2 = attribute(dep-attr) get instance with value: "dep2"
+    When $get_ind1 = attribute(ind-attr) get instance with value: "ind1"
+    When $get_ind2 = attribute(ind-attr) get instance with value: "ind2"
+    Then attribute $dep1 is none: false
+    Then attribute $dep2 is none: false
+    Then attribute $ind1 is none: false
+    Then attribute $ind2 is none: false
+    Then attribute $get_dep1 is none: false
+    Then attribute $get_dep2 is none: false
+    Then attribute $get_ind1 is none: false
+    Then attribute $get_ind2 is none: false
+    Then attribute(dep-attr) get instances contain: $dep1
+    Then attribute(dep-attr) get instances contain: $dep2
+    Then attribute(ind-attr) get instances contain: $ind1
+    Then attribute(ind-attr) get instances contain: $ind2
+    Then attribute(dep-attr) get instances contain: $get_dep1
+    Then attribute(dep-attr) get instances contain: $get_dep2
+    Then attribute(ind-attr) get instances contain: $get_ind1
+    Then attribute(ind-attr) get instances contain: $get_ind2
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $dep1 = attribute(dep-attr) get instance with value: "dep1"
+    When $dep2 = attribute(dep-attr) get instance with value: "dep2"
+    When $ind1 = attribute(ind-attr) get instance with value: "ind1"
+    When $ind2 = attribute(ind-attr) get instance with value: "ind2"
+    Then attribute $dep1 is none: true
+    Then attribute $dep2 is none: false
+    Then attribute $ind1 is none: false
+    Then attribute $ind2 is none: false
+    Then attribute(dep-attr) get instances contain: $dep2
+    Then attribute(ind-attr) get instances contain: $ind1
+    Then attribute(ind-attr) get instances contain: $ind2
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $dep1 = attribute(dep-attr) get instance with value: "dep1"
+    When $dep2 = attribute(dep-attr) get instance with value: "dep2"
+    When $ind1 = attribute(ind-attr) get instance with value: "ind1"
+    When $ind2 = attribute(ind-attr) get instance with value: "ind2"
+    Then attribute $dep1 is none: true
+    Then attribute $dep2 is none: false
+    Then attribute $ind1 is none: false
+    Then attribute $ind2 is none: false
+    Then attribute(dep-attr) get instances contain: $dep2
+    Then attribute(ind-attr) get instances contain: $ind1
+    Then attribute(ind-attr) get instances contain: $ind2
+    When $ent = entity(ent) get instance with key(ref): ent
+    When entity $ent unset has: $dep2
+    When entity $ent unset has: $ind2
+    When $get_dep1 = attribute(dep-attr) get instance with value: "dep1"
+    When $get_dep2 = attribute(dep-attr) get instance with value: "dep2"
+    When $get_ind1 = attribute(ind-attr) get instance with value: "ind1"
+    When $get_ind2 = attribute(ind-attr) get instance with value: "ind2"
+    Then attribute $get_dep1 is none: true
+    Then attribute $get_dep2 is none: false
+    Then attribute $get_ind1 is none: false
+    Then attribute $get_ind2 is none: false
+    Then attribute(dep-attr) get instances contain: $get_dep2
+    Then attribute(ind-attr) get instances contain: $get_ind1
+    Then attribute(ind-attr) get instances contain: $get_ind2
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $dep1 = attribute(dep-attr) get instance with value: "dep1"
+    When $dep2 = attribute(dep-attr) get instance with value: "dep2"
+    When $ind1 = attribute(ind-attr) get instance with value: "ind1"
+    When $ind2 = attribute(ind-attr) get instance with value: "ind2"
+    Then attribute $dep1 is none: true
+    Then attribute $dep2 is none: true
+    Then attribute $ind1 is none: false
+    Then attribute $ind2 is none: false
+    Then attribute(ind-attr) get instances contain: $ind1
+    Then attribute(ind-attr) get instances contain: $ind2

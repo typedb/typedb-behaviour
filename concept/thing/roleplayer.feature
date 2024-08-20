@@ -140,8 +140,33 @@ Feature: Concept Ordered Role Players
     When $company = entity(company) create new instance with key(company-name): acme
     When $vacation = relation(vacation) create new instance
     When $employment = relation(employment) create new instance
-    When relation $employment set players for role(employee[]): [$company]; fails
-    When relation $vacation add player for role(employee): $company; fails
+    Then relation $employment set players for role(employee[]): [$company]; fails
+    Then relation $vacation add player for role(employee): $company; fails
     Then transaction commits
 
     # TODO: Cascade (when we understand it)
+
+  Scenario: Relation can be a player of relation of the same type
+    When create relation type: parentship
+    When relation(parentship) create role: info
+    When relation(parentship) set plays: parentship:info
+    Then relation(parentship) get plays contain:
+      | parentship:info |
+    Given relation(parentship) set owns: name
+    Given relation(parentship) get owns(name) set annotation: @key
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p1 = relation(parentship) create new instance with key(name): p1
+    When $p2 = relation(parentship) create new instance with key(name): p2
+    When $p3 = relation(parentship) create new instance with key(name): p3
+    When relation $p1 add player for role(info): $p2
+    When relation $p2 add player for role(info): $p1
+    When relation $p3 add player for role(info): $p3
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $p1 = relation(parentship) get instance with key(name): p1
+    When $p2 = relation(parentship) get instance with key(name): p2
+    When $p3 = relation(parentship) get instance with key(name): p3
+    Then relation $p1 get players for role(info) contain: $p2
+    Then relation $p2 get players for role(info) contain: $p1
+    Then relation $p3 get players for role(info) contain: $p3

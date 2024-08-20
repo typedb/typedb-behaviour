@@ -42,11 +42,13 @@ Feature: Concept Attribute Type
     Then attribute(name) exists
     Then attribute(name) get supertype does not exist
     Then attribute(name) get value type: <value-type>
+    Then attribute(name) get value type declared: <value-type>
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) exists
     Then attribute(name) get supertype does not exist
     Then attribute(name) get value type: <value-type>
+    Then attribute(name) get value type declared: <value-type>
     Examples:
       | value-type  |
       | long        |
@@ -68,11 +70,13 @@ Feature: Concept Attribute Type
     Then attribute(full-name) exists
     Then attribute(full-name) get supertype does not exist
     Then attribute(full-name) get value type: multi-name
+    Then attribute(full-name) get value type declared: multi-name
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(full-name) exists
     Then attribute(full-name) get supertype does not exist
     Then attribute(full-name) get value type: multi-name
+    Then attribute(full-name) get value type declared: multi-name
 
   Scenario Outline: Attribute types cannot be recreated with <value-type> value type
     When create attribute type: name
@@ -99,6 +103,7 @@ Feature: Concept Attribute Type
   Scenario: Attribute types cannot be created without value types
     When create attribute type: name
     Then attribute(name) exists
+    Then attribute(name) get value type declared is none
     Then attribute(name) get value type is none
     Then transaction commits; fails
 
@@ -553,28 +558,37 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     When attribute(surname) set value type: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared: string
     When attribute(surname) unset value type
+    Then attribute(surname) get value type declared is none
     Then attribute(surname) unset value type; fails
     Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(surname) unset supertype; fails
     When attribute(surname) set annotation: @abstract
     When attribute(surname) unset supertype
     Then attribute(surname) get value type is none
+    Then attribute(surname) get value type declared is none
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(surname) set supertype: name
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     Then attribute(surname) unset value type; fails
     Then attribute(surname) get value type: string
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
 
   Scenario: Attribute types cannot unset value type if there are subtypes without @abstract annotation and value types
     When create attribute type: name

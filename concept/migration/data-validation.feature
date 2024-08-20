@@ -2397,6 +2397,273 @@ Feature: Data validation
     Then transaction commits
 
 
+  Scenario: Owns cardinality is correctly validated after multiple redeclaring overrides
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given attribute(attr0) set annotation: @independent
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr0
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr0
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) get owns(attr0) set annotation: @card(0..6)
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given create entity type: ent2
+    Given entity(ent2) set supertype: ent1
+    Given create entity type: ent3
+    Given entity(ent3) set supertype: ent2
+    Given create entity type: ent4
+    Given entity(ent4) set supertype: ent3
+    Given entity(ent1) set owns: attr1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set annotation: @card(0..4)
+    Given entity(ent1) get owns(attr2) set override: attr0
+    Given entity(ent2) set owns: attr1
+    Given entity(ent2) get owns(attr1) set override: attr1
+    Given entity(ent2) get owns(attr1) set annotation: @card(0..3)
+    Given entity(ent3) set owns: attr1
+    Given entity(ent3) get owns(attr1) set override: attr1
+    Given entity(ent3) get owns(attr1) set annotation: @card(1..2)
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When entity(ent4) set owns: attr3
+    Then entity(ent4) get owns(attr3) set override: attr0; fails
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $ent3 = entity(ent3) create new instance with key(ref): ent3
+    When $ent4 = entity(ent4) create new instance with key(ref): ent4
+    When $attr1_0 = attribute(attr1) put instance with value: "val0"
+    When $attr1_1 = attribute(attr1) put instance with value: "val1"
+    When $attr1_2 = attribute(attr1) put instance with value: "val2"
+    When $attr1_3 = attribute(attr1) put instance with value: "val3"
+    When $attr1_4 = attribute(attr1) put instance with value: "val4"
+    When $attr1_5 = attribute(attr1) put instance with value: "val5"
+    When $attr2_0 = attribute(attr2) put instance with value: "val0"
+    When $attr2_1 = attribute(attr2) put instance with value: "val1"
+    When $attr2_2 = attribute(attr2) put instance with value: "val2"
+    When $attr2_3 = attribute(attr2) put instance with value: "val3"
+    When $attr2_4 = attribute(attr2) put instance with value: "val4"
+    When $attr2_5 = attribute(attr2) put instance with value: "val5"
+    # ent1: 6 total, attr1 max 4
+    When entity $ent1 set has: $attr1_0
+    When entity $ent1 set has: $attr1_1
+    When entity $ent1 set has: $attr1_2
+    When entity $ent1 set has: $attr1_3
+    When entity $ent1 set has: $attr2_0
+    When entity $ent1 set has: $attr2_1
+    # ent2: 6 total, attr1 max 3
+    When entity $ent2 set has: $attr1_0
+    When entity $ent2 set has: $attr1_1
+    When entity $ent2 set has: $attr1_2
+    When entity $ent2 set has: $attr2_0
+    When entity $ent2 set has: $attr2_1
+    When entity $ent2 set has: $attr2_2
+    # ent3: 6 total, attr1 min 1, max 2
+    When entity $ent3 set has: $attr1_0
+    When entity $ent3 set has: $attr2_0
+    When entity $ent3 set has: $attr2_1
+    When entity $ent3 set has: $attr2_2
+    When entity $ent3 set has: $attr2_3
+    When entity $ent3 set has: $attr2_4
+    # ent4: 6 total, attr1 min 1, max 2
+    When entity $ent4 set has: $attr1_0
+    When entity $ent4 set has: $attr1_1
+    When entity $ent4 set has: $attr2_0
+    When entity $ent4 set has: $attr2_1
+    When entity $ent4 set has: $attr2_2
+    When entity $ent4 set has: $attr2_3
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @card(0..5); fails
+    Then entity(ent0) get owns(attr0) set annotation: @card(1..6); fails
+    When entity(ent0) get owns(attr0) set annotation: @card(0..7)
+    Then entity(ent0) get owns(attr0) set annotation: @card(2..7); fails
+    When entity(ent0) get owns(attr0) set annotation: @card(0..6)
+    Then entity(ent1) get owns(attr1) set annotation: @card(0..3); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(4..4); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(3..4); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(2..4); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(1..4); fails
+    When entity(ent1) get owns(attr1) set annotation: @card(0..4)
+    Then entity(ent2) get owns(attr1) set annotation: @card(0..1); fails
+    Then entity(ent2) get owns(attr1) set annotation: @card(2..3); fails
+    When entity(ent2) get owns(attr1) set annotation: @card(1..3)
+    When entity(ent2) get owns(attr1) set annotation: @card(0..3)
+    Then entity(ent3) get owns(attr1) set annotation: @card(0..1); fails
+    Then entity(ent3) get owns(attr1) set annotation: @card(2..2); fails
+    When entity(ent3) get owns(attr1) set annotation: @card(0..2)
+    When entity(ent3) get owns(attr1) set annotation: @card(1..2)
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_4 = attribute(attr1) get instance with value: "val4"
+    When entity $ent1 set has: $attr1_4
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_2 = attribute(attr2) get instance with value: "val2"
+    When entity $ent1 set has: $attr2_2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr1_3 = attribute(attr1) get instance with value: "val3"
+    When entity $ent2 set has: $attr1_3
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr2_3 = attribute(attr2) get instance with value: "val3"
+    When entity $ent2 set has: $attr2_3
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent3 = entity(ent3) get instance with key(ref): ent3
+    When $attr1_1 = attribute(attr1) get instance with value: "val1"
+    When entity $ent3 set has: $attr1_1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent3 = entity(ent3) get instance with key(ref): ent3
+    When $attr2_5 = attribute(attr2) get instance with value: "val5"
+    When entity $ent3 set has: $attr2_5
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent4 = entity(ent4) get instance with key(ref): ent4
+    When $attr1_2 = attribute(attr1) get instance with value: "val2"
+    When entity $ent4 set has: $attr1_2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent4 = entity(ent4) get instance with key(ref): ent4
+    When $attr2_4 = attribute(attr2) get instance with value: "val4"
+    When entity $ent4 set has: $attr2_4
+    Then transaction commits; fails
+
+
+  Scenario: Owns cardinality is correctly checked for lists
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set owns: ref
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given create attribute type: attr0
+    Given attribute(attr0) set annotation: @abstract
+    Given attribute(attr0) set annotation: @independent
+    Given attribute(attr0) set value type: string
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) get owns(attr0) set ordering: ordered
+    Given entity(ent1) set owns: attr1
+    Given entity(ent1) get owns(attr1) set ordering: ordered
+    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) get owns(attr2) set ordering: ordered
+    Given entity(ent1) get owns(attr2) set override: attr0
+    Given entity(ent0) get owns(attr0) set annotation: @card(0..6)
+    Given entity(ent1) get owns(attr1) set annotation: @card(1..4)
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1_0 = attribute(attr1) put instance with value: "val0"
+    When $attr1_1 = attribute(attr1) put instance with value: "val1"
+    When $attr2_0 = attribute(attr2) put instance with value: "val0"
+    When $attr2_1 = attribute(attr2) put instance with value: "val1"
+    When entity $ent1 set has(attr1[]): [$attr1_0, $attr1_0, $attr1_1, $attr1_0]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_0 = attribute(attr1) get instance with value: "val0"
+    When $attr1_1 = attribute(attr1) get instance with value: "val1"
+    When entity $ent1 set has(attr1[]): [$attr1_0, $attr1_0, $attr1_1, $attr1_0, $attr1_0]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_0 = attribute(attr1) get instance with value: "val0"
+    When $attr1_1 = attribute(attr1) get instance with value: "val1"
+    When entity $ent1 set has(attr1[]): [$attr1_0, $attr1_0, $attr1_1, $attr1_0, $attr1_1]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When entity $ent1 unset has: attr1[]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When entity $ent1 set has(attr2[]): [$attr2_0]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When entity $ent1 set has(attr2[]): [$attr2_0, $attr2_0]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_0, $attr2_1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_1, $attr2_1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_0, $attr2_0, $attr2_1]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_1, $attr2_1, $attr2_0]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_0, $attr2_0, $attr2_1]
+    When entity $ent1 unset has: attr1[]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When $attr1_0 = attribute(attr1) get instance with value: "val0"
+    When $attr1_1 = attribute(attr1) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_0, $attr2_0, $attr2_1]
+    When entity $ent1 set has(attr1[]): [$attr1_0, $attr1_0, $attr1_1]
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get owns(attr0) set annotation: @card(0..4); fails
+    When entity(ent1) get owns(attr1) set annotation: @card(1..6)
+    When entity(ent1) get owns(attr1) unset annotation: @card
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr2_0 = attribute(attr2) get instance with value: "val0"
+    When $attr2_1 = attribute(attr2) get instance with value: "val1"
+    When $attr1_0 = attribute(attr1) get instance with value: "val0"
+    When $attr1_1 = attribute(attr1) get instance with value: "val1"
+    When entity $ent1 set has(attr2[]): [$attr2_1, $attr2_1, $attr2_1, $attr2_1, $attr2_1, $attr2_0]
+    When entity $ent1 unset has: attr1[]
+    Then transaction commits
+
+
   Scenario: Plays cardinality is checked for all siblings
     Given create relation type: rel0
     Given relation(rel0) create role: role0
@@ -2864,4 +3131,638 @@ Feature: Data validation
     Then entity(ent1) get plays(rel1:role1) set annotation: @card(0..1); fails
     Then transaction commits
 
-# TODO:  relates
+
+  Scenario: Plays cardinality is correctly validated after multiple redeclaring overrides
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given relation(rel0) set annotation: @abstract
+    Given relation(rel0) get role(role0) set annotation: @abstract
+    Given relation(rel0) get role(role0) set annotation: @card(0..)
+    Given create relation type: rel
+    Given relation(rel) set supertype: rel0
+    Given relation(rel) create role: role1
+    Given relation(rel) get role(role1) set override: role0
+    Given relation(rel) create role: role2
+    Given relation(rel) get role(role2) set override: role0
+    Given relation(rel) create role: role3
+    Given relation(rel) get role(role3) set override: role0
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given relation(rel) set owns: ref
+    Given create entity type: ent0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set plays: rel0:role0
+    Given entity(ent0) get plays(rel0:role0) set annotation: @card(0..6)
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given create entity type: ent2
+    Given entity(ent2) set supertype: ent1
+    Given create entity type: ent3
+    Given entity(ent3) set supertype: ent2
+    Given create entity type: ent4
+    Given entity(ent4) set supertype: ent3
+    Given entity(ent1) set plays: rel:role1
+    Given entity(ent1) set plays: rel:role2
+    Given entity(ent1) get plays(rel:role1) set override: rel0:role0
+    Given entity(ent1) get plays(rel:role1) set annotation: @card(0..4)
+    Given entity(ent1) get plays(rel:role2) set override: rel0:role0
+    Given entity(ent2) set plays: rel:role1
+    Given entity(ent2) get plays(rel:role1) set override: rel:role1
+    Given entity(ent2) get plays(rel:role1) set annotation: @card(0..3)
+    Given entity(ent3) set plays: rel:role1
+    Given entity(ent3) get plays(rel:role1) set override: rel:role1
+    Given entity(ent3) get plays(rel:role1) set annotation: @card(1..2)
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When entity(ent4) set plays: rel:role3
+    Then entity(ent4) get plays(rel:role3) set override: rel0:role0; fails
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $ent3 = entity(ent3) create new instance with key(ref): ent3
+    When $ent4 = entity(ent4) create new instance with key(ref): ent4
+    When $rel0 = relation(rel) create new instance with key(ref): rel0
+    When $rel1 = relation(rel) create new instance with key(ref): rel1
+    When $rel2 = relation(rel) create new instance with key(ref): rel2
+    When $rel3 = relation(rel) create new instance with key(ref): rel3
+    When $rel4 = relation(rel) create new instance with key(ref): rel4
+    # ent1: 6 total, role1 max 4
+    When relation $rel0 add player for role(role1): $ent1
+    When relation $rel1 add player for role(role1): $ent1
+    When relation $rel2 add player for role(role1): $ent1
+    When relation $rel3 add player for role(role1): $ent1
+    When relation $rel0 add player for role(role2): $ent1
+    When relation $rel1 add player for role(role2): $ent1
+    # ent2: 6 total, role1 max 3
+    When relation $rel0 add player for role(role1): $ent2
+    When relation $rel1 add player for role(role1): $ent2
+    When relation $rel2 add player for role(role1): $ent2
+    When relation $rel0 add player for role(role2): $ent2
+    When relation $rel1 add player for role(role2): $ent2
+    When relation $rel2 add player for role(role2): $ent2
+    # ent3: 6 total, role1 min 1, max 2
+    When relation $rel0 add player for role(role1): $ent3
+    When relation $rel0 add player for role(role2): $ent3
+    When relation $rel1 add player for role(role2): $ent3
+    When relation $rel2 add player for role(role2): $ent3
+    When relation $rel3 add player for role(role2): $ent3
+    When relation $rel4 add player for role(role2): $ent3
+    # ent4: 6 total, role1 min 1, max 2
+    When relation $rel0 add player for role(role1): $ent4
+    When relation $rel1 add player for role(role1): $ent4
+    When relation $rel0 add player for role(role2): $ent4
+    When relation $rel1 add player for role(role2): $ent4
+    When relation $rel2 add player for role(role2): $ent4
+    When relation $rel3 add player for role(role2): $ent4
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..5); fails
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..6); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..7)
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..7); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..6)
+    Then entity(ent1) get plays(rel:role1) set annotation: @card(0..3); fails
+    Then entity(ent1) get plays(rel:role1) set annotation: @card(4..4); fails
+    Then entity(ent1) get plays(rel:role1) set annotation: @card(3..4); fails
+    Then entity(ent1) get plays(rel:role1) set annotation: @card(2..4); fails
+    Then entity(ent1) get plays(rel:role1) set annotation: @card(1..4); fails
+    When entity(ent1) get plays(rel:role1) set annotation: @card(0..4)
+    Then entity(ent2) get plays(rel:role1) set annotation: @card(0..1); fails
+    Then entity(ent2) get plays(rel:role1) set annotation: @card(2..3); fails
+    When entity(ent2) get plays(rel:role1) set annotation: @card(1..3)
+    When entity(ent2) get plays(rel:role1) set annotation: @card(0..3)
+    Then entity(ent3) get plays(rel:role1) set annotation: @card(0..1); fails
+    Then entity(ent3) get plays(rel:role1) set annotation: @card(2..2); fails
+    When entity(ent3) get plays(rel:role1) set annotation: @card(0..2)
+    When entity(ent3) get plays(rel:role1) set annotation: @card(1..2)
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel4 = relation(rel) get instance with key(ref): rel4
+    When relation $rel4 add player for role(role1): $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel2 = relation(rel) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role1): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent3 = entity(ent3) get instance with key(ref): ent3
+    When $rel3 = relation(rel) get instance with key(ref): rel3
+    When relation $rel1 add player for role(role1): $ent3
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent3 = entity(ent3) get instance with key(ref): ent3
+    When $rel5 = relation(rel) create new instance with key(ref): rel5
+    When relation $rel5 add player for role(role2): $ent3
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent4 = entity(ent4) get instance with key(ref): ent4
+    When $rel2 = relation(rel) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role1): $ent4
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent4 = entity(ent4) get instance with key(ref): ent4
+    When $rel4 = relation(rel) get instance with key(ref): rel4
+    When relation $rel4 add player for role(role2): $ent4
+    Then transaction commits; fails
+
+
+  Scenario: Relates cardinality is checked for all siblings
+    Given create relation type: relX
+    Given relation(relX) create role: role0
+    Given relation(relX) set annotation: @abstract
+    Given relation(relX) get role(role0) set annotation: @abstract
+    Given create relation type: rel0
+    Given relation(rel0) set supertype: relX
+    Given relation(rel0) set annotation: @abstract
+    Given create relation type: rel1
+    Given relation(rel1) create role: role1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) create role: role2
+    Then relation(rel1) get role(role2) set override: role0; fails
+    When relation(relX) get role(role0) set annotation: @card(0..1)
+    When relation(rel1) get role(role2) set override: role0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When relation(rel1) set owns: ref
+    When relation(rel1) get owns(ref) set annotation: @key
+    When create entity type: ent1
+    When create entity type: ent2
+    When entity(ent1) set plays: rel1:role1
+    When entity(ent2) set plays: rel1:role2
+    When entity(ent1) set owns: ref
+    When entity(ent2) set owns: ref
+    When entity(ent1) get owns(ref) set annotation: @key
+    When entity(ent2) get owns(ref) set annotation: @key
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(relX) get role(role0) set annotation: @card(0..1)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent1
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(relX) get role(role0) set annotation: @card(1..1); fails
+    Then relation(rel1) get role(role2) set annotation: @card(1..1); fails
+    When relation(rel1) get role(role1) set annotation: @card(1..1)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then relation(relX) get role(role0) set annotation: @card(1..2); fails
+    When relation(relX) get role(role0) set annotation: @card(0..2)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 get players for role(role1) contain: $ent1
+    When relation $rel1 remove player for role(role1): $ent1
+    When relation $rel1 get players for role(role1) do not contain: $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 get players for role(role2) contain: $ent2
+    When relation $rel1 remove player for role(role2): $ent2
+    When relation $rel1 get players for role(role2) do not contain: $ent2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) create role: role3; fails
+    When relation(rel1) create role: role3, with @card(0..2)
+    When relation(rel1) get role(role3) set override: role0
+    When relation(rel1) get role(role3) unset annotation: @card
+    When entity(ent1) set plays: rel1:role3
+    Then relation(rel1) get role(role3) set annotation: @card(2..2); fails
+    When relation(rel1) get role(role3) set annotation: @card(1..3); fails
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role3): $ent1
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent2_2 = entity(ent2) create new instance with key(ref): ent2_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2_2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) create new instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent1_2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel0) create role: role4; fails
+    When relation(rel0) create role: role4, with @card(0..1)
+    When relation(rel0) get role(role4) set override: role0; fails
+    When entity(ent1) set plays: rel0:role4
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role4): $ent1
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) create new instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role4): $ent1_2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role4) set annotation: @card(2..2); fails
+    When relation(rel0) get role(role4) set annotation: @card(1..1)
+    When relation(rel0) get role(role4) set annotation: @card(1..2)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) create new instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role4): $ent1_2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(relX) get role(role0) set annotation: @card(1..1); fails
+    Then relation(relX) get role(role0) set annotation: @card(1..); fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(relX) get role(role0) set annotation: @card(0..3)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(relX) get role(role0) set annotation: @card(1..)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role3): $ent1
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(relX) get role(role0) set annotation: @card(0..)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role3): $ent1
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent1
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) unset annotation: @card
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent1
+    When $ent2_2 = entity(ent2) create new instance with key(ref): ent2_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2_2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) unset override; fails
+    When relation(rel1) get role(role1) set annotation: @card(0..1)
+    When relation(rel1) get role(role1) unset override
+    When relation(rel1) get role(role2) unset override; fails
+    When relation(rel1) get role(role2) set annotation: @card(2..2)
+    Then relation(rel1) get role(role2) unset override
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role3) unset override; fails
+    When relation(rel1) get role(role3) set annotation: @card(0..)
+    Then relation(rel1) get role(role3) unset override
+    Then relation(rel1) unset supertype; fails
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role4): $ent1
+    When relation $rel1 remove player for role(role4): $ent1_2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role4) unset annotation: @card; fails
+    When relation(rel0) get role(role4) set annotation: @card(0..2)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role4): $ent1
+    When relation $rel1 remove player for role(role4): $ent1_2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role3) unset override; fails
+    When relation(rel1) get role(role3) set annotation: @card(0..)
+    Then relation(rel1) get role(role3) unset override
+    Then relation(rel1) unset supertype
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(rel0) unset annotation: @abstract
+    When relation(rel0) unset supertype
+    When relation(rel0) set owns: ref
+    When relation(rel0) get owns(ref) set annotation: @key
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel0 = relation(rel0) create new instance with key(ref): rel0
+    When relation $rel0 add player for role(role4): $ent1
+    When relation $rel0 add player for role(role4): $ent1_2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role4) set annotation: @card(0..1); fails
+    When relation(rel0) get role(role4) set annotation: @card(2..)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) set supertype: rel0; fails
+    When relation(rel0) get role(role4) set annotation: @card(0..)
+    Then relation(rel1) set supertype: rel0
+    When relation(rel1) unset owns: ref
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role4): $ent1
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role4) set annotation: @card(0..1); fails
+    Then relation(rel0) get role(role4) set annotation: @card(2..); fails
+    When relation(rel0) get role(role4) set annotation: @card(1..)
+    Then transaction commits
+
+
+  Scenario: Relates cardinality is not violated if sibling role types are owned by different types
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given relation(rel0) set annotation: @abstract
+    Given relation(rel0) get role(role0) set annotation: @abstract
+    Given create relation type: rel1
+    Given relation(rel1) create role: role1
+    Given relation(rel1) set supertype: rel0
+    Given relation(rel1) get role(role1) set override: role0
+    Given create relation type: rel2
+    Given relation(rel2) create role: role2
+    Given relation(rel2) set supertype: rel0
+    Given relation(rel2) get role(role2) set override: role0
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given relation(rel0) set owns: ref
+    Given relation(rel0) get owns(ref) set annotation: @key
+    Given create entity type: ent1
+    Given entity(ent1) set owns: ref
+    Given entity(ent1) set plays: rel1:role1
+    Given entity(ent1) set plays: rel2:role2
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    When $rel2 = relation(rel2) create new instance with key(ref): rel2
+    When relation $rel1 add player for role(role1): $ent1
+    When relation $rel2 add player for role(role2): $ent1
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) create new instance with key(ref): ent1_2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent1_2
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(0..)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) create new instance with key(ref): ent1_2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent1_2
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role0) set annotation: @card(1..1); fails
+    Then relation(rel0) get role(role0) set annotation: @card(0..1); fails
+    Then relation(rel0) get role(role0) set annotation: @card(1..2)
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 remove player for role(role2): $ent1_2
+    When relation $rel2 remove player for role(role2): $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 remove player for role(role1): $ent1
+    When relation $rel2 remove player for role(role2): $ent1
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1_3 = entity(ent1) create new instance with key(ref): ent1_3
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent1_3
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent1_2
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role0) set annotation: @card(0..3)
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_3 = entity(ent1) create new instance with key(ref): ent1_3
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 add player for role(role1): $ent1_3
+    When relation $rel2 add player for role(role2): $ent1_3
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role0) set annotation: @card(0..2); fails
+    Then relation(rel1) get role(role1) set annotation: @card(0..2); fails
+    Then relation(rel2) get role(role2) set annotation: @card(0..2); fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent1_2 = entity(ent1) get instance with key(ref): ent1_2
+    When $rel1 = relation(rel1) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent1_2
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role0) set annotation: @card(0..2); fails
+    Then relation(rel2) get role(role2) set annotation: @card(0..2); fails
+    When relation(rel1) get role(role1) set annotation: @card(0..2)
+    Then relation(rel1) get role(role1) set annotation: @card(0..1); fails
+    Then transaction commits
+
+
+  Scenario: Relates cardinality is correctly checked for lists
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create relation type: rel0
+    Given relation(rel0) set owns: ref
+    Given relation(rel0) get owns(ref) set annotation: @key
+    Given relation(rel0) create role: role0
+    Given relation(rel0) get role(role0) set ordering: ordered
+    Given relation(rel0) set annotation: @abstract
+    Given relation(rel0) get role(role0) set annotation: @abstract
+    Given create relation type: rel
+    Given relation(rel) set supertype: rel0
+    Given relation(rel) create role: role1
+    Given relation(rel) get role(role1) set ordering: ordered
+    Given relation(rel) get role(role1) set override: role0
+    Given relation(rel) create role: role2
+    Given relation(rel) get role(role2) set ordering: ordered
+    Given relation(rel) get role(role2) set override: role0
+    Given create entity type: ent0
+    Given entity(ent0) set annotation: @abstract
+    Given entity(ent0) set plays: rel0:role0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) get owns(ref) set annotation: @key
+    Given create entity type: ent
+    Given entity(ent) set supertype: ent0
+    Given entity(ent) set plays: rel:role1
+    Given entity(ent) set plays: rel:role2
+    Given entity(ent) get plays(rel:role1) set override: rel0:role0
+    Given entity(ent) get plays(rel:role2) set override: rel0:role0
+    Given relation(rel0) get role(role0) set annotation: @card(0..6)
+    Given relation(rel) get role(role1) set annotation: @card(1..4)
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) create new instance with key(ref): ent1
+    When $ent2 = entity(ent) create new instance with key(ref): ent2
+    When $rel = relation(rel) create new instance with key(ref): rel
+    When relation $rel set players for role(role1[]): [$ent1, $ent1, $ent2, $ent1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role1[]): [$ent1, $ent1, $ent2, $ent1, $ent1]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role1[]): [$ent1, $ent1, $ent2, $ent1, $ent2]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $rel = relation(rel) get instance with key(ref): rel
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When relation $rel remove 3 players for role(role1[]): $ent1
+    When relation $rel remove 1 players for role(role1[]): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent2]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent2, $ent2]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent2]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent1, $ent2]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent2, $ent2, $ent1]
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent1, $ent2]
+    When relation $rel remove 3 players for role(role1[]): $ent1
+    When relation $rel remove 1 players for role(role1[]): $ent2
+    Then transaction commits; fails
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent1, $ent2]
+    When relation $rel set players for role(role1[]): [$ent1, $ent1, $ent2]
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel0) get role(role0) set annotation: @card(0..4); fails
+    When relation(rel) get role(role1) set annotation: @card(1..6)
+    When relation(rel) get role(role1) unset annotation: @card
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $ent2 = entity(ent) get instance with key(ref): ent2
+    When $rel = relation(rel) get instance with key(ref): rel
+    When relation $rel set players for role(role2[]): [$ent1, $ent1, $ent1, $ent1, $ent1, $ent2]
+    When relation $rel remove 2 players for role(role1[]): $ent1
+    When relation $rel remove 1 players for role(role1[]): $ent2
+    Then transaction commits
