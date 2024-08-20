@@ -24,12 +24,6 @@ Feature: Concept Attribute Type
 # attribute type common
 ########################
 
-  Scenario: Root attribute type cannot be deleted
-    Then delete attribute type: attribute; fails
-
-  Scenario: Root attribute type cannot be renamed
-    Then attribute(attribute) set label: superattribute; fails
-
   Scenario: Cyclic attribute type hierarchies are disallowed
     When create attribute type: attr0
     When attribute(attr0) set value type: string
@@ -46,13 +40,15 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) exists
-    Then attribute(name) get supertype: attribute
+    Then attribute(name) get supertype does not exist
     Then attribute(name) get value type: <value-type>
+    Then attribute(name) get value type declared: <value-type>
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) exists
-    Then attribute(name) get supertype: attribute
+    Then attribute(name) get supertype does not exist
     Then attribute(name) get value type: <value-type>
+    Then attribute(name) get value type declared: <value-type>
     Examples:
       | value-type  |
       | long        |
@@ -72,13 +68,15 @@ Feature: Concept Attribute Type
     When create attribute type: full-name
     When attribute(full-name) set value type: multi-name
     Then attribute(full-name) exists
-    Then attribute(full-name) get supertype: attribute
+    Then attribute(full-name) get supertype does not exist
     Then attribute(full-name) get value type: multi-name
+    Then attribute(full-name) get value type declared: multi-name
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(full-name) exists
-    Then attribute(full-name) get supertype: attribute
+    Then attribute(full-name) get supertype does not exist
     Then attribute(full-name) get value type: multi-name
+    Then attribute(full-name) get value type declared: multi-name
 
   Scenario Outline: Attribute types cannot be recreated with <value-type> value type
     When create attribute type: name
@@ -105,6 +103,7 @@ Feature: Concept Attribute Type
   Scenario: Attribute types cannot be created without value types
     When create attribute type: name
     Then attribute(name) exists
+    Then attribute(name) get value type declared is none
     Then attribute(name) get value type is none
     Then transaction commits; fails
 
@@ -117,24 +116,24 @@ Feature: Concept Attribute Type
     Then attribute(age) exists
     When delete attribute type: age
     Then attribute(age) does not exist
-    Then attribute(attribute) get subtypes do not contain:
+    Then get attribute types do not contain:
       | age |
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) exists
     Then attribute(age) does not exist
-    Then attribute(attribute) get subtypes do not contain:
+    Then get attribute types do not contain:
       | age |
     When delete attribute type: name
     Then attribute(name) does not exist
-    Then attribute(attribute) get subtypes do not contain:
+    Then get attribute types do not contain:
       | name |
       | age  |
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) does not exist
     Then attribute(age) does not exist
-    Then attribute(attribute) get subtypes do not contain:
+    Then get attribute types do not contain:
       | name |
       | age  |
     Examples:
@@ -144,7 +143,7 @@ Feature: Concept Attribute Type
       | decimal      | datetime-tz  |
       | datetime     | duration     |
 
-  Scenario: Attribute types can get the root type
+  Scenario: Attribute types can have absent supertypes
     When create attribute type: is-open
     When attribute(is-open) set value type: boolean
     When create attribute type: age
@@ -155,29 +154,18 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When create attribute type: timestamp
     When attribute(timestamp) set value type: datetime
-    Then attribute(is-open) get supertype: attribute
-    Then attribute(age) get supertype: attribute
-    Then attribute(rating) get supertype: attribute
-    Then attribute(name) get supertype: attribute
-    Then attribute(timestamp) get supertype: attribute
+    Then attribute(is-open) get supertype does not exist
+    Then attribute(age) get supertype does not exist
+    Then attribute(rating) get supertype does not exist
+    Then attribute(name) get supertype does not exist
+    Then attribute(timestamp) get supertype does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(is-open) get supertype: attribute
-    Then attribute(age) get supertype: attribute
-    Then attribute(rating) get supertype: attribute
-    Then attribute(name) get supertype: attribute
-    Then attribute(timestamp) get supertype: attribute
-
-    # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Attribute types that have instances cannot be deleted
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $x = attribute(name) put: alice
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then delete attribute type: name; fails
+    Then attribute(is-open) get supertype does not exist
+    Then attribute(age) get supertype does not exist
+    Then attribute(rating) get supertype does not exist
+    Then attribute(name) get supertype does not exist
+    Then attribute(timestamp) get supertype does not exist
 
   Scenario: Attribute types can change labels
     When create attribute type: name
@@ -218,143 +206,29 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     Then attribute(timestamp) set supertype: timestamp; fails
 
-  Scenario: Attribute types cannot change root's supertype
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    Then attribute(attribute) set supertype: name; fails
-    Then attribute(attribute) set supertype: attribute; fails
-    Then attribute(attribute) get supertypes is empty
-
-  # Revisit if this is still valid
-#  # TODO: Doesn't need to be tied to the root since we can have abstract non-valued attribute types.
-#  # Scenario: Attribute types can be retrieved by value type
-#  #   Then attribute(???)  get subtypes do not contain:
-#  Scenario: Attribute type root can get attribute types of a specific value type
-#    When create attribute type: is-open
-#    When attribute(is-open) set value type: boolean
-#    When create attribute type: age
-#    When attribute(age) set value type: long
-#    When create attribute type: rating
-#    When attribute(rating) set value type: double
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When create attribute type: timestamp
-#    When attribute(timestamp) set value type: datetime
-#    Then attribute(attribute) as(boolean) get subtypes contain:
-#      | is-open   |
-#    Then attribute(attribute) as(boolean) get subtypes do not contain:
-#      | age       |
-#      | rating    |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(long) get subtypes contain:
-#      | age       |
-#    Then attribute(attribute) as(long) get subtypes do not contain:
-#      | is-open   |
-#      | rating    |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(double) get subtypes contain:
-#      | rating    |
-#    Then attribute(attribute) as(double) get subtypes do not contain:
-#      | is-open   |
-#      | age       |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(string) get subtypes contain:
-#      | name      |
-#    Then attribute(attribute) as(string) get subtypes do not contain:
-#      | is-open   |
-#      | age       |
-#      | rating    |
-#      | timestamp |
-#    Then attribute(attribute) as(datetime) get subtypes contain:
-#      | timestamp |
-#    Then attribute(attribute) as(datetime) get subtypes do not contain:
-#      | is-open |
-#      | age     |
-#      | rating  |
-#      | name    |
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(attribute) as(boolean) get subtypes contain:
-#      | is-open   |
-#    Then attribute(attribute) as(boolean) get subtypes do not contain:
-#      | age       |
-#      | rating    |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(long) get subtypes contain:
-#      | age       |
-#    Then attribute(attribute) as(long) get subtypes do not contain:
-#      | is-open   |
-#      | rating    |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(double) get subtypes contain:
-#      | rating    |
-#    Then attribute(attribute) as(double) get subtypes do not contain:
-#      | is-open   |
-#      | age       |
-#      | name      |
-#      | timestamp |
-#    Then attribute(attribute) as(string) get subtypes contain:
-#      | name      |
-#    Then attribute(attribute) as(string) get subtypes do not contain:
-#      | is-open   |
-#      | age       |
-#      | rating    |
-#      | timestamp |
-#    Then attribute(attribute) as(datetime) get subtypes contain:
-#      | timestamp |
-#    Then attribute(attribute) as(datetime) get subtypes do not contain:
-#      | is-open |
-#      | age     |
-#      | rating  |
-#      | name    |
-
-#  Scenario: Attribute type root can get attribute types of any value type
-#    When create attribute type: is-open
-#    When attribute(is-open) set value type: boolean
-#    When create attribute type: age
-#    When attribute(age) set value type: long
-#    When create attribute type: rating
-#    When attribute(rating) set value type: double
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When create attribute type: timestamp
-#    When attribute(timestamp) set value type: datetime
-#    Then attribute(attribute) get subtypes contain:
-#      | attribute |
-#      | is-open   |
-#      | age       |
-#      | rating    |
-#      | name      |
-#      | timestamp |
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(attribute) get subtypes contain:
-#      | attribute |
-#      | is-open   |
-#      | age       |
-#      | rating    |
-#      | name      |
-#      | timestamp |
+  Scenario: The schema may not be modified in a way that an overridden owns attribute is no longer inherited by the overriding type
+    When create attribute type: attr0
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When attribute(attr1) set value type: string
+    When create entity type: ent00
+    When entity(ent00) set annotation: @abstract
+    When entity(ent00) set owns: attr0
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent00
+    When entity(ent1) set owns: attr1
+    When entity(ent1) get owns(attr1) set override: attr0
+    When create entity type: ent01
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(attr1) unset supertype; fails
+    Then entity(ent00) unset owns: attr0; fails
+    Then entity(ent1) set supertype: ent01; fails
 
 ########################
 # @annotations common
 ########################
-
-  Scenario Outline: Root attribute type cannot set or unset @<annotation>
-    Then attribute(attribute) set annotation: @<annotation>; fails
-    Then attribute(attribute) unset annotation: @<annotation-category>; fails
-    Examples:
-      | annotation  | annotation-category |
-      | abstract    | abstract            |
-      | independent | independent         |
-    # TODO: Only for typeql as we can't parse value types without set value types
-#      | values(1)   | values              |
-#      | range(1..3) | range               |
 
   Scenario Outline: Attribute type can set and unset @<annotation>
     When create attribute type: name
@@ -535,9 +409,9 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
-    Then attribute(surname) set supertype: attribute; fails
+    Then attribute(surname) unset supertype; fails
     When attribute(surname) set annotation: @abstract
-    When attribute(surname) set supertype: attribute
+    When attribute(surname) unset supertype
     When attribute(surname) set value type: <value-type>
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
@@ -555,7 +429,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations contain: @<annotation>
     Then attribute(surname) get annotations contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
-    When attribute(surname) set supertype: attribute
+    When attribute(surname) unset supertype
     When attribute(surname) set value type: <value-type>
     Then attribute(name) get annotations contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
@@ -570,7 +444,7 @@ Feature: Concept Attribute Type
     Examples:
       | value-type | annotation   |
       # abstract is not inherited
-#      | decimal    | independent  | # Cannot unset supertype while inheriting independence from it, covered by special test
+      | decimal    | independent  |
       | string     | regex("\S+") |
       | string     | values("1")  |
       | long       | range(1..3)  |
@@ -684,28 +558,37 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     When attribute(surname) set value type: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared: string
     When attribute(surname) unset value type
+    Then attribute(surname) get value type declared is none
     Then attribute(surname) unset value type; fails
     Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) set supertype: attribute; fails
+    Then attribute(surname) unset supertype; fails
     When attribute(surname) set annotation: @abstract
-    When attribute(surname) set supertype: attribute
+    When attribute(surname) unset supertype
     Then attribute(surname) get value type is none
+    Then attribute(surname) get value type declared is none
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(surname) set supertype: name
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
     Then attribute(surname) unset value type; fails
     Then attribute(surname) get value type: string
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
 
   Scenario: Attribute types cannot unset value type if there are subtypes without @abstract annotation and value types
     When create attribute type: name
@@ -718,9 +601,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) unset value type
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When attribute(name) unset value type; fails
     When attribute(surname) set value type: string
     When attribute(name) unset value type
     Then attribute(surname) get value type: string
@@ -733,8 +614,8 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type: string
     Then attribute(surname) get value type: string
-    When attribute(name) unset value type
-    Then transaction commits; fails
+    When attribute(name) unset value type; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When attribute(surname) set annotation: @abstract
     Then attribute(surname) get value type: string
@@ -907,7 +788,17 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type: <value-type-1>
     Then attribute(first-name) get value type: <value-type-1>
     Then attribute(first-name) set value type: <value-type-2>; fails
-    Then attribute(name) set value type: <value-type-2>; fails
+    When attribute(name) set value type: <value-type-2>
+    Then attribute(name) get value type: <value-type-2>
+    Then attribute(first-name) get value type: <value-type-2>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When attribute(first-name) set value type: <value-type-2>
+    When attribute(name) unset value type
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get value type is none
+    Then attribute(first-name) get value type: <value-type-2>
     Examples:
       | value-type-1  | value-type-2    |
       | long          | string          |
@@ -957,46 +848,34 @@ Feature: Concept Attribute Type
     When attribute(first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(sub-first-name) unset value type
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(first-name) unset value type
     When attribute(second-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(second-name) unset value type
     When attribute(sub-first-name) set value type: <value-type-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) set value type: <value-type-2>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: <value-type-2>; fails
     When attribute(sub-first-name) unset value type
     Then attribute(name) set value type: <value-type-2>
     Then attribute(first-name) get value type: <value-type-2>
@@ -1004,11 +883,17 @@ Feature: Concept Attribute Type
     Then attribute(sub-first-name) get value type: <value-type-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) set value type: <value-type-1>; fails
-    Then attribute(name) get value type: <value-type-2>
-    Then attribute(first-name) get value type: <value-type-2>
-    Then attribute(second-name) get value type: <value-type-2>
-    Then attribute(sub-first-name) get value type: <value-type-2>
+    When attribute(name) set value type: <value-type-1>
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(second-name) get value type: <value-type-1>
+    Then attribute(sub-first-name) get value type: <value-type-1>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: <value-type-1>
+    Then attribute(first-name) get value type: <value-type-1>
+    Then attribute(second-name) get value type: <value-type-1>
+    Then attribute(sub-first-name) get value type: <value-type-1>
     When attribute(name) unset value type
     Then attribute(name) get value type is none
     Then attribute(first-name) get value type is none
@@ -1245,19 +1130,15 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
-      | attribute |
       | real-name |
       | name      |
     Then attribute(last-name) get supertypes contain:
-      | attribute |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
-      | attribute |
-      | name      |
+      | name |
     Then attribute(username) get supertypes contain:
-      | attribute |
-      | name      |
+      | name |
     Then attribute(first-name) get subtypes is empty
     Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
@@ -1269,7 +1150,7 @@ Feature: Concept Attribute Type
       | real-name  |
       | first-name |
       | last-name  |
-    Then attribute(attribute) get subtypes contain:
+    Then get attribute types contain:
       | name       |
       | username   |
       | real-name  |
@@ -1282,19 +1163,15 @@ Feature: Concept Attribute Type
     Then attribute(real-name) get supertype: name
     Then attribute(username) get supertype: name
     Then attribute(first-name) get supertypes contain:
-      | attribute |
       | real-name |
       | name      |
     Then attribute(last-name) get supertypes contain:
-      | attribute |
       | real-name |
       | name      |
     Then attribute(real-name) get supertypes contain:
-      | attribute |
-      | name      |
+      | name |
     Then attribute(username) get supertypes contain:
-      | attribute |
-      | name      |
+      | name |
     Then attribute(first-name) get subtypes is empty
     Then attribute(last-name) get subtypes is empty
     Then attribute(real-name) get subtypes contain:
@@ -1306,7 +1183,7 @@ Feature: Concept Attribute Type
       | real-name  |
       | first-name |
       | last-name  |
-    Then attribute(attribute) get subtypes contain:
+    Then get attribute types contain:
       | name       |
       | username   |
       | real-name  |
@@ -1496,6 +1373,16 @@ Feature: Concept Attribute Type
 #    When connection open read transaction for database: typedb
 #    Then attribute(name) get annotations is empty
 
+  Scenario: Attribute type cannot set @regex annotation with invalid value
+    When create attribute type: name
+    When attribute(name) set value type: string
+    Then attribute(name) set annotation: @regex(""); fails
+    Then attribute(name) set annotation: @regex("*"); fails
+    Then attribute(name) get annotations is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get annotations is empty
+
   Scenario Outline: Attribute type can reset @regex annotation
     When create attribute type: name
     When attribute(name) set value type: string
@@ -1529,7 +1416,7 @@ Feature: Concept Attribute Type
       | init-args | reset-args      |
       | "\S+"     | "\S"            |
       | "\S+"     | "S+"            |
-      | "\S+"     | "*"             |
+      | "\S+"     | ".*"            |
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
@@ -1618,7 +1505,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     Then attribute(first-name) unset annotation: @regex; fails
     When attribute(first-name) set annotation: @abstract
-    When attribute(first-name) set supertype: attribute
+    When attribute(first-name) unset supertype
     Then attribute(first-name) get annotations do not contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     When transaction commits
@@ -1763,7 +1650,7 @@ Feature: Concept Attribute Type
     When attribute(first-name) set annotation: @abstract
     # Can't change supertype while losing independence
     When attribute(first-name) set annotation: @independent
-    When attribute(first-name) set supertype: attribute
+    When attribute(first-name) unset supertype
     When attribute(first-name) unset annotation: @independent
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
@@ -1772,7 +1659,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
 
-  Scenario: Attribute type cannot change supertype while implicitly losing @independent annotation
+  Scenario: Attribute type can change supertype while implicitly losing @independent annotation if it doesn't have data
     When create attribute type: literal
     When create attribute type: word
     When create attribute type: name
@@ -1788,13 +1675,33 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
-    Then attribute(name) set supertype: word; fails
-    When attribute(name) set annotation: @independent
     When attribute(name) set supertype: word
-    When attribute(name) unset annotation: @independent
+    Then attribute(name) get annotations do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: word
+    Then attribute(name) get annotations do not contain: @independent
+
+  Scenario: Attribute type can unset supertype while implicitly losing @independent annotation if it doesn't have data
+    When create attribute type: literal
+    When create attribute type: name
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set annotation: @independent
+    When attribute(name) set value type: string
+    When attribute(name) unset supertype
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    When attribute(name) set supertype: literal
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get supertype: literal
+    When attribute(name) unset supertype
+    Then attribute(name) get annotations do not contain: @independent
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype does not exist
+    Then attribute(name) get annotations do not contain: @independent
 
 #  TODO: Make it only for typeql
 #  Scenario: Attribute type cannot set @independent annotation with arguments
@@ -1949,6 +1856,40 @@ Feature: Concept Attribute Type
 #      | 2024-06-04T16:35:02.10+0100                                           |
 #      | P2M                                                                   |
 #      | P1Y2M3DT4H5M6.789S                                                    |
+
+  Scenario Outline: Attribute type @values annotation correctly validates nanoseconds
+    When create attribute type: today
+    When attribute(today) set value type: <value-type>
+    When attribute(today) set annotation: @values(<first>, <second>)
+    Then attribute(today) set annotation: @values(<first>, <first>); fails
+    Then attribute(today) set annotation: @values(<second>, <second>); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(today) get annotations contain: @values(<first>, <second>)
+    Then attribute(today) get annotations do not contain: @values(<first>, <first>)
+    Then attribute(today) get annotations do not contain: @values(<second>, <second>)
+    Then attribute(today) set annotation: @values(<first>, <first>); fails
+    Then attribute(today) set annotation: @values(<second>, <second>); fails
+    Examples:
+      | value-type  | first                              | second                             |
+      | datetime    | 2024-05-05T16:15:18.8              | 2024-05-05T16:15:18.9              |
+      | datetime    | 2024-05-05T16:15:18.78             | 2024-05-05T16:15:18.79             |
+      | datetime    | 2024-05-05T16:15:18.678            | 2024-05-05T16:15:18.679            |
+      | datetime    | 2024-05-05T16:15:18.5678           | 2024-05-05T16:15:18.5679           |
+      | datetime    | 2024-05-05T16:15:18.45678          | 2024-05-05T16:15:18.45679          |
+      | datetime    | 2024-05-05T16:15:18.345678         | 2024-05-05T16:15:18.345679         |
+      | datetime    | 2024-05-05T16:15:18.2345678        | 2024-05-05T16:15:18.2345679        |
+      | datetime    | 2024-05-05T16:15:18.12345678       | 2024-05-05T16:15:18.12345679       |
+      | datetime    | 2024-05-05T16:15:18.112345678      | 2024-05-05T16:15:18.112345679      |
+      | datetime-tz | 2024-05-05T16:15:18.8+0010         | 2024-05-05T16:15:18.9+0010         |
+      | datetime-tz | 2024-05-05T16:15:18.78+0010        | 2024-05-05T16:15:18.79+0010        |
+      | datetime-tz | 2024-05-05T16:15:18.678+0010       | 2024-05-05T16:15:18.679+0010       |
+      | datetime-tz | 2024-05-05T16:15:18.5678+0010      | 2024-05-05T16:15:18.5679+0010      |
+      | datetime-tz | 2024-05-05T16:15:18.45678+0010     | 2024-05-05T16:15:18.45679+0010     |
+      | datetime-tz | 2024-05-05T16:15:18.345678+0010    | 2024-05-05T16:15:18.345679+0010    |
+      | datetime-tz | 2024-05-05T16:15:18.2345678+0010   | 2024-05-05T16:15:18.2345679+0010   |
+      | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
+      | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
   Scenario: Attribute types' @values annotation can be inherited
     When create attribute type: name
@@ -2135,9 +2076,9 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get annotations contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
     Then attribute(first-name) unset annotation: @values; fails
-    Then attribute(first-name) set supertype: attribute; fails
+    Then attribute(first-name) unset supertype; fails
     When attribute(first-name) set annotation: @abstract
-    When attribute(first-name) set supertype: attribute
+    When attribute(first-name) unset supertype
     Then attribute(first-name) get annotation categories do not contain: @values
     When transaction commits
     When connection open read transaction for database: typedb
@@ -2220,6 +2161,36 @@ Feature: Concept Attribute Type
       | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
       | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
       | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
+
+  Scenario: Attribute type can change value type and @values through @values resetting
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @values("only this string is allowed")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
+    Then attribute(surname) set value type: long; fails
+    When attribute(surname) unset annotation: @values
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
+    When attribute(name) set value type: long
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @values(1, 2, 3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
+    When attribute(name) set annotation: @values(1, 2, 3)
+    When attribute(surname) unset annotation: @values
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get value type: long
 
 ########################
 # @range
@@ -2338,6 +2309,37 @@ Feature: Concept Attribute Type
       | duration   | P2M                | P1Y2M              |
       | duration   | P1Y2M              | P1Y2M3DT4H5M6.789S |
       | duration   | P1Y2M3DT4H5M6.788S | P1Y2M3DT4H5M6.789S |
+
+  Scenario Outline: Attribute type @range annotation correctly validates nanoseconds
+    When create attribute type: today
+    When attribute(today) set value type: <value-type>
+    When attribute(today) set annotation: @range(<from>..<to>)
+    Then attribute(today) set annotation: @range(<to>..<from>); fails
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(today) get annotations contain: @range(<from>..<to>)
+    Then attribute(today) get annotations do not contain: @range(<to>..<from>)
+    Then attribute(today) set annotation: @range(<to>..<from>); fails
+    Examples:
+      | value-type  | from                               | to                                 |
+      | datetime    | 2024-05-05T16:15:18.8              | 2024-05-05T16:15:18.9              |
+      | datetime    | 2024-05-05T16:15:18.78             | 2024-05-05T16:15:18.79             |
+      | datetime    | 2024-05-05T16:15:18.678            | 2024-05-05T16:15:18.679            |
+      | datetime    | 2024-05-05T16:15:18.5678           | 2024-05-05T16:15:18.5679           |
+      | datetime    | 2024-05-05T16:15:18.45678          | 2024-05-05T16:15:18.45679          |
+      | datetime    | 2024-05-05T16:15:18.345678         | 2024-05-05T16:15:18.345679         |
+      | datetime    | 2024-05-05T16:15:18.2345678        | 2024-05-05T16:15:18.2345679        |
+      | datetime    | 2024-05-05T16:15:18.12345678       | 2024-05-05T16:15:18.12345679       |
+      | datetime    | 2024-05-05T16:15:18.112345678      | 2024-05-05T16:15:18.112345679      |
+      | datetime-tz | 2024-05-05T16:15:18.8+0010         | 2024-05-05T16:15:18.9+0010         |
+      | datetime-tz | 2024-05-05T16:15:18.78+0010        | 2024-05-05T16:15:18.79+0010        |
+      | datetime-tz | 2024-05-05T16:15:18.678+0010       | 2024-05-05T16:15:18.679+0010       |
+      | datetime-tz | 2024-05-05T16:15:18.5678+0010      | 2024-05-05T16:15:18.5679+0010      |
+      | datetime-tz | 2024-05-05T16:15:18.45678+0010     | 2024-05-05T16:15:18.45679+0010     |
+      | datetime-tz | 2024-05-05T16:15:18.345678+0010    | 2024-05-05T16:15:18.345679+0010    |
+      | datetime-tz | 2024-05-05T16:15:18.2345678+0010   | 2024-05-05T16:15:18.2345679+0010   |
+      | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
+      | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
     # TODO: Struct parsing is not supported now
 #  Scenario: Attribute type cannot set @range annotation for struct value type
@@ -2596,7 +2598,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     Then attribute(first-name) unset annotation: @range; fails
     When attribute(first-name) set value type: string
-    When attribute(first-name) set supertype: attribute
+    When attribute(first-name) unset supertype
     Then attribute(first-name) get annotations do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     When transaction commits
@@ -2679,6 +2681,36 @@ Feature: Concept Attribute Type
       | date        | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04                    |
       | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
+
+  Scenario: Attribute type can change value type and @range through @range resetting
+    When create attribute type: name
+    When create attribute type: surname
+    When attribute(name) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @range("a start".."finish line")
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set value type: long; fails
+    Then attribute(surname) set value type: long; fails
+    When attribute(surname) unset annotation: @range
+    Then attribute(surname) unset value type; fails
+    When attribute(surname) set value type: long
+    When attribute(name) set value type: long
+    When attribute(surname) unset value type
+    When attribute(surname) set annotation: @range(1..3)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get value type: long
+    When attribute(name) set annotation: @range(1..3)
+    When attribute(surname) unset annotation: @range
+    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) set value type: string; fails
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get value type: long
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace

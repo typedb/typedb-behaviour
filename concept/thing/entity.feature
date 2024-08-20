@@ -117,7 +117,8 @@ Feature: Concept Entity
     When $alice = attribute(username) put instance with value: alice
     When $bob = attribute(username) put instance with value: bob
     When entity $a set has: $alice
-    Then entity $a set has: $bob; fails
+    When entity $a set has: $bob
+    Then transaction commits; fails
     When connection open write transaction for database: typedb
     When $a = entity(person) create new instance
     When $alice = attribute(username) put instance with value: alice
@@ -126,7 +127,8 @@ Feature: Concept Entity
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $bob = attribute(username) put instance with value: bob
-    Then entity $a set has: $bob; fails
+    When entity $a set has: $bob
+    Then transaction commits; fails
 
   Scenario: Entity cannot have a key that has been taken
     When $a = entity(person) create new instance
@@ -204,3 +206,21 @@ Feature: Concept Entity
     When delete entity: $a
     Then entity $a is deleted: true
     When entity $a set has: $email; fails
+
+  Scenario: Cannot create instances of abstract entity type
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create entity type: character
+    When entity(character) set annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then entity(character) create new instance; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When entity(character) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then entity(character) create new instance
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(character) get instances is not empty

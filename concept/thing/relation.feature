@@ -26,9 +26,9 @@ Feature: Concept Relation
     Given relation(marriage) set owns: date
 
     Given relation(marriage) create role: wife
-    Given relation(marriage) get role(wife) set annotation: @card(0, 1)
+    Given relation(marriage) get role(wife) set annotation: @card(0..1)
     Given relation(marriage) create role: husband
-    Given relation(marriage) get role(husband) set annotation: @card(0, 1)
+    Given relation(marriage) get role(husband) set annotation: @card(0..1)
 
     Given create entity type: person
     Given entity(person) set owns: username
@@ -142,7 +142,7 @@ Feature: Concept Relation
   Scenario: Relation chain with no other role players gets deleted on commit
     Then transaction commits
     Given connection open schema transaction for database: typedb
-    Given relation(marriage) create role: dependent-marriage
+    Given relation(marriage) create role: dependent-marriage, with @card(0..)
     Given relation(marriage) set plays: marriage:dependent-marriage
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -205,3 +205,50 @@ Feature: Concept Relation
     When delete relation: $m
     Then relation $m is deleted: true
     When relation $m add player for role(wife): $a; fails
+
+  Scenario: Cannot create instances of abstract relation type and role type
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) get role(parent) set annotation: @abstract
+    When create entity type: parentship-player
+    When entity(parentship-player) set annotation: @abstract
+    When entity(parentship-player) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then relation(parentship) create new instance; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    Then relation(parentship) unset annotation: @abstract; fails
+    When relation(parentship) get role(parent) unset annotation: @abstract
+    When relation(parentship) unset annotation: @abstract
+    When entity(parentship-player) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then $r = relation(parentship) create new instance
+    Then $p = entity(parentship-player) create new instance
+    Then relation $r add player for role(parent): $p
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get instances is not empty
+
+  Scenario: Relations are cleaned up after their players are cleaned up
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create relation type: parentship
+    When relation(parentship) create role: parent, with @card(0..1)
+    When create relation type: parentship-player
+    When relation(parentship-player) create role: unplayed-role-leading-to-cleanup, with @card(0..1)
+    Then relation(parentship-player) get role(unplayed-role-leading-to-cleanup) get cardinality: @card(0..1)
+    When relation(parentship-player) set plays: parentship:parent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then $r = relation(parentship) create new instance
+    Then $p = relation(parentship-player) create new instance
+    Then relation $r add player for role(parent): $p
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship-player) get instances is empty
+    Then relation(parentship) get instances is empty

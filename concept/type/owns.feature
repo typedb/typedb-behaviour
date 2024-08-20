@@ -24,7 +24,9 @@ Feature: Concept Owns
     Given create relation type: description
     Given relation(description) create role: object
     Given create relation type: registration
+    Given relation(registration) create role: registration-object
     Given create relation type: profile
+    Given relation(profile) create role: profile-object
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
@@ -40,14 +42,6 @@ Feature: Concept Owns
 ########################
 # owns common
 ########################
-  Scenario Outline: Root types cannot own attributes
-    When create attribute type: name
-    Then <root-type>(<root-type>) set owns: name; fails
-    Examples:
-      | root-type |
-      | entity    |
-      | relation  |
-
   Scenario Outline: Entity types can own and unset attributes
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -306,7 +300,6 @@ Feature: Concept Owns
     Then entity(ent1) set supertype: ent00
     Then transaction commits; fails
 
-
   Scenario: A type may only override an ownership it inherits
     When create attribute type: attr0
     When attribute(attr0) set value type: string
@@ -331,10 +324,8 @@ Feature: Concept Owns
     When entity(ent1) get owns(attr1) set override: attr0
     Then transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent00) unset owns: attr0
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01; fails
+    Then entity(ent00) unset owns: attr0; fails
+    Then entity(ent1) set supertype: ent01; fails
 
   Scenario: A type may not declare ownership of an attribute that has been overridden by an inherited ownership
     When create attribute type: attr0
@@ -372,8 +363,8 @@ Feature: Concept Owns
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr1
-    When entity(ent1) get owns(attr1) set override: attr0
-    Then transaction commits; fails
+    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When create entity type: ent3
     When entity(ent3) set annotation: @abstract
@@ -395,8 +386,7 @@ Feature: Concept Owns
       | attr0 |
     Then entity(ent3) get owns do not contain:
       | attr0 |
-    When entity(ent3) set supertype: ent2
-    Then transaction commits; fails
+    Then entity(ent3) set supertype: ent2; fails
 
   Scenario: A type may only override an ownership it inherits with a subtype of the inherited attribute
     When create attribute type: attr0
@@ -636,42 +626,6 @@ Feature: Concept Owns
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then struct(wallet) get owns is empty
-
-    # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset owning attributes that are owned by existing instances
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    When <root-type>(<type-name>) set owns: name
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $a = attribute(name) as(<value-type>) put: <value>
-#    When entity $i set has: $a
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset owns: name; fails
-#    Then <root-type>(<type-name>) get owns contain:
-#    |name|
-#    Examples:
-#      | root-type | type-name   | value-type | value           |
-#      | entity    | person      | long       | 1               |
-#      | entity    | person      | double     | 1.0             |
-#      | entity    | person      | decimal    | 1.0             |
-#      | entity    | person      | string     | "alice"         |
-#      | entity    | person      | boolean    | true            |
-#      | entity    | person      | date       | 2024-05-04      |
-#      | entity    | person      | datetime   | 2024-05-04      |
-#      | entity    | person      | datetime-tz | 2024-05-04+0010 |
-#      | entity    | person      | duration   | P1Y             |
-#      | relation  | description | long       | 1               |
-#      | relation  | description | double     | 1.0             |
-#      | relation  | description | decimal    | 1.0             |
-#      | relation  | description | string     | "alice"         |
-#      | relation  | description | boolean    | true            |
-#      | relation  | description | date       | 2024-05-04      |
-#      | relation  | description | datetime   | 2024-05-04      |
-#      | relation  | description | datetime-tz | 2024-05-04+0010 |
-#      | relation  | description | duration   | P1Y             |
 
   Scenario Outline: <root-type> types can re-override owns
     When create attribute type: email
@@ -1082,69 +1036,6 @@ Feature: Concept Owns
       | duration      | boolean      |
       | custom-struct | long         |
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for entity type
-#    When create attribute type: name
-#    When attribute(name) set value type: double
-#    When create entity type: person
-#    When entity(person) set owns: name
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $a = entity(person) create new instance
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When entity(person) get owns(name) set ordering: ordered
-#    Then entity(person) get owns(name) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) get owns(name) get ordering: ordered
-#    When entity(person) get owns(name) set ordering: unordered
-#    Then entity(person) get owns(name) get ordering: unordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) get owns(name) get ordering: unordered
-
-   # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Ownership cannot change ordering if it has role instances for entity type
-#    When create attribute type: id
-#    When attribute(id) set value type: long
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When create attribute type: email
-#    When attribute(email) set value type: decimal
-#    When create entity type: person
-#    When entity(person) set owns: id
-#    When entity(person) get owns(id) set annotation: @key
-#    When entity(person) set owns: name
-#    When entity(person) set owns: email
-#    When entity(person) get owns(email) set ordering: ordered
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $e = entity(person) create new instance with key(id): 1
-#    When $a1 = attribute(name) create new instance
-#    When $a2 = attribute(name) create new instance
-#    When entity $e set has: $a1
-#    When entity $e set has: $a2
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) get owns(name) set ordering: unordered; fails
-#    Then entity(person) get owns(name) set ordering: ordered; fails
-#    Then entity(person) get owns(email) set ordering: unordered; fails
-#    Then entity(person) get owns(email) set ordering: ordered; fails
-#    When connection open write transaction for database: typedb
-#    When $a = entity(person) get instance with key(id): 1
-#    When delete entity: $a
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When entity(person) get owns(name) set ordering: ordered
-#    Then entity(person) get owns(name) get ordering: ordered
-#    When entity(person) get owns(email) set ordering: unordered
-#    Then entity(person) get owns(email) get ordering: unordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(name) get ordering: ordered
-#    Then entity(person) get owns(email) get ordering: unordered
-
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
     When attribute(name) set value type: <value-type>
@@ -1261,83 +1152,6 @@ Feature: Concept Owns
       | long          | string       |
       | double        | datetime-tz  |
       | custom-struct | decimal      |
-
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Ownership can change ordering if it does not have instances even if its owner has instances for relation type
-#    When create attribute type: name
-#    When attribute(name) set value type: double
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) set owns: name
-#    When create entity type: person
-#    When entity(person) set plays: email
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $e = entity(person) create new instance
-#    When $r = relation(parentship) create new instance
-#    When relation $r add player for role(parent): $e
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When relation(parentship) get owns(name) set ordering: ordered
-#    Then relation(parentship) get owns(name) get ordering: ordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get owns(name) get ordering: ordered
-#    When relation(parentship) get owns(name) set ordering: unordered
-#    Then relation(parentship) get owns(name) get ordering: unordered
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get owns(name) get ordering: unordered
-
-   # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario: Ownership cannot change ordering if it has role instances for relation type
-#    When create attribute type: id
-#    When attribute(id) set value type: long
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    When create attribute type: email
-#    When attribute(email) set value type: decimal
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) set owns: name
-#    When relation(parentship) set owns: email
-#    When relation(parentship) get owns(email) set ordering: ordered
-#    When relation(parentship) set owns: id
-#    When relation(parentship) get owns(id) set annotation: @key
-#    When create entity type: person
-#    When entity(person) set plays: email
-#    When entity(person) set owns: id
-#    When entity(person) get owns(id) set annotation: @key
-#    When transaction commits
-#    When connection open write transaction for database: typedb
-#    When $e = entity(person) create new instance with key(id): 1
-#    When $r = relation(parentship) create new instance with key(id): 1
-#    When relation $r add player for role(parent): $e
-#    When $a1 = attribute(name) create new instance
-#    When $a2 = attribute(name) create new instance
-#    When entity $r set has: $a1
-#    When entity $r set has: $a2
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(parentship) get owns(name) set ordering: unordered; fails
-#    Then relation(parentship) get owns(name) set ordering: ordered; fails
-#    Then relation(parentship) get owns(email) set ordering: unordered; fails
-#    Then relation(parentship) get owns(email) set ordering: ordered; fails
-#    When connection open write transaction for database: typedb
-#    When $r = relation(parentship) get instance with key(id): 1
-#    When $a = entity(person) get instance with key(id): 1
-#    When delete entity: $a
-#    When delete relation: $r
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    When relation(parentship) get owns(name) set ordering: ordered
-#    Then relation(parentship) get owns(name) get ordering: ordered
-#    When relation(parentship) get owns(email) set ordering: unordered
-#    Then relation(parentship) get owns(email) get ordering: unordered
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get owns(name) get ordering: ordered
-#    Then relation(parentship) get owns(email) get ordering: unordered
 
   Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
@@ -1486,44 +1300,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | duration   |
       | relation  | description    | registration | string     |
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset ordered ownership of attributes that are owned by existing instances
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    When <root-type>(<type-name>) set owns: name
-#    When <root-type>(<type-name>) get owns(name) set ordering: ordered
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $a = attribute(name) as(<value-type>) put: [<value>]
-#    When entity $i set has: $a
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset owns: name; fails
-#    Then <root-type>(<type-name>) get owns contain:
-#      | name |
-#    Then <root-type>(<type-name>) get owns(name) get ordering: ordered
-#    Examples:
-#      | root-type | type-name   | value-type | value           |
-#      | entity    | person      | long       | 1               |
-#      | entity    | person      | double     | 1.0             |
-#      | entity    | person      | decimal    | 1.0             |
-#      | entity    | person      | string     | "alice"         |
-#      | entity    | person      | boolean    | true            |
-#      | entity    | person      | date       | 2024-05-04      |
-#      | entity    | person      | datetime   | 2024-05-04      |
-#      | entity    | person      | datetime-tz | 2024-05-04+0010 |
-#      | entity    | person      | duration   | P1Y             |
-#      | relation  | description | long       | 1               |
-#      | relation  | description | double     | 1.0             |
-#      | relation  | description | decimal    | 1.0             |
-#      | relation  | description | string     | "alice"         |
-#      | relation  | description | boolean    | true            |
-#      | relation  | description | date       | 2024-05-04      |
-#      | relation  | description | datetime   | 2024-05-04      |
-#      | relation  | description | datetime-tz | 2024-05-04+0010 |
-#      | relation  | description | duration   | P1Y             |
-
   Scenario Outline: <root-type> types can re-override ordered ownership
     When create attribute type: email
     When attribute(email) set value type: <value-type>
@@ -1554,7 +1330,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | long       |
       | relation  | description    | registration | string     |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns as owns
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When create attribute type: name
@@ -1570,7 +1346,7 @@ Feature: Concept Owns
       | relation  | description    | registration | string     |
       | relation  | description    | registration | datetime   |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns in multiple layers of inheritance
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns in multiple layers of inheritance
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1591,7 +1367,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare overridden owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered overridden owns as owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1614,7 +1390,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | duration   |
       | relation  | description    | registration | profile        | double     |
 
-  Scenario Outline: <root-type> types cannot override declared owns with owns
+  Scenario Outline: <root-type> types cannot override ordered declared owns by declared owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1634,7 +1410,7 @@ Feature: Concept Owns
       | entity    | person      | string     |
       | relation  | description | string     |
 
-  Scenario Outline: <root-type> types cannot override inherited owns other than with their subtypes
+  Scenario Outline: <root-type> types cannot override ordered inherited owns other than with their subtypes
     When create attribute type: username
     When attribute(username) set value type: <value-type>
     When create attribute type: reference
@@ -1702,12 +1478,16 @@ Feature: Concept Owns
     When attribute(surname) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: surname
     When <root-type>(<supertype-name>) get owns(surname) set ordering: ordered
+    Then attribute(name) set supertype: surname; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: surname
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
+    Then attribute(name) set supertype: other; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: other
     When <root-type>(<subtype-name>) get owns(name) set override: other
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
@@ -1715,10 +1495,10 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
     When <root-type>(<supertype-name>) get owns(surname) set ordering: unordered
+    Then attribute(name) set supertype: surname; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: surname
     Then <root-type>(<subtype-name>) get owns(name) set override: surname; fails
-    Then <root-type>(<subtype-name>) get owns overridden(name) get label: other
-    When <root-type>(<subtype-name>) get owns(name) unset override
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set override: surname
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
@@ -1731,6 +1511,8 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns overridden(name) get label: surname
+    Then attribute(name) set supertype: other; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
     When attribute(name) set supertype: other
     Then <root-type>(<subtype-name>) get owns(name) set override: other; fails
     When <root-type>(<supertype-name>) get owns(other) set ordering: unordered
@@ -1849,17 +1631,17 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set override: name
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name>) get owns(surname) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset owns: surname
@@ -1868,17 +1650,15 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) get owns(surname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name-2>) set supertype: <root-type>; fails
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) unset supertype; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name-2>) get owns(surname) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get owns overridden(surname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
@@ -1898,16 +1678,14 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) set override: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(surname) set supertype: attribute
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    When attribute(surname) unset supertype; fails
     When <root-type>(<subtype-name>) get owns(surname) unset override
-    When attribute(surname) set supertype: attribute
-    Then attribute(surname) get supertype: attribute
+    When attribute(surname) unset supertype
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get supertype: attribute
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(surname) does not exist
     When create attribute type: subsurname
     When attribute(subsurname) set supertype: surname
@@ -1919,22 +1697,111 @@ Feature: Concept Owns
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(subsurname) set annotation: @abstract
-    When attribute(subsurname) set supertype: attribute
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When attribute(surname) set supertype: attribute
-    Then transaction commits; fails
+    Then attribute(subsurname) unset supertype; fails
+    Then attribute(surname) unset supertype; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get owns(subsurname) unset override
-    When attribute(surname) set supertype: attribute
-    Then attribute(surname) get supertype: attribute
-    Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
+    When attribute(surname) unset supertype; fails
     When attribute(subsurname) set annotation: @abstract
+    When attribute(surname) unset supertype
+    Then attribute(surname) get supertype does not exist
+    Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(surname) get supertype: attribute
+    Then attribute(surname) get supertype does not exist
     Then <root-type>(<subtype-name>) get owns overridden(subsurname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | value-type  |
       | entity    | person         | customer     | datetime-tz |
       | relation  | description    | registration | double      |
+
+  Scenario Outline: Attribute type can change supertype only if <root-type>'s owns overrides are in the inheritance tree of supertype
+    When create attribute type: literal
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set value type: <value-type>
+    When create attribute type: text
+    When attribute(text) set annotation: @abstract
+    When attribute(text) set supertype: literal
+    When create attribute type: latin-text
+    When attribute(latin-text) set annotation: @abstract
+    When attribute(latin-text) set supertype: text
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set supertype: text
+    When create attribute type: surname
+    When attribute(surname) set annotation: @abstract
+    When attribute(surname) set supertype: name
+    When create attribute type: matronymic-surname
+    When attribute(matronymic-surname) set annotation: @abstract
+    When attribute(matronymic-surname) set supertype: surname
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) set owns: text
+    When <root-type>(<supertype-name>) set owns: latin-text
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name-2>) set owns: surname
+    When <root-type>(<subtype-name-2>) set owns: matronymic-surname
+    When <root-type>(<subtype-name>) get owns(name) set override: text
+    When <root-type>(<subtype-name-2>) get owns(surname) set override: literal
+    When <root-type>(<subtype-name-2>) get owns(matronymic-surname) set override: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) set supertype: literal; fails
+    When create attribute type: another-literal
+    When attribute(another-literal) set annotation: @abstract
+    When attribute(another-literal) set value type: <value-type>
+    Then attribute(name) set supertype: another-literal; fails
+    When <root-type>(<supertype-name>) set owns: another-literal
+    Then attribute(name) set supertype: another-literal; fails
+    When attribute(name) set supertype: latin-text
+    Then <root-type>(<subtype-name>) get owns overridden(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns overridden(matronymic-surname) get label: name
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get supertype: latin-text
+    Then <root-type>(<subtype-name>) get owns overridden(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns overridden(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns overridden(matronymic-surname) get label: name
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
+      | entity    | person         | customer     | subscriber     | datetime-tz |
+      | relation  | description    | registration | profile        | double      |
+
+  Scenario Outline: <root-type> type cannot redeclare ownership overriding another attribute type
+    When create attribute type: literal
+    When attribute(literal) set annotation: @abstract
+    When attribute(literal) set value type: string
+    When create attribute type: name
+    When attribute(name) set annotation: @abstract
+    When attribute(name) set supertype: literal
+    When <root-type>(<supertype-name>) set owns: literal
+    When <root-type>(<supertype-name>) set owns: name
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: literal
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |

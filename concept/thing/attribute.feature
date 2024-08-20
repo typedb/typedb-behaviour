@@ -23,11 +23,14 @@ Feature: Concept Attribute
     Given attribute(score) set value type: double
     Given attribute(score) set annotation: @independent
     Given create attribute type: birth-date
-    Given attribute(birth-date) set value type: datetime
+    Given attribute(birth-date) set value type: date
     Given attribute(birth-date) set annotation: @independent
-    Given create attribute type: event-date
-    Given attribute(event-date) set value type: datetime-tz
-    Given attribute(event-date) set annotation: @independent
+    Given create attribute type: event-datetime
+    Given attribute(event-datetime) set value type: datetime
+    Given attribute(event-datetime) set annotation: @independent
+    Given create attribute type: global-date
+    Given attribute(global-date) set value type: datetime-tz
+    Given attribute(global-date) set annotation: @independent
     Given create attribute type: schedule-interval
     Given attribute(schedule-interval) set value type: duration
     Given attribute(schedule-interval) set annotation: @independent
@@ -61,9 +64,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01T11:22:33                |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
@@ -79,9 +83,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01 11:22:33                |
-      | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario Outline: Attribute with value type <type> can be deleted
@@ -112,9 +117,10 @@ Feature: Concept Attribute
       | age               | long        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
-      | birth-date        | datetime    | 1990-01-01 11:22:33                |
-      | event-date        | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
-      | event-date        | datetime-tz | 1990-01-01T11:22:33-0700           |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
   Scenario: Attribute with value type string that satisfies the regular expression can be created
@@ -136,17 +142,17 @@ Feature: Concept Attribute
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
     When set time zone: Asia/Calcutta
-    When $x = attribute(birth-date) put instance with value: 2001-08-23 08:30:00
+    When $x = attribute(event-datetime) put instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
-    Then attribute $x has type: birth-date
+    Then attribute $x has type: event-datetime
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
     When transaction commits
     When connection open read transaction for database: typedb
     When set time zone: America/Chicago
-    When $x = attribute(birth-date) get instance with value: 2001-08-23 08:30:00
+    When $x = attribute(event-datetime) get instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
-    Then attribute $x has type: birth-date
+    Then attribute $x has type: event-datetime
     Then attribute $x has value type: datetime
     Then attribute $x has value: 2001-08-23 08:30:00
 
@@ -165,8 +171,7 @@ Feature: Concept Attribute
     When connection open read transaction for database: typedb
     When $x = attribute(ephemeral) get instance with value: 1337
     Then attribute $x does not exist
-    # FIXME: read transactions shouldn't commit
-    When transaction commits
+    When transaction closes
 
     When connection open schema transaction for database: typedb
     When attribute(ephemeral) set annotation: @independent
@@ -176,3 +181,119 @@ Feature: Concept Attribute
     When $x = attribute(ephemeral) get instance with value: 1337
     Then attribute $x does not exist
 
+  Scenario: Cannot create instances of abstract attribute type
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: full-name
+    When attribute(full-name) set value type: string
+    When attribute(full-name) set annotation: @abstract
+    When attribute(full-name) set annotation: @independent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(full-name) put instance with value: "bob"; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When attribute(full-name) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(full-name) put instance with value: "bob"
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(full-name) get instances is not empty
+
+  Scenario Outline: Cannot create instances of attribute type of value type <value-type> with values not matching @values(<values-args>) annotation
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: limited-value
+    When attribute(limited-value) set value type: <value-type>
+    When attribute(limited-value) set annotation: @values(<values-args>)
+    When attribute(limited-value) set annotation: @independent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(limited-value) put instance with value: <fail-val>; fails
+    Then attribute(limited-value) put instance with value: <suc-val>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(limited-value) get instances is not empty
+    Then $suc = attribute(limited-value) get instance with value: <suc-val>
+    Then $fail = attribute(limited-value) get instance with value: <fail-val>
+    Then attribute $suc exists
+    Then attribute $fail does not exist
+    Examples:
+      | value-type  | values-args                               | fail-val                      | suc-val                       |
+      | long        | 1, 5, 4                                   | 2                             | 1                             |
+      | long        | 1                                         | 2                             | 1                             |
+      | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
+      | double      | 0.01                                      | 0.1                           | 0.01                          |
+      | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
+      | double      | 0.01, 0.0001                              | 1.0                           | 0.01                          |
+      | decimal     | -8.0, 88.3, 0.001                         | 0.01                          | 0.001                         |
+      | decimal     | 0.001                                     | 0.01                          | 0.001                         |
+      | decimal     | 0.01                                      | 0.1                           | 0.01                          |
+      | decimal     | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
+      | decimal     | 0.01, 0.0001                              | 1.0                           | 0.01                          |
+      | string      | "s", "sss", "S"                           | "ss"                          | "sss"                         |
+      | string      | "s", "sss"                                | "S"                           | "s"                           |
+      | string      | "sss"                                     | "ss"                          | "sss"                         |
+      | boolean     | true                                      | false                         | true                          |
+      | boolean     | false                                     | true                          | false                         |
+      | date        | 2024-05-05, 2024-05-07                    | 2024-05-06                    | 2024-05-05                    |
+      | date        | 2024-05-05                                | 2024-05-06                    | 2024-05-05                    |
+      | datetime    | 2024-05-05T16:01:59, 2024-05-05T16:01:58  | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
+      | datetime    | 2024-05-05T16:01:59                       | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
+      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.12345678  | 2024-05-05T16:01:59.123456789 |
+      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.123456788 | 2024-05-05T16:01:59.123456789 |
+      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.12345679  | 2024-05-05T16:01:59.123456789 |
+      | datetime-tz | 2024-05-05+0100, 2024-05-05T16:31:59+0100 | 2024-05-05+0000               | 2024-05-05T16:31:59+0100      |
+      | datetime-tz | 2024-05-05T16:31:59+0100                  | 2024-05-05+0000               | 2024-05-05T16:31:59+0100      |
+      | duration    | P1Y, P1Y5M8H                              | P2Y                           | P1Y                           |
+      | duration    | P1Y                                       | P2Y                           | P1Y                           |
+      | duration    | P1Y, P1Y1M1DT1H1M0.000001S                | P1Y1M1DT1H1M0.00001S          | P1Y1M1DT1H1M0.000001S         |
+
+  Scenario Outline: Cannot create instances of attribute type of value type <value-type> with values not matching @range(<range-args>) annotation
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: limited-value
+    When attribute(limited-value) set value type: <value-type>
+    When attribute(limited-value) set annotation: @range(<range-args>)
+    When attribute(limited-value) set annotation: @independent
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then attribute(limited-value) put instance with value: <fail-val>; fails
+    Then attribute(limited-value) put instance with value: <suc-val>
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(limited-value) get instances is not empty
+    Then $suc = attribute(limited-value) get instance with value: <suc-val>
+    Then $fail = attribute(limited-value) get instance with value: <fail-val>
+    Then attribute $suc exists
+    Then attribute $fail does not exist
+    Examples:
+      | value-type  | range-args                                | fail-val            | suc-val                  |
+      | long        | 1..3                                      | 0                   | 1                        |
+      | long        | 1..3                                      | -1                  | 2                        |
+      | long        | 1..3                                      | 4                   | 3                        |
+      | long        | -1..1                                     | -2                  | 0                        |
+      | long        | -1..1                                     | 2                   | -1                       |
+      | double      | 0.01..0.1                                 | 0.001               | 0.01                     |
+      | double      | 0.01..0.1                                 | 0.11                | 0.0111111                |
+      | double      | -0.01..0.1                                | -0.011              | 0.01                     |
+      | double      | -0.01..0.1                                | 0.11                | -0.01                    |
+      | double      | 19.337..339.0                             | 19.336              | 78.838482823782          |
+      | decimal     | 0.01..0.1                                 | 0.001               | 0.01                     |
+      | decimal     | 0.01..0.1                                 | 0.11                | 0.0111111                |
+      | decimal     | -0.01..0.1                                | -0.011              | 0.01                     |
+      | decimal     | -0.01..0.1                                | 0.11                | -0.01                    |
+      | decimal     | 19.337..339.0                             | 19.336              | 78.838482823782          |
+      | string      | "1".."3"                                  | "0"                 | "1"                      |
+      | string      | "1".."3"                                  | "#"                 | "2"                      |
+      | string      | "1".."3"                                  | "4"                 | "3"                      |
+      | string      | "s".."sss"                                | "S"                 | "s"                      |
+      | string      | "s".."sss"                                | "j"                 | "ss"                     |
+      | string      | "s".."sss"                                | "SSS"               | "sss"                    |
+      | date        | 2024-05-05..2024-05-07                    | 2024-05-04          | 2024-05-06               |
+      | datetime    | 2024-05-05T16:01:57..2024-05-05T16:01:59  | 2024-05-04T16:01:59 | 2024-05-05T16:01:59      |
+      | datetime    | 2024-05-05T16:01:57..2024-05-05T16:01:59  | 2024-05-05T16:02:00 | 2024-05-05T16:01:58      |
+      | datetime    | 2024-05-05T16:01:57..2024-05-05T16:01:59  | 2025-05-05T16:01:58 | 2024-05-05T16:01:57      |
+      | datetime-tz | 2024-05-05+0100..2024-05-05T16:31:59+0100 | 2024-05-04+0000     | 2024-05-05T16:31:00+0100 |
+      | datetime-tz | 2024-05-05+0100..2024-05-05T16:31:59+0100 | 2024-05-05+0010     | 2024-05-05+0100          |

@@ -21,7 +21,9 @@ Feature: Concept Plays
     Given create relation type: description
     Given relation(description) create role: object
     Given create relation type: registration
+    Given relation(registration) create role: registration-object
     Given create relation type: profile
+    Given relation(profile) create role: profile-object
     # Notice: supertypes are the same, but can be overridden for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(registration) create role: object2
@@ -34,15 +36,6 @@ Feature: Concept Plays
 ########################
 # plays common
 ########################
-  Scenario Outline: Root types cannot play roles
-    When create relation type: marriage
-    When relation(marriage) create role: husband
-    Then <root-type>(<root-type>) set plays: marriage:husband; fails
-    Examples:
-      | root-type |
-      | entity    |
-      | relation  |
-
   Scenario: Entity types can play role types
     When create relation type: marriage
     When relation(marriage) create role: husband
@@ -496,12 +489,8 @@ Feature: Concept Plays
     When create entity type: ent01
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset override
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then entity(ent00) unset plays: rel0:role0
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) unset override; fails
+    Then entity(ent00) unset plays: rel0:role0; fails
     Then entity(ent1) set supertype: ent01; fails
 
   Scenario: A type may not redeclare the ability to play a role which is hidden by an override
@@ -525,8 +514,7 @@ Feature: Concept Plays
     When entity(ent1) set plays: rel1:role1
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent1) get plays(rel1:role1) set override: rel0:role0
-    Then transaction commits; fails
+    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
 
   Scenario: A type may not be moved in a way that its plays declarations are hidden by an override
     When create relation type: rel0
@@ -851,6 +839,18 @@ Feature: Concept Plays
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: contractor-locates:contractor-located; fails
     Then relation(contractor-employment) get plays(contractor-locates:contractor-located) set override: locates:located; fails
 
+  Scenario: Relation types can plays their roles
+    When create relation type: parentship
+    When relation(parentship) create role: info
+    When relation(parentship) create role: parent
+    When relation(parentship) set plays: parentship:info
+    Then relation(parentship) get plays contain:
+      | parentship:info |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(parentship) get plays contain:
+      | parentship:info |
+
     # TODO: Only for typeql
 #  Scenario: Attribute types cannot play entities, attributes, relations, roles, structs, structs fields, and non-existing things
 #    When create attribute type: surname
@@ -911,7 +911,7 @@ Feature: Concept Plays
       | root-type | type-name   |
       | entity    | person      |
       | relation  | description |
-    
+
   Scenario Outline: Deleting a role does not leave dangling plays declarations for <root-type>
     When create relation type: rel0
     When relation(rel0) create role: role0
@@ -951,25 +951,6 @@ Feature: Concept Plays
       | root-type | type-name   |
       | entity    | person      |
       | relation  | description |
-
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset playing role types that are currently played by existing instances
-#    When create relation type: marriage
-#    When relation(marriage) create role: husband
-#    When relation(marriage) create role: wife
-#    When <root-type>(<type-name>) set plays: marriage:wife
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $m = relation(marriage) create new instance
-#    When relation $m add player for role(wife): $i
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset plays: marriage:wife; fails
-#    Examples:
-#      | root-type | type-name   |
-#      | entity    | person      |
-#      | relation  | description |
 
   Scenario Outline: <root-type> types can re-override inherited playing role types
     When create relation type: parentship
@@ -1120,6 +1101,42 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get declared plays do not contain:
       | parentship:parent |
       | parentship:child  |
+    Examples:
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
+
+  Scenario Outline: <root-type> type cannot redeclare plays overriding another role type
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) create role: father
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) get role(father) set override: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    When <root-type>(<supertype-name>) set plays: fathership:father
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: fathership:father
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @card(1..1)
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When <root-type>(<subtype-name>) set plays: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set override: fathership:father
+    When <root-type>(<subtype-name>) get plays(fathership:father) set annotation: @card(1..1)
+    Then transaction commits
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -1419,27 +1436,6 @@ Feature: Concept Plays
       | entity    | person      |
       | relation  | description |
 
-     # TODO: Move to thing-feature or schema/data-validation?
-#  Scenario Outline: <root-type> types cannot unset playing ordered role that is currently played by existing instances
-#    When create relation type: marriage
-#    When relation(marriage) create role: husband
-#    When relation(marriage) get role(husband) set ordering: ordered
-#    When relation(marriage) create role: wife
-#    When relation(marriage) get role(wife) set ordering: ordered
-#    When <root-type>(<type-name>) set plays: marriage:wife
-#    Then transaction commits
-#    When connection open write transaction for database: typedb
-#    When $i = <root-type>(<type-name>) create new instance
-#    When $m = relation(marriage) create new instance
-#    When relation $m add player for role(wife): $i
-#    Then transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then <root-type>(<type-name>) unset plays: marriage:wife; fails
-#    Examples:
-#      | root-type | type-name   |
-#      | entity    | person      |
-#      | relation  | description |
-
   Scenario Outline: <root-type> types can re-override inherited playing ordered role
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -1533,17 +1529,17 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set supertype: <root-type>; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset plays: fathership:father
@@ -1552,17 +1548,15 @@ Feature: Concept Plays
     When <root-type>(<subtype-name-2>) get plays(fathership:father) set override: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name-2>) set supertype: <root-type>; fails
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) unset supertype; fails
+    Then <root-type>(<subtype-name>) unset supertype; fails
     When <root-type>(<subtype-name-2>) get plays(fathership:father) unset override
-    When <root-type>(<subtype-name>) set supertype: <root-type>
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    When <root-type>(<subtype-name>) unset supertype
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype: <root-type>
+    Then <root-type>(<subtype-name>) get supertype does not exist
     Then <root-type>(<subtype-name-2>) get plays overridden(fathership:father) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
@@ -1582,16 +1576,14 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) unset override
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) unset override; fails
     When <root-type>(<subtype-name>) get plays(fathership:father) unset override
     When relation(fathership) get role(father) unset override
-    Then relation(fathership) get role(father) get supertype: relation:role
+    Then relation(fathership) get role(father) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) get supertype: relation:role
+    Then relation(fathership) get role(father) get supertype does not exist
     Then <root-type>(<subtype-name>) get plays overridden(fathership:father) does not exist
     When create relation type: subfathership
     When relation(subfathership) create role: subfather
@@ -1599,28 +1591,26 @@ Feature: Concept Plays
     When relation(subfathership) get role(subfather) set override: parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) set supertype: relation
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then relation(fathership) unset supertype; fails
     When relation(subfathership) get role(subfather) unset override
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
       | parentship:parent       |
-    When relation(fathership) set supertype: relation
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    When relation(fathership) unset supertype
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
-    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get supertype does not exist
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(subfathership) get role(subfather) get supertype: relation:role
+    Then relation(subfathership) get role(subfather) get supertype does not exist
     Then relation(subfathership) get roles contain:
       | subfathership:subfather |
       | fathership:father       |
-    Then relation(fathership) get supertype: relation
+    Then relation(fathership) get supertype does not exist
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -1638,10 +1628,10 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set override: parentship:parent
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) set supertype: relation; fails
+    Then relation(fathership) unset supertype; fails
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -3168,12 +3158,8 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
     Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(2..2)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..1); fails
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..2); fails
     When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -3186,15 +3172,9 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
     Then <root-type>(<subtype-name>) get plays(overridden-parentship:overridden-parent) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name-2>) get plays(overridden-parentship-2:overridden-parent-2) get cardinality: @card(4..5)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..4)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..5)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..4); fails
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3..3); fails
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..5); fails
     When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -3279,16 +3259,9 @@ Feature: Concept Plays
     When relation(parentship) create role: cardinality-destroyer
     When relation(parentship) get role(cardinality-destroyer) set override: player
     When <root-type>(<subtype-name>) set plays: parentship:cardinality-destroyer
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(0..2); fails
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(1..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(parentship) create role: cardinality-destroyer
-    When relation(parentship) get role(cardinality-destroyer) set override: player
-    When <root-type>(<subtype-name>) set plays: parentship:cardinality-destroyer
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set override: connection:player
+    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set override: connection:player; fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
+    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set override: connection:player
     Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..3)
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
     Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
@@ -3302,25 +3275,22 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(3..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3)
+    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(3..3); fails
+    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3); fails
     When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(0..1)
+    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..3)
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
     Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(2..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1); fails
     When <root-type>(<subtype-name>) get plays(parentship:parent) unset annotation: @card
     When <root-type>(<subtype-name>) get plays(parentship:child) unset annotation: @card
     When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) unset annotation: @card
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
@@ -3333,9 +3303,7 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(1..1); fails
     When create relation type: subsubtype-to-disturb
     When relation(subsubtype-to-disturb) create role: subsubdisturber
     When relation(subsubtype-to-disturb) set supertype: subtype-to-disturb
@@ -3375,16 +3343,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..1)
-    When <root-type>(<subtype-name>) get plays(family:child) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get plays(family:father) set override: connection:player; fails
+    Then <root-type>(<subtype-name>) get plays(family:child) set override: connection:player; fails
     When <root-type>(<subtype-name>) get plays(family:mother) unset override
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
     When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..2)
@@ -3396,18 +3356,16 @@ Feature: Concept Plays
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
     Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
-    When <root-type>(<subtype-name>) get plays(family:child) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..2)
-    Then transaction commits; fails
+    # card becomes 1..2
+    Then <root-type>(<subtype-name>) get plays(family:child) set override: connection:player; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
     Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:child) set override: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..2)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 1..2
+    Then <root-type>(<subtype-name>) get plays(family:child) set override: connection:player; fails
     When <root-type>(<subtype-name>) get plays(family:mother) unset override
     When <root-type>(<subtype-name>) get plays(family:father) unset override
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
@@ -3426,57 +3384,40 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
     When <root-type>(<subtype-name>) get plays(family:child) unset override
-    Then transaction commits; fails
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
+    When transaction closes
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
     When <root-type>(<subtype-name>) get plays(family:child) unset override
     When <root-type>(<subtype-name>) get plays(family:father) unset override
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
+    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
-    When <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(2..3)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 2..3
+    Then <root-type>(<subtype-name>) get plays(family:father) set override: connection:player; fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..4)
     When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..4)
     When <root-type>(<subtype-name>) get plays(family:father) set override: connection:player
     When <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(2..4)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:child) set override: connection:player
-    When <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(2..4)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 2..4
+    Then <root-type>(<subtype-name>) get plays(family:child) set override: connection:player; fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..6)
     When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..6)
     When <root-type>(<subtype-name>) get plays(family:child) set override: connection:player
     When <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(2..6)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..5)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..5)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..8)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(3..8)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..5); fails
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..8); fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..9)
     When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(3..9)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1); fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
     When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
     When transaction commits
@@ -3487,11 +3428,9 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set annotation: @card(1..1)
     Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..1)
     Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name>) get plays(family:father) set annotation: @card(1..1); fails
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -3542,15 +3481,11 @@ Feature: Concept Plays
     Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-2) set override: parentship:parent
-    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(5..10)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-2) set override: parentship:parent
-    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(5..10)
-    When entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child
-    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(5..10)
-    Then transaction commits; fails
+    # card becomes 5..10
+    Then entity(subscriber) get plays(fathership:father-2) set override: parentship:parent; fails
+    # card becomes 5..10
+    Then entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(person) get plays(connection:player) set annotation: @card(3..10)
     Then entity(person) get plays(connection:player) get cardinality: @card(3..10)
@@ -3561,10 +3496,8 @@ Feature: Concept Plays
     When entity(subscriber) get plays(fathership:father-2) set override: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child
-    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(3..10)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 3..10
+    Then entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child; fails
     When entity(person) get plays(connection:player) set annotation: @card(3..)
     Then entity(person) get plays(connection:player) get cardinality: @card(3..)
     When entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child
@@ -3591,38 +3524,34 @@ Feature: Concept Plays
     Then entity(subscriber) get plays overridden(fathership:father-child-2) get label: parentship:child
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-2) set override: parentship:parent
     Then entity(customer) get plays overridden(parentship:parent) get label: connection:player
     Then entity(subscriber) get plays overridden(fathership:father) get label: parentship:parent
-    Then entity(subscriber) get plays overridden(fathership:father-2) get label: parentship:parent
     Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..1)
-    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(1..1)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 1..1
+    Then entity(subscriber) get plays(fathership:father-2) set override: parentship:parent; fails
     When entity(person) get plays(connection:player) set annotation: @card(2..5)
     When entity(subscriber) get plays(fathership:father-2) set override: parentship:parent
+    Then entity(subscriber) get plays overridden(fathership:father-2) get label: parentship:parent
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(subscriber) get plays(fathership:father-child-2) unset override
     When entity(customer) get plays(parentship:child) unset annotation: @card
-    When entity(customer) get plays(parentship:child) set override: connection:player
-    Then entity(customer) get plays overridden(parentship:child) get label: connection:player
     Then entity(subscriber) get plays overridden(fathership:father-child) get label: parentship:child
     Then entity(subscriber) get plays overridden(fathership:father-child-2) does not exist
-    Then transaction commits; fails
+    Then entity(customer) get plays(parentship:child) set override: connection:player; fails
+    When transaction closes
     When connection open schema transaction for database: typedb
     When entity(subscriber) get plays(fathership:father-child-2) unset override
     When entity(customer) get plays(parentship:child) unset annotation: @card
-    When entity(customer) get plays(parentship:child) set override: connection:player
-    Then entity(customer) get plays overridden(parentship:child) get label: connection:player
     Then entity(subscriber) get plays overridden(fathership:father-child) get label: parentship:child
     Then entity(subscriber) get plays overridden(fathership:father-child-2) does not exist
+    When entity(customer) get plays(parentship:child) set override: connection:player; fails
     When entity(person) get plays(connection:player) set annotation: @card(2..6)
+    When entity(customer) get plays(parentship:child) set override: connection:player
+    Then entity(customer) get plays overridden(parentship:child) get label: connection:player
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then entity(subscriber) get plays(fathership:father-child-2) set override: parentship:child; fails
     When create relation type: mothership
     When relation(mothership) set supertype: parentship
     When relation(mothership) create role: mother
@@ -3663,13 +3592,10 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(real-customer-with-three-children) set plays: mothership-with-three-children:three-children-mother
-    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set override: mothership:mother
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) get cardinality: @card(2..6)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    # card becomes 2..6
+    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set override: mothership:mother; fails
     When entity(customer) get plays(parentship:parent) unset override
     When entity(customer) get plays(parentship:parent) set annotation: @card(2..6)
-    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:three-children-mother
     When entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set override: mothership:mother
     Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) get cardinality: @card(2..6)
     When transaction commits
@@ -3711,6 +3637,165 @@ Feature: Concept Plays
     When connection open read transaction for database: typedb
     Then entity(subscriber) get plays overridden(fathership:father) get label: parentship:parent
     Then entity(subscriber) get plays overridden(fathership:father-2) get label: parentship:parent
+
+  Scenario: Plays cannot set override that breaks cardinality between siblings
+    When entity(customer) set supertype: person
+    When entity(subscriber) set supertype: customer
+    When create relation type: connection
+    When relation(connection) create role: player
+    When relation(connection) get role(player) set annotation: @card(0..)
+    When entity(person) set plays: connection:player
+    Then entity(person) get plays(connection:player) get cardinality: @card(0..)
+    When entity(person) get plays(connection:player) set annotation: @card(1..1)
+    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) set supertype: connection
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When entity(customer) set plays: parentship:parent
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(0..)
+    When entity(customer) set plays: parentship:child
+    Then entity(customer) get plays(parentship:child) get cardinality: @card(0..)
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When entity(subscriber) set plays: fathership:father
+    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(0..)
+    When entity(subscriber) set plays: mothership:mother
+    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(0..)
+    When relation(parentship) get role(parent) set override: player
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(mothership) get role(mother) set override: parent
+    When entity(customer) get plays(parentship:parent) set override: connection:player
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then entity(customer) get plays(parentship:child) set override: connection:player; fails
+    When entity(person) get plays(connection:player) set annotation: @card(1..2)
+    When entity(customer) get plays(parentship:child) set override: connection:player
+    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..2)
+    Then entity(customer) get plays(parentship:child) get cardinality: @card(1..2)
+    When entity(subscriber) get plays(fathership:father) set override: parentship:parent
+    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..2)
+    When entity(subscriber) get plays(mothership:mother) set override: parentship:parent
+    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(connection) create role: bad-player
+    When relation(connection) get role(bad-player) set annotation: @card(0..)
+    When entity(person) set plays: connection:bad-player
+    When entity(person) get plays(connection:bad-player) set annotation: @card(1..1)
+    Then entity(person) get plays(connection:bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: connection:bad-player; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When create relation type: bad-connection
+    When relation(bad-connection) create role: bad-player
+    When relation(bad-connection) get role(bad-player) set annotation: @card(0..)
+    When create entity type: bad-person
+    When entity(bad-person) set plays: bad-connection:bad-player
+    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(1..1)
+    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(1..1)
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    Then entity(customer) set supertype: bad-person; fails
+    When relation(bad-connection) set supertype: connection
+    When entity(bad-person) set supertype: person
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When entity(customer) set supertype: bad-person
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When relation(parentship) set supertype: bad-connection
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    # Cannot set override to player as it hides other overrides. Thus, it's not possible to just change overrides
+    # without unsetting subtype overrides, and card checks are not scary at this point.
+    Then relation(bad-connection) get role(bad-player) set override: player; fails
+    Then relation(parentship) get role(parent) set override: bad-player; fails
+    Then relation(parentship) get role(child) set override: bad-player; fails
+    When entity(customer) get plays(parentship:parent) unset override
+    When entity(customer) get plays(parentship:child) unset override
+    When relation(parentship) get role(parent) set override: bad-player
+    When relation(parentship) get role(child) set override: bad-player
+    # plays of fathership:father and mothership:mother inherit 1..1 cardinality and break it for subscriber together
+    Then entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player; fails
+    When entity(customer) get plays(parentship:child) set override: bad-connection:bad-player
+    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(0..1)
+    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(0..1)
+    When entity(customer) get plays(parentship:parent) set override: bad-connection:bad-player
+    Then transaction commits
+
+  Scenario Outline: Plays unset annotation @card cannot break cardinality between affected siblings
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+    When create relation type: connection
+    When relation(connection) create role: player
+    When relation(connection) get role(player) set annotation: @card(0..)
+    When <root-type>(<supertype-name>) set plays: connection:player
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..)
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1)
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..1)
+    When create relation type: parentship
+    When relation(parentship) set supertype: connection
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: child
+    When <root-type>(<subtype-name>) set plays: parentship:parent
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    When <root-type>(<subtype-name>) set plays: parentship:child
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..)
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When <root-type>(<subtype-name-2>) set plays: fathership:father
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    When <root-type>(<subtype-name-2>) set plays: mothership:mother
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    When relation(parentship) get role(parent) set override: player
+    When relation(parentship) get role(child) set override: player
+    When relation(fathership) get role(father) set override: parent
+    When relation(mothership) get role(mother) set override: parent
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set override: connection:player
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) set override: connection:player; fails
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
+    When <root-type>(<subtype-name>) get plays(parentship:child) set override: connection:player
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get plays(fathership:father) set override: parentship:parent
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name-2>) get plays(mothership:mother) set override: parentship:parent
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(1..2)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) get plays(connection:player) unset annotation: @card
+    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1); fails
+    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..2)
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(1..2)
+    When <root-type>(<subtype-name>) get plays(parentship:parent) unset annotation: @card
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..2)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..2)
+    When <root-type>(<supertype-name>) get plays(connection:player) unset annotation: @card
+    Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
+    Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | subtype-name-2 |
+      | entity    | person         | customer     | subscriber     |
+      | relation  | description    | registration | profile        |
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @regex, @abstract, @cascade, @independent, @replace
