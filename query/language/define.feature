@@ -336,6 +336,310 @@ Feature: TypeQL Define Query
       """
 
 
+  ###############
+  # ANNOTATIONS #
+  ###############
+
+  Scenario Outline: can set annotation @<annotation> to entity types
+    Then typeql define
+      """
+      define
+      entity player @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation |
+      | abstract   |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to entity types
+    Then typeql define; fails
+      """
+      define
+      entity player @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | distinct         |
+      | independent      |
+      | unique           |
+      | key              |
+      | card(1..1)       |
+      | regex("val")     |
+      | cascade          |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to relation types
+    Then typeql define
+      """
+      define
+      relation parentship @<annotation>, relates parent;
+      """
+    Then transaction commits
+    Examples:
+      | annotation |
+      | abstract   |
+      | cascade    |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to relation types
+    Then typeql define; fails
+      """
+      define
+      relation parentship @<annotation>, relates parent;
+      """
+    Examples:
+      | annotation       |
+      | distinct         |
+      | independent      |
+      | unique           |
+      | key              |
+      | card(1..1)       |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to attribute types
+    Then typeql define
+      """
+      define
+      attribute description @<annotation>, value string;
+      """
+    Then transaction commits
+    Examples:
+      | annotation  |
+      | abstract    |
+      | independent |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to attribute types
+    Then typeql define; fails
+      """
+      define
+      attribute description @<annotation>, value string;
+      """
+    Examples:
+      | annotation       |
+      | distinct         |
+      | unique           |
+      | key              |
+      | card(1..1)       |
+      | cascade          |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to relates/role types
+    Then typeql define
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation |
+      | abstract   |
+      | card(1..1) |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to relates/role types
+    Then typeql define; fails
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | distinct         |
+      | independent      |
+      | unique           |
+      | key              |
+      | cascade          |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to relates/role types lists
+    Then typeql define
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation |
+      | abstract   |
+      | card(1..1) |
+      | distinct   |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to relates/role types lists
+    Then typeql define; fails
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | independent      |
+      | unique           |
+      | key              |
+      | cascade          |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to owns
+    Then typeql define
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       |
+      | card(1..1)       |
+      | unique           |
+      | key              |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to owns
+    Then typeql define; fails
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    Examples:
+      | annotation  |
+      | abstract    |
+      | distinct    |
+      | independent |
+      | cascade     |
+
+
+  Scenario Outline: can set annotation @<annotation> to owns lists
+    Then typeql define
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       |
+      | distinct         |
+      | card(1..1)       |
+      | unique           |
+      | key              |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to owns lists
+    Then typeql define; fails
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    Examples:
+      | annotation  |
+      | abstract    |
+      | independent |
+      | cascade     |
+
+
+  Scenario Outline: can set annotation @<annotation> to plays
+    Then typeql define
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation |
+      | card(1..1) |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to plays
+    Then typeql define; fails
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | abstract         |
+      | distinct         |
+      | independent      |
+      | cascade          |
+      | unique           |
+      | key              |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: can set annotation @<annotation> to value types
+    Then typeql define
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to value types
+    Then typeql define; fails
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    Examples:
+      | annotation  |
+      | abstract    |
+      | distinct    |
+      | independent |
+      | unique      |
+      | key         |
+      | card(1..1)  |
+      | cascade     |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to subs
+    Then typeql define; fails
+      """
+      define
+      entity player sub person @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | abstract         |
+      | distinct         |
+      | independent      |
+      | unique           |
+      | key              |
+      | card(1..1)       |
+      | regex("val")     |
+      | cascade          |
+      | range("1".."2")  |
+      | values("1", "2") |
+
+    # TODO: Same "cannot set annotation" for alias?
+
 
   ##################
   # RELATION TYPES #
@@ -663,10 +967,18 @@ Feature: TypeQL Define Query
       | label:flight-attendant-employment |
 
 
-  Scenario: a relation type can be defined with no roleplayers when it is marked as @abstract
+  Scenario: a relation type cannot be defined with no roleplayers even if it is marked as @abstract
     When typeql define
       """
       define relation connection @abstract;
+      """
+    Then transaction commits; fails
+
+
+  Scenario: an abstract relation type can be defined with both abstract and concrete role types
+    When typeql define
+      """
+      define relation connection @abstract, relates from, relates to @abstract;
       """
     Then transaction commits
 
@@ -678,6 +990,28 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                |
       | label:connection |
+
+
+  Scenario: a concrete relation type cannot be defined with abstract role types
+    When typeql define
+      """
+      define relation connection relates from, relates to @abstract;
+      """
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When typeql define
+      """
+      define relation connection @abstract, relates to @abstract;
+      """
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When typeql define
+      """
+      define relation connection, relates from;
+      """
+    Then transaction commits
 
 
   Scenario: when defining a relation type, duplicate 'relates' are idempotent
@@ -735,7 +1069,7 @@ Feature: TypeQL Define Query
       """
       match
         $x type <label>;
-        $x sub attribute;
+        attribute $x;
       get;
       """
     Then answer size is: 1
@@ -750,10 +1084,19 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
-    Then typeql define; fails
+    When typeql define
       """
-      define colour sub attribute;
+      define attribute colour;
       """
+    Then transaction commits; fails
+
+
+  Scenario: defining an abstract attribute type does not throw if you don't specify a value type
+    When typeql define
+      """
+      define attribute colour @abstract;
+      """
+    Then transaction commits
 
 
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
@@ -808,14 +1151,27 @@ Feature: TypeQL Define Query
       define attribute code-name sub name, value long;
       """
 
+    When typeql define
+      """
+      define attribute code-name sub name; attribute code-name-2 value long;
+      """
 
+    Then typeql define; fails
+      """
+      define attribute code-name, value long;
+      """
+
+    Then typeql define; fails
+      """
+      define attribute code-name-2 sub name;
+      """
 
   # TODO: re-enable when fixed (currently gives wrong answer)
   @ignore
   Scenario: a regex constraint can be defined on a 'string' attribute type
     Given typeql define
       """
-      define attribute response value string, @regex("^(yes|no|maybe)$");
+      define attribute response @regex("^(yes|no|maybe)$"), value string;
       """
     Given transaction commits
 
@@ -832,7 +1188,7 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
     Then typeql define; fails
       """
-      define attribute name-in-binary value long, @regex("^(0|1)+$");
+      define attribute name-in-binary @regex("^(0|1)+$"), value long;
       """
 
 
@@ -1150,9 +1506,9 @@ Feature: TypeQL Define Query
       match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
-      | t             | a               |
-      | label:person  | label:phone-nr  |
-      | label:child   | label:phone-nr  |
+      | t            | a              |
+      | label:person | label:phone-nr |
+      | label:child  | label:phone-nr |
 
 
   Scenario: redefining inherited annotations throws
@@ -1185,9 +1541,9 @@ Feature: TypeQL Define Query
       match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
-      | t             | a               |
-      | label:person  | label:phone-nr  |
-      | label:child   | label:mobile    |
+      | t            | a              |
+      | label:person | label:phone-nr |
+      | label:child  | label:mobile   |
     Given typeql define
       """
       define
@@ -1203,10 +1559,10 @@ Feature: TypeQL Define Query
       match $t owns $a @unique; get;
       """
     Then uniquely identify answer concepts
-      | t             | a                   |
-      | label:person  | label:phone-nr      |
-      | label:child   | label:mobile        |
-      | label:infant  | label:baby-phone-nr |
+      | t            | a                   |
+      | label:person | label:phone-nr      |
+      | label:child  | label:mobile        |
+      | label:infant | label:baby-phone-nr |
 
 
   Scenario: redefining inherited annotations on overrides throws
@@ -1230,7 +1586,7 @@ Feature: TypeQL Define Query
   Scenario: defining a less strict annotation on an inherited ownership throws
     Then typeql define; fails
       """
-      define child, owns email @unique;
+      define entity child, owns email @unique;
       """
 
 
@@ -1451,7 +1807,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     When typeql define
       """
-      define name value string @regex("^A.*$");
+      define name @regex("^A.*$"), value string;
       """
     Then transaction commits
 
@@ -1492,7 +1848,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
-      define house-number @regex("^A.*$)";
+      define house-number @regex("^A.*$");
       """
 
 
@@ -1562,7 +1918,11 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
-    Given transaction closes
+    Given typeql define
+      """
+      define person owns name @card(0..);
+      """
+    Given transaction commits
     Given connection open write transaction for database: typedb
     When typeql insert
       """
@@ -1604,41 +1964,41 @@ Feature: TypeQL Define Query
       define person owns name @unique;
       """
 
-
-  Scenario: a key ownership can be converted to a unique ownership
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has email "jane@gmail.com";
-      $y isa person, has email "john@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define
-      """
-      define person owns email @unique;
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns $y @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | x            | y              |
-      | label:person | label:email    |
-      | label:person | label:phone-nr |
-    When get answers of typeql get
-      """
-      match person owns $y @key; get;
-      """
-    Then answer size is: 0
-    Given typeql insert; fails
-      """
-      insert $x isa person, has email "jane@gmail.com";
-      """
+## TODO: Move to redefine!
+#  Scenario: a key ownership can be converted to a unique ownership
+#    Given transaction closes
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert
+#      $x isa person, has email "jane@gmail.com";
+#      $y isa person, has email "john@gmail.com";
+#      """
+#    Given transaction commits
+#    Given connection open schema transaction for database: typedb
+#    Given typeql define
+#      """
+#      define person owns email @unique;
+#      """
+#    Then transaction commits
+#    Given connection open write transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x owns $y @unique; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            | y              |
+#      | label:person | label:email    |
+#      | label:person | label:phone-nr |
+#    When get answers of typeql get
+#      """
+#      match person owns $y @key; get;
+#      """
+#    Then answer size is: 0
+#    Given typeql insert; fails
+#      """
+#      insert $x isa person, has email "jane@gmail.com";
+#      """
 
 
   Scenario: ownership uniqueness can be removed
@@ -1656,45 +2016,46 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-
-  Scenario: converting unique to key is possible if the data conforms to key requirements
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has phone-nr "123", has email "abc@gmail.com";
-      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define
-      """
-      define
-      person owns phone-nr @key;
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    Then typeql insert; fails
-      """
-      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
-      """
-
-
-  Scenario: converting unique to key fails if the data does not conform to key requirements
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      person owns phone-nr @key;
-      """
+#
+## TODO: Move to redefine!
+#  Scenario: converting unique to key is possible if the data conforms to key requirements
+#    Given transaction closes
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert
+#      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+#      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
+#      """
+#    Given transaction commits
+#    Given connection open schema transaction for database: typedb
+#    Given typeql define
+#      """
+#      define
+#      person owns phone-nr @key;
+#      """
+#    Then transaction commits
+#    Given connection open write transaction for database: typedb
+#    Then typeql insert; fails
+#      """
+#      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
+#      """
+#
+## TODO: Move to redefine!
+#  Scenario: converting unique to key fails if the data does not conform to key requirements
+#    Given transaction closes
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
+#      """
+#    Given transaction commits
+#    Given connection open schema transaction for database: typedb
+#    Then typeql define; fails
+#      """
+#      define
+#      person owns phone-nr @key;
+#      """
 
 
   #############################
@@ -1864,7 +2225,7 @@ Feature: TypeQL Define Query
     Given typeql define
       """
       define
-      attribute measure value double @abstract;
+      attribute measure @abstract, value double;
       attribute shoe-size sub measure;
       entity shoe owns shoe-size;
       """
@@ -1884,6 +2245,7 @@ Feature: TypeQL Define Query
       attribute size value double @abstract;
       attribute shoe-size sub size;
       """
+    # TODO: This will probably fail because of the value type redundancy. Move this test to redefine/undefine?
     Then transaction commits
 
     When connection open read transaction for database: typedb
@@ -2099,11 +2461,11 @@ Feature: TypeQL Define Query
       match $x type child, owns $y; get;
       """
     Then uniquely identify answer concepts
-      | x           | y                  |
-      | label:child | label:name         |
-      | label:child | label:mobile       |
-      | label:child | label:email        |
-      | label:child | label:phone-nr     |
+      | x           | y              |
+      | label:child | label:name     |
+      | label:child | label:mobile   |
+      | label:child | label:email    |
+      | label:child | label:phone-nr |
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
@@ -2156,12 +2518,14 @@ Feature: TypeQL Define Query
       """
       define entity dog;
       """
+    # TODO: The current framework doesn't support another transaction from the same client without closing the
+    # already existing one. It might contradict the test!
+    Given transaction closes
     Given connection open read transaction for database: typedb
     Then typeql get; fails
       """
       match $x type dog; get;
       """
-
 
 
   ########################
@@ -2222,44 +2586,44 @@ Feature: TypeQL Define Query
       """
       define
 
-      relation apple @abstract, plays huge-apple:grows-from;
+      relation apple @abstract, relates source @abstract, plays huge-apple:grows-from;
       relation big-apple @abstract, sub apple;
-      relation huge-apple sub big-apple, relates tree, relates grows-from;
+      relation huge-apple sub big-apple, relates tree as source, relates grows-from;
 
-      relation banana @abstract, plays huge-banana:grows-from;
+      relation banana @abstract, relates source @abstract, plays huge-banana:grows-from;
       relation big-banana @abstract, sub banana;
-      relation huge-banana sub big-banana, relates tree, relates grows-from;
+      relation huge-banana sub big-banana, relates tree as source, relates grows-from;
 
-      relation orange @abstract, plays huge-orange:grows-from;
+      relation orange @abstract, relates source @abstract, plays huge-orange:grows-from;
       relation big-orange @abstract, sub orange;
-      relation huge-orange sub big-orange, relates tree, relates grows-from;
+      relation huge-orange sub big-orange, relates tree as source, relates grows-from;
 
-      relation pear @abstract, plays huge-pear:grows-from;
+      relation pear @abstract, relates source @abstract, plays huge-pear:grows-from;
       relation big-pear @abstract, sub pear;
-      relation huge-pear sub big-pear, relates tree, relates grows-from;
+      relation huge-pear sub big-pear, relates tree as source, relates grows-from;
 
-      relation tomato @abstract, plays huge-tomato:grows-from;
+      relation tomato @abstract, relates source @abstract, plays huge-tomato:grows-from;
       relation big-tomato @abstract, sub tomato;
-      relation huge-tomato sub big-tomato, relates tree, relates grows-from;
+      relation huge-tomato sub big-tomato, relates tree as source, relates grows-from;
 
-      relation watermelon @abstract, plays huge-watermelon:grows-from;
+      relation watermelon @abstract, relates source @abstract, plays huge-watermelon:grows-from;
       relation big-watermelon @abstract, sub watermelon;
-      relation huge-watermelon sub big-watermelon, relates tree, relates grows-from;
+      relation huge-watermelon sub big-watermelon, relates tree as source, relates grows-from;
 
-      relation lemon @abstract, plays huge-lemon:grows-from;
+      relation lemon @abstract, relates source @abstract, plays huge-lemon:grows-from;
       relation big-lemon @abstract, sub lemon;
-      relation huge-lemon sub big-lemon, relates tree, relates grows-from;
+      relation huge-lemon sub big-lemon, relates tree as source, relates grows-from;
 
-      relation lime @abstract, plays huge-lime:grows-from;
+      relation lime @abstract, relates source @abstract, plays huge-lime:grows-from;
       relation big-lime @abstract, sub lime;
-      relation huge-lime sub big-lime, relates tree, relates grows-from;
+      relation huge-lime sub big-lime, relates tree as source, relates grows-from;
 
-      relation mango @abstract, plays huge-mango:grows-from;
+      relation mango @abstract, relates source @abstract, plays huge-mango:grows-from;
       relation big-mango @abstract, sub mango;
-      relation huge-mango sub big-mango, relates tree, relates grows-from;
+      relation huge-mango sub big-mango, relates tree as source, relates grows-from;
 
-      relation pineapple @abstract, plays huge-pineapple:grows-from;
+      relation pineapple @abstract, relates source @abstract, plays huge-pineapple:grows-from;
       relation big-pineapple @abstract, sub pineapple;
-      relation huge-pineapple sub big-pineapple, relates tree, relates grows-from;
+      relation huge-pineapple sub big-pineapple, relates tree as source, relates grows-from;
       """
     Then transaction commits
