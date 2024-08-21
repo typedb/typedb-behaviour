@@ -1142,6 +1142,26 @@ Feature: Concept Plays
       | entity    | person         | customer     |
       | relation  | description    | registration |
 
+  Scenario Outline: <root-type> can't change supertype if override is lost even if it has another plays for the same role type
+    When <root-type>(<supertype-name-2>) unset supertype
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When <root-type>(<supertype-name>) set plays: parentship:parent
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set plays: parentship:parent
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set override: parentship:parent
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1)
+    When <root-type>(<supertype-name-2>) set plays: parentship:parent
+    Then <root-type>(<subtype-name>) set supertype: <supertype-name-2>; fails
+    When <root-type>(<subtype-name>) get plays(parentship:parent) unset override
+    When <root-type>(<subtype-name>) set supertype: <supertype-name-2>
+    When <root-type>(<subtype-name>) get plays(parentship:parent) set override: parentship:parent
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | supertype-name-2 |
+      | entity    | person         | customer     | subscriber       |
+      | relation  | description    | registration | profile          |
+
 ########################
 # plays from a list
 ########################
