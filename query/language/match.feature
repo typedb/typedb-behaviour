@@ -11,8 +11,7 @@ Feature: TypeQL Match Clause
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
     Given typeql define
       """
@@ -42,7 +41,7 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
 
   ##################
@@ -58,8 +57,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x type person; get;
       """
@@ -77,8 +76,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x sub person; get;
       """
@@ -98,8 +97,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match writer sub $x; get;
       """
@@ -129,10 +128,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a isa child, has name "Alfred", has ref 0;
@@ -145,8 +142,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
@@ -182,8 +179,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x sub! person; get;
       """
@@ -202,8 +199,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match writer sub! $x; get;
       """
@@ -227,8 +224,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x sub $y;
@@ -242,7 +239,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' matches types that own the specified attribute type
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns age; get;
       """
@@ -259,8 +256,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns $x; get;
       """
@@ -280,8 +277,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns general-name; get;
       """
@@ -301,8 +298,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns club-name; get;
       """
@@ -312,7 +309,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' can be used to match attribute types that a given type owns
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match person owns $x; get;
       """
@@ -325,7 +322,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: directly declared 'owns' annotations are queryable
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns ref @key; get;
       """
@@ -335,7 +332,7 @@ Feature: TypeQL Match Clause
       | label:company    |
       | label:friendship |
       | label:employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns $a @key; get;
       """
@@ -345,14 +342,14 @@ Feature: TypeQL Match Clause
       | label:company    | label:ref |
       | label:friendship | label:ref |
       | label:employment | label:ref |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns email @unique; get;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns $a @unique; get;
       """
@@ -367,8 +364,9 @@ Feature: TypeQL Match Clause
       define child sub person;
       """
     Given transaction commits
-    Given session opens transaction of type: write
-    When get answers of typeql get
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns ref @key; get;
       """
@@ -379,7 +377,7 @@ Feature: TypeQL Match Clause
       | label:company    |
       | label:friendship |
       | label:employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns $a @key; get;
       """
@@ -390,7 +388,7 @@ Feature: TypeQL Match Clause
       | label:company    | label:ref |
       | label:friendship | label:ref |
       | label:employment | label:ref |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns email @unique; get;
       """
@@ -398,7 +396,7 @@ Feature: TypeQL Match Clause
       | x            |
       | label:person |
       | label:child  |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x owns $a @unique; get;
       """
@@ -416,10 +414,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -429,8 +425,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
@@ -446,7 +442,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' matches types that can play the specified role
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x plays friendship:friend; get;
       """
@@ -464,8 +460,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x plays friendship:friend; get;
       """
@@ -482,8 +478,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    When typeql read query; throws exception
       """
       match $x plays close-friendship:friend; get;
       """
@@ -498,8 +494,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x plays close-friendship:close-friend; get;
       """
@@ -509,7 +505,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' can be used to match roles that a particular type can play
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match person plays $x; get;
       """
@@ -529,10 +525,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -541,8 +535,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
@@ -565,8 +559,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns breed @key; get;
       """
@@ -576,7 +570,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'key' can be used to find all attribute types that a given type owns as a key
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match person owns $x @key; get;
       """
@@ -595,8 +589,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x owns breed; get;
       """
@@ -607,7 +601,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'relates' matches relation types where the specified role can be played
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x relates employee; get;
       """
@@ -626,8 +620,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x relates close-friend as friend; get;
       """
@@ -645,8 +639,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x relates friend; get;
       """
@@ -656,7 +650,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match employment relates $x; get;
       """
@@ -669,7 +663,7 @@ Feature: TypeQL Match Clause
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x iid 0x83cb2;
@@ -683,10 +677,10 @@ Feature: TypeQL Match Clause
   ##########
 
   Scenario: 'isa' gets any thing for any type
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $_ isa person, has ref 0;
@@ -694,8 +688,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa $y; get;
       """
@@ -724,10 +718,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -737,8 +729,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa writer; get;
       """
@@ -759,10 +751,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -772,8 +762,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa! writer; get;
       """
@@ -793,10 +783,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa person; get;
       """
@@ -804,18 +792,18 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'iid' matches the instance with the specified internal iid
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa person; get;
       """
@@ -835,10 +823,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa shop, has address "123 street";
@@ -846,12 +832,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa! shop; get;
       """
-    Then get answers of templated typeql get
+    Then get answers of templated typeql read query
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street"; get;
       """
@@ -859,7 +845,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: match returns an empty answer if there are no matches
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name "Anonymous Coward"; get;
       """
@@ -867,41 +853,41 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x isa ganesh; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match ($x, $y) isa $type; $type type jakas-relacja; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x isa $type; $type type polok; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa person;
@@ -914,7 +900,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x isa friendship:friend; get;
       """
@@ -935,12 +921,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    Then typeql read query; throws exception
       """
       match $x isa metre-rule; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
 
@@ -949,10 +935,10 @@ Feature: TypeQL Match Clause
   #############
 
   Scenario: a relation is matchable from role players without specifying relation type
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -962,15 +948,15 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
       match $x isa person; $r (employee: $x) isa relation; get;
       """
     Then uniquely identify answer concepts
       | x         | r         |
       | key:ref:0 | key:ref:2 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $y isa company; $r (employer: $y) isa relation; get;
       """
@@ -980,10 +966,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: relations are matchable from roleplayers without specifying any roles
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -993,8 +979,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa person; $r ($x) isa relation; get;
       """
@@ -1004,10 +990,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: all combinations of players in a relation can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    When typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
       """
       insert $p isa person, has ref 0;
       $c isa company, has ref 1;
@@ -1016,8 +1002,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
       match $r ($x, $y) isa employment; get;
       """
@@ -1040,17 +1026,15 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $r (player: $x, player: $x) isa relation; get;
       """
@@ -1068,17 +1052,15 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $r (player: $x) isa relation; get;
       """
@@ -1088,10 +1070,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: a mixture of variable and explicit roles can retrieve relations
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa company, has ref 0;
@@ -1099,8 +1081,8 @@ Feature: TypeQL Match Clause
       (employer: $x, employee: $y) isa employment, has ref 2;
       """
     Given transaction commits
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match (employer: $e, $role: $x) isa employment; get;
       """
@@ -1120,18 +1102,16 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $r(compared:$r) isa comparator;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $r(compared:$r) isa comparator; get;
       """
@@ -1150,10 +1130,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $r(compared: $v, compared:$r) isa comparator;
@@ -1161,8 +1139,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $r(compared: $v, compared:$r) isa comparator; get;
       """
@@ -1170,10 +1148,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 1;
@@ -1182,8 +1160,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match (friend: $x, friend: $x) isa friendship; get;
       """
@@ -1204,10 +1182,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x1 isa person, has name "Soroush", has ref 0;
@@ -1222,8 +1198,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1233,7 +1209,7 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | a         | b         | c         |
       | key:ref:0 | key:ref:1 | key:ref:2 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
@@ -1255,10 +1231,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -1268,8 +1242,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $r isa relation; get;
       """
@@ -1278,14 +1252,14 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
       | key:ref:2 |
       | key:ref:3 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match ($x) isa relation; get;
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match ($x); get;
       """
@@ -1295,53 +1269,53 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match (person: $x) isa relation; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match ($x) isa person; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match ($x) isa bottle-of-rum; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match (rolein-rolein-rolein: $rolein) isa relation; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match (friend: $x) isa employment; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
-    When typeql get; throws exception
+    When typeql read query; throws exception
       """
       match
       $x isa company;
       ($x) isa friendship;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
@@ -1355,10 +1329,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a isa person, has ref 1;
@@ -1368,64 +1340,64 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $m (wife: $x, husband: $y) isa hetero-marriage; get;
       """
     Then answer size is: 1
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $m (wife: $x, husband: $y) isa civil-marriage; get;
       """
-    Then session transaction is open: false
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Then transaction is open: false
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $m (wife: $x, husband: $y) isa marriage; get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (wife: $x, husband: $y) isa relation; get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (spouse: $x, spouse: $y) isa hetero-marriage; get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (spouse: $x, spouse: $y) isa civil-marriage; get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (spouse: $x, spouse: $y) isa marriage; get;
       """
     Then answer size is: 4
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (spouse: $x, spouse: $y) isa relation; get;
       """
     Then answer size is: 4
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (role: $x, role: $y) isa hetero-marriage; get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (role: $x, role: $y) isa civil-marriage; get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (role: $x, role: $y) isa marriage; get;
       """
     Then answer size is: 4
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $m (role: $x, role: $y) isa relation; get;
       """
@@ -1443,26 +1415,24 @@ Feature: TypeQL Match Clause
       is-insured sub attribute, value boolean;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       (owned: $c1, owner: $company) isa ownership, has is-insured true;
       $c1 isa car, has ref 0; $company isa company, has ref 1;
       """
     Given transaction commits
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       (owned: $c2, owner: $person) isa ownership, has is-insured true;
       $c2 isa car, has ref 2; $person isa person, has ref 3;
       """
     Given transaction commits
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
     """
     match $r (owner: $x) isa ownership, has is-insured true; $x isa person; get;
     """
@@ -1479,17 +1449,15 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $n <value> isa <attr>, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $a <value>; get;
       """
@@ -1513,8 +1481,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $a <value>; get;
       """
@@ -1530,10 +1498,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'contains' matches strings that contain the specified substring
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "Seven Databases in Seven Weeks" isa name;
@@ -1542,8 +1510,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x contains "Fun"; get;
       """
@@ -1554,10 +1522,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'contains' performs a case-insensitive match
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "The Phantom of the Opera" isa name;
@@ -1566,8 +1534,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x contains "Bean"; get;
       """
@@ -1578,10 +1546,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'like' matches strings that match the specified regex
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "ABC123" isa name;
@@ -1590,8 +1558,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x like "^[0-9]+$"; get;
       """
@@ -1604,12 +1572,12 @@ Feature: TypeQL Match Clause
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x has name $y; $x iid 0x83cb2; get;
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x has name $y; $y iid 0x83cb2; get;
       """
@@ -1619,10 +1587,10 @@ Feature: TypeQL Match Clause
   #       such that match query does not throw. Perhaps we should introduce a new feature file
   #       containing a new set of scenarios that test: traversal structure, plan and procedure
   Scenario: Traversal planner can handle "loops" in the traversal structure
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name 'alice', has ref 0;
@@ -1630,8 +1598,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $x isa person, has $n;
@@ -1644,10 +1612,10 @@ Feature: TypeQL Match Clause
   #######################
 
   Scenario: 'has' can be used to match things that own any instance of the specified attribute
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Leila", has ref 0;
@@ -1657,8 +1625,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has name $y; get $x;
       """
@@ -1677,10 +1645,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has age 9, has ref 0;
@@ -1689,8 +1655,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has attribute 9; get;
       """
@@ -1710,10 +1676,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
@@ -1725,8 +1689,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has age 21; get;
       """
@@ -1746,18 +1710,16 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has lucky-number 20; get;
       """
@@ -1774,18 +1736,16 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "meter" isa unit, has $x, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has $x; get;
       """
@@ -1795,27 +1755,27 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x has person "Luke"; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x isa company, has age $n; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match $x has bananananananana "rama"; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
 
@@ -1834,10 +1794,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
@@ -1845,8 +1803,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
       match
         $x isa person, has graduation-date $date;
@@ -1860,10 +1818,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1872,8 +1830,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has age == 16; get;
       """
@@ -1883,10 +1841,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1895,8 +1853,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has age > 18; get;
       """
@@ -1906,10 +1864,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1918,8 +1876,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has age < 18; get;
       """
@@ -1929,10 +1887,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr != $x' matches owners of any instance '$y' of '$attr' where '$y != $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1941,8 +1899,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has age != 18; get;
       """
@@ -1961,10 +1919,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x 1 isa house-number;
@@ -1972,8 +1928,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
@@ -1981,7 +1937,7 @@ Feature: TypeQL Match Clause
       get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa length;
@@ -1989,7 +1945,7 @@ Feature: TypeQL Match Clause
       get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
@@ -1997,7 +1953,7 @@ Feature: TypeQL Match Clause
       get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa length;
@@ -2005,7 +1961,7 @@ Feature: TypeQL Match Clause
       get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa attribute;
@@ -2013,7 +1969,7 @@ Feature: TypeQL Match Clause
       get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa attribute;
@@ -2022,7 +1978,7 @@ Feature: TypeQL Match Clause
       """
     Then answer size is: 1
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
@@ -2042,18 +1998,16 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has lucky-number > 25; get;
       """
@@ -2063,10 +2017,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an attribute variable used in both '=' and '>=' predicates is correctly resolved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -2075,8 +2029,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x has age == $z;
@@ -2098,10 +2052,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a 24 isa age;
@@ -2111,8 +2063,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa attribute;
@@ -2126,17 +2078,17 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa person;
@@ -2148,21 +2100,21 @@ Feature: TypeQL Match Clause
 
 
   Scenario: concept comparison of unbound variables throws an error
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match not { $x is $y; }; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   ############
   # PATTERNS #
   ############
 
   Scenario: disjunctions return the union of composing query statements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -2170,8 +2122,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa $t; { $t type person; } or {$t type company;}; get $x;
       """
@@ -2179,7 +2131,7 @@ Feature: TypeQL Match Clause
       | x         |
       | key:ref:0 |
       | key:ref:1 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa entity; {$x has name "Jeff";} or {$x has name "Amazon";}; get;
       """
@@ -2190,15 +2142,13 @@ Feature: TypeQL Match Clause
 
 
   Scenario: disjunctions with no answers can be limited
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa $t; { $t type person; } or {$t type company;}; get;
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; { $t type person; } or {$t type company;}; get; limit 1;
       """
@@ -2206,10 +2156,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: negations can be applied to filtered variables
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -2217,8 +2167,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x isa person, has name $a; not { $a == "Jeff"; }; get $x;
       """
@@ -2228,10 +2178,8 @@ Feature: TypeQL Match Clause
 
 
   Scenario: multiple negations can be applied
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x sub! thing; not { $x type thing; }; not { $x type entity; }; not { $x type relation; }; get;
       """
@@ -2240,10 +2188,8 @@ Feature: TypeQL Match Clause
       | label:attribute |
 
   Scenario: pattern variable without named variable is invalid
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    Then typeql read query; throws exception
       """
       match $x isa person, has name $a; "bob" isa name; get;
       """
@@ -2254,10 +2200,10 @@ Feature: TypeQL Match Clause
   ##################
 
   Scenario: all instances and their types can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
@@ -2266,23 +2212,23 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $x isa entity; get;
       """
     Given answer size is: 2
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $r isa relation; get;
       """
     Given answer size is: 1
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa attribute; get;
       """
     Given answer size is: 5
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $type; get;
       """
@@ -2293,10 +2239,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: all relations and their types can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
@@ -2305,19 +2251,19 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $r isa relation; get;
       """
     Given answer size is: 1
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match ($x, $y) isa relation; get;
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match ($x, $y) isa $type; get;
       """
@@ -2326,9 +2272,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variable role types with relations playing roles
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
     Given typeql define
       """
       define
@@ -2337,10 +2283,9 @@ Feature: TypeQL Match Clause
         id sub attribute, value string, plays nested:id;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $i1 "i1" isa id;
@@ -2351,10 +2296,10 @@ Feature: TypeQL Match Clause
         $p2 (nested: $n2) isa parent, has id $i2;
       """
     Given transaction commits
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
 
     # Force traversal of role edges in each direction: See vaticle/typedb#6925
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $role-nested sub! relation:role;
@@ -2367,7 +2312,7 @@ Feature: TypeQL Match Clause
       """
     Then answer size is: 1
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $role-nested sub! relation:role;
@@ -2388,14 +2333,14 @@ Feature: TypeQL Match Clause
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
   Scenario: when the entire match clause is a negation, an error is thrown
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match not { $x has attribute "value"; }; get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match
         $r isa entity;
@@ -2405,10 +2350,10 @@ Feature: TypeQL Match Clause
         };
       get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
         $r isa attribute;
@@ -2420,7 +2365,7 @@ Feature: TypeQL Match Clause
 
   # TODO: We should verify the answers
   Scenario: negations can contain disjunctions
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
         $x isa entity;
@@ -2431,7 +2376,7 @@ Feature: TypeQL Match Clause
       """
 
   Scenario: when negating a negation redundantly, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; throws exception
       """
       match
         $x isa person, has name "Tim";
@@ -2456,10 +2401,9 @@ Feature: TypeQL Match Clause
       favorite-phrase sub attribute, value string;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has favorite-phrase "你明白了吗", has ref 0;
@@ -2468,8 +2412,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $phrase isa favorite-phrase; get;
       """
@@ -2478,7 +2422,7 @@ Feature: TypeQL Match Clause
       | attr:favorite-phrase:你明白了吗    |
       | attr:favorite-phrase:בוקר טוב |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa person, has favorite-phrase "你明白了吗"; get;
       """
@@ -2486,7 +2430,7 @@ Feature: TypeQL Match Clause
       | x         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa person, has favorite-phrase "בוקר טוב"; get;
       """
@@ -2494,7 +2438,7 @@ Feature: TypeQL Match Clause
       | x         |
       | key:ref:1 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa person, has favorite-phrase "请给我一"; get;
       """
@@ -2508,10 +2452,8 @@ Feature: TypeQL Match Clause
       人 sub entity, owns name, owns ref @key; אדם sub entity, owns name, owns ref @key;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa 人, has name "Liu", has ref 0;
@@ -2519,8 +2461,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $x isa! $t; $x has name $_; get $t;
       """
@@ -2529,7 +2471,7 @@ Feature: TypeQL Match Clause
       | label:人   |
       | label:אדם |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa 人; get;
       """
@@ -2537,7 +2479,7 @@ Feature: TypeQL Match Clause
       | x         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $x isa אדם; get;
       """
@@ -2547,10 +2489,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variables can be non-ascii
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $人 isa person, has name "Liu", has ref 0;
@@ -2558,8 +2500,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match $人 isa person; $人 has name "Liu"; get $人;
       """
@@ -2567,7 +2509,7 @@ Feature: TypeQL Match Clause
       | 人         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match $אדם isa person; $אדם has name "Solomon"; get $אדם;
       """
@@ -2582,8 +2524,8 @@ Feature: TypeQL Match Clause
       define
       0_leading_digit_fails sub entity;
       """
-    Given session opens transaction of type: write
-    Given get answers of typeql get
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
       $0_leading_digit_allowed sub entity;
@@ -2596,8 +2538,8 @@ Feature: TypeQL Match Clause
       define
       _leading_connector_disallowed sub entity;
       """
-    Given session opens transaction of type: read
-    Given typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    Given typeql read query; throws exception
       """
       match
       $_leading_connector_disallowed sub entity;
@@ -2605,13 +2547,13 @@ Feature: TypeQL Match Clause
       get;
       """
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql define
       """
       define
       following_connectors-and-digits-1-2-3-allowed sub entity;
       """
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match
       $following_connectors-and-digits-1-2-3-allowed sub entity;
