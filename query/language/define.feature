@@ -100,7 +100,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: types cannot play entity types
-    Then typeql define; fails
+    Then typeql define; parsing fails
       """
       define entity parrot plays person;
       """
@@ -316,21 +316,21 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
-    Then typeql define; fails
+    Then typeql define; parsing fails
       """
       define $p isa person;
       """
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
-    Then typeql define; fails
+    Then typeql define; parsing fails
       """
       define $p has name "Loch Ness Monster";
       """
 
 
   Scenario: writing a variable in a 'define' is not allowed
-    Then typeql define; fails
+    Then typeql define; parsing fails
       """
       define entity $x;
       """
@@ -1568,12 +1568,12 @@ Feature: TypeQL Define Query
     Then transaction commits; fails
 
 
-    # TODO: Check why it worked in typedb 2.x...
   Scenario: defining a less strict annotation on an inherited ownership throws
-    Then typeql define; fails
+    When typeql define
       """
-      define entity child owns email @unique;
+      define entity child sub person, owns email @unique;
       """
+    Then transaction commits; fails
 
 
   ###################
