@@ -819,7 +819,7 @@ Feature: TypeQL Define Query
         relation employment relates employee, plays locates:located;
         relation contractor-employment sub employment, plays contractor-locates:contractor-located as located;
       """
-
+# TODO: ^ as locates:located?
 
   Scenario: already shadowed types should not be overrideable
     Then typeql define; fails
@@ -993,23 +993,23 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete relation type cannot be defined with abstract role types
-    When typeql define
+    When typeql define; fails
       """
       define relation connection relates from, relates to @abstract;
       """
-    Then transaction commits; fails
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql define; fails
+      """
+      define relation connection relates to @abstract;
+      """
+    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql define
       """
-      define relation connection @abstract, relates to @abstract;
-      """
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define relation connection, relates from;
+      define relation connection relates from;
       """
     Then transaction commits
 
@@ -1146,6 +1146,11 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
+    When typeql define
+    """
+    define attribute name @abstract;
+    """
+
     Then typeql define; fails
       """
       define attribute code-name sub name, value long;
@@ -1158,7 +1163,7 @@ Feature: TypeQL Define Query
 
     Then typeql define; fails
       """
-      define attribute code-name, value long;
+      define attribute code-name value long;
       """
 
     Then typeql define; fails
@@ -1271,7 +1276,7 @@ Feature: TypeQL Define Query
       """
       define
       entity animal @abstract;
-      entity fish sub animal @abstract;
+      entity fish @abstract, sub animal;
       """
     Then transaction commits
 
@@ -1286,23 +1291,13 @@ Feature: TypeQL Define Query
       | label:fish   |
 
 
-  Scenario: an abstract entity type can be defined as a subtype of a concrete entity type
-    When typeql define
+  Scenario: an abstract entity type cannot be defined as a subtype of a concrete entity type
+    Then typeql define; fails
       """
       define
       entity exception;
-      entity typedb-exception sub exception @abstract;
+      entity typedb-exception @abstract, sub exception;
       """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub exception @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                      |
-      | label:typedb-exception |
 
 
   Scenario: an abstract relation type can be defined
@@ -1347,7 +1342,7 @@ Feature: TypeQL Define Query
       """
       define
       relation requirement @abstract, relates prerequisite, relates outcome;
-      relation tool-requirement sub requirement @abstract, relates required-tool as prerequisite;
+      relation tool-requirement @abstract, sub requirement, relates required-tool as prerequisite;
       """
     Then transaction commits
 
@@ -1362,23 +1357,13 @@ Feature: TypeQL Define Query
       | label:tool-requirement |
 
 
-  Scenario: an abstract relation type can be defined as a subtype of a concrete relation type
-    When typeql define
+  Scenario: an abstract relation type cannot be defined as a subtype of a concrete relation type
+    Then typeql define; fails
       """
       define
       relation requirement relates prerequisite, relates outcome;
-      relation tech-requirement sub requirement @abstract, relates required-tech as prerequisite;
+      relation tech-requirement @abstract, sub requirement, relates required-tech as prerequisite;
       """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub requirement; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                      |
-      | label:tech-requirement |
 
 
   Scenario: an abstract attribute type can be defined
@@ -1423,7 +1408,7 @@ Feature: TypeQL Define Query
       """
       define
       attribute number-of-limbs @abstract, value long;
-      attribute number-of-artificial-limbs sub number-of-limbs @abstract;
+      attribute number-of-artificial-limbs @abstract, sub number-of-limbs;
       """
     Then transaction commits
 
@@ -1583,10 +1568,11 @@ Feature: TypeQL Define Query
     Then transaction commits; fails
 
 
+    # TODO: Check why it worked in typedb 2.x...
   Scenario: defining a less strict annotation on an inherited ownership throws
     Then typeql define; fails
       """
-      define entity child, owns email @unique;
+      define entity child owns email @unique;
       """
 
 
@@ -1778,7 +1764,7 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                |
       | label:employment |
-#
+
 
   Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
     Then typeql define; fails
@@ -1807,7 +1793,7 @@ Feature: TypeQL Define Query
     Given connection open schema transaction for database: typedb
     When typeql define
       """
-      define name @regex("^A.*$"), value string;
+      define name value string @regex("^A.*$");
       """
     Then transaction commits
 
@@ -1866,7 +1852,8 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: the value type of an existing attribute type is not modifiable
+    # TODO: Write a successful test with redefine!
+  Scenario: the value type of an existing attribute type is not modifiable through define
     Then typeql define; fails
       """
       define name value long;
@@ -2148,7 +2135,7 @@ Feature: TypeQL Define Query
       """
       insert
       $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
-      $r (employee: $x) isa employment, has employment-reference-code "J123123";
+      $r isa employment, links (employee: $x), has employment-reference-code "J123123";
       """
     Given transaction commits
 
@@ -2190,7 +2177,36 @@ Feature: TypeQL Define Query
   # HIERARCHY MUTATION #
   ######################
 
-  Scenario: an existing entity type can be switched to a new supertype
+  # TODO: Move to redefine
+#  Scenario: an existing entity type can be switched to a new supertype
+#    Given typeql define
+#      """
+#      define
+#      entity apple-product;
+#      entity genius sub person;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      entity genius sub apple-product;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub apple-product; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                   |
+#      | label:apple-product |
+#      | label:genius        |
+
+
+  Scenario: an existing entity type cannot be switched to a new supertype through define
     Given typeql define
       """
       define
@@ -2200,25 +2216,57 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    Then typeql define; fails
       """
       define
       entity genius sub apple-product;
       """
-    Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
+
+  # TODO: Move to redefine
+#  Scenario: an existing relation type can be switched to a new supertype
+#    Given typeql define
+#      """
+#      define
+#      relation sabbatical sub employment;
+#      relation vacation relates employee;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      relation sabbatical sub vacation;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub vacation; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:vacation   |
+#      | label:sabbatical |
+
+
+  Scenario: an existing relation type cannot be switched to a new supertype through define
+    Given typeql define
       """
-      match $x sub apple-product; get;
+      define
+      relation sabbatical sub employment;
+      relation vacation relates employee;
       """
-    Then uniquely identify answer concepts
-      | x                   |
-      | label:apple-product |
-      | label:genius        |
+    Given transaction commits
 
-
-  Scenario: an existing relation type can be switched to a new supertype
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      relation sabbatical sub vacation;
+      """
 
 
   Scenario: an existing attribute type can be switched to a new supertype with a matching value type
@@ -2232,6 +2280,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
+    # TODO: 9 is considered long, while it should be transformed into double before thing_manager
     Given typeql insert
       """
       insert $s isa shoe, has shoe-size 9;
@@ -2258,7 +2307,7 @@ Feature: TypeQL Define Query
       | label:shoe-size |
 
 
-  Scenario: assigning a new supertype succeeds even if they have different attributes + roles, if there are no instances
+  Scenario: assigning a supertype without previous supertype succeeds even if they have different attributes + roles, if there are no instances
     Given typeql define
       """
       define
@@ -2290,7 +2339,151 @@ Feature: TypeQL Define Query
       | label:child    |
 
 
-  Scenario: assigning a new supertype succeeds even with existing data if the supertypes have no properties
+    # TODO: Move to redefine
+#  Scenario: assigning a supertype while having another supertype succeeds even if they have different attributes + roles, if there are no instances
+#    Given typeql define
+#      """
+#      define
+#      entity person sub species;
+#      entity species owns name, plays species-membership:species;
+#      relation species-membership relates species, relates member;
+#      attribute lifespan value double;
+#      entity organism owns lifespan, plays species-membership:member;
+#      entity child sub person;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      entity person sub organism;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub organism; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x              |
+#      | label:organism |
+#      | label:person   |
+#      | label:child    |
+
+
+  # TODO: Move to redefine
+#  Scenario: assigning a new supertype when having other sub succeeds even with existing data if the supertypes have no properties
+#    Given typeql define
+#      """
+#      define
+#      entity bird;
+#      entity pigeon sub bird;
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $p isa pigeon;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      entity animal;
+#      entity pigeon sub animal;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub pigeon; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:pigeon |
+
+
+    # TODO: Move to redefine!
+#  Scenario: assigning a new supertype when having other sub succeeds with existing data if the supertypes play the same roles
+#    Given typeql define
+#      """
+#      define
+#      entity bird plays flying:flier;
+#      entity pigeon sub bird;
+#      relation flying relates flier;
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $p isa pigeon;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      entity animal plays flying:flier;
+#      entity pigeon sub animal;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub pigeon; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:pigeon |
+
+
+    # TODO: Move to redefine!
+#  Scenario: assigning a new supertype when having other sub succeeds with existing data if the supertypes have the same attributes
+#    Given typeql define
+#      """
+#      define
+#      attribute name value string;
+#      entity bird owns name;
+#      entity pigeon sub bird;
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql insert
+#      """
+#      insert $p isa pigeon;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define
+#      entity animal owns name;
+#      entity pigeon sub animal;
+#      """
+#    Then transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql get
+#      """
+#      match $x sub pigeon; get;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:pigeon |
+
+
+  Scenario: assigning a new supertype when having another supertype through define fails without preceding redefine/undefine
     Given typeql define
       """
       define
@@ -2307,30 +2500,42 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    Then typeql define; fails
       """
       define
       entity animal;
       entity pigeon sub animal;
       """
-    Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub pigeon; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:pigeon |
-
-
-  Scenario: assigning a new supertype succeeds with existing data if the supertypes play the same roles
     Given typeql define
       """
       define
-      entity bird plays flying:flier;
-      entity pigeon sub bird;
+      attribute name value string;
+      entity bird2 owns name;
+      entity pigeon2 sub bird2;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql insert
+      """
+      insert $p isa pigeon2;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      entity animal owns name;
+      entity pigeon2 sub animal;
+      """
+
+    Given typeql define
+      """
+      define
+      entity bird3 plays flying:flier;
+      entity pigeon3 sub bird3;
       relation flying relates flier;
       """
     Given transaction commits
@@ -2338,63 +2543,37 @@ Feature: TypeQL Define Query
     Given connection open write transaction for database: typedb
     Given typeql insert
       """
-      insert $p isa pigeon;
+      insert $p isa pigeon3;
       """
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    Then typeql define; fails
       """
       define
       entity animal plays flying:flier;
-      entity pigeon sub animal;
+      entity pigeon3 sub animal;
       """
-    Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub pigeon; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:pigeon |
-
-
-  Scenario: assigning a new supertype succeeds with existing data if the supertypes have the same attributes
+  Scenario: assigning a supertype while having another supertype through define fails even if there are no instances
     Given typeql define
       """
       define
-      attribute name value string;
-      entity bird owns name;
-      entity pigeon sub bird;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $p isa pigeon;
+      entity person sub organism;
+      entity species owns name, plays species-membership:species;
+      relation species-membership relates species, relates member;
+      attribute lifespan value double;
+      entity organism owns lifespan, plays species-membership:member;
+      entity child sub person;
       """
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    Then typeql define; fails
       """
       define
-      entity animal owns name;
-      entity pigeon sub animal;
+      entity person sub species;
       """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub pigeon; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:pigeon |
 
 
   # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes have the same attributes

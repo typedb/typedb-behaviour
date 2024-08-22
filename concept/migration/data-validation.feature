@@ -3766,3 +3766,92 @@ Feature: Data validation
     When relation $rel remove 2 players for role(role1[]): $ent1
     When relation $rel remove 1 players for role(role1[]): $ent2
     Then transaction commits
+
+
+  Scenario: Can reset owns with existing instances
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr0
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr0
+    Given create attribute type: ref
+    Given attribute(ref) set supertype: attr0
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+    Given entity(ent) set owns: attr3
+    Given entity(ent) get owns(attr2) set annotation: @card(0..3)
+    Then entity(ent) get owns(ref) get cardinality: @card(0..1)
+    Then entity(ent) get owns(attr1) get cardinality: @card(0..1)
+    Then entity(ent) get owns(attr2) get cardinality: @card(0..3)
+    Then entity(ent) get owns(attr3) get cardinality: @card(0..1)
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent
+    When $attr1_0 = attribute(attr1) put instance with value: "val0"
+    When $attr2_0 = attribute(attr2) put instance with value: "val0"
+    When $attr2_1 = attribute(attr2) put instance with value: "val1"
+    When $attr2_2 = attribute(attr2) put instance with value: "val2"
+    When entity $ent set has: $attr1_0
+    When entity $ent set has: $attr2_0
+    When entity $ent set has: $attr2_1
+    When entity $ent set has: $attr2_2
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent) set owns: ref
+    Then entity(ent) set owns: attr1
+    Then entity(ent) set owns: attr2
+    Then entity(ent) set owns: attr3
+    Then entity(ent) get owns(ref) get cardinality: @card(0..1)
+    Then entity(ent) get owns(attr1) get cardinality: @card(0..1)
+    Then entity(ent) get owns(attr2) get cardinality: @card(0..3)
+    Then entity(ent) get owns(attr3) get cardinality: @card(0..1)
+    Then transaction commits
+
+
+  Scenario: Can reset plays with existing instances
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create relation type: rel1
+    Given relation(rel1) create role: role
+    Given relation(rel1) set owns: ref
+    Given create relation type: rel2
+    Given relation(rel2) create role: role
+    Given relation(rel2) set owns: ref
+    Given create relation type: rel3
+    Given relation(rel3) create role: role
+    Given relation(rel3) set owns: ref
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) set plays: rel1:role
+    Given entity(ent) set plays: rel2:role
+    Given entity(ent) set plays: rel3:role
+    Given entity(ent) get plays(rel2:role) set annotation: @card(0..1)
+    Then entity(ent) get plays(rel1:role) get cardinality: @card(0..)
+    Then entity(ent) get plays(rel2:role) get cardinality: @card(0..1)
+    Then entity(ent) get plays(rel3:role) get cardinality: @card(0..)
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent
+    When $rel1_0 = relation(rel1) create new instance with key(ref): rel0
+    When $rel1_1 = relation(rel1) create new instance with key(ref): rel1
+    When $rel1_2 = relation(rel1) create new instance with key(ref): rel2
+    When $rel2_0 = relation(rel2) create new instance with key(ref): rel0
+    When relation $rel1_0 add player for role(role): $ent
+    When relation $rel1_1 add player for role(role): $ent
+    When relation $rel1_2 add player for role(role): $ent
+    When relation $rel2_0 add player for role(role): $ent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(ent) set plays: rel1:role
+    Then entity(ent) set plays: rel2:role
+    Then entity(ent) set plays: rel3:role
+    Then entity(ent) get plays(rel1:role) get cardinality: @card(0..)
+    Then entity(ent) get plays(rel2:role) get cardinality: @card(0..1)
+    Then entity(ent) get plays(rel3:role) get cardinality: @card(0..)
+    Then transaction commits
