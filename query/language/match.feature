@@ -48,7 +48,7 @@ Feature: TypeQL Match Clause
   # SCHEMA QUERIES #
   ##################
 
-  Scenario: 'type' matches only the specified type, and does not match subtypes
+  Scenario: 'label' matches only the specified type, and does not match subtypes
     Given typeql define
       """
       define
@@ -106,8 +106,6 @@ Feature: TypeQL Match Clause
       | x            |
       | label:writer |
       | label:person |
-      | label:entity |
-      | label:thing  |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -419,8 +417,8 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $z (friend: $x) isa friendship, has ref 2;
-      $w (employee: $x, employer: $y) isa employment, has ref 3;
+      $z links (friend: $x), isa friendship, has ref 2;
+      $w links (employee: $x, employer: $y), isa employment, has ref 3;
       """
     Given transaction commits
 
@@ -477,7 +475,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When typeql read query; throws exception
+    When typeql read query; fails
       """
       match $x plays close-friendship:friend;
       """
@@ -693,17 +691,9 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | x          | y               |
       | key:ref:0  | label:person    |
-      | key:ref:0  | label:entity    |
-      | key:ref:0  | label:thing     |
       | key:ref:1  | label:person    |
-      | key:ref:1  | label:entity    |
-      | key:ref:1  | label:thing     |
       | attr:ref:0 | label:ref       |
-      | attr:ref:0 | label:attribute |
-      | attr:ref:0 | label:thing     |
       | attr:ref:1 | label:ref       |
-      | attr:ref:1 | label:attribute |
-      | attr:ref:1 | label:thing     |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
     Given typeql define
@@ -773,10 +763,10 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      entity person abstract;
-      entity writer sub person, abstract;
-      entity scifi-writer sub writer, abstract;
-      entity good-scifi-writer sub scifi-writer, abstract;
+      entity person @abstract;
+      entity writer @abstract, sub person;
+      entity scifi-writer @abstract, sub writer;
+      entity good-scifi-writer @abstract, sub scifi-writer;
       """
     Given transaction commits
 
@@ -850,7 +840,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x isa ganesh;
       """
@@ -858,7 +848,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match ($x, $y) isa $type; $type type jakas-relacja;
       """
@@ -866,7 +856,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x isa $type; $type type polok;
       """
@@ -896,34 +886,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x isa friendship:friend;
       """
-
-
-  # TODO we can't query for rule anymore
-  @ignore
-  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
-    Given typeql define
-      """
-      define
-      rule metre-rule:
-      when {
-        $x isa person;
-      } then {
-        $x has name "metre";
-      };
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    Then typeql read query; throws exception
-      """
-      match $x isa metre-rule;
-      """
-    Then transaction is open: false
-
 
 
   #############
@@ -939,22 +905,23 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $r (employee: $x, employer: $y) isa employment,
-         has ref 2;
+      $r isa employment,
+        links (employee: $x, employer: $y),
+        has ref 2;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Then get answers of typeql read query
       """
-      match $x isa person; $r (employee: $x) isa relation;
+      match $x isa person; $r links (employee: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
       | key:ref:0 | key:ref:2 |
     When get answers of typeql read query
       """
-      match $y isa company; $r (employer: $y) isa relation;
+      match $y isa company; $r links (employer: $y);
       """
     Then uniquely identify answer concepts
       | y         | r         |
@@ -970,7 +937,7 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $r (employee: $x, employer: $y) isa employment,
+      $r links (employee: $x, employer: $y), isa employment,
          has ref 2;
       """
     Given transaction commits
@@ -978,7 +945,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa person; $r ($x) isa relation;
+      match $x isa person; $r links ($x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -994,14 +961,14 @@ Feature: TypeQL Match Clause
       insert $p isa person, has ref 0;
       $c isa company, has ref 1;
       $c2 isa company, has ref 2;
-      $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3;
+      $r links (employee: $p, employer: $c, employer: $c2), isa employment, has ref 3;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Then get answers of typeql read query
       """
-      match $r ($x, $y) isa employment;
+      match $r links ($x, $y), isa employment;
       """
     Then uniquely identify answer concepts
       | x         | y         | r         |
@@ -1032,7 +999,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (player: $x, player: $x) isa relation;
+      match $r links (player: $x, player: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -1058,7 +1025,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (player: $x) isa relation;
+      match $r links (player: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -1085,7 +1052,6 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | e         | x         | role                      |
       | key:ref:0 | key:ref:1 | label:employment:employee |
-      | key:ref:0 | key:ref:1 | label:relation:role       |
 
   @ignore
   Scenario: A relation can play a role in itself
@@ -1102,14 +1068,14 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $r(compared:$r) isa comparator;
+      $rlinks (compared:$r), isa comparator;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r(compared:$r) isa comparator;
+      match $rlinks (compared:$r), isa comparator;
       """
     Then answer size is: 1
 
@@ -1130,7 +1096,7 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $r(compared: $v, compared:$r) isa comparator;
+      $rlinks (compared: $v, compared:$r), isa comparator;
       $v isa variable;
       """
     Given transaction commits
@@ -1138,7 +1104,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r(compared: $v, compared:$r) isa comparator;
+      match $rlinks (compared: $v, compared:$r), isa comparator;
       """
     Then answer size is: 1
 
@@ -1230,16 +1196,16 @@ Feature: TypeQL Match Clause
       """
       insert
       $x isa person, has ref 0;
-      $e (employee: $x) isa employment, has ref 1;
-      $f (friend: $x) isa friendship, has ref 2;
-      $r (resident: $x) isa residency, has ref 3;
+      $e links (employee: $x), isa employment, has ref 1;
+      $f links (friend: $x), isa friendship, has ref 2;
+      $r links (resident: $x), isa residency, has ref 3;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $r isa relation;
+      match relation $t; $r isa $t;
       """
     Given uniquely identify answer concepts
       | r         |
@@ -1248,7 +1214,7 @@ Feature: TypeQL Match Clause
       | key:ref:3 |
     When get answers of typeql read query
       """
-      match ($x) isa relation;
+      match ($x) isa $_;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1263,15 +1229,15 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
-      match (person: $x) isa relation;
+      match (person: $x);
       """
     Then transaction is open: false
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match ($x) isa person;
       """
@@ -1279,7 +1245,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match ($x) isa bottle-of-rum;
       """
@@ -1287,15 +1253,15 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
-      match (rolein-rolein-rolein: $rolein) isa relation;
+      match (rolein-rolein-rolein: $rolein);
       """
     Then transaction is open: false
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match (friend: $x) isa employment;
       """
@@ -1303,7 +1269,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
-    When typeql read query; throws exception
+    When typeql read query; fails
       """
       match
       $x isa company;
@@ -1337,63 +1303,63 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $m (wife: $x, husband: $y) isa hetero-marriage;
+      match $m links (wife: $x, husband: $y), isa hetero-marriage;
       """
     Then answer size is: 1
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
-      match $m (wife: $x, husband: $y) isa civil-marriage;
+      match $m links (wife: $x, husband: $y), isa civil-marriage;
       """
     Then transaction is open: false
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $m (wife: $x, husband: $y) isa marriage;
+      match $m links (wife: $x, husband: $y), isa marriage;
       """
     Then answer size is: 1
     When get answers of typeql read query
       """
-      match $m (wife: $x, husband: $y) isa relation;
+      match $m links (wife: $x, husband: $y);
       """
     Then answer size is: 1
     When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa hetero-marriage;
+      match $m links (spouse: $x, spouse: $y), isa hetero-marriage;
       """
     Then answer size is: 2
     When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa civil-marriage;
+      match $m links (spouse: $x, spouse: $y), isa civil-marriage;
       """
     Then answer size is: 2
     When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa marriage;
+      match $m links (spouse: $x, spouse: $y), isa marriage;
       """
     Then answer size is: 4
     When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa relation;
+      match $m links (spouse: $x, spouse: $y);
       """
     Then answer size is: 4
     When get answers of typeql read query
       """
-      match $m (role: $x, role: $y) isa hetero-marriage;
+      match $m links (role: $x, role: $y), isa hetero-marriage;
       """
     Then answer size is: 2
     When get answers of typeql read query
       """
-      match $m (role: $x, role: $y) isa civil-marriage;
+      match $m links (role: $x, role: $y), isa civil-marriage;
       """
     Then answer size is: 2
     When get answers of typeql read query
       """
-      match $m (role: $x, role: $y) isa marriage;
+      match $m links (role: $x, role: $y), isa marriage;
       """
     Then answer size is: 4
     When get answers of typeql read query
       """
-      match $m (role: $x, role: $y) isa relation;
+      match $m links (role: $x, role: $y);
       """
     Then answer size is: 4
 
@@ -1428,7 +1394,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $r (owner: $x) isa ownership, has is-insured true; $x isa person;
+    match $r links (owner: $x), isa ownership, has is-insured true; $x isa person;
     """
     Then answer size is: 1
 
@@ -1674,10 +1640,10 @@ Feature: TypeQL Match Clause
       """
       insert
       $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
-      $y (friend: $x) isa friendship, has age 21, has ref 1;
+      $y links (friend: $x), isa friendship, has age 21, has ref 1;
       $z 2020-06-01 isa graduation-date, has age 21, has ref 2;
       $w isa person, has ref 3;
-      $v (friend: $x, friend: $w) isa friendship, has age 7, has ref 4;
+      $v links (friend: $x, friend: $w), isa friendship, has age 7, has ref 4;
       $u 2019-06-03 isa graduation-date, has age 22, has ref 5;
       """
     Given transaction commits
@@ -1748,7 +1714,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x has person "Luke";
       """
@@ -1756,7 +1722,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x isa company, has age $n;
       """
@@ -1764,7 +1730,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x has bananananananana "rama";
       """
@@ -1792,7 +1758,7 @@ Feature: TypeQL Match Clause
       """
       insert
       $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
-      $r (employee: $x) isa employment, has start-date 2009-07-16, has ref 1;
+      $r links (employee: $x), isa employment, has start-date 2009-07-16, has ref 1;
       """
     Given transaction commits
 
@@ -1801,7 +1767,7 @@ Feature: TypeQL Match Clause
       """
       match
         $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date == $date;
+        $r links (employee: $x), isa employment, has start-date == $date;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
@@ -1952,14 +1918,14 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $a;
         $x >= 1;
       """
     Then answer size is: 2
     When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $a;
         $x < 2.0;
       """
     Then answer size is: 1
@@ -2051,7 +2017,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $_;
         $x > 20;
       """
     Then uniquely identify answer concepts
@@ -2082,7 +2048,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: concept comparison of unbound variables throws an error
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match not { $x is $y; };
       """
@@ -2115,7 +2081,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
     When get answers of typeql read query
       """
-      match $x isa entity; {$x has name "Jeff";} or {$x has name "Amazon";};
+      match $x isa $_; {$x has name "Jeff";} or {$x has name "Amazon";};
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2159,6 +2125,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
+  # TODO use non-root types
   Scenario: multiple negations can be applied
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -2171,7 +2138,7 @@ Feature: TypeQL Match Clause
 
   Scenario: pattern variable without named variable is invalid
     Given connection open read transaction for database: typedb
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match $x isa person, has name $a; "bob" isa name;
       """
@@ -2190,34 +2157,34 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has name "Bertie", has ref 0;
       $y isa person, has name "Angelina", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x isa entity;
+      match entity $t; $x isa $t;
       """
     Given answer size is: 2
     Given get answers of typeql read query
       """
-      match $r isa relation;
+      match relation $t; $x isa $t;
       """
     Given answer size is: 1
     Given get answers of typeql read query
       """
-      match $x isa attribute;
+      match attribute $t; $x isa $t;
       """
     Given answer size is: 5
     When get answers of typeql read query
       """
       match $x isa $type;
       """
-    # 2 entities x 3 types {person,entity,thing}
-    # 1 relation x 3 types {friendship,relation,thing}
-    # 5 attributes x 3 types {ref/name,attribute,thing}
-    Then answer size is: 24
+    # 2 entities x 1 type {person}
+    # 1 relation x 1 type {friendship}
+    # 5 attributes x 2 types {ref/name}
+    Then answer size is: 13
 
 
   Scenario: all relations and their types can be retrieved
@@ -2229,19 +2196,19 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has name "Bertie", has ref 0;
       $y isa person, has name "Angelina", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $r isa relation;
+      match relation $t; $r isa $t;
       """
     Given answer size is: 1
     Given get answers of typeql read query
       """
-      match ($x, $y) isa relation;
+      match ($x, $y);
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
@@ -2249,8 +2216,8 @@ Feature: TypeQL Match Clause
       """
       match ($x, $y) isa $type;
       """
-    # 2 permutations x 3 types {friendship,relation,thing}
-    Then answer size is: 6
+    # 2 permutations of the roleplayers
+    Then answer size is: 2
 
 
   Scenario: variable role types with relations playing roles
@@ -2272,10 +2239,10 @@ Feature: TypeQL Match Clause
       insert
         $i1 "i1" isa id;
         $i2 "i2" isa id;
-        $n1 (id: $i1) isa nested;
-        $n2 (id: $i2) isa nested;
-        $p1 (nested: $n1) isa parent, has id $i1;
-        $p2 (nested: $n2) isa parent, has id $i2;
+        $n1 links (id: $i1), isa nested;
+        $n2 links (id: $i2), isa nested;
+        $p1 links (nested: $n1), isa parent, has id $i1;
+        $p2 links (nested: $n2), isa parent, has id $i2;
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
@@ -2284,24 +2251,26 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        $role-nested sub! relation:role;
-        $role-id sub! relation:role;
         $boundId1 = "i1";
 
-        $p ($role-nested: $n) isa parent, has id $boundId1;
-        $n ($role-id: $i) isa nested;
+        $p links ($role-nested: $n), isa parent, has id $boundId1;
+        $n links ($role-id: $i), isa nested;
+
+        not { $role-nested sub! $r; };
+        not { $role-id sub! $r; };
       """
     Then answer size is: 1
 
     When get answers of typeql read query
       """
       match
-        $role-nested sub! relation:role;
-        $role-id sub! relation:role;
         $boundId1 = "i1";
 
-        $p ($role-nested: $n) isa parent, has id $i;
-        $n ($role-id: $boundId1) isa nested;
+        $p links ($role-nested: $n), isa parent, has id $i;
+        $n links ($role-id: $boundId1), isa nested;
+
+        not { $role-nested sub! $r; };
+        not { $role-id sub! $r; };
       """
     Then answer size is: 1
 
@@ -2313,20 +2282,20 @@ Feature: TypeQL Match Clause
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
   Scenario: when the entire match clause is a negation, an error is thrown
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
-      match not { $x has attribute "value"; };
+      match not { $x has $a "value"; };
       """
     Then transaction is open: false
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match
-        $r isa entity;
+        entity $t;
+        $r isa $t;
         not {
           ($r2, $i);
-          $i isa entity;
         };
       """
     Then transaction is open: false
@@ -2335,9 +2304,10 @@ Feature: TypeQL Match Clause
     Then get answers of typeql read query
       """
       match
-        $r isa attribute;
+        attribute $a;
+        $r isa $a;
         not {
-          $x isa entity, has attribute $r;
+          $x has $r;
         };
       """
 
@@ -2346,14 +2316,15 @@ Feature: TypeQL Match Clause
     Then get answers of typeql read query
       """
       match
-        $x isa entity;
+        entity $t;
+        $x isa $t;
         not {
-          { $x has attribute 1; } or { $x has attribute 2; };
+          { $x has $a 1; } or { $x has $a 2; };
         };
       """
 
   Scenario: when negating a negation redundantly, an error is thrown
-    Then typeql read query; throws exception
+    Then typeql read query; fails
       """
       match
         $x isa person, has name "Tim";
@@ -2384,7 +2355,7 @@ Feature: TypeQL Match Clause
       insert
       $x isa person, has favorite-phrase "你明白了吗", has ref 0;
       $y isa person, has favorite-phrase "בוקר טוב", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
@@ -2495,7 +2466,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: labels and variables have different identifier formats
-    Given typeql define; throws exception
+    Given typeql define; parsing fails
       """
       define
       entity 0_leading_digit_fails;
@@ -2508,13 +2479,13 @@ Feature: TypeQL Match Clause
       ?0_leading_digit_allowed_val = 0;
       """
 
-    Given typeql define; throws exception
+    Given typeql define; parsing fails
       """
       define
       entity _leading_connector_disallowed;
       """
     Given connection open read transaction for database: typedb
-    Given typeql read query; throws exception
+    Given typeql read query; parsing fails
       """
       match
       entity $_leading_connector_disallowed;
