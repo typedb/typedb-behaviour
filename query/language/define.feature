@@ -1172,25 +1172,33 @@ Feature: TypeQL Define Query
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
     When typeql define
-    """
-    define attribute name @abstract;
-    """
+      """
+      define attribute name @abstract; entity person @abstract;
+      """
+    When transaction commits
 
+    When connection open schema transaction for database: typedb
     Then typeql define; fails
       """
       define attribute code-name sub name, value long;
       """
+    When transaction closes
 
+    When connection open schema transaction for database: typedb
     When typeql define
       """
       define attribute code-name sub name; attribute code-name-2 value long;
       """
+    When transaction commits
 
+    When connection open schema transaction for database: typedb
     Then typeql define; fails
       """
       define attribute code-name value long;
       """
+    When transaction closes
 
+    When connection open schema transaction for database: typedb
     Then typeql define; fails
       """
       define attribute code-name-2 sub name;
