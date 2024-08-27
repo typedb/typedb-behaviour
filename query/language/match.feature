@@ -28,7 +28,7 @@ Feature: TypeQL Match Clause
         owns name,
         owns ref @key;
       relation friendship
-        relates friend,
+        relates friend @card(0..),
         owns ref @key;
       relation employment
         relates employee,
