@@ -809,7 +809,7 @@ Feature: TypeQL Define Query
       | label:pilot-employment |
 
 
-  Scenario: types should be able to define roles they play with an override
+  Scenario Outline: types should be able to define roles they play with an override using <mode>
     Then typeql define
       """
         define
@@ -817,9 +817,34 @@ Feature: TypeQL Define Query
         relation contractor-locates sub locates, relates contractor-located as located;
 
         relation employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as located;
+        relation contractor-employment sub employment, plays contractor-locates:contractor-located as <as-label>;
       """
-# TODO: ^ as locates:located?
+    Examples:
+      | mode              | as-label        |
+      | role name         | located         |
+      | role scoped label | locates:located |
+
+
+  Scenario Outline: types should be able to define roles they play with an override using <mode>
+    Then typeql define<failure>
+      """
+        define
+        relation locates relates located;
+        relation contractor-locates sub locates, relates contractor-located as located;
+
+        relation employment relates employee, plays locates:located;
+        relation contractor-employment sub employment, plays contractor-locates:contractor-located as <as-label>;
+      """
+    Examples:
+      | mode                     | as-label                              | failure         |
+      | builtin kind             | entity                                | ; parsing fails |
+    # TODO: Parser allows builtin types here for simplicity, it would be cleaner to accept only label and scoped_label
+      | builtin type             | string                                | ; fails         |
+      | name:name without scope  | locates:locates                       | ; fails         |
+      | scope:scope without name | located:located                       | ; fails         |
+      | incorrect scope          | contractor-locates:located            | ; fails         |
+      | same role                | contractor-locates:contractor-located | ; fails         |
+
 
   Scenario: already shadowed types should not be overrideable
     Then typeql define; fails
