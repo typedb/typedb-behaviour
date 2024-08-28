@@ -401,8 +401,9 @@ Feature: TypeQL Define Query
   Scenario: a newly defined relation subtype inherits roles from all of its supertypes
     Given typeql define
       """
-      define relation part-time-employment sub employment, relates shift;
-      define relation student-part-time-employment sub part-time-employment, relates student-document;
+      define
+      relation part-time-employment sub employment, relates shift;
+      relation student-part-time-employment sub part-time-employment, relates student-document;
       """
     Given transaction commits
 
@@ -806,10 +807,10 @@ Feature: TypeQL Define Query
   # ATTRIBUTE TYPES #
   ###################
 
-  Scenario Outline: a '<value_type>' attribute type can be defined
+  Scenario Outline: a '<value-type>' attribute type can be defined
     Given typeql define
       """
-      define attribute <label> value <value_type>;
+      define attribute <label> value <value-type>;
       """
     Given transaction commits
 
@@ -824,12 +825,16 @@ Feature: TypeQL Define Query
     Then answer size is: 1
 
     Examples:
-      | value_type | label          |
-      | boolean    | can-fly        |
-      | long       | number-of-cows |
-      | double     | density        |
-      | string     | favourite-food |
-      | datetime   | flight-date    |
+      | value-type  | label              |
+      | long        | number-of-cows     |
+      | string      | favourite-food     |
+      | boolean     | can-fly            |
+      | double      | density            |
+      | decimal     | savings            |
+      | date        | flight-date        |
+      | datetime    | flight-time        |
+      | datetime-tz | flight-time-tz     |
+      | duration    | procedure-duration |
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
@@ -2027,6 +2032,86 @@ Feature: TypeQL Define Query
       $y isa person, has phone-nr "456", has email "xyz@gmail.com";
       """
     Given transaction commits
+
+
+
+  Scenario: a key ownership can be converted to a unique ownership
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql insert
+      """
+      insert
+      $x isa person, has email "jane@gmail.com";
+      $y isa person, has email "john@gmail.com";
+      """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    # TODO: Wait for undefine queries to undefine unique!
+    Given typeql define
+      """
+      define person owns email @unique;
+      """
+    Then transaction commits
+    Given connection open write transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x owns $y @unique; get;
+      """
+    Then uniquely identify answer concepts
+      | x            | y              |
+      | label:person | label:email    |
+      | label:person | label:phone-nr |
+    When get answers of typeql get
+      """
+      match person owns $y @key; get;
+      """
+    Then answer size is: 0
+    Given typeql insert; fails
+      """
+      insert $x isa person, has email "jane@gmail.com";
+      """
+
+
+  Scenario: converting unique to key is possible if the data conforms to key requirements
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql insert
+      """
+      insert
+      $x isa person, has phone-nr "123", has email "abc@gmail.com";
+      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
+      """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    # TODO: Wait for undefine queries to undefine unique!
+    Given typeql define
+      """
+      define
+      person owns phone-nr @key;
+      """
+    Then transaction commits
+    Given connection open write transaction for database: typedb
+    Then typeql insert; fails
+      """
+      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
+      """
+
+
+  Scenario: converting unique to key fails if the data does not conform to key requirements
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    # no instances of phone-nr -> 0 vs key's card 1..1
+    Given typeql insert
+      """
+      insert $x isa person, has email "abc@gmail.com";
+      """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine; fails
+      """
+      define
+      person owns phone-nr @key;
+      """
 
 
   #############################

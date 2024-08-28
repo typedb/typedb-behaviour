@@ -19,11 +19,21 @@ Feature: TypeQL Redefine Query
       relation employment relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
       relation income relates earner, relates source;
 
+      entity empty-entity @abstract;
+      entity child sub empty-entity;
+
+      relation empty-relation relates empty-role;
+      relation part-time-employment sub empty-relation, relates part-time-role;
+
       attribute name value string;
       attribute email value string;
       attribute start-date value datetime;
       attribute employment-reference-code value string;
       attribute phone-nr value string;
+      attribute empty-data @abstract;
+      attribute abstract-decimal-data @abstract, value decimal;
+      attribute long-data sub empty-data, value long;
+      attribute empty-sub-data @abstract, sub empty-data;
       """
     Given transaction commits
 
@@ -35,20 +45,10 @@ Feature: TypeQL Redefine Query
   ################
 
   Scenario: entity types cannot be redefined
-    When typeql define; fails
+    When typeql define; parsing fails
       """
       redefine entity person;
       """
-    Then transaction commits
-
-    When connection open schema transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type dog; get;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | label:dog |
 
 
   Scenario: can redefine entity type's sub
@@ -70,13 +70,21 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined entity subtype inherits playable roles from its parent type
-    Given typeql redefine
+    When get answers of typeql get
+      """
+      match $x plays employment:employee; get;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+
+    When typeql redefine
       """
       redefine entity child sub person;
       """
-    Given transaction commits
+    When transaction commits
 
-    Given connection open read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x plays employment:employee; get;
@@ -105,24 +113,34 @@ Feature: TypeQL Redefine Query
       | label:child  |
 
 
-  Scenario: redefining a type without a kind is acceptable
+  Scenario: redefining an entity type without a kind is acceptable
+    When typeql define
+      """
+      define entity flying-spaghetti-monster owns name @regex("Spaghett.*");
+      """
     Then typeql redefine
       """
-      redefine flying-spaghetti-monster;
+      redefine flying-spaghetti-monster owns name @regex("Mr. Spaghett.*");
       """
+    Then transaction commits
 
 
-  Scenario: defining a type with a kind is acceptable
+  Scenario: defining an entity type with a kind is acceptable
+    When typeql define
+      """
+      define entity flying-spaghetti-monster owns name @regex("Spaghett.*");
+      """
     Then typeql redefine
       """
-      redefine flying-spaghetti-monster;
+      redefine entity flying-spaghetti-monster owns name @regex("Mr. Spaghett.*");
       """
+    Then transaction commits
 
 
   Scenario: an entity type can not have a value type redefined
     Then typeql redefine; fails
       """
-      redefine entity cream value double;
+      redefine entity person value double;
       """
 
 
@@ -140,7 +158,7 @@ Feature: TypeQL Redefine Query
       """
 
 
-  Scenario: writing a variable in a 'redefine' is not allowed
+  Scenario: writing an entity variable in a 'redefine' is not allowed
     Then typeql redefine; parsing fails
       """
       redefine entity $x;
@@ -152,16 +170,16 @@ Feature: TypeQL Redefine Query
   ##################
 
   Scenario: relation types cannot be redefined
-    Then typeql redefine; fails
+    Then typeql redefine; parsing fails
       """
       redefine relation employment;
       """
 
 
-  Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
-    When typeql define
+  Scenario: can redefine relation type's sub
+    When typeql redefine
       """
-      define relation fun-employment sub employment, relates employee-having-fun as employee;
+      redefine relation part-time-employment sub employment;
       """
     Then transaction commits
 
@@ -176,22 +194,22 @@ Feature: TypeQL Redefine Query
       | label:fun-employment |
 
 
-  Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
-    Then typeql define
+  Scenario: a redefined relation subtype inherits roles from its supertype
+    When get answers of typeql get
       """
-      define relation useless-relation;
+      match $x relates employee; get;
       """
-    Then transaction commits; fails
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
 
-
-  Scenario: a newly defined relation subtype inherits roles from its supertype
-    Given typeql define
+    When typeql define
       """
-      define relation part-time-employment sub employment;
+      redefine relation part-time-employment sub employment;
       """
-    Given transaction commits
+    When transaction commits
 
-    Given connection open read transaction for database: typedb
+    When connection open read transaction for database: typedb
     When get answers of typeql get
       """
       match $x relates employee; get;
@@ -201,215 +219,11 @@ Feature: TypeQL Redefine Query
       | label:employment           |
       | label:part-time-employment |
 
-  # TODO: Why does this have no body?
-  Scenario: a newly defined relation subtype inherits roles from all of its supertypes
 
-
-  Scenario: a relation type's role can be overridden in a child relation type using 'as'
-    When typeql define
-      """
-      define
-        relation parenthood relates parent, relates child;
-        relation father-sonhood sub parenthood, relates father as parent, relates son as child;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match
-        $x relates parent;
-        $x relates child;
-      get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:parenthood |
-    When get answers of typeql get
-      """
-      match
-        $x relates father;
-        $x relates son;
-      get;
-      """
-    Then uniquely identify answer concepts
-      | x                    |
-      | label:father-sonhood |
-
-
-  Scenario: when a relation type's role is overridden, it creates a sub-role of the parent role type
-    When typeql define
-      """
-      define
-      relation parenthood relates parent, relates child;
-      relation father-sonhood sub parenthood, relates father as parent, relates son as child;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match
-      $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
-      """
-    Then uniquely identify answer concepts
-      | x                           | y                        |
-      | label:parenthood:parent     | label:parenthood:child   |
-      | label:father-sonhood:father | label:parenthood:child   |
-      | label:parenthood:parent     | label:father-sonhood:son |
-      | label:father-sonhood:father | label:father-sonhood:son |
-
-
-  Scenario: an overridden role is no longer associated with the relation type that overrides it
+  Scenario: a redefined relation subtype inherits attribute ownerships from its parent type
     Given typeql define
       """
-      define relation part-time-employment sub employment, relates part-timer as employee;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x relates employee; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
-
-
-  Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
-    Then typeql define; fails
-      """
-      define
-      relation close-friendship relates close-friend as friend;
-      """
-
-
-  Scenario: relation subtypes can have roles that their supertypes don't have
-    Given typeql define
-      """
-      define
-      entity plane plays pilot-employment:preferred-plane;
-      relation pilot-employment sub employment, relates pilot as employee, relates preferred-plane;
-      person plays pilot-employment:pilot;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x relates preferred-plane; get;
-      """
-    Then uniquely identify answer concepts
-      | x                      |
-      | label:pilot-employment |
-
-
-  Scenario Outline: types should be able to define roles they play with an override using <mode>
-    Then typeql define
-      """
-        define
-        relation locates relates located;
-        relation contractor-locates sub locates, relates contractor-located as located;
-
-        relation employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as <as-label>;
-      """
-    Examples:
-      | mode              | as-label        |
-      | role name         | located         |
-      | role scoped label | locates:located |
-
-
-  Scenario Outline: types should be able to define roles they play with an override using <mode>
-    Then typeql define<failure>
-      """
-        define
-        relation locates relates located;
-        relation contractor-locates sub locates, relates contractor-located as located;
-
-        relation employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as <as-label>;
-      """
-    Examples:
-      | mode                     | as-label                              | failure         |
-      | builtin kind             | entity                                | ; parsing fails |
-    # TODO: Parser allows builtin types here for simplicity, it would be cleaner to accept only label and scoped_label
-      | builtin type             | string                                | ; fails         |
-      | name:name without scope  | locates:locates                       | ; fails         |
-      | scope:scope without name | located:located                       | ; fails         |
-      | incorrect scope          | contractor-locates:located            | ; fails         |
-      | same role                | contractor-locates:contractor-located | ; fails         |
-
-
-  Scenario: already shadowed types should not be overrideable
-    Then typeql define; fails
-      """
-        define
-        relation locates relates located;
-        relation contractor-locates sub locates, relates contractor-located as located;
-        relation software-contractor-locates sub contractor-locates, relates software-contractor-located as contractor-located;
-
-        employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as located;
-        relation software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
-      """
-
-
-  Scenario: a newly defined relation subtype inherits playable roles from its parent type
-    Given typeql define
-      """
-      define relation contract-employment sub employment, relates contractor as employee;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x plays income:source; get;
-      """
-    Then uniquely identify answer concepts
-      | x                         |
-      | label:employment          |
-      | label:contract-employment |
-
-
-  Scenario: a newly defined relation subtype inherits playable roles from all of its supertypes
-    Given typeql define
-      """
-      define
-      relation transport-employment sub employment, relates transport-worker as employee;
-      relation aviation-employment sub transport-employment, relates aviation-worker as transport-worker;
-      relation flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x plays income:source; get;
-      """
-    Then uniquely identify answer concepts
-      | x                                 |
-      | label:employment                  |
-      | label:transport-employment        |
-      | label:aviation-employment         |
-      | label:flight-attendant-employment |
-
-
-  Scenario: inherited role types cannot be played via role type aliases
-    Given typeql define; fails
-      """
-      define
-      relation part-time-employment sub employment;
-      person plays part-time-employment:employee;
-      """
-
-
-  Scenario: a newly defined relation subtype inherits attribute ownerships from its parent type
-    Given typeql define
-      """
-      define relation contract-employment sub employment, relates contractor as employee;
+      redefine relation part-time-employment sub employment;
       """
     Given transaction commits
 
@@ -419,169 +233,64 @@ Feature: TypeQL Redefine Query
       match $x owns start-date; get;
       """
     Then uniquely identify answer concepts
-      | x                         |
-      | label:employment          |
-      | label:contract-employment |
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
 
 
-  Scenario: a newly defined relation subtype inherits attribute ownerships from all of its supertypes
-    Given typeql define
-      """
-      define
-      relation transport-employment sub employment, relates transport-worker as employee;
-      relation aviation-employment sub transport-employment, relates aviation-worker as transport-worker;
-      relation flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns start-date; get;
-      """
-    Then uniquely identify answer concepts
-      | x                                 |
-      | label:employment                  |
-      | label:transport-employment        |
-      | label:aviation-employment         |
-      | label:flight-attendant-employment |
-
-
-  Scenario: a newly defined relation subtype inherits keys from its parent type
-    Given typeql define
-      """
-      define relation contract-employment sub employment, relates contractor as employee;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns employment-reference-code @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x                         |
-      | label:employment          |
-      | label:contract-employment |
-
-
-  Scenario: a newly defined relation subtype inherits keys from all of its supertypes
-    Given typeql define
-      """
-      define
-      relation transport-employment sub employment, relates transport-worker as employee;
-      relation aviation-employment sub transport-employment, relates aviation-worker as transport-worker;
-      relation flight-attendant-employment sub aviation-employment, relates flight-attendant as aviation-worker;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns employment-reference-code @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x                                 |
-      | label:employment                  |
-      | label:transport-employment        |
-      | label:aviation-employment         |
-      | label:flight-attendant-employment |
-
-
-  Scenario: a relation type cannot be defined with no roleplayers even if it is marked as @abstract
+  Scenario: redefining a relation type without a kind is acceptable
     When typeql define
       """
-      define relation connection @abstract;
+      define relation family relates children @card(0..5);
       """
-    Then transaction commits; fails
-
-
-  Scenario: an abstract relation type can be defined with both abstract and concrete role types
-    When typeql define
+    Then typeql redefine
       """
-      define relation connection @abstract, relates from, relates to @abstract;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type connection; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:connection |
-
-
-  Scenario: a concrete relation type cannot be defined with abstract role types
-    When typeql define; fails
-      """
-      define relation connection relates from, relates to @abstract;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
-    When typeql define; fails
-      """
-      define relation connection relates to @abstract;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define relation connection relates from;
+      redefine family relates children @card(0..);
       """
     Then transaction commits
 
 
-  Scenario: when defining a relation type, duplicate 'relates' are idempotent
-    Given typeql define
-      """
-      define
-      relation parenthood relates parent, relates child, relates child, relates parent, relates child;
-      person plays parenthood:parent, plays parenthood:child;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x relates parent; $x relates child; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:parenthood |
-
-
-  Scenario: unrelated relations are allowed to have roles with the same name
+  Scenario: defining a relation type with a kind is acceptable
     When typeql define
       """
-      define
-      relation ownership relates owner;
-      relation loan relates owner;
+      define relation family relates children @card(0..5);
+      """
+    Then typeql redefine
+      """
+      redefine relation family relates children @card(0..);
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
+
+  Scenario: writing a relation variable in a 'redefine' is not allowed
+    Then typeql redefine; parsing fails
       """
-      match $x relates owner; get;
+      redefine relation $x;
       """
-    Then uniquely identify answer concepts
-      | x               |
-      | label:ownership |
-      | label:loan      |
 
 
   ###################
   # ATTRIBUTE TYPES #
   ###################
 
-  Scenario Outline: a '<value_type>' attribute type can be defined
+  Scenario: attribute types cannot be redefined
+    Then typeql redefine; parsing fails
+      """
+      redefine attribute name;
+      """
+
+
+  Scenario Outline: attribute types' value type can be redefined from '<value-type-1>' to '<value-type-2>'
     Given typeql define
       """
-      define attribute <label> value <value_type>;
+      define attribute <label> value <value-type-1>;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql redefine
+      """
+      redefine attribute <label> value <value-type-2>;
       """
     Given transaction commits
 
@@ -596,167 +305,107 @@ Feature: TypeQL Redefine Query
     Then answer size is: 1
 
     Examples:
-      | value_type | label          |
-      | boolean    | can-fly        |
-      | long       | number-of-cows |
-      | double     | density        |
-      | string     | favourite-food |
-      | datetime   | flight-date    |
+      | value-type-1 | value-type-2 | label              |
+      | date         | long         | number-of-cows     |
+      | decimal      | string       | favourite-food     |
+      | duration     | boolean      | can-fly            |
+      | datetime-tz  | double       | density            |
+      | double       | decimal      | savings            |
+      | datetime     | date         | flight-date        |
+      | long         | datetime     | flight-time        |
+      | boolean      | datetime-tz  | flight-time-tz     |
+      | string       | duration     | procedure-duration |
 
 
-  Scenario: defining an attribute type throws if you don't specify a value type
+  Scenario: an attribute type can be redefined as a subtype of an abstract attribute type
     When typeql define
       """
-      define attribute colour;
+        define attribute data @abstract;
       """
-    Then transaction commits; fails
-
-
-  Scenario: defining an abstract attribute type does not throw if you don't specify a value type
-    When typeql define
+    When typeql redefine
       """
-      define attribute colour @abstract;
-      """
-    Then transaction commits
-
-
-  Scenario: defining an attribute type throws if the specified value type is not a recognised value type
-    Then typeql define; fails
-      """
-      define attribute colour value rgba;
-      """
-
-
-  Scenario: a new attribute type can be defined as a subtype of an abstract attribute type
-    When typeql define
-      """
-      define
-      attribute code @abstract, value string ;
-      attribute door-code sub code;
+      redefine attribute long-data sub data;
       """
     Then transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
-      match $x sub code; get;
+      match $x sub data; get;
       """
     Then uniquely identify answer concepts
       | x               |
-      | label:code      |
-      | label:door-code |
+      | label:data      |
+      | label:long-data |
 
 
-  Scenario: a newly defined attribute subtype inherits the value type of its parent
-    When typeql define
+  Scenario: a redefined attribute subtype inherits the value type of its parent
+    When typeql redefine
       """
-      define
-      attribute code @abstract, value string;
-      attribute door-code sub code;
+      redefine empty-sub-data sub abstract-decimal-data;
       """
     Then transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql get
       """
-      match $x type door-code, value string; get;
+      match $x type empty-sub-data, value decimal; get;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:door-code |
+      | x                    |
+      | label:empty-sub-data |
 
 
-  Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
+  Scenario: redefining an attribute subtype throws if it is given a different value type to what its parent has
+    Then typeql redefine; fails
+      """
+      redefine attribute long-data sub abstract-decimal-data;
+      """
+
+
+  Scenario: redefining an attribute type without a kind is acceptable
     When typeql define
       """
-      define attribute name @abstract; entity person @abstract;
+      define attribute id value string;
       """
-    When transaction commits
-
-    When connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql redefine
       """
-      define attribute code-name sub name, value long;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define attribute code-name sub name; attribute code-name-2 value long;
-      """
-    When transaction commits
-
-    When connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define attribute code-name value long;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define attribute code-name-2 sub name;
-      """
-
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
-  Scenario: a regex constraint can be defined on a 'string' attribute type
-    Given typeql define
-      """
-      define attribute response @regex("^(yes|no|maybe)$"), value string;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x @regex("^(yes|no|maybe)$"); get;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:resource |
-
-
-  Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
-    Then typeql define; fails
-      """
-      define attribute name-in-binary @regex("^(0|1)+$"), value long;
-      """
-
-
-  Scenario Outline: a type can own a '<value_type>' attribute type
-    When typeql define
-      """
-      define
-      attribute <label> value <value_type>;
-      person owns <label>;
+      redefine attribute id value long;
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
+
+  Scenario: defining an attribute type with a kind is acceptable
+    When typeql define
       """
-      match $x owns <label>; get;
+      define attribute id value string;
       """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-
-    Examples:
-      | value_type | label             |
-      | boolean    | is-sleeping       |
-      | long       | number-of-fingers |
-      | double     | height            |
-      | string     | first-word        |
-      | datetime   | graduation-date   |
+    Then typeql redefine
+      """
+      redefine id value long;
+      """
+    Then transaction commits
 
 
-  # TODO
-#  Scenario Outline: a type can own a '<value_type>' attribute type as a key
-#
-#  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
+  Scenario: writing an attribute variable in a 'redefine' is not allowed
+    Then typeql redefine; parsing fails
+      """
+      redefine attribute $x;
+      """
+
+
+  Scenario: the value type of an existing attribute type is modifiable through redefine
+    Then typeql redefine
+      """
+      redefine name value long;
+      """
+    Then transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine attribute name value string;
+      """
+    Then transaction commits
 
 
   ###############
@@ -1243,949 +892,6 @@ Feature: TypeQL Redefine Query
       | values("1", "2") | values("0", "2") |
 
 
-  ##################
-  # ABSTRACT TYPES #
-  ##################
-
-  Scenario: an abstract entity type can be defined
-    When typeql define
-      """
-      define entity animal @abstract;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type animal; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:animal |
-
-
-  Scenario: a concrete entity type can be defined as a subtype of an abstract entity type
-    When typeql define
-      """
-      define
-      entity animal @abstract;
-      entity horse sub animal;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub animal; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:animal |
-      | label:horse  |
-
-
-  Scenario: an abstract entity type can be defined as a subtype of another abstract entity type
-    When typeql define
-      """
-      define
-      entity animal @abstract;
-      entity fish @abstract, sub animal;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub animal; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:animal |
-      | label:fish   |
-
-
-  Scenario: an abstract entity type cannot be defined as a subtype of a concrete entity type
-    Then typeql define; fails
-      """
-      define
-      entity exception;
-      entity typedb-exception @abstract, sub exception;
-      """
-
-
-  Scenario: an abstract relation type can be defined
-    When typeql define
-      """
-      define relation membership @abstract, relates member;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type membership; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:membership |
-
-
-  Scenario: a concrete relation type can be defined as a subtype of an abstract relation type
-    When typeql define
-      """
-      define
-      relation membership @abstract, relates member;
-      relation gym-membership sub membership, relates gym-with-members, relates gym-member as member;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub membership; get;
-      """
-    Then uniquely identify answer concepts
-      | x                    |
-      | label:membership     |
-      | label:gym-membership |
-
-
-  Scenario: an abstract relation type can be defined as a subtype of another abstract relation type
-    When typeql define
-      """
-      define
-      relation requirement @abstract, relates prerequisite, relates outcome;
-      relation tool-requirement @abstract, sub requirement, relates required-tool as prerequisite;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub requirement; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                      |
-      | label:requirement      |
-      | label:tool-requirement |
-
-
-  Scenario: an abstract relation type cannot be defined as a subtype of a concrete relation type
-    Then typeql define; fails
-      """
-      define
-      relation requirement relates prerequisite, relates outcome;
-      relation tech-requirement @abstract, sub requirement, relates required-tech as prerequisite;
-      """
-
-
-  Scenario: an abstract attribute type can be defined
-    When typeql define
-      """
-      define attribute number-of-limbs @abstract, value long;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type number-of-limbs; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                     |
-      | label:number-of-limbs |
-
-
-  Scenario: a concrete attribute type can be defined as a subtype of an abstract attribute type
-    When typeql define
-      """
-      define
-      attribute number-of-limbs @abstract, value long;
-      attribute number-of-legs sub number-of-limbs;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub number-of-limbs; get;
-      """
-    Then uniquely identify answer concepts
-      | x                     |
-      | label:number-of-limbs |
-      | label:number-of-legs  |
-
-
-  Scenario: an abstract attribute type can be defined as a subtype of another abstract attribute type
-    When typeql define
-      """
-      define
-      attribute number-of-limbs @abstract, value long;
-      attribute number-of-artificial-limbs @abstract, sub number-of-limbs;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub number-of-limbs; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                                |
-      | label:number-of-limbs            |
-      | label:number-of-artificial-limbs |
-
-
-  Scenario: defining attribute type hierarchies is idempotent
-    When typeql define
-      """
-      define attribute super-name @abstract, value string; attribute location-name sub super-name;
-      """
-    Then transaction commits
-    Then connection open schema transaction for database: typedb
-    Then typeql define
-      """
-      define attribute super-name @abstract, value string; attribute location-name sub super-name;
-      """
-    Then transaction commits
-    Then connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match
-      $name type super-name @abstract;
-      $location type location-name, sub super-name;
-      get;
-      """
-    Then uniquely identify answer concepts
-      | name             | location            |
-      | label:super-name | label:location-name |
-
-  # TODO: Reenable this scenario after closing https://github.com/vaticle/typeql/issues/281
-  @ignore
-  @ignore-typedb-driver-rust
-  Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
-    Given typeql define; fails
-      """
-      define entity animal @abstract @abstract @abstract;
-      """
-
-  ##############
-  # Annotation #
-  ##############
-
-  Scenario: annotations can be added on subtypes
-    Given typeql define
-      """
-      define
-      entity child sub person, owns school-id @unique;
-      attribute school-id value string;
-      """
-    Then transaction commits
-
-
-  Scenario: annotations are inherited
-    Given typeql define
-      """
-      define entity child sub person;
-      """
-    Given transaction commits
-    Then connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $t owns $a @key; get;
-      """
-    Then uniquely identify answer concepts
-      | t                | a                               |
-      | label:person     | label:email                     |
-      | label:child      | label:email                     |
-      | label:employment | label:employment-reference-code |
-    When get answers of typeql get
-      """
-      match $t owns $a @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | t            | a              |
-      | label:person | label:phone-nr |
-      | label:child  | label:phone-nr |
-
-
-  Scenario: redefining inherited annotations throws
-    Then typeql define
-      """
-      define entity child sub person, owns email @key;
-      """
-    Then transaction commits; fails
-    Then connection open schema transaction for database: typedb
-    Then typeql define
-      """
-      define entity child sub person, owns phone-nr @unique;
-      """
-    Then transaction commits; fails
-
-
-  Scenario: annotations are inherited through overrides
-    Given typeql define
-      """
-      define
-      entity person @abstract;
-      attribute phone-nr @abstract;
-      entity child sub person, owns mobile as phone-nr;
-      attribute mobile sub phone-nr;
-      """
-    Given transaction commits
-    Then connection open schema transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $t owns $a @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | t            | a              |
-      | label:person | label:phone-nr |
-      | label:child  | label:mobile   |
-    Given typeql define
-      """
-      define
-      entity child @abstract;
-      attribute mobile @abstract;
-      entity infant sub child, owns baby-phone-nr as mobile;
-      attribute baby-phone-nr sub mobile;
-      """
-    Given transaction commits
-    Then connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $t owns $a @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | t            | a                   |
-      | label:person | label:phone-nr      |
-      | label:child  | label:mobile        |
-      | label:infant | label:baby-phone-nr |
-
-
-  Scenario: redefining inherited annotations on overrides throws
-    Given typeql define
-      """
-      define
-      entity person @abstract;
-      attribute phone-nr @abstract;
-      entity child sub person, owns mobile as phone-nr;
-      attribute mobile sub phone-nr;
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Then typeql define
-      """
-      define entity child owns mobile as phone-nr @unique;
-      """
-    Then transaction commits; fails
-
-
-  Scenario: defining a less strict annotation on an inherited ownership throws
-    When typeql define
-      """
-      define entity child sub person, owns email @unique;
-      """
-    Then transaction commits; fails
-
-
-  ###################
-  # SCHEMA MUTATION #
-  ###################
-
-  Scenario: an existing type can be repeatedly redefined, and it is a no-op
-    When typeql define
-      """
-      define
-      entity person owns name;
-      entity person owns name;
-      entity person owns name;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type person, owns name; get;
-      """
-    Then answer size is: 1
-
-
-  Scenario: an entity type cannot be changed into a relation type
-    Then typeql define; fails
-      """
-      define
-      relation person relates body-part;
-      entity arm plays person:body-part;
-      """
-
-
-  Scenario: a relation type cannot be changed into an attribute type
-    Then typeql define; fails
-      """
-      define attribute employment value string;
-      """
-
-
-  Scenario: an attribute type cannot be changed into an entity type
-    Then typeql define; fails
-      """
-      define entity name;
-      """
-
-
-  Scenario: a new attribute ownership can be defined on an existing type
-    When typeql define
-      """
-      define employment owns name;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns name; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:person     |
-      | label:employment |
-
-
-  Scenario: a new playable role can be defined on an existing type
-    When typeql define
-      """
-      define employment plays employment:employee;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x plays employment:employee; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:person     |
-      | label:employment |
-
-
-  Scenario: defining a key on an existing ownership is possible if data already conforms to key requirements
-    Given typeql define
-      """
-      define
-      attribute barcode value string;
-      entity product owns name, owns barcode;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa product, has name "Cheese", has barcode "10001";
-      $y isa product, has name "Ham", has barcode "10011";
-      $a "Milk" isa name;
-      $b "11111" isa barcode;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define
-      product owns barcode @key;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns barcode @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x             |
-      | label:product |
-
-
-  Scenario: defining a key on a type throws if existing instances don't have that key
-    Given typeql define
-      """
-      define
-      attribute barcode value string;
-      entity product owns name;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa product, has name "Cheese";
-      $y isa product, has name "Ham";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      product owns barcode @key;
-      """
-
-
-  Scenario: defining a key on a type throws if there is a key collision between two existing instances
-    Given typeql define
-      """
-      define
-      attribute barcode value string;
-      entity product owns name, owns barcode;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa product, has name "Cheese", has barcode "10000";
-      $y isa product, has name "Ham", has barcode "10000";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      product owns barcode @key;
-      """
-
-
-  Scenario: a new role can be defined on an existing relation type
-    When typeql define
-      """
-      define
-      entity company plays employment:employer;
-      employment relates employer;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x relates employer; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
-
-
-  Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
-    Then typeql define; fails
-      """
-      define attribute name value long;
-      """
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define attribute name value string;
-      """
-    Then transaction commits
-
-
-  Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Alice", has email "alice@vaticle.com";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define name value string @regex("^A.*$");
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    Then get answers of typeql get
-      """
-      match $x @regex("^A.*$"); get;
-      """
-    Then uniquely identify answer concepts
-      | x          |
-      | label:name |
-
-
-  Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Maria", has email "maria@vaticle.com";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define name @regex("^A.*$");
-      """
-
-
-  Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
-    Given typeql define
-      """
-      define attribute house-number value long;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define house-number @regex("^A.*$");
-      """
-
-
-  Scenario: related roles cannot be added to existing entity types
-    Then typeql define; fails
-      """
-      define person relates employee;
-      """
-
-
-  Scenario: related roles cannot be added to existing attribute types
-    Then typeql define; fails
-      """
-      define name relates employee;
-      """
-
-
-  Scenario: the value type of an existing attribute type is modifiable through redefine
-    Then typeql redefine
-      """
-      redefine name value long;
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Then typeql redefine
-      """
-      redefine attribute name value long;
-      """
-    Then transaction commits
-
-
-  Scenario: an attribute ownership can be converted to a key ownership
-    When typeql define
-      """
-      define person owns name @key;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns name @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-
-
-  Scenario: an attribute key ownership can be converted to a regular ownership
-    When typeql define
-      """
-      define person owns email;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns email; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-    When get answers of typeql get
-      """
-      match $x owns email @key; get;
-      """
-    Then answer size is: 0
-
-
-  Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
-    Given typeql define
-      """
-      define person owns name @card(0..);
-      """
-    Given transaction commits
-    Given connection open write transaction for database: typedb
-    When typeql insert
-      """
-      insert $x isa person, has name "Bob", has email "bob@gmail.com";
-      """
-    Then typeql insert
-      """
-      insert $x isa person, has name "Jane", has name "Doe", has email "janedoe@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define
-      """
-      define person owns name @unique;
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    Given typeql insert; fails
-      """
-      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
-      """
-
-
-  Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    When typeql insert
-      """
-      insert $x isa person, has name "Bob", has email "bob@gmail.com";
-      """
-    Then typeql insert
-      """
-      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql define; fails
-      """
-      define person owns name @unique;
-      """
-
-
-  Scenario: a key ownership can be converted to a unique ownership
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has email "jane@gmail.com";
-      $y isa person, has email "john@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql redefine
-      """
-      redefine person owns email @unique;
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns $y @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | x            | y              |
-      | label:person | label:email    |
-      | label:person | label:phone-nr |
-    When get answers of typeql get
-      """
-      match person owns $y @key; get;
-      """
-    Then answer size is: 0
-    Given typeql insert; fails
-      """
-      insert $x isa person, has email "jane@gmail.com";
-      """
-
-
-  Scenario: ownership uniqueness can be removed
-    Given typeql define
-      """
-      define person owns phone-nr;
-      """
-    Given transaction commits
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has phone-nr "123", has email "abc@gmail.com";
-      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
-      """
-    Given transaction commits
-
-
-  Scenario: converting unique to key is possible if the data conforms to key requirements
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has phone-nr "123", has email "abc@gmail.com";
-      $y isa person, has phone-nr "456", has email "xyz@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Given typeql redefine
-      """
-      redefine
-      person owns phone-nr @key;
-      """
-    Then transaction commits
-    Given connection open write transaction for database: typedb
-    Then typeql insert; fails
-      """
-      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
-      """
-
-
-  Scenario: converting unique to key fails if the data does not conform to key requirements
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $x isa person, has phone-nr "123", has phone-nr "456", has email "abc@gmail.com";
-      """
-    Given transaction commits
-    Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
-      """
-      redefine
-      person owns phone-nr @key;
-      """
-
-
-  #############################
-  # SCHEMA MUTATION: ABSTRACT #
-  #############################
-
-  Scenario: a concrete entity type can be converted to an abstract entity type
-    When typeql define
-      """
-      define person @abstract;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub person; $x @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-
-
-  Scenario: a concrete relation type can be converted to an abstract relation type
-    When typeql define
-      """
-      define relation friendship relates friend;
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define friendship @abstract;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub friendship @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:friendship |
-
-
-  Scenario: a concrete attribute type can be converted to an abstract attribute type
-    When typeql define
-      """
-      define attribute age value long;
-      """
-    Then transaction commits
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define age @abstract;
-      """
-    Then transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub age @abstract; get;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | label:age |
-
-
-  Scenario: an existing entity type cannot be converted to abstract if it has existing instances
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define person @abstract;
-      """
-
-
-  Scenario: an existing relation type cannot be converted to abstract if it has existing instances
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
-      $r isa employment, links (employee: $x), has employment-reference-code "J123123";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define employment @abstract;
-      """
-
-
-  Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
-    Given transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define name @abstract;
-      """
-
-
-  Scenario: changing a concrete type to abstract throws on commit if it has a concrete supertype
-
-  @ignore
-  # TODO: re-enable when rules are indexed
-  Scenario: changing a concrete relation type to abstract throws on commit if it appears in the conclusion of any rule
-
-#  @ignore
-#  # TODO: re-enable when rules are indexed
-#  Scenario: changing a concrete attribute type to abstract throws on commit if it appears in the conclusion of any rule
-
   ######################
   # HIERARCHY MUTATION #
   ######################
@@ -2218,23 +924,6 @@ Feature: TypeQL Redefine Query
       | label:genius        |
 
 
-  Scenario: an existing entity type cannot be switched to a new supertype through define
-    Given typeql define
-      """
-      define
-      entity apple-product;
-      entity genius sub person;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      entity genius sub apple-product;
-      """
-
-
   Scenario: an existing relation type can be switched to a new supertype
     Given typeql define
       """
@@ -2263,103 +952,16 @@ Feature: TypeQL Redefine Query
       | label:sabbatical |
 
 
-  Scenario: an existing relation type cannot be switched to a new supertype through define
-    Given typeql define
-      """
-      define
-      relation sabbatical sub employment;
-      relation vacation relates employee;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      relation sabbatical sub vacation;
-      """
-
-
-  Scenario: an existing attribute type can be switched to a new supertype with a matching value type
-    Given typeql define
-      """
-      define
-      attribute measure @abstract, value double;
-      attribute shoe-size sub measure;
-      entity shoe owns shoe-size;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    # TODO: 9 is considered long, while it should be transformed into double before thing_manager
-    Given typeql insert
-      """
-      insert $s isa shoe, has shoe-size 9;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define
-      attribute size value double @abstract;
-      attribute shoe-size sub size;
-      """
-    # TODO: This will probably fail because of the value type redundancy. Move this test to redefine/undefine?
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub shoe-size; get;
-      """
-    Then uniquely identify answer concepts
-      | x               |
-      | label:shoe-size |
-
-
-  Scenario: assigning a supertype without previous supertype succeeds even if they have different attributes + roles, if there are no instances
-    Given typeql define
-      """
-      define
-      entity species owns name, plays species-membership:species;
-      relation species-membership relates species, relates member;
-      attribute lifespan value double;
-      entity organism owns lifespan, plays species-membership:member;
-      entity child sub person;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When typeql define
-      """
-      define
-      entity person sub organism;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x sub organism; get;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:organism |
-      | label:person   |
-      | label:child    |
-
-
   Scenario: assigning a supertype while having another supertype succeeds even if they have different attributes + roles, if there are no instances
     Given typeql define
       """
       define
-      entity person sub species;
+      entity creature sub species;
       entity species owns name, plays species-membership:species;
       relation species-membership relates species, relates member;
       attribute lifespan value double;
       entity organism owns lifespan, plays species-membership:member;
-      entity child sub person;
+      entity human sub person;
       """
     Given transaction commits
 
@@ -2367,7 +969,7 @@ Feature: TypeQL Redefine Query
     When typeql define
       """
       redefine
-      entity person sub organism;
+      entity creature sub organism;
       """
     Then transaction commits
 
@@ -2379,8 +981,8 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x              |
       | label:organism |
-      | label:person   |
-      | label:child    |
+      | label:creature |
+      | label:human    |
 
 
   Scenario: assigning a new supertype when having other sub succeeds even with existing data if the supertypes have no properties
@@ -2440,10 +1042,14 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
+    When typeql define
+      """
+      define
+      entity animal plays flying:flier;
+      """
     When typeql redefine
       """
       redefine
-      entity animal plays flying:flier;
       entity pigeon sub animal;
       """
     Then transaction commits
@@ -2476,10 +1082,17 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
+    When typeql define
+      """
+      define
+      entity animal owns name;
+      """
+    Then transaction commits
+
+    Given connection open schema transaction for database: typedb
     When typeql redefine
       """
       redefine
-      entity animal owns name;
       entity pigeon sub animal;
       """
     Then transaction commits
@@ -2492,328 +1105,3 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x            |
       | label:pigeon |
-
-
-  Scenario: assigning a new supertype when having another supertype through define fails without preceding redefine/undefine
-    Given typeql define
-      """
-      define
-      entity bird;
-      entity pigeon sub bird;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $p isa pigeon;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      entity animal;
-      entity pigeon sub animal;
-      """
-
-    Given typeql define
-      """
-      define
-      attribute name value string;
-      entity bird2 owns name;
-      entity pigeon2 sub bird2;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $p isa pigeon2;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      entity animal owns name;
-      entity pigeon2 sub animal;
-      """
-
-    Given typeql define
-      """
-      define
-      entity bird3 plays flying:flier;
-      entity pigeon3 sub bird3;
-      relation flying relates flier;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql insert
-      """
-      insert $p isa pigeon3;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      entity animal plays flying:flier;
-      entity pigeon3 sub animal;
-      """
-
-  Scenario: assigning a supertype while having another supertype through define fails even if there are no instances
-    Given typeql define
-      """
-      define
-      entity person sub organism;
-      entity species owns name, plays species-membership:species;
-      relation species-membership relates species, relates member;
-      attribute lifespan value double;
-      entity organism owns lifespan, plays species-membership:member;
-      entity child sub person;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    Then typeql define; fails
-      """
-      define
-      entity person sub species;
-      """
-
-
-  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes have the same attributes
-  Scenario: assigning a new supertype throws if existing data has attributes not present on the new supertype
-
-  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes play the same roles
-  Scenario: assigning a new supertype throws if existing data plays a role that it can't with the new supertype
-
-  # TODO: write this once 'assign new supertype throws if .. data has attributes not present on the new supertype' is written
-  Scenario: assigning a new supertype throws if that supertype has a has not @key present in the existing data (?)
-
-  # TODO: write this once 'define new 'sub' on relation type changes its supertype' is written
-  Scenario: assigning a new super-relation throws if existing data has roleplayers not present on the new supertype (?)
-
-  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
-  Scenario: assigning a new super-attribute throws if it has a different value type (?)
-
-  # TODO: write this if 'assign new super-attribute throws if it has a different value type ..' turns out to not throw
-  Scenario: assigning a new super-attribute throws if it has existing data and a different value type (?)
-
-  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
-  Scenario: assigning a new super-attribute throws if the new supertype has a regex and existing data doesn't match it (?)
-
-  ###############################
-  # SCHEMA MUTATION INHERITANCE #
-  ###############################
-
-
-  Scenario: when adding a playable role to an existing type, the change is propagated to its subtypes
-    Given typeql define
-      """
-      define
-      relation employment relates employer;
-      entity child sub person;
-      entity person plays employment:employer;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type child, plays $r; get;
-      """
-    Then uniquely identify answer concepts
-      | x           | r                         |
-      | label:child | label:employment:employee |
-      | label:child | label:employment:employer |
-      | label:child | label:income:earner       |
-
-
-  Scenario: when adding an attribute ownership to an existing type, the change is propagated to its subtypes
-    Given typeql define
-    """
-       define
-       entity person owns mobile;
-       attribute mobile value long;
-       entity child sub person;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type child, owns $y; get;
-      """
-    Then uniquely identify answer concepts
-      | x           | y              |
-      | label:child | label:name     |
-      | label:child | label:mobile   |
-      | label:child | label:email    |
-      | label:child | label:phone-nr |
-
-
-  Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
-    Given typeql define
-      """
-      define
-      entity child sub person;
-      attribute phone-number value long;
-      entity person owns phone-number @key;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type child, owns $y @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x           | y                  |
-      | label:child | label:email        |
-      | label:child | label:phone-number |
-
-
-  Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
-    Given typeql define
-      """
-      define
-      relation part-time-employment sub employment;
-      relation employment relates employer;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type part-time-employment, relates $r; get;
-      """
-    Then uniquely identify answer concepts
-      | x                          | r                         |
-      | label:part-time-employment | label:employment:employee |
-      | label:part-time-employment | label:employment:employer |
-
-
-  ####################
-  # TRANSACTIONALITY #
-  ####################
-
-  Scenario: uncommitted transaction writes are not persisted
-    When typeql define
-      """
-      define entity dog;
-      """
-    # TODO: The current framework doesn't support another transaction from the same client without closing the
-    # already existing one. It might contradict the test!
-    Given transaction closes
-    Given connection open read transaction for database: typedb
-    Then typeql get; fails
-      """
-      match $x type dog; get;
-      """
-
-
-  ########################
-  # CYCLIC SCHEMA GRAPHS #
-  ########################
-
-  Scenario: a type cannot be a subtype of itself
-    Then typeql define; fails
-      """
-      define dog sub dog;
-      """
-
-
-  Scenario: a cyclic type hierarchy is not allowed
-    Then typeql define; fails
-      """
-      define
-      entity giant sub person;
-      entity green-giant sub giant;
-      entity person sub green-giant;
-      """
-
-
-  Scenario: a relation type can relate to a role that it plays itself
-    When typeql define
-      """
-      define
-      relation recursive-function relates function, plays recursive-function:function;
-      """
-    Then transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x relates function; $x plays recursive-function:function; get;
-      """
-    Then uniquely identify answer concepts
-      | x                        |
-      | label:recursive-function |
-
-
-  Scenario: two relation types in a type hierarchy can play each other's roles
-    When typeql define
-      """
-      define
-      relation apple @abstract, relates role1, plays big-apple:role2;
-      relation big-apple sub apple, plays apple:role1, relates role2;
-      """
-
-
-  Scenario: relation types that play roles in their transitive subtypes can be reliably defined
-
-  Variables from a 'define' query are selected for defining in an arbitrary order. When these variables
-  depend on each other, creating a dependency graph, they should all define successfully regardless of
-  which variable was picked as the start vertex (#131)
-
-    When typeql define
-      """
-      define
-
-      relation apple @abstract, relates source @abstract, plays huge-apple:grows-from;
-      relation big-apple @abstract, sub apple;
-      relation huge-apple sub big-apple, relates tree as source, relates grows-from;
-
-      relation banana @abstract, relates source @abstract, plays huge-banana:grows-from;
-      relation big-banana @abstract, sub banana;
-      relation huge-banana sub big-banana, relates tree as source, relates grows-from;
-
-      relation orange @abstract, relates source @abstract, plays huge-orange:grows-from;
-      relation big-orange @abstract, sub orange;
-      relation huge-orange sub big-orange, relates tree as source, relates grows-from;
-
-      relation pear @abstract, relates source @abstract, plays huge-pear:grows-from;
-      relation big-pear @abstract, sub pear;
-      relation huge-pear sub big-pear, relates tree as source, relates grows-from;
-
-      relation tomato @abstract, relates source @abstract, plays huge-tomato:grows-from;
-      relation big-tomato @abstract, sub tomato;
-      relation huge-tomato sub big-tomato, relates tree as source, relates grows-from;
-
-      relation watermelon @abstract, relates source @abstract, plays huge-watermelon:grows-from;
-      relation big-watermelon @abstract, sub watermelon;
-      relation huge-watermelon sub big-watermelon, relates tree as source, relates grows-from;
-
-      relation lemon @abstract, relates source @abstract, plays huge-lemon:grows-from;
-      relation big-lemon @abstract, sub lemon;
-      relation huge-lemon sub big-lemon, relates tree as source, relates grows-from;
-
-      relation lime @abstract, relates source @abstract, plays huge-lime:grows-from;
-      relation big-lime @abstract, sub lime;
-      relation huge-lime sub big-lime, relates tree as source, relates grows-from;
-
-      relation mango @abstract, relates source @abstract, plays huge-mango:grows-from;
-      relation big-mango @abstract, sub mango;
-      relation huge-mango sub big-mango, relates tree as source, relates grows-from;
-
-      relation pineapple @abstract, relates source @abstract, plays huge-pineapple:grows-from;
-      relation big-pineapple @abstract, sub pineapple;
-      relation huge-pineapple sub big-pineapple, relates tree as source, relates grows-from;
-      """
-    Then transaction commits
