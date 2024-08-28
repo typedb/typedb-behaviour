@@ -10,8 +10,6 @@ Feature: TypeQL Redefine Query
     Given connection opens with default authentication
     Given connection has been opened
     Given connection reset database: typedb
-#    Given connection does not have any database
-#    Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
     Given typeql define
@@ -53,10 +51,10 @@ Feature: TypeQL Redefine Query
       | label:dog |
 
 
-  Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
-    When typeql define
+  Scenario: can redefine entity type's sub
+    When typeql redefine
       """
-      define entity child sub person;
+      redefine entity child sub person;
       """
     Then transaction commits
 
@@ -71,52 +69,10 @@ Feature: TypeQL Redefine Query
       | label:child  |
 
 
-  Scenario: when defining that a type owns a non-existent thing, an error is thrown
-    Then typeql define; fails
+  Scenario: a redefined entity subtype inherits playable roles from its parent type
+    Given typeql redefine
       """
-      define entity book owns pages;
-      """
-
-
-  Scenario: types cannot own entity types
-    Then typeql define; fails
-      """
-      define entity house owns person;
-      """
-
-
-  Scenario: types cannot own relation types
-    Then typeql define; fails
-      """
-      define entity company owns employment;
-      """
-
-
-  Scenario: when defining that a type plays a non-existent role, an error is thrown
-    Then typeql define; fails
-      """
-      define entity house plays constructed:something;
-      """
-
-
-  Scenario: types cannot play entity types
-    Then typeql define; parsing fails
-      """
-      define entity parrot plays person;
-      """
-
-
-  Scenario: types can not own entity types as keys
-    Then typeql define; fails
-      """
-      define entity passport owns person @key;
-      """
-
-
-  Scenario: a newly defined entity subtype inherits playable roles from its parent type
-    Given typeql define
-      """
-      define entity child sub person;
+      redefine entity child sub person;
       """
     Given transaction commits
 
@@ -131,33 +87,10 @@ Feature: TypeQL Redefine Query
       | label:child  |
 
 
-  Scenario: a newly defined entity subtype inherits playable roles from all of its supertypes
-    Given typeql define
+  Scenario: a redefined entity subtype inherits attribute ownerships from its parent type
+    Given typeql redefine
       """
-      define
-      entity athlete sub person;
-      entity runner sub athlete;
-      entity sprinter sub runner;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x plays employment:employee; get;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:person   |
-      | label:athlete  |
-      | label:runner   |
-      | label:sprinter |
-
-
-  Scenario: a newly defined entity subtype inherits attribute ownerships from its parent type
-    Given typeql define
-      """
-      define entity child sub person;
+      redefine entity child sub person;
       """
     Given transaction commits
 
@@ -172,494 +105,57 @@ Feature: TypeQL Redefine Query
       | label:child  |
 
 
-  Scenario: a newly defined entity subtype inherits attribute ownerships from all of its supertypes
-    Given typeql define
+  Scenario: redefining a type without a kind is acceptable
+    Then typeql redefine
       """
-      define
-      entity athlete sub person;
-      entity runner sub athlete;
-      entity sprinter sub runner;
+      redefine flying-spaghetti-monster;
       """
-    Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns name; get;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:person   |
-      | label:athlete  |
-      | label:runner   |
-      | label:sprinter |
-
-
-  Scenario: a newly defined entity subtype inherits keys from its parent type
-    Given typeql define
-      """
-      define entity child sub person;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns email @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-      | label:child  |
-
-
-  Scenario: a newly defined entity subtype inherits keys from all of its supertypes
-    Given typeql define
-      """
-      define
-      entity athlete sub person;
-      entity runner sub athlete;
-      entity sprinter sub runner;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns email @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:person   |
-      | label:athlete  |
-      | label:runner   |
-      | label:sprinter |
-
-
-  Scenario: defining a playable role is idempotent
-    Given typeql define
-      """
-      define
-      entity house plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
-      relation home-ownership relates home, relates owner;
-      person plays home-ownership:owner;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x plays home-ownership:home; get;
-      """
-    Then uniquely identify answer concepts
-      | x           |
-      | label:house |
-
-
-  Scenario: defining an attribute ownership is idempotent
-    Given typeql define
-      """
-      define
-      attribute price value double;
-      entity house owns price, owns price, owns price;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns price; get;
-      """
-    Then uniquely identify answer concepts
-      | x           |
-      | label:house |
-
-
-  Scenario: defining a key ownership is idempotent
-    Given typeql define
-      """
-      define
-      attribute address value string;
-      entity house owns address @key, owns address @key, owns address @key;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x owns address @key; get;
-      """
-    Then uniquely identify answer concepts
-      | x           |
-      | label:house |
-
-
-  Scenario: defining a type without a kind throws
-    Then typeql define; fails
-      """
-      define flying-spaghetti-monster;
-      """
-
-
-  Scenario: a type definition must specify a kind
-    Then typeql define; fails
-      """
-      define column;
-      """
-
-
-  Scenario: an entity type can not have a value type defined
-    Then typeql define; fails
-      """
-      define entity cream value double;
-      """
-
-
-  Scenario: defining a thing with 'isa' is not possible in a 'define' query
-    Then typeql define; parsing fails
-      """
-      define $p isa person;
-      """
-
-
-  Scenario: adding an attribute instance to a thing is not possible in a 'define' query
-    Then typeql define; parsing fails
-      """
-      define $p has name "Loch Ness Monster";
-      """
-
-
-  Scenario: writing a variable in a 'define' is not allowed
-    Then typeql define; parsing fails
-      """
-      define entity $x;
-      """
-
-
-  ###############
-  # ANNOTATIONS #
-  ###############
-
-  Scenario Outline: can set annotation @<annotation> to entity types
-    Then typeql define
-      """
-      define
-      entity player @<annotation>;
-      """
-    Then transaction commits
-    Examples:
-      | annotation |
-      | abstract   |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to entity types
-    Then typeql define; fails
-      """
-      define
-      entity player @<annotation>;
-      """
-    Examples:
-      | annotation       |
-      | distinct         |
-      | independent      |
-      | unique           |
-      | key              |
-      | card(1..1)       |
-      | regex("val")     |
-      | cascade          |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: can set annotation @<annotation> to relation types
-    Then typeql define
-      """
-      define
-      relation parentship @<annotation>, relates parent;
-      """
-    Then transaction commits
-    Examples:
-      | annotation |
-      | abstract   |
-      | cascade    |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to relation types
-    Then typeql define; fails
-      """
-      define
-      relation parentship @<annotation>, relates parent;
-      """
-    Examples:
-      | annotation       |
-      | distinct         |
-      | independent      |
-      | unique           |
-      | key              |
-      | card(1..1)       |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: can set annotation @<annotation> to attribute types
-    Then typeql define
-      """
-      define
-      attribute description @<annotation>, value string;
-      """
-    Then transaction commits
-    Examples:
-      | annotation  |
-      | abstract    |
-      | independent |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to attribute types
-    Then typeql define; fails
-      """
-      define
-      attribute description @<annotation>, value string;
-      """
-    Examples:
-      | annotation       |
-      | distinct         |
-      | unique           |
-      | key              |
-      | card(1..1)       |
-      | cascade          |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: can set annotation @<annotation> to relates/role types
-    Then typeql define
-      """
-      define
-      relation parentship @abstract, relates parent @<annotation>;
-      """
-    Then transaction commits
-    Examples:
-      | annotation |
-      | abstract   |
-      | card(1..1) |
 
-
-  Scenario Outline: cannot set annotation @<annotation> to relates/role types
-    Then typeql define; fails
-      """
-      define
-      relation parentship @abstract, relates parent @<annotation>;
-      """
-    Examples:
-      | annotation       |
-      | distinct         |
-      | independent      |
-      | unique           |
-      | key              |
-      | cascade          |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: can set annotation @<annotation> to relates/role types lists
-    Then typeql define
-      """
-      define
-      relation parentship @abstract, relates parent[] @<annotation>;
-      """
-    Then transaction commits
-    Examples:
-      | annotation |
-      | abstract   |
-      | card(1..1) |
-      | distinct   |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to relates/role types lists
-    Then typeql define; fails
-      """
-      define
-      relation parentship @abstract, relates parent[] @<annotation>;
-      """
-    Examples:
-      | annotation       |
-      | independent      |
-      | unique           |
-      | key              |
-      | cascade          |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: can set annotation @<annotation> to owns
-    Then typeql define
-      """
-      define
-      entity player owns name @<annotation>;
-      """
-    Then transaction commits
-    Examples:
-      | annotation       |
-      | card(1..1)       |
-      | unique           |
-      | key              |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to owns
-    Then typeql define; fails
-      """
-      define
-      entity player owns name @<annotation>;
-      """
-    Examples:
-      | annotation  |
-      | abstract    |
-      | distinct    |
-      | independent |
-      | cascade     |
-
-
-  Scenario Outline: can set annotation @<annotation> to owns lists
-    Then typeql define
-      """
-      define
-      entity player owns name[] @<annotation>;
+  Scenario: defining a type with a kind is acceptable
+    Then typeql redefine
       """
-    Then transaction commits
-    Examples:
-      | annotation       |
-      | distinct         |
-      | card(1..1)       |
-      | unique           |
-      | key              |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-
-  Scenario Outline: cannot set annotation @<annotation> to owns lists
-    Then typeql define; fails
-      """
-      define
-      entity player owns name[] @<annotation>;
-      """
-    Examples:
-      | annotation  |
-      | abstract    |
-      | independent |
-      | cascade     |
-
-
-  Scenario Outline: can set annotation @<annotation> to plays
-    Then typeql define
+      redefine flying-spaghetti-monster;
       """
-      define
-      entity player plays employment:employee @<annotation>;
-      """
-    Then transaction commits
-    Examples:
-      | annotation |
-      | card(1..1) |
 
 
-  Scenario Outline: cannot set annotation @<annotation> to plays
-    Then typeql define; fails
+  Scenario: an entity type can not have a value type redefined
+    Then typeql redefine; fails
       """
-      define
-      entity player plays employment:employee @<annotation>;
+      redefine entity cream value double;
       """
-    Examples:
-      | annotation       |
-      | abstract         |
-      | distinct         |
-      | independent      |
-      | cascade          |
-      | unique           |
-      | key              |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
 
 
-  Scenario Outline: can set annotation @<annotation> to value types
-    Then typeql define
+  Scenario: redefining a thing with 'isa' is not possible in a 'redefine' query
+    Then typeql redefine; parsing fails
       """
-      define
-      attribute description value string @<annotation>;
+      redefine $p isa person;
       """
-    Then transaction commits
-    Examples:
-      | annotation       |
-      | regex("val")     |
-      | range("1".."2")  |
-      | values("1", "2") |
 
 
-  Scenario Outline: cannot set annotation @<annotation> to value types
-    Then typeql define; fails
+  Scenario: adding an attribute instance to a thing is not possible in a 'redefine' query
+    Then typeql redefine; parsing fails
       """
-      define
-      attribute description value string @<annotation>;
+      redefine $p has name "Loch Ness Monster";
       """
-    Examples:
-      | annotation  |
-      | abstract    |
-      | distinct    |
-      | independent |
-      | unique      |
-      | key         |
-      | card(1..1)  |
-      | cascade     |
 
 
-  Scenario Outline: cannot set annotation @<annotation> to subs
-    Then typeql define; fails
+  Scenario: writing a variable in a 'redefine' is not allowed
+    Then typeql redefine; parsing fails
       """
-      define
-      entity player sub person @<annotation>;
+      redefine entity $x;
       """
-    Examples:
-      | annotation       |
-      | abstract         |
-      | distinct         |
-      | independent      |
-      | unique           |
-      | key              |
-      | card(1..1)       |
-      | regex("val")     |
-      | cascade          |
-      | range("1".."2")  |
-      | values("1", "2") |
-
-    # TODO: Same "cannot set annotation" for alias?
 
 
   ##################
   # RELATION TYPES #
   ##################
 
-  Scenario: new relation types can be defined
-    When typeql define
+  Scenario: relation types cannot be redefined
+    Then typeql redefine; fails
       """
-      define relation pet-ownership relates pet-owner, relates owned-pet;
+      redefine relation employment;
       """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $x type pet-ownership; get;
-      """
-    Then uniquely identify answer concepts
-      | x                   |
-      | label:pet-ownership |
 
 
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
@@ -1261,6 +757,490 @@ Feature: TypeQL Redefine Query
 #  Scenario Outline: a type can own a '<value_type>' attribute type as a key
 #
 #  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
+
+
+  ###############
+  # ANNOTATIONS #
+  ###############
+
+  Scenario Outline: cannot redefine annotation @<annotation> for entity types
+    When typeql define
+      """
+      define entity player;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      entity player @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      entity player @<annotation-2>;
+      """
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | abstract         | abstract         |             | ; fails       | commits          |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for relation types
+    When typeql define
+      """
+      define
+      relation parentship relates parent;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql define<define-fail>
+      """
+      define
+      relation parentship @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      relation parentship @<annotation-2>;
+      """
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | abstract         | abstract         |             | ; fails       | commits          |
+      | cascade          | cascade          |             | ; fails       | commits          |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for attribute types
+    When typeql define
+      """
+      define
+      attribute description value string;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      attribute description @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      attribute description @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | abstract         | abstract         |             | ; fails       | commits          |
+      | independent      | independent      |             | ; fails       | commits          |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for relates/role types
+    When typeql define
+      """
+      define
+      relation parentship @abstract, relates parent;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      relation parentship relates parent @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | abstract         | abstract         |             | ; fails       | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for relates/role types
+    Then typeql define
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      relation parentship relates parent @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation | annotation-2 |
+      | card(1..1) | card(0..1)   |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> to relates/role types lists
+    When typeql define
+      """
+      define
+      relation parentship @abstract, relates parent[];
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      relation parentship relates parent[] @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | abstract         | abstract         |             | ; fails       | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
+      | distinct         | distinct         |             | ; fails       | commits          |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for relates/role types lists
+    Then typeql define
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      relation parentship relates parent[] @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation | annotation-2 |
+      | card(1..1) | card(0..1)   |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for owns
+    When typeql define
+      """
+      define
+      entity player owns name;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      entity player owns name @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | unique           | unique           |             | ; fails       | commits          |
+      | key              | key              |             | ; fails       | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
+      | regex("val")     | regex("val")     |             | ; fails       | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
+      | abstract         | abstract         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for owns
+    Then typeql define
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      entity player owns name @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     |
+      | card(1..1)       | card(0..1)       |
+      | regex("val")     | regex("lav")     |
+      | range("1".."2")  | range("0".."2")  |
+      | values("1", "2") | values("0", "2") |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for owns lists
+    When typeql define
+      """
+      define
+      entity player owns name[];
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      entity player owns name[] @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | unique           | unique           |             | ; fails       | commits          |
+      | key              | key              |             | ; fails       | commits          |
+      | distinct         | distinct         |             | ; fails       | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
+      | regex("val")     | regex("val")     |             | ; fails       | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
+      | abstract         | abstract         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for owns lists
+    Then typeql define
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      entity player owns name[] @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     |
+      | card(1..1)       | card(0..1)       |
+      | regex("val")     | regex("lav")     |
+      | range("1".."2")  | range("0".."2")  |
+      | values("1", "2") | values("0", "2") |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for plays
+    When typeql define
+      """
+      define
+      entity player plays employment:employee;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      entity player plays employment:employee @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
+      | abstract         | abstract         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for plays
+    Then typeql define
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      entity player plays employment:employee @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation | annotation-2 |
+      | card(1..1) | card(0..1)   |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for value types
+    When typeql define
+      """
+      define
+      attribute description value string;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define<define-fail>
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    When transaction <define-tx-action>
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine<redefine-fail>
+      """
+      redefine
+      attribute description value string @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
+      | regex("val")     | regex("val")     |             | ; fails       | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
+      | unique           | unique           | ; fails     | ; fails       | closes           |
+      | key              | key              | ; fails     | ; fails       | closes           |
+      | abstract         | abstract         | ; fails     | ; fails       | closes           |
+      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
+
+
+  Scenario Outline: can redefine annotation @<annotation> for value types
+    Then typeql define
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    When transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine
+      attribute description value string @<annotation-2>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation       | annotation-2     |
+      | regex("val")     | regex("lav")     |
+      | range("1".."2")  | range("0".."2")  |
+      | values("1", "2") | values("0", "2") |
 
 
   ##################
