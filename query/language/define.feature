@@ -550,7 +550,7 @@ Feature: TypeQL Define Query
       | role scoped label | locates:located |
 
 
-  Scenario Outline: types should be able to define roles they play with an override using <mode>
+  Scenario Outline: types should not be able to define roles they play with an incorrect override of <mode>
     Then typeql define<failure>
       """
         define
@@ -563,7 +563,6 @@ Feature: TypeQL Define Query
     Examples:
       | mode                     | as-label                              | failure         |
       | builtin kind             | entity                                | ; parsing fails |
-    # TODO: Parser allows builtin types here for simplicity, it would be cleaner to accept only label and scoped_label
       | builtin type             | string                                | ; fails         |
       | name:name without scope  | locates:locates                       | ; fails         |
       | scope:scope without name | located:located                       | ; fails         |
