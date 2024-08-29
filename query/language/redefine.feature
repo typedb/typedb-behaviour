@@ -15,8 +15,8 @@ Feature: TypeQL Redefine Query
     Given typeql define
       """
       define
-      entity person plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
-      relation employment relates employee, plays income:source, owns start-date, owns employment-reference-code @key;
+      entity person plays employment:employee, plays income:earner, owns name @card(0..) @regex("^.*$"), owns email @key, owns phone-nr @unique;
+      relation employment relates employee @card(1..), plays income:source, owns start-date @card(0..), owns employment-reference-code @key;
       relation income relates earner, relates source;
 
       entity empty-entity @abstract;
@@ -26,13 +26,13 @@ Feature: TypeQL Redefine Query
       relation part-time-employment sub empty-relation, relates part-time-role;
 
       attribute name value string;
-      attribute email value string;
+      attribute email @independent, value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       attribute start-date value datetime;
       attribute employment-reference-code value string;
       attribute phone-nr value string;
       attribute empty-data @abstract;
       attribute abstract-decimal-data @abstract, value decimal;
-      attribute long-data sub empty-data, value long;
+      attribute long-data sub empty-data, value long @values(1, 2, 3, 4, 5, 6, 7, 8, 9);
       attribute empty-sub-data @abstract, sub empty-data;
       """
     Given transaction commits
@@ -45,9 +45,43 @@ Feature: TypeQL Redefine Query
   ################
 
   Scenario: entity types cannot be redefined
-    When typeql define; parsing fails
+    Then typeql redefine; parsing fails
       """
       redefine entity person;
+      """
+
+
+  Scenario: redefine parsing fails if multiple statements for entity type
+    Then typeql redefine; parsing fails
+      """
+      redefine entity person plays employment:employee, plays income:earner, owns name @card(0..) @regex("^.*$"), owns email @key, owns phone-nr @unique;
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine entity person owns phone-nr @unique, owns name @regex("^.*$") @card(0..), plays income:earner, owns email @key, plays employment:employee;
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine entity person owns phone-nr @unique, owns name @regex("^.*$");
+      """
+
+
+  Scenario: redefine fails if nothing is redefined for entity type
+    Then typeql redefine; fails
+      """
+      redefine entity person plays employment:employee;
+      """
+    Then typeql redefine; fails
+      """
+      redefine entity person owns name @regex("^.*$") @card(0..);
+      """
+    Then typeql redefine; fails
+      """
+      redefine entity person plays income:earner;
+      """
+    Then typeql redefine; fails
+      """
+      redefine entity child sub empty-entity;
       """
 
 
@@ -165,6 +199,13 @@ Feature: TypeQL Redefine Query
       | label:person |
 
 
+  Scenario: cannot redefine entity type's owns both ordering and annotation
+    When typeql redefine; fails
+      """
+      redefine entity person owns name[] @card(0..1);
+      """
+
+
   Scenario: redefining an entity type without a kind is acceptable
     When typeql define
       """
@@ -225,6 +266,44 @@ Feature: TypeQL Redefine Query
     Then typeql redefine; parsing fails
       """
       redefine relation employment;
+      """
+
+
+  Scenario: redefine parsing fails if multiple statements for relation type
+    Then typeql redefine; parsing fails
+      """
+      redefine relation employment relates employee @card(1..), plays income:source, owns start-date @card(0..), owns employment-reference-code @key;
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine relation employment plays income:source, relates employee @card(1..), owns employment-reference-code @key, owns start-date @card(0..);
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine relation part-time-employment sub empty-relation, relates part-time-role;
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine relation part-time-employment relates part-time-role, sub empty-relation;
+      """
+
+
+  Scenario: redefine fails if nothing is redefined for relation type
+    Then typeql redefine; fails
+      """
+      redefine relation employment relates employee @card(1..);
+      """
+    Then typeql redefine; fails
+      """
+      redefine relation employment plays income:source;
+      """
+    Then typeql redefine; fails
+      """
+      redefine relation part-time-employment sub empty-relation;
+      """
+    Then typeql redefine; fails
+      """
+      redefine relation part-time-employment relates part-time-role;
       """
 
 
@@ -331,6 +410,13 @@ Feature: TypeQL Redefine Query
       | label:employment |
 
 
+  Scenario: cannot redefine relation type's relates both ordering and annotation
+    When typeql redefine; fails
+      """
+      redefine employment relates employee[] @card(1..5);
+      """
+
+
   Scenario: can redefine relation type's owns ordering
     Then typeql define; fails
       """
@@ -372,6 +458,13 @@ Feature: TypeQL Redefine Query
       | label:employment |
 
 
+  Scenario: cannot redefine relation type's owns both ordering and annotation
+    When typeql redefine; fails
+      """
+      redefine employment owns start-date[] @card(0..1);
+      """
+
+
   Scenario: redefining a relation type without a kind is acceptable
     When typeql define
       """
@@ -411,6 +504,35 @@ Feature: TypeQL Redefine Query
     Then typeql redefine; parsing fails
       """
       redefine attribute name;
+      """
+
+
+  Scenario: redefine parsing fails if multiple statements for attribute type
+    Then typeql redefine; parsing fails
+      """
+      redefine attribute email @independent, value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
+      """
+    Then typeql redefine; parsing fails
+      """
+      redefine
+      attribute email @independent, value string @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz") @regex("^.*@.*$");
+      """
+
+
+  Scenario: redefine fails if nothing is redefined for attribute type
+    Then typeql redefine; fails
+      """
+      redefine attribute email @independent;
+      """
+    Then typeql redefine; fails
+      """
+      redefine
+      attribute email value string @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz") @regex("^.*@.*$");
+      """
+    Then typeql redefine; fails
+      """
+      redefine
+      attribute email value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
 
 
@@ -531,13 +653,13 @@ Feature: TypeQL Redefine Query
   Scenario: the value type of an existing attribute type is modifiable through redefine
     Then typeql redefine
       """
-      redefine name value long;
+      redefine phone-nr value long;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
     Then typeql redefine
       """
-      redefine attribute name value string;
+      redefine attribute phone-nr value string;
       """
     Then transaction commits
 
@@ -1024,6 +1146,25 @@ Feature: TypeQL Redefine Query
       | regex("val")     | regex("lav")     |
       | range("1".."2")  | range("0".."2")  |
       | values("1", "2") | values("0", "2") |
+
+
+  Scenario: cannot redefine multiple annotations in one query
+    Then typeql redefine; fails
+      """
+      redefine entity person owns name @card(0..1) @regex("^[a-zA-Z]+$");
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql redefine
+      """
+      redefine entity person owns name @regex("^[a-zA-Z]+$");
+      """
+    Then typeql redefine
+      """
+      redefine entity person owns name @card(0..1);
+      """
+    Then transaction commits
 
 
   ######################
