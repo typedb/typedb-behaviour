@@ -113,6 +113,58 @@ Feature: TypeQL Redefine Query
       | label:child  |
 
 
+  Scenario: cannot redefine entity types' relates
+    Then typeql redefine; fails
+      """
+      redefine entity child relates employee;
+      """
+    Then typeql redefine; fails
+      """
+      redefine entity child relates employee[];
+      """
+
+
+  Scenario: can redefine entity type's owns ordering
+    Then typeql define; fails
+      """
+      define entity person owns name[];
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine entity person owns name[];
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x owns name[]; get;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine entity person owns name;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x owns name; get;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+
+
   Scenario: redefining an entity type without a kind is acceptable
     When typeql define
       """
@@ -236,6 +288,88 @@ Feature: TypeQL Redefine Query
       | x                          |
       | label:employment           |
       | label:part-time-employment |
+
+
+  Scenario: can redefine relation type's relates ordering
+    Then typeql define; fails
+      """
+      define relation employment relates employee[];
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine relation employment relates employee[];
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x relates employee[]; get;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine relation employment relates employee;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x relates employee; get;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
+
+
+  Scenario: can redefine relation type's owns ordering
+    Then typeql define; fails
+      """
+      define relation employment owns start-date[];
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine relation employment owns start-date[];
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x owns start-date[]; get;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql redefine
+      """
+      redefine relation employment owns start-date;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql get
+      """
+      match $x owns start-date; get;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
 
 
   Scenario: redefining a relation type without a kind is acceptable
@@ -1105,3 +1239,7 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x            |
       | label:pigeon |
+
+
+    # TODO 3.0: Add tests for structs
+    # TODO 3.0: Add tests for functions?

@@ -2673,3 +2673,6 @@ Feature: TypeQL Define Query
       relation huge-pineapple sub big-pineapple, relates tree as source, relates grows-from;
       """
     Then transaction commits
+
+    # TODO 3.0: Add tests for structs
+    # TODO 3.0: Add tests for functions
