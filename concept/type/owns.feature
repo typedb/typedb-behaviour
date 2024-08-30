@@ -1805,3 +1805,24 @@ Feature: Concept Owns
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
       | relation  | description    | registration |
+
+  Scenario Outline: <root-type> can't change supertype if override is lost even if it has another owns for the same attribute type
+    When <root-type>(<supertype-name-2>) unset supertype
+    When create attribute type: name
+    When attribute(name) set value type: <value-type>
+    When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..7)
+    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+    When <root-type>(<subtype-name>) set owns: name
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @key
+    When <root-type>(<supertype-name-2>) set owns: name
+    Then <root-type>(<subtype-name>) set supertype: <supertype-name-2>; fails
+    When <root-type>(<subtype-name>) get owns(name) unset override
+    When <root-type>(<subtype-name>) set supertype: <supertype-name-2>
+    When <root-type>(<subtype-name>) get owns(name) set override: name
+    Then transaction commits
+    Examples:
+      | root-type | supertype-name | subtype-name | supertype-name-2 | value-type |
+      | entity    | person         | customer     | subscriber       | long       |
+      | relation  | description    | registration | profile          | date       |

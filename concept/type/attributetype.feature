@@ -684,7 +684,7 @@ Feature: Concept Attribute Type
     Then attribute(email) get value type is none
     Then attribute(birthday) get value type is none
 
-  Scenario: Attribute type cannot set value type if it already inherits it
+  Scenario: Attribute type cannot set value type without value type annotations specialization if it already inherits it
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
@@ -706,7 +706,63 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
     Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared is none
+
+  Scenario Outline: Attribute type cannot set value type without value type annotations specialization if it already inherits it (has <annotation> specialization)
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When attribute(surname) set annotation: @<annotation>
+    When attribute(surname) set value type: string
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set value type: string
+    When attribute(surname) set supertype: name
+    When attribute(surname) set annotation: @<annotation>
+    Then transaction commits; fails
+    Examples:
+      | annotation  |
+      | abstract    |
+      | independent |
+
+  Scenario Outline: Attribute type can set value type if it already inherits it with value type @<annotation> specialization
+    When create attribute type: name
+    When attribute(name) set value type: string
+    When attribute(name) set annotation: @abstract
+    Then attribute(name) get annotations contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: surname
+    When attribute(surname) set supertype: name
+    When attribute(surname) set value type: string
+    When attribute(surname) set annotation: @<annotation>
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    When create attribute type: third-name
+    When attribute(third-name) set value type: string
+    When attribute(third-name) set annotation: @<annotation>
+    When attribute(third-name) set supertype: name
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get value type: string
+    Then attribute(name) get value type declared: string
+    Then attribute(surname) get value type: string
+    Then attribute(surname) get value type declared: string
+    Then attribute(third-name) get value type: string
+    Then attribute(third-name) get value type declared: string
+    Examples:
+      | annotation      |
+      | regex("str")    |
+      | values("str")   |
+      | range("1".."2") |
 
   Scenario: Inherited attribute types without @abstract cannot be created without value type
     When create attribute type: name
