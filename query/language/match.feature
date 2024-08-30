@@ -11,57 +11,56 @@ Feature: TypeQL Match Clause
     Given connection has been opened
     Given connection does not have any database
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
     Given typeql define
       """
       define
-      person sub entity,
+      entity person
         plays friendship:friend,
         plays employment:employee,
         owns name,
         owns age,
         owns ref @key,
         owns email @unique;
-      company sub entity,
+      entity company
         plays employment:employer,
         owns name,
         owns ref @key;
-      friendship sub relation,
-        relates friend,
+      relation friendship
+        relates friend @card(0..),
         owns ref @key;
-      employment sub relation,
+      relation employment
         relates employee,
         relates employer,
         owns ref @key;
-      name sub attribute, value string;
-      age sub attribute, value long;
-      ref sub attribute, value long;
-      email sub attribute, value string;
+      attribute name value string;
+      attribute age value long;
+      attribute ref value long;
+      attribute email value string;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
 
   ##################
   # SCHEMA QUERIES #
   ##################
 
-  Scenario: 'type' matches only the specified type, and does not match subtypes
+  Scenario: 'label' matches only the specified type, and does not match subtypes
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x type person; get;
+      match $x label person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -72,15 +71,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Then uniquely identify answer concepts
       | x                  |
@@ -93,22 +92,20 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match writer sub $x; get;
+      match writer sub $x;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:writer |
       | label:person |
-      | label:entity |
-      | label:thing  |
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
@@ -116,23 +113,21 @@ Feature: TypeQL Match Clause
       """
       define
 
-      child sub person;
-      worker sub person;
-      retired-person sub person;
-      construction-worker sub worker;
-      bricklayer sub construction-worker;
-      crane-driver sub construction-worker;
-      telecoms-worker sub worker;
-      mobile-network-researcher sub telecoms-worker;
-      smartphone-designer sub telecoms-worker;
-      telecoms-business-strategist sub telecoms-worker;
+      entity child sub person;
+      entity worker sub person;
+      entity retired-person sub person;
+      entity construction-worker sub worker;
+      entity bricklayer sub construction-worker;
+      entity crane-driver sub construction-worker;
+      entity telecoms-worker sub worker;
+      entity mobile-network-researcher sub telecoms-worker;
+      entity smartphone-designer sub telecoms-worker;
+      entity telecoms-business-strategist sub telecoms-worker;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a isa child, has name "Alfred", has ref 0;
@@ -145,13 +140,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
         $type sub worker;
-      get;
       """
     # Alfred and Barbara are not retrieved, as they aren't subtypes of worker
     Then uniquely identify answer concepts
@@ -175,17 +169,17 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
-      musician sub person;
-      flutist sub musician;
+      entity writer sub person;
+      entity scifi-writer sub writer;
+      entity musician sub person;
+      entity flutist sub musician;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x sub! person; get;
+      match $x sub! person;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -197,15 +191,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match writer sub! $x; get;
+      match writer sub! $x;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -218,17 +212,17 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      sub1 sub entity;
-      sub2 sub sub1;
-      sub3 sub sub1;
-      sub4 sub sub2;
-      sub5 sub sub4;
-      sub6 sub sub5;
+      entity sub1;
+      entity sub2 sub sub1;
+      entity sub3 sub sub1;
+      entity sub4 sub sub2;
+      entity sub5 sub sub4;
+      entity sub6 sub sub5;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x sub $y;
@@ -237,14 +231,14 @@ Feature: TypeQL Match Clause
       """
     Then each answer satisfies
       """
-      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>; get;
+      match $x sub $z; $x iid <answer.x.iid>; $z iid <answer.z.iid>;
       """
 
 
   Scenario: 'owns' matches types that own the specified attribute type
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns age; get;
+      match $x owns age;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -255,14 +249,14 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      unit sub attribute, value string, owns unit;
+      attribute unit value string, owns unit;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns $x; get;
+      match $x owns $x;
       """
     Then uniquely identify answer concepts
       | x          |
@@ -273,17 +267,17 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      general-name sub attribute, abstract, value string;
-      institution sub entity, abstract, owns general-name;
-      club-name sub general-name;
-      club sub entity, owns club-name;
+      attribute general-name abstract, value string;
+      entity institution abstract, owns general-name;
+      attribute club-name sub general-name;
+      entity club owns club-name;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns general-name; get;
+      match $x owns general-name;
       """
     Then uniquely identify answer concepts
       | x                 |
@@ -294,17 +288,17 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      general-name sub attribute, abstract, value string;
-      institution sub entity, abstract, owns general-name;
-      club-name sub general-name;
-      club sub entity, owns club-name;
+      attribute general-name abstract, value string;
+      entity institution abstract, owns general-name;
+      attribute club-name sub general-name;
+      entity club owns club-name;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns club-name; get;
+      match $x owns club-name;
       """
     Then uniquely identify answer concepts
       | x          |
@@ -312,9 +306,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' can be used to match attribute types that a given type owns
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match person owns $x; get;
+      match person owns $x;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -325,9 +319,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: directly declared 'owns' annotations are queryable
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns ref @key; get;
+      match $x owns ref @key;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -335,9 +329,9 @@ Feature: TypeQL Match Clause
       | label:company    |
       | label:friendship |
       | label:employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns $a @key; get;
+      match $x owns $a @key;
       """
     Then uniquely identify answer concepts
       | x                | a         |
@@ -345,16 +339,16 @@ Feature: TypeQL Match Clause
       | label:company    | label:ref |
       | label:friendship | label:ref |
       | label:employment | label:ref |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email @unique; get;
+      match $x owns email @unique;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns $a @unique; get;
+      match $x owns $a @unique;
       """
     Then uniquely identify answer concepts
       | x            | a           |
@@ -367,10 +361,11 @@ Feature: TypeQL Match Clause
       define child sub person;
       """
     Given transaction commits
-    Given session opens transaction of type: write
-    When get answers of typeql get
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns ref @key; get;
+      match $x owns ref @key;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -379,9 +374,9 @@ Feature: TypeQL Match Clause
       | label:company    |
       | label:friendship |
       | label:employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns $a @key; get;
+      match $x owns $a @key;
       """
     Then uniquely identify answer concepts
       | x                | a         |
@@ -390,17 +385,17 @@ Feature: TypeQL Match Clause
       | label:company    | label:ref |
       | label:friendship | label:ref |
       | label:employment | label:ref |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email @unique; get;
+      match $x owns email @unique;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
       | label:child  |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns $a @unique; get;
+      match $x owns $a @unique;
       """
     Then uniquely identify answer concepts
       | x            | a           |
@@ -416,26 +411,23 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $z (friend: $x) isa friendship, has ref 2;
-      $w (employee: $x, employer: $y) isa employment, has ref 3;
+      $z links (friend: $x), isa friendship, has ref 2;
+      $w links (employee: $x, employer: $y), isa employment, has ref 3;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
         $type owns name;
-      get;
       """
     # friendship and ref should not be retrieved, as they can't have a name
     Then uniquely identify answer concepts
@@ -446,9 +438,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' matches types that can play the specified role
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays friendship:friend; get;
+      match $x plays friendship:friend;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -459,15 +451,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      close-friendship sub friendship, relates close-friend as friend;
-      friendly-person sub entity, plays close-friendship:close-friend;
+      relation close-friendship sub friendship, relates close-friend as friend;
+      entity friendly-person plays close-friendship:close-friend;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x plays friendship:friend; get;
+      match $x plays friendship:friend;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -478,14 +470,14 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      close-friendship sub friendship;
+      relation close-friendship sub friendship;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails
       """
-      match $x plays close-friendship:friend; get;
+      match $x plays close-friendship:friend;
       """
 
 
@@ -493,15 +485,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      close-friendship sub friendship, relates close-friend as friend;
-      friendly-person sub entity, plays close-friendship:close-friend;
+      relation close-friendship sub friendship, relates close-friend as friend;
+      entity friendly-person plays close-friendship:close-friend;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x plays close-friendship:close-friend; get;
+      match $x plays close-friendship:close-friend;
       """
     Then uniquely identify answer concepts
       | x                     |
@@ -509,9 +501,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' can be used to match roles that a particular type can play
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match person plays $x; get;
+      match person plays $x;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -523,16 +515,14 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      dog sub entity,
+      entity dog
         plays friendship:friend,
         owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -541,13 +531,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa $type;
         $type plays friendship:friend;
-      get;
       """
     Then uniquely identify answer concepts
       | x         | type         |
@@ -559,16 +548,16 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      breed sub attribute, value string;
-      dog sub entity, owns breed @key;
-      kennel sub entity, owns breed;
+      attribute breed value string;
+      entity dog owns breed @key;
+      entity kennel owns breed;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns breed @key; get;
+      match $x owns breed @key;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -576,9 +565,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'key' can be used to find all attribute types that a given type owns as a key
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match person owns $x @key; get;
+      match person owns $x @key;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -589,16 +578,16 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      breed sub attribute, value string;
-      dog sub entity, owns breed @key;
-      cat sub entity, owns breed;
+      attribute breed value string;
+      entity dog owns breed @key;
+      entity cat owns breed;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x owns breed; get;
+      match $x owns breed;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -607,9 +596,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'relates' matches relation types where the specified role can be played
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -621,15 +610,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      close-friendship sub friendship, relates close-friend as friend;
-      friendly-person sub entity, plays close-friendship:close-friend;
+      relation close-friendship sub friendship, relates close-friend as friend;
+      entity friendly-person plays close-friendship:close-friend;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x relates close-friend as friend; get;
+      match $x relates close-friend as friend;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -640,15 +629,15 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      close-friendship sub friendship, relates close-friend as friend;
-      friendly-person sub entity, plays close-friendship:close-friend;
+      relation close-friendship sub friendship, relates close-friend as friend;
+      entity friendly-person plays close-friendship:close-friend;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x relates friend; get;
+      match $x relates friend;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -656,9 +645,9 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match employment relates $x; get;
+      match employment relates $x;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -669,7 +658,7 @@ Feature: TypeQL Match Clause
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x iid 0x83cb2;
@@ -683,10 +672,10 @@ Feature: TypeQL Match Clause
   ##########
 
   Scenario: 'isa' gets any thing for any type
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $_ isa person, has ref 0;
@@ -694,40 +683,30 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa $y; get;
+      match $x isa $y;
       """
     Then uniquely identify answer concepts
       | x          | y               |
       | key:ref:0  | label:person    |
-      | key:ref:0  | label:entity    |
-      | key:ref:0  | label:thing     |
       | key:ref:1  | label:person    |
-      | key:ref:1  | label:entity    |
-      | key:ref:1  | label:thing     |
       | attr:ref:0 | label:ref       |
-      | attr:ref:0 | label:attribute |
-      | attr:ref:0 | label:thing     |
       | attr:ref:1 | label:ref       |
-      | attr:ref:1 | label:attribute |
-      | attr:ref:1 | label:thing     |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
-      good-scifi-writer sub scifi-writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
+      entity good-scifi-writer sub scifi-writer;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -737,10 +716,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa writer; get;
+      match $x isa writer;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -753,16 +732,14 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      writer sub person;
-      scifi-writer sub writer;
-      good-scifi-writer sub scifi-writer;
+      entity writer sub person;
+      entity scifi-writer sub writer;
+      entity good-scifi-writer sub scifi-writer;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
@@ -772,10 +749,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa! writer; get;
+      match $x isa! writer;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -786,42 +763,40 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      person sub entity, abstract;
-      writer sub person, abstract;
-      scifi-writer sub writer, abstract;
-      good-scifi-writer sub scifi-writer, abstract;
+      entity person @abstract;
+      entity writer @abstract, sub person;
+      entity scifi-writer @abstract, sub writer;
+      entity good-scifi-writer @abstract, sub scifi-writer;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
 
   Scenario: 'iid' matches the instance with the specified internal iid
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then each answer satisfies
       """
-      match $x iid <answer.x.iid>; get;
+      match $x iid <answer.x.iid>;
       """
 
 
@@ -829,16 +804,14 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      shop sub entity, owns address;
-      grocery sub shop;
-      address sub attribute, value string;
+      entity shop owns address;
+      entity grocery sub shop;
+      attribute address value string;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa shop, has address "123 street";
@@ -846,67 +819,66 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa! shop; get;
+      match $x isa! shop;
       """
-    Then get answers of templated typeql get
+    Then get answers of templated typeql read query
       """
-      match $x iid <answer.x.iid>; $x isa grocery, has address "123 street"; get;
+      match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
       """
     Then answer size is: 0
 
 
   Scenario: match returns an empty answer if there are no matches
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person, has name "Anonymous Coward"; get;
+      match $x isa person, has name "Anonymous Coward";
       """
     Then answer size is: 0
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x isa ganesh; get;
+      match $x isa ganesh;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match ($x, $y) isa $type; $type type jakas-relacja; get;
+      match ($x, $y) isa $type; $type type jakas-relacja;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x isa $type; $type type polok; get;
+      match $x isa $type; $type type polok;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa person;
-      get;
       """
     Then uniquely identify answer concepts
       | x         | y         |
@@ -914,34 +886,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a role type
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x isa friendship:friend; get;
+      match $x isa friendship:friend;
       """
-
-
-  # TODO we can't query for rule anymore
-  @ignore
-  Scenario: an error is thrown when matching that a variable has a specific type, when that type is in fact a rule
-    Given typeql define
-      """
-      define
-      rule metre-rule:
-      when {
-        $x isa person;
-      } then {
-        $x has name "metre";
-      };
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: read
-    Then typeql get; throws exception
-      """
-      match $x isa metre-rule; get;
-      """
-    Then session transaction is open: false
-
 
 
   #############
@@ -949,30 +897,31 @@ Feature: TypeQL Match Clause
   #############
 
   Scenario: a relation is matchable from role players without specifying relation type
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $r (employee: $x, employer: $y) isa employment,
-         has ref 2;
+      $r isa employment,
+        links (employee: $x, employer: $y),
+        has ref 2;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
-      match $x isa person; $r (employee: $x) isa relation; get;
+      match $x isa person; $r links (employee: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
       | key:ref:0 | key:ref:2 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $y isa company; $r (employer: $y) isa relation; get;
+      match $y isa company; $r links (employer: $y);
       """
     Then uniquely identify answer concepts
       | y         | r         |
@@ -980,23 +929,23 @@ Feature: TypeQL Match Clause
 
 
   Scenario: relations are matchable from roleplayers without specifying any roles
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
       $y isa company, has ref 1;
-      $r (employee: $x, employer: $y) isa employment,
+      $r links (employee: $x, employer: $y), isa employment,
          has ref 2;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa person; $r ($x) isa relation; get;
+      match $x isa person; $r links ($x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -1004,22 +953,22 @@ Feature: TypeQL Match Clause
 
 
   Scenario: all combinations of players in a relation can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    When typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
       """
       insert $p isa person, has ref 0;
       $c isa company, has ref 1;
       $c2 isa company, has ref 2;
-      $r (employee: $p, employer: $c, employer: $c2) isa employment, has ref 3;
+      $r links (employee: $p, employer: $c, employer: $c2), isa employment, has ref 3;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
-      match $r ($x, $y) isa employment; get;
+      match $r links ($x, $y), isa employment;
       """
     Then uniquely identify answer concepts
       | x         | y         | r         |
@@ -1035,24 +984,22 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      some-entity sub entity, plays symmetric:player, owns ref @key;
-      symmetric sub relation, relates player, owns ref @key;
+      entity some-entity plays symmetric:player, owns ref @key;
+      relation symmetric relates player, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $r (player: $x, player: $x) isa relation; get;
+      match $r links (player: $x, player: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -1063,24 +1010,22 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      some-entity sub entity, plays symmetric:player, owns ref @key;
-      symmetric sub relation, relates player, owns ref @key;
+      entity some-entity plays symmetric:player, owns ref @key;
+      relation symmetric relates player, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $r (player: $x) isa relation; get;
+      match $r links (player: $x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -1088,10 +1033,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: a mixture of variable and explicit roles can retrieve relations
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa company, has ref 0;
@@ -1099,41 +1044,38 @@ Feature: TypeQL Match Clause
       (employer: $x, employee: $y) isa employment, has ref 2;
       """
     Given transaction commits
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match (employer: $e, $role: $x) isa employment; get;
+      match (employer: $e, $role: $x) isa employment;
       """
     Then uniquely identify answer concepts
       | e         | x         | role                      |
       | key:ref:0 | key:ref:1 | label:employment:employee |
-      | key:ref:0 | key:ref:1 | label:relation:role       |
 
   @ignore
   Scenario: A relation can play a role in itself
     Given typeql define
       """
       define
-      comparator sub relation,
+      relation comparator
         relates compared,
         plays comparator:compared;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $r(compared:$r) isa comparator;
+      $rlinks (compared:$r), isa comparator;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $r(compared:$r) isa comparator; get;
+      match $rlinks (compared:$r), isa comparator;
       """
     Then answer size is: 1
 
@@ -1142,38 +1084,36 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      comparator sub relation,
+      relation comparator
         relates compared,
         plays comparator:compared;
-      variable sub entity,
+      entity variable
         plays comparator:compared;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $r(compared: $v, compared:$r) isa comparator;
+      $rlinks (compared: $v, compared:$r), isa comparator;
       $v isa variable;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $r(compared: $v, compared:$r) isa comparator; get;
+      match $rlinks (compared: $v, compared:$r), isa comparator;
       """
     Then answer size is: 1
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 1;
@@ -1182,10 +1122,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match (friend: $x, friend: $x) isa friendship; get;
+      match (friend: $x, friend: $x) isa friendship;
       """
     Then answer size is: 0
 
@@ -1195,7 +1135,7 @@ Feature: TypeQL Match Clause
       """
       define
 
-      gift-delivery sub relation,
+      relation gift-delivery
         relates sender,
         relates recipient;
 
@@ -1204,10 +1144,8 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x1 isa person, has name "Soroush", has ref 0;
@@ -1222,24 +1160,22 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
         (sender: $b, recipient: $c) isa gift-delivery;
-      get;
       """
     Then uniquely identify answer concepts
       | a         | b         | c         |
       | key:ref:0 | key:ref:1 | key:ref:2 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         (sender: $a, recipient: $b) isa gift-delivery;
         (sender: $b, recipient: $c) isa gift-delivery;
         (sender: $c, recipient: $d) isa gift-delivery;
-      get;
       """
     Then answer size is: 0
 
@@ -1248,46 +1184,44 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      residency sub relation,
+      relation residency
         relates resident,
         owns ref @key;
       person plays residency:resident;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has ref 0;
-      $e (employee: $x) isa employment, has ref 1;
-      $f (friend: $x) isa friendship, has ref 2;
-      $r (resident: $x) isa residency, has ref 3;
+      $e links (employee: $x), isa employment, has ref 1;
+      $f links (friend: $x), isa friendship, has ref 2;
+      $r links (resident: $x), isa residency, has ref 3;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $r isa relation; get;
+      match relation $t; $r isa $t;
       """
     Given uniquely identify answer concepts
       | r         |
       | key:ref:1 |
       | key:ref:2 |
       | key:ref:3 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match ($x) isa relation; get;
+      match ($x) isa $_;
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match ($x); get;
+      match ($x);
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1295,53 +1229,53 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match (person: $x) isa relation; get;
+      match (person: $x);
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match ($x) isa person; get;
+      match ($x) isa person;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match ($x) isa bottle-of-rum; get;
+      match ($x) isa bottle-of-rum;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match (rolein-rolein-rolein: $rolein) isa relation; get;
+      match (rolein-rolein-rolein: $rolein);
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match (friend: $x) isa employment; get;
+      match (friend: $x) isa employment;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
-    When typeql get; throws exception
+    When typeql read query; fails
       """
       match
       $x isa company;
       ($x) isa friendship;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
@@ -1349,16 +1283,14 @@ Feature: TypeQL Match Clause
       """
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
-      marriage sub relation, relates spouse;
-      hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
-      civil-marriage sub marriage;
+      relation marriage relates spouse;
+      relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
+      relation civil-marriage sub marriage;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a isa person, has ref 1;
@@ -1368,66 +1300,66 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $m (wife: $x, husband: $y) isa hetero-marriage; get;
-      """
-    Then answer size is: 1
-    Then typeql get; throws exception
-      """
-      match $m (wife: $x, husband: $y) isa civil-marriage; get;
-      """
-    Then session transaction is open: false
-    Given session opens transaction of type: read
-    When get answers of typeql get
-      """
-      match $m (wife: $x, husband: $y) isa marriage; get;
+      match $m links (wife: $x, husband: $y), isa hetero-marriage;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    Then typeql read query; fails
       """
-      match $m (wife: $x, husband: $y) isa relation; get;
+      match $m links (wife: $x, husband: $y), isa civil-marriage;
+      """
+    Then transaction is open: false
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $m links (wife: $x, husband: $y), isa marriage;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa hetero-marriage; get;
+      match $m links (wife: $x, husband: $y);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $m links (spouse: $x, spouse: $y), isa hetero-marriage;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa civil-marriage; get;
+      match $m links (spouse: $x, spouse: $y), isa civil-marriage;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa marriage; get;
+      match $m links (spouse: $x, spouse: $y), isa marriage;
       """
     Then answer size is: 4
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $m (spouse: $x, spouse: $y) isa relation; get;
-      """
-    Then answer size is: 4
-    When get answers of typeql get
-      """
-      match $m (role: $x, role: $y) isa hetero-marriage; get;
-      """
-    Then answer size is: 2
-    When get answers of typeql get
-      """
-      match $m (role: $x, role: $y) isa civil-marriage; get;
-      """
-    Then answer size is: 2
-    When get answers of typeql get
-      """
-      match $m (role: $x, role: $y) isa marriage; get;
+      match $m links (spouse: $x, spouse: $y);
       """
     Then answer size is: 4
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $m (role: $x, role: $y) isa relation; get;
+      match $m links (role: $x, role: $y), isa hetero-marriage;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $m links (role: $x, role: $y), isa civil-marriage;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $m links (role: $x, role: $y), isa marriage;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match $m links (role: $x, role: $y);
       """
     Then answer size is: 4
 
@@ -1436,35 +1368,33 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      car sub entity, plays ownership:owned, owns ref @key;
+      entity car plays ownership:owned, owns ref @key;
       person plays ownership:owner;
       company plays ownership:owner;
-      ownership sub relation, relates owned, relates owner, owns is-insured;
-      is-insured sub attribute, value boolean;
+      relation ownership relates owned, relates owner, owns is-insured;
+      attribute is-insured value boolean;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       (owned: $c1, owner: $company) isa ownership, has is-insured true;
       $c1 isa car, has ref 0; $company isa company, has ref 1;
       """
     Given transaction commits
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       (owned: $c2, owner: $person) isa ownership, has is-insured true;
       $c2 isa car, has ref 2; $person isa person, has ref 3;
       """
     Given transaction commits
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
     """
-    match $r (owner: $x) isa ownership, has is-insured true; $x isa person; get;
+    match $r links (owner: $x), isa ownership, has is-insured true; $x isa person;
     """
     Then answer size is: 1
 
@@ -1475,23 +1405,21 @@ Feature: TypeQL Match Clause
   Scenario Outline: '<type>' attributes can be matched by value
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $n <value> isa <attr>, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $a <value>; get;
+      match $a <value>;
       """
     Then uniquely identify answer concepts
       | a         |
@@ -1509,14 +1437,14 @@ Feature: TypeQL Match Clause
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
     Given typeql define
       """
-      define <attr> sub attribute, value <type>, owns ref @key;
+      define attribute <attr> value <type>, owns ref @key;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $a <value>; get;
+      match $a <value>;
       """
     Then answer size is: 0
 
@@ -1530,10 +1458,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'contains' matches strings that contain the specified substring
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "Seven Databases in Seven Weeks" isa name;
@@ -1542,10 +1470,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x contains "Fun"; get;
+      match $x contains "Fun";
       """
     Then uniquely identify answer concepts
       | x                                     |
@@ -1554,10 +1482,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'contains' performs a case-insensitive match
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "The Phantom of the Opera" isa name;
@@ -1566,10 +1494,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x contains "Bean"; get;
+      match $x contains "Bean";
       """
     Then uniquely identify answer concepts
       | x                                  |
@@ -1578,10 +1506,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'like' matches strings that match the specified regex
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "ABC123" isa name;
@@ -1590,10 +1518,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x like "^[0-9]+$"; get;
+      match $x like "^[0-9]+$";
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1604,14 +1532,14 @@ Feature: TypeQL Match Clause
   # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
   @ignore
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has name $y; $x iid 0x83cb2; get;
+      match $x has name $y; $x iid 0x83cb2;
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has name $y; $y iid 0x83cb2; get;
+      match $x has name $y; $y iid 0x83cb2;
       """
     Then answer size is: 0
 
@@ -1619,10 +1547,10 @@ Feature: TypeQL Match Clause
   #       such that match query does not throw. Perhaps we should introduce a new feature file
   #       containing a new set of scenarios that test: traversal structure, plan and procedure
   Scenario: Traversal planner can handle "loops" in the traversal structure
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name 'alice', has ref 0;
@@ -1630,13 +1558,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $x isa person, has $n;
       $y isa person, has $n;
-      get;
       """
 
   #######################
@@ -1644,10 +1571,10 @@ Feature: TypeQL Match Clause
   #######################
 
   Scenario: 'has' can be used to match things that own any instance of the specified attribute
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Leila", has ref 0;
@@ -1657,10 +1584,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has name $y; get $x;
+      match $x has name $y;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1672,15 +1599,13 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      shoe-size sub attribute, value long;
+      attribute shoe-size value long;
       person owns shoe-size;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has age 9, has ref 0;
@@ -1689,10 +1614,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has attribute 9; get;
+      match $x has attribute 9;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1705,30 +1630,28 @@ Feature: TypeQL Match Clause
       """
       define
       friendship owns age;
-      graduation-date sub attribute, value datetime, owns age, owns ref @key;
+      attribute graduation-date value datetime, owns age, owns ref @key;
       person owns graduation-date;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
-      $y (friend: $x) isa friendship, has age 21, has ref 1;
+      $y links (friend: $x), isa friendship, has age 21, has ref 1;
       $z 2020-06-01 isa graduation-date, has age 21, has ref 2;
       $w isa person, has ref 3;
-      $v (friend: $x, friend: $w) isa friendship, has age 7, has ref 4;
+      $v links (friend: $x, friend: $w), isa friendship, has age 7, has ref 4;
       $u 2019-06-03 isa graduation-date, has age 22, has ref 5;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has age 21; get;
+      match $x has age 21;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1741,25 +1664,23 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      lucky-number sub attribute, value long;
+      attribute lucky-number value long;
       person owns lucky-number;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has lucky-number 20; get;
+      match $x has lucky-number 20;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1770,24 +1691,22 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      unit sub attribute, value string, owns unit, owns ref @key;
+      attribute unit value string, owns unit, owns ref @key;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x "meter" isa unit, has $x, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has $x; get;
+      match $x has $x;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1795,27 +1714,27 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned thing is actually an entity
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x has person "Luke"; get;
+      match $x has person "Luke";
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x isa company, has age $n; get;
+      match $x isa company, has age $n;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match $x has bananananananana "rama"; get;
+      match $x has bananananananana "rama";
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
 
 
@@ -1827,31 +1746,28 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      start-date sub attribute, value datetime;
-      graduation-date sub attribute, value datetime;
+      attribute start-date value datetime;
+      attribute graduation-date value datetime;
       person owns graduation-date;
       employment owns start-date;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "James", has ref 0, has graduation-date 2009-07-16;
-      $r (employee: $x) isa employment, has start-date 2009-07-16, has ref 1;
+      $r links (employee: $x), isa employment, has start-date 2009-07-16, has ref 1;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
       """
       match
         $x isa person, has graduation-date $date;
-        $r (employee: $x) isa employment, has start-date == $date;
-      get;
+        $r links (employee: $x), isa employment, has start-date == $date;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
@@ -1860,10 +1776,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr == $x' matches owners of any instance '$y' of '$attr' where '$y' and '$x' are equal by value
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1872,10 +1788,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has age == 16; get;
+      match $x has age == 16;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1883,10 +1799,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr > $x' matches owners of any instance '$y' of '$attr' where '$y > $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1895,10 +1811,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has age > 18; get;
+      match $x has age > 18;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1906,10 +1822,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr < $x' matches owners of any instance '$y' of '$attr' where '$y < $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1918,10 +1834,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has age < 18; get;
+      match $x has age < 18;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1929,10 +1845,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has $attr != $x' matches owners of any instance '$y' of '$attr' where '$y != $x'
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -1941,10 +1857,10 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has age != 18; get;
+      match $x has age != 18;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -1956,15 +1872,13 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      house-number sub attribute, value long;
-      length sub attribute, value double;
+      attribute house-number value long;
+      attribute length value double;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x 1 isa house-number;
@@ -1972,63 +1886,56 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
         $x == 1.0;
-      get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa length;
         $x == 2;
-      get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
         $x 1.0;
-      get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa length;
         $x 2;
-      get;
       """
     Then answer size is: 1
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $a;
         $x >= 1;
-      get;
       """
     Then answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $a;
         $x < 2.0;
-      get;
       """
     Then answer size is: 1
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa house-number;
         $y isa length;
         $x < $y;
-      get;
       """
     Then answer size is: 1
 
@@ -2037,25 +1944,23 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      lucky-number sub attribute, value long;
+      attribute lucky-number value long;
       person owns lucky-number;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has lucky-number 10, has lucky-number 20, has lucky-number 30, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x has lucky-number > 25; get;
+      match $x has lucky-number > 25;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2063,10 +1968,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: an attribute variable used in both '=' and '>=' predicates is correctly resolved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Susie", has age 16, has ref 0;
@@ -2075,14 +1980,13 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x has age == $z;
         $z >= 17;
         $z isa age;
-      get $x;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2094,14 +1998,12 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      length sub attribute, value double;
+      attribute length value double;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $a 24 isa age;
@@ -2111,13 +2013,12 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
-        $x isa attribute;
+        $x isa $_;
         $x > 20;
-      get;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -2126,43 +2027,42 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa person;
         not { $x is $y; };
-      get;
       """
     Then answer size is: 0
 
 
   Scenario: concept comparison of unbound variables throws an error
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match not { $x is $y; }; get;
+      match not { $x is $y; };
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   ############
   # PATTERNS #
   ############
 
   Scenario: disjunctions return the union of composing query statements
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -2170,18 +2070,18 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;}; get $x;
+      match $x isa $t; { $t type person; } or {$t type company;};
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
       | key:ref:1 |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa entity; {$x has name "Jeff";} or {$x has name "Amazon";}; get;
+      match $x isa $_; {$x has name "Jeff";} or {$x has name "Amazon";};
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2190,26 +2090,24 @@ Feature: TypeQL Match Clause
 
 
   Scenario: disjunctions with no answers can be limited
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;}; get;
+      match $x isa $t; { $t type person; } or {$t type company;};
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;}; get; limit 1;
+      match $x isa $t; { $t type person; } or {$t type company;};
       """
     Then answer size is: 0
 
 
   Scenario: negations can be applied to filtered variables
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeff", has ref 0;
@@ -2217,35 +2115,32 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x isa person, has name $a; not { $a == "Jeff"; }; get $x;
+      match $x isa person, has name $a; not { $a == "Jeff"; };
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:1 |
 
 
+  # TODO use non-root types
   Scenario: multiple negations can be applied
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql get
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
-      match $x sub! thing; not { $x type thing; }; not { $x type entity; }; not { $x type relation; }; get;
+      match $x sub! thing; not { $x type thing; }; not { $x type entity; }; not { $x type relation; };
       """
     Then uniquely identify answer concepts
       | x               |
       | label:attribute |
 
   Scenario: pattern variable without named variable is invalid
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
       """
-      match $x isa person, has name $a; "bob" isa name; get;
+      match $x isa person, has name $a; "bob" isa name;
       """
 
 
@@ -2254,129 +2149,128 @@ Feature: TypeQL Match Clause
   ##################
 
   Scenario: all instances and their types can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
       $y isa person, has name "Angelina", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $x isa entity; get;
+      match entity $t; $x isa $t;
       """
     Given answer size is: 2
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $r isa relation; get;
+      match relation $t; $x isa $t;
       """
     Given answer size is: 1
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa attribute; get;
+      match attribute $t; $x isa $t;
       """
     Given answer size is: 5
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa $type; get;
+      match $x isa $type;
       """
-    # 2 entities x 3 types {person,entity,thing}
-    # 1 relation x 3 types {friendship,relation,thing}
-    # 5 attributes x 3 types {ref/name,attribute,thing}
-    Then answer size is: 24
+    # 2 entities x 1 type {person}
+    # 1 relation x 1 type {friendship}
+    # 5 attributes x 2 types {ref/name}
+    Then answer size is: 13
 
 
   Scenario: all relations and their types can be retrieved
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has name "Bertie", has ref 0;
       $y isa person, has name "Angelina", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $r isa relation; get;
+      match relation $t; $r isa $t;
       """
     Given answer size is: 1
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match ($x, $y) isa relation; get;
+      match ($x, $y);
       """
     # 2 permutations of the roleplayers
     Given answer size is: 2
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match ($x, $y) isa $type; get;
+      match ($x, $y) isa $type;
       """
-    # 2 permutations x 3 types {friendship,relation,thing}
-    Then answer size is: 6
+    # 2 permutations of the roleplayers
+    Then answer size is: 2
 
 
   Scenario: variable role types with relations playing roles
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
     Given typeql define
       """
       define
-        parent sub relation, relates nested, owns id;
-        nested sub relation, relates id, plays parent:nested;
-        id sub attribute, value string, plays nested:id;
+        relation parent relates nested, owns id;
+        relation nested relates id, plays parent:nested;
+        attribute id value string, plays nested:id;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $i1 "i1" isa id;
         $i2 "i2" isa id;
-        $n1 (id: $i1) isa nested;
-        $n2 (id: $i2) isa nested;
-        $p1 (nested: $n1) isa parent, has id $i1;
-        $p2 (nested: $n2) isa parent, has id $i2;
+        $n1 links (id: $i1), isa nested;
+        $n2 links (id: $i2), isa nested;
+        $p1 links (nested: $n1), isa parent, has id $i1;
+        $p2 links (nested: $n2), isa parent, has id $i2;
       """
     Given transaction commits
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
 
     # Force traversal of role edges in each direction: See vaticle/typedb#6925
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-        $role-nested sub! relation:role;
-        $role-id sub! relation:role;
         $boundId1 = "i1";
 
-        $p ($role-nested: $n) isa parent, has id $boundId1;
-        $n ($role-id: $i) isa nested;
-      get $p, $n, $i;
+        $p links ($role-nested: $n), isa parent, has id $boundId1;
+        $n links ($role-id: $i), isa nested;
+
+        not { $role-nested sub! $r; };
+        not { $role-id sub! $r; };
       """
     Then answer size is: 1
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-        $role-nested sub! relation:role;
-        $role-id sub! relation:role;
         $boundId1 = "i1";
 
-        $p ($role-nested: $n) isa parent, has id $i;
-        $n ($role-id: $boundId1) isa nested;
-      get $p, $n, $i;
+        $p links ($role-nested: $n), isa parent, has id $i;
+        $n links ($role-id: $boundId1), isa nested;
+
+        not { $role-nested sub! $r; };
+        not { $role-id sub! $r; };
       """
     Then answer size is: 1
 
@@ -2388,50 +2282,49 @@ Feature: TypeQL Match Clause
   # Negation resolution is handled by Reasoner, but query validation is handled by the language.
   Scenario: when the entire match clause is a negation, an error is thrown
   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
-      match not { $x has attribute "value"; }; get;
+      match not { $x has $a "value"; };
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
       match
-        $r isa entity;
+        entity $t;
+        $r isa $t;
         not {
           ($r2, $i);
-          $i isa entity;
         };
-      get;
       """
-    Then session transaction is open: false
+    Then transaction is open: false
 
   Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
-        $r isa attribute;
+        attribute $a;
+        $r isa $a;
         not {
-          $x isa entity, has attribute $r;
+          $x has $r;
         };
-      get;
       """
 
   # TODO: We should verify the answers
   Scenario: negations can contain disjunctions
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
-        $x isa entity;
+        entity $t;
+        $x isa $t;
         not {
-          { $x has attribute 1; } or { $x has attribute 2; };
+          { $x has $a 1; } or { $x has $a 2; };
         };
-      get;
       """
 
   Scenario: when negating a negation redundantly, an error is thrown
-    Then typeql get; throws exception
+    Then typeql read query; fails
       """
       match
         $x isa person, has name "Tim";
@@ -2440,7 +2333,6 @@ Feature: TypeQL Match Clause
             $x has age 55;
           };
         };
-      get;
       """
 
 
@@ -2453,50 +2345,49 @@ Feature: TypeQL Match Clause
       """
       define
       person owns favorite-phrase;
-      favorite-phrase sub attribute, value string;
+      attribute favorite-phrase value string;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa person, has favorite-phrase "你明白了吗", has ref 0;
       $y isa person, has favorite-phrase "בוקר טוב", has ref 1;
-      $r (friend: $x, friend: $y) isa friendship, has ref 2;
+      $r links (friend: $x, friend: $y), isa friendship, has ref 2;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $phrase isa favorite-phrase; get;
+      match $phrase isa favorite-phrase;
       """
     Then uniquely identify answer concepts
       | phrase                        |
       | attr:favorite-phrase:你明白了吗    |
       | attr:favorite-phrase:בוקר טוב |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa person, has favorite-phrase "你明白了吗"; get;
+      match $x isa person, has favorite-phrase "你明白了吗";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa person, has favorite-phrase "בוקר טוב"; get;
+      match $x isa person, has favorite-phrase "בוקר טוב";
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:1 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa person, has favorite-phrase "请给我一"; get;
+      match $x isa person, has favorite-phrase "请给我一";
       """
     Then answer size is: 0
 
@@ -2505,13 +2396,11 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      人 sub entity, owns name, owns ref @key; אדם sub entity, owns name, owns ref @key;
+      entity 人 owns name, owns ref @key; entity אדם owns name, owns ref @key;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa 人, has name "Liu", has ref 0;
@@ -2519,27 +2408,27 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $x isa! $t; $x has name $_; get $t;
+      match $x isa! $t; $x has name $_;
       """
     Then uniquely identify answer concepts
       | t         |
       | label:人   |
       | label:אדם |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa 人; get;
+      match $x isa 人;
       """
     Then uniquely identify answer concepts
       | x         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x isa אדם; get;
+      match $x isa אדם;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2547,10 +2436,10 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variables can be non-ascii
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $人 isa person, has name "Liu", has ref 0;
@@ -2558,18 +2447,18 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Given get answers of typeql get
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match $人 isa person; $人 has name "Liu"; get $人;
+      match $人 isa person; $人 has name "Liu";
       """
     Then uniquely identify answer concepts
       | 人         |
       | key:ref:0 |
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $אדם isa person; $אדם has name "Solomon"; get $אדם;
+      match $אדם isa person; $אדם has name "Solomon";
       """
     Then uniquely identify answer concepts
       | אדם       |
@@ -2577,44 +2466,41 @@ Feature: TypeQL Match Clause
 
 
   Scenario: labels and variables have different identifier formats
-    Given typeql define; throws exception
+    Given typeql define; parsing fails
       """
       define
-      0_leading_digit_fails sub entity;
+      entity 0_leading_digit_fails;
       """
-    Given session opens transaction of type: write
-    Given get answers of typeql get
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-      $0_leading_digit_allowed sub entity;
+      entity $0_leading_digit_allowed;
       ?0_leading_digit_allowed_val = 0;
-      get;
       """
 
-    Given typeql define; throws exception
+    Given typeql define; parsing fails
       """
       define
-      _leading_connector_disallowed sub entity;
+      entity _leading_connector_disallowed;
       """
-    Given session opens transaction of type: read
-    Given typeql get; throws exception
+    Given connection open read transaction for database: typedb
+    Given typeql read query; parsing fails
       """
       match
-      $_leading_connector_disallowed sub entity;
+      entity $_leading_connector_disallowed;
       ?_leading_connector_disallowed_val = 0;
-      get;
       """
 
-    Given session opens transaction of type: write
+    Given connection open write transaction for database: typedb
     Given typeql define
       """
       define
-      following_connectors-and-digits-1-2-3-allowed sub entity;
+      entity following_connectors-and-digits-1-2-3-allowed;
       """
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
       match
-      $following_connectors-and-digits-1-2-3-allowed sub entity;
+      entity $following_connectors-and-digits-1-2-3-allowed;
       ?following_connectors-and-digits-1-2-3-allowed_val = 0;
-      get;
       """
