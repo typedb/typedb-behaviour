@@ -245,24 +245,6 @@ Feature: TypeQL Match Clause
       | label:person |
 
 
-  Scenario: 'owns' can match types that can own themselves
-    Given typeql define
-      """
-      define
-      attribute unit value string, owns unit;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns $x;
-      """
-    Then uniquely identify answer concepts
-      | x          |
-      | label:unit |
-
-
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
     Given typeql define
       """
@@ -1405,14 +1387,14 @@ Feature: TypeQL Match Clause
   Scenario Outline: '<type>' attributes can be matched by value
     Given typeql define
       """
-      define attribute <attr> value <type>, owns ref @key;
+      define attribute <attr> value <type>;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $n <value> isa <attr>, has ref 0;
+      insert $n <value> isa <attr>;
       """
     Given transaction commits
 
@@ -1422,8 +1404,8 @@ Feature: TypeQL Match Clause
       match $a <value>;
       """
     Then uniquely identify answer concepts
-      | a         |
-      | key:ref:0 |
+      | a             |
+      | attr:<attr>:0 |
 
     Examples:
       | attr        | type     | value      |
@@ -1437,7 +1419,7 @@ Feature: TypeQL Match Clause
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
     Given typeql define
       """
-      define attribute <attr> value <type>, owns ref @key;
+      define attribute <attr> value <type>;
       """
     Given transaction commits
 
@@ -1630,8 +1612,6 @@ Feature: TypeQL Match Clause
       """
       define
       friendship owns age;
-      attribute graduation-date value datetime, owns age, owns ref @key;
-      person owns graduation-date;
       """
     Given transaction commits
 
@@ -1639,12 +1619,10 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $x isa person, has name "Zoe", has age 21, has graduation-date 2020-06-01, has ref 0;
+      $x isa person, has name "Zoe", has age 21, has ref 0;
       $y links (friend: $x), isa friendship, has age 21, has ref 1;
-      $z 2020-06-01 isa graduation-date, has age 21, has ref 2;
-      $w isa person, has ref 3;
-      $v links (friend: $x, friend: $w), isa friendship, has age 7, has ref 4;
-      $u 2019-06-03 isa graduation-date, has age 22, has ref 5;
+      $w isa person, has ref 2;
+      $v links (friend: $x, friend: $w), isa friendship, has age 7, has ref 3;
       """
     Given transaction commits
 
@@ -1657,7 +1635,6 @@ Feature: TypeQL Match Clause
       | x         |
       | key:ref:0 |
       | key:ref:1 |
-      | key:ref:2 |
 
 
   Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
@@ -1681,32 +1658,6 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match $x has lucky-number 20;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-
-
-  Scenario: 'has' can match instances that have themselves
-    Given typeql define
-      """
-      define
-      attribute unit value string, owns unit, owns ref @key;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x "meter" isa unit, has $x, has ref 0;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x has $x;
       """
     Then uniquely identify answer concepts
       | x         |
