@@ -1599,7 +1599,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x has attribute 9;
+      match $x has $_ 9;
       """
     Then uniquely identify answer concepts
       | x         |
