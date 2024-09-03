@@ -2024,7 +2024,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;};
+      match $x isa $t; { $t label person; } or {$t label company;};
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2044,12 +2044,12 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;};
+      match $x isa $t; { $t label person; } or {$t label company;};
       """
     Then answer size is: 0
     When get answers of typeql read query
       """
-      match $x isa $t; { $t type person; } or {$t type company;};
+      match $x isa $t; { $t label person; } or {$t label company;};
       """
     Then answer size is: 0
 
