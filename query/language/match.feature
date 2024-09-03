@@ -2316,9 +2316,9 @@ Feature: TypeQL Match Clause
       match $phrase isa favorite-phrase;
       """
     Then uniquely identify answer concepts
-      | phrase                        |
+      | phrase                             |
       | attr:favorite-phrase:你明白了吗    |
-      | attr:favorite-phrase:בוקר טוב |
+      | attr:favorite-phrase:בוקר טוב      |
 
     Given get answers of typeql read query
       """
@@ -2366,7 +2366,7 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | t         |
-      | label:人   |
+      | label:人  |
       | label:אדם |
 
     Given get answers of typeql read query
@@ -2404,7 +2404,7 @@ Feature: TypeQL Match Clause
       match $人 isa person; $人 has name "Liu";
       """
     Then uniquely identify answer concepts
-      | 人         |
+      | 人        |
       | key:ref:0 |
 
     Given get answers of typeql read query
