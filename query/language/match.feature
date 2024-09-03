@@ -2427,7 +2427,6 @@ Feature: TypeQL Match Clause
       """
       match
       entity $0_leading_digit_allowed;
-      ?0_leading_digit_allowed_val = 0;
       """
 
     Given typeql define; parsing fails
@@ -2440,7 +2439,6 @@ Feature: TypeQL Match Clause
       """
       match
       entity $_leading_connector_disallowed;
-      ?_leading_connector_disallowed_val = 0;
       """
 
     Given connection open write transaction for database: typedb
@@ -2453,5 +2451,4 @@ Feature: TypeQL Match Clause
       """
       match
       entity $following_connectors-and-digits-1-2-3-allowed;
-      ?following_connectors-and-digits-1-2-3-allowed_val = 0;
       """
