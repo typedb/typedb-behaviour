@@ -2174,7 +2174,7 @@ Feature: TypeQL Match Clause
   Scenario: variable role types with relations playing roles
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
