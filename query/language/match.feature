@@ -267,8 +267,8 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      attribute general-name abstract, value string;
-      entity institution abstract, owns general-name;
+      attribute general-name @abstract, value string;
+      entity institution @abstract, owns general-name;
       attribute club-name sub general-name;
       entity club owns club-name;
       """
@@ -288,8 +288,8 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      attribute general-name abstract, value string;
-      entity institution abstract, owns general-name;
+      attribute general-name @abstract, value string;
+      entity institution @abstract, owns general-name;
       attribute club-name sub general-name;
       entity club owns club-name;
       """
