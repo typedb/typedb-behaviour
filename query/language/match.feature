@@ -2172,15 +2172,13 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variable role types with relations playing roles
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
         relation parent relates nested, owns id;
-        relation nested relates id, plays parent:nested;
-        attribute id value string, plays nested:id;
+        relation nested relates player, plays parent:nested;
+        entity player owns id, plays nested:player;
+        attribute id value string;
       """
     Given transaction commits
 
@@ -2190,8 +2188,10 @@ Feature: TypeQL Match Clause
       insert
         $i1 "i1" isa id;
         $i2 "i2" isa id;
-        $n1 links (id: $i1), isa nested;
-        $n2 links (id: $i2), isa nested;
+        $p1 isa player, has id $i1;
+        $p2 isa player, has id $i2;
+        $n1 links (player: $p1), isa nested;
+        $n2 links (player: $p2), isa nested;
         $p1 links (nested: $n1), isa parent, has id $i1;
         $p2 links (nested: $n2), isa parent, has id $i2;
       """
@@ -2205,10 +2205,10 @@ Feature: TypeQL Match Clause
         $boundId1 = "i1";
 
         $p links ($role-nested: $n), isa parent, has id $boundId1;
-        $n links ($role-id: $i), isa nested;
+        $n links ($role-player: $i), isa nested;
 
         not { $role-nested sub! $r; };
-        not { $role-id sub! $r; };
+        not { $role-player sub! $r; };
       """
     Then answer size is: 1
 
@@ -2218,10 +2218,11 @@ Feature: TypeQL Match Clause
         $boundId1 = "i1";
 
         $p links ($role-nested: $n), isa parent, has id $i;
-        $n links ($role-id: $boundId1), isa nested;
+        $n links ($role-player: $p), isa nested;
+        $p has $boundId1;
 
         not { $role-nested sub! $r; };
-        not { $role-id sub! $r; };
+        not { $role-player sub! $r; };
       """
     Then answer size is: 1
 
