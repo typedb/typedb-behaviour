@@ -2422,18 +2422,22 @@ Feature: TypeQL Match Clause
       define
       entity 0_leading_digit_fails;
       """
-    Given connection open write transaction for database: typedb
+
+    Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
       match
       entity $0_leading_digit_allowed;
       """
+    Given transaction commits
 
+    Given connection open schema transaction for database: typedb
     Given typeql define; parsing fails
       """
       define
       entity _leading_connector_disallowed;
       """
+
     Given connection open read transaction for database: typedb
     Given typeql read query; parsing fails
       """
@@ -2441,12 +2445,15 @@ Feature: TypeQL Match Clause
       entity $_leading_connector_disallowed;
       """
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql define
       """
       define
       entity following_connectors-and-digits-1-2-3-allowed;
       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
       match
