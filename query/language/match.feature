@@ -340,7 +340,7 @@ Feature: TypeQL Match Clause
   Scenario: inherited 'owns' annotations are queryable
     Given typeql define
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
