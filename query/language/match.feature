@@ -19,13 +19,13 @@ Feature: TypeQL Match Clause
       entity person
         plays friendship:friend,
         plays employment:employee,
-        owns name,
-        owns age,
+        owns name @card(0..),
+        owns age @card(0..),
         owns ref @key,
-        owns email @unique;
+        owns email @unique @card(0..);
       entity company
         plays employment:employer,
-        owns name,
+        owns name @card(0..),
         owns ref @key;
       relation friendship
         relates friend @card(0..),
@@ -832,7 +832,7 @@ Feature: TypeQL Match Clause
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then typeql read query; fails
       """
-      match ($x, $y) isa $type; $type type jakas-relacja;
+      match ($x, $y) isa $type; $type label jakas-relacja;
       """
     Then transaction is open: false
 
@@ -840,7 +840,7 @@ Feature: TypeQL Match Clause
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
     Then typeql read query; fails
       """
-      match $x isa $type; $type type polok;
+      match $x isa $type; $type label polok;
       """
     Then transaction is open: false
 
@@ -1265,8 +1265,8 @@ Feature: TypeQL Match Clause
       """
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
-      relation marriage relates spouse;
-      relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
+      relation marriage relates spouse @card(0..);
+      relation hetero-marriage sub marriage, relates husband as spouse @card(0..), relates wife as spouse @card(0..);
       relation civil-marriage sub marriage;
       """
     Given transaction commits
@@ -1408,12 +1408,12 @@ Feature: TypeQL Match Clause
       | attr:<attr>:0 |
 
     Examples:
-      | attr        | type     | value      |
-      | colour      | string   | "Green"    |
-      | calories    | long     | 1761       |
-      | grams       | double   | 9.6        |
-      | gluten-free | boolean  | false      |
-      | use-by-date | datetime | 2020-06-16 |
+      | attr        | type     | value               |
+      | colour      | string   | "Green"             |
+      | calories    | long     | 1761                |
+      | grams       | double   | 9.6                 |
+      | gluten-free | boolean  | false               |
+      | use-by-date | datetime | 2020-06-16T00:00:00 |
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
@@ -1426,7 +1426,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a <value>;
+      match $a == <value>;
       """
     Then answer size is: 0
 
@@ -1642,7 +1642,7 @@ Feature: TypeQL Match Clause
       """
       define
       attribute lucky-number value long;
-      person owns lucky-number;
+      person owns lucky-number @card(0..);
       """
     Given transaction commits
 
@@ -1896,7 +1896,7 @@ Feature: TypeQL Match Clause
       """
       define
       attribute lucky-number value long;
-      person owns lucky-number;
+      person owns lucky-number @card(0..);
       """
     Given transaction commits
 
@@ -2041,15 +2041,17 @@ Feature: TypeQL Match Clause
 
 
   Scenario: disjunctions with no answers can be limited
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa $t; { $t label person; } or {$t label company;};
+      match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then answer size is: 0
     When get answers of typeql read query
       """
-      match $x isa $t; { $t label person; } or {$t label company;};
+      match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then answer size is: 0
 
@@ -2078,18 +2080,22 @@ Feature: TypeQL Match Clause
 
   # TODO use non-root types
   Scenario: multiple negations can be applied
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub! thing; not { $x type thing; }; not { $x type entity; }; not { $x type relation; };
+      match $x sub! thing; not { $x label thing; }; not { $x label entity; }; not { $x label relation; };
       """
     Then uniquely identify answer concepts
       | x               |
       | label:attribute |
 
   Scenario: pattern variable without named variable is invalid
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails
+    Then typeql read query; parsing fails
       """
       match $x isa person, has name $a; "bob" isa name;
       """
@@ -2134,8 +2140,8 @@ Feature: TypeQL Match Clause
       """
     # 2 entities x 1 type {person}
     # 1 relation x 1 type {friendship}
-    # 5 attributes x 2 types {ref/name}
-    Then answer size is: 13
+    # 5 attributes x 1 type {ref/name}
+    Then answer size is: 8
 
 
   Scenario: all relations and their types can be retrieved
