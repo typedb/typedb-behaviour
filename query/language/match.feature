@@ -1266,7 +1266,7 @@ Feature: TypeQL Match Clause
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
       relation marriage relates spouse @card(0..);
-      relation hetero-marriage sub marriage, relates husband as spouse @card(0..), relates wife as spouse @card(0..);
+      relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
       relation civil-marriage sub marriage;
       """
     Given transaction commits
@@ -1697,8 +1697,8 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      attribute start-date value datetime;
-      attribute graduation-date value datetime;
+      attribute start-date value date;
+      attribute graduation-date value date;
       person owns graduation-date;
       employment owns start-date;
       """
@@ -2024,7 +2024,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa $t; { $t label person; } or {$t label company;};
+      match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2032,7 +2032,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
     When get answers of typeql read query
       """
-      match $x isa $_; {$x has name "Jeff";} or {$x has name "Amazon";};
+      match $x isa $_; [ $x has name "Jeff"; ] or { $x has name "Amazon"; };
       """
     Then uniquely identify answer concepts
       | x         |
