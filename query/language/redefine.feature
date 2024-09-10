@@ -593,7 +593,7 @@ Feature: TypeQL Redefine Query
     When get answers of typeql read query
       """
       match
-        $x type <label>;
+        $x label <label>;
         attribute $x;
 
       """
@@ -644,7 +644,7 @@ Feature: TypeQL Redefine Query
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x type empty-sub-data, value decimal;
+      match $x label empty-sub-data, value decimal;
       """
     Then uniquely identify answer concepts
       | x                    |
