@@ -56,7 +56,7 @@ Feature: Compound Query Resolution
       match
         $x has base-attribute $ax;
         $y has base-attribute $ay;
-      get;
+
       """
     Then verify answers are sound
     Then verify answers are complete

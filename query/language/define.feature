@@ -20,7 +20,7 @@ Feature: TypeQL Define Query
       relation income relates earner, relates source;
 
       attribute name value string;
-      attribute email value string;
+      attribute email value string @regex("^.*@.*$");
       attribute start-date value datetime;
       attribute employment-reference-code value string;
       attribute phone-nr value string;
@@ -42,9 +42,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type dog; get;
+      match $x label dog;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -59,9 +59,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -119,9 +119,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -140,9 +140,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -160,9 +160,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -181,9 +181,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -201,9 +201,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email @key; get;
+      match $x owns email @key;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -222,9 +222,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email @key; get;
+      match $x owns email @key;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -245,9 +245,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays home-ownership:home; get;
+      match $x plays home-ownership:home;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -264,9 +264,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns price; get;
+      match $x owns price;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -283,9 +283,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns address @key; get;
+      match $x owns address @key;
       """
     Then uniquely identify answer concepts
       | x           |
@@ -346,9 +346,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type pet-ownership; get;
+      match $x label pet-ownership;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -363,9 +363,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub employment; get;
+      match $x sub employment;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -389,9 +389,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                          |
@@ -408,26 +408,26 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                                  |
       | label:employment                   |
       | label:part-time-employment         |
       | label:student-part-time-employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates shift; get;
+      match $x relates shift;
       """
     Then uniquely identify answer concepts
       | x                                  |
       | label:part-time-employment         |
       | label:student-part-time-employment |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates student-document; get;
+      match $x relates student-document;
       """
     Then uniquely identify answer concepts
       | x                                  |
@@ -444,22 +444,22 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x relates parent;
         $x relates child;
-      get;
+     
       """
     Then uniquely identify answer concepts
       | x                |
       | label:parenthood |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x relates father;
         $x relates son;
-      get;
+     
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -476,10 +476,10 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-      $x sub parenthood:parent; $y sub parenthood:child; get $x, $y;
+      $x sub parenthood:parent; $y sub parenthood:child;
       """
     Then uniquely identify answer concepts
       | x                           | y                        |
@@ -497,9 +497,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -525,17 +525,17 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates preferred-plane; get;
+      match $x relates preferred-plane;
       """
     Then uniquely identify answer concepts
       | x                      |
       | label:pilot-employment |
 
 
-  Scenario Outline: types should be able to define roles they play with an override using <mode>
-    Then typeql define
+  Scenario Outline: types cannot override plays in any <mode>
+    Then typeql define; parsing fails
       """
         define
         relation locates relates located;
@@ -550,40 +550,6 @@ Feature: TypeQL Define Query
       | role scoped label | locates:located |
 
 
-  Scenario Outline: types should not be able to define roles they play with an incorrect override of <mode>
-    Then typeql define<failure>
-      """
-        define
-        relation locates relates located;
-        relation contractor-locates sub locates, relates contractor-located as located;
-
-        relation employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as <as-label>;
-      """
-    Examples:
-      | mode                     | as-label                              | failure         |
-      | builtin kind             | entity                                | ; parsing fails |
-      | builtin type             | string                                | ; fails         |
-      | name:name without scope  | locates:locates                       | ; fails         |
-      | scope:scope without name | located:located                       | ; fails         |
-      | incorrect scope          | contractor-locates:located            | ; fails         |
-      | same role                | contractor-locates:contractor-located | ; fails         |
-
-
-  Scenario: already shadowed types should not be overrideable
-    Then typeql define; fails
-      """
-        define
-        relation locates relates located;
-        relation contractor-locates sub locates, relates contractor-located as located;
-        relation software-contractor-locates sub contractor-locates, relates software-contractor-located as contractor-located;
-
-        employment relates employee, plays locates:located;
-        relation contractor-employment sub employment, plays contractor-locates:contractor-located as located;
-        relation software-contractor-employment sub contractor-employment, plays software-contractor-locates:software-contractor-located as located;
-      """
-
-
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
     Given typeql define
       """
@@ -592,9 +558,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays income:source; get;
+      match $x plays income:source;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -613,9 +579,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays income:source; get;
+      match $x plays income:source;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -642,9 +608,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -663,9 +629,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -683,9 +649,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns employment-reference-code @key; get;
+      match $x owns employment-reference-code @key;
       """
     Then uniquely identify answer concepts
       | x                         |
@@ -704,9 +670,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns employment-reference-code @key; get;
+      match $x owns employment-reference-code @key;
       """
     Then uniquely identify answer concepts
       | x                                 |
@@ -732,33 +698,19 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type connection; get;
+      match $x label connection;
       """
     Then uniquely identify answer concepts
       | x                |
       | label:connection |
 
 
-  Scenario: a concrete relation type cannot be defined with abstract role types
-    When typeql define; fails
-      """
-      define relation connection relates from, relates to @abstract;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
-    When typeql define; fails
-      """
-      define relation connection relates to @abstract;
-      """
-    When transaction closes
-
-    When connection open schema transaction for database: typedb
+  Scenario: a concrete relation type can be defined with abstract role types
     When typeql define
       """
-      define relation connection relates from;
+      define relation connection relates from, relates to @abstract;
       """
     Then transaction commits
 
@@ -773,9 +725,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates parent; $x relates child; get;
+      match $x relates parent; $x relates child;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -792,14 +744,14 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates owner; get;
+      match $x relates owner;
       """
     Then uniquely identify answer concepts
       | x               |
-      | label:ownership |
       | label:loan      |
+      | label:ownership |
 
 
   ###################
@@ -814,12 +766,12 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
-        $x type <label>;
+        $x label <label>;
         attribute $x;
-      get;
+     
       """
     Then answer size is: 1
 
@@ -869,9 +821,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub code; get;
+      match $x sub code;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -889,9 +841,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type door-code, value string; get;
+      match $x label door-code, value string;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -942,9 +894,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x @regex("^(yes|no|maybe)$"); get;
+      match $x @regex("^(yes|no|maybe)$");
       """
     Then uniquely identify answer concepts
       | x              |
@@ -968,9 +920,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns <label>; get;
+      match $x owns <label>;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1021,7 +973,7 @@ Feature: TypeQL Define Query
       | key              |
       | card(1..1)       |
       | regex("val")     |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | range("1".."2")  |
       | values("1", "2") |
 
@@ -1036,7 +988,7 @@ Feature: TypeQL Define Query
     Examples:
       | annotation |
       | abstract   |
-      | cascade    |
+#      | cascade          | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: cannot set annotation @<annotation> to relation types
@@ -1082,7 +1034,7 @@ Feature: TypeQL Define Query
       | unique           |
       | key              |
       | card(1..1)       |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
@@ -1113,7 +1065,7 @@ Feature: TypeQL Define Query
       | independent      |
       | unique           |
       | key              |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
@@ -1144,7 +1096,7 @@ Feature: TypeQL Define Query
       | independent      |
       | unique           |
       | key              |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
@@ -1178,7 +1130,7 @@ Feature: TypeQL Define Query
       | abstract    |
       | distinct    |
       | independent |
-      | cascade     |
+#      | cascade          | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can set annotation @<annotation> to owns lists
@@ -1209,7 +1161,7 @@ Feature: TypeQL Define Query
       | annotation  |
       | abstract    |
       | independent |
-      | cascade     |
+#      | cascade          | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can set annotation @<annotation> to plays
@@ -1235,7 +1187,7 @@ Feature: TypeQL Define Query
       | abstract         |
       | distinct         |
       | independent      |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | unique           |
       | key              |
       | regex("val")     |
@@ -1271,7 +1223,7 @@ Feature: TypeQL Define Query
       | unique      |
       | key         |
       | card(1..1)  |
-      | cascade     |
+#      | cascade          | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: cannot set annotation @<annotation> to subs
@@ -1289,7 +1241,7 @@ Feature: TypeQL Define Query
       | key              |
       | card(1..1)       |
       | regex("val")     |
-      | cascade          |
+#      | cascade          | # TODO: Cascade is temporarily turned off
       | range("1".."2")  |
       | values("1", "2") |
 
@@ -1308,9 +1260,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type animal; $x @abstract; get;
+      match $x label animal; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1327,9 +1279,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub animal; get;
+      match $x sub animal;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1347,9 +1299,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub animal; $x @abstract; get;
+      match $x sub animal; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1374,9 +1326,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type membership; $x @abstract; get;
+      match $x label membership; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1393,9 +1345,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub membership; get;
+      match $x sub membership;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -1413,9 +1365,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub requirement; $x @abstract; get;
+      match $x sub requirement; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x                      |
@@ -1440,9 +1392,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type number-of-limbs; $x @abstract; get;
+      match $x label number-of-limbs; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x                     |
@@ -1459,9 +1411,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub number-of-limbs; get;
+      match $x sub number-of-limbs;
       """
     Then uniquely identify answer concepts
       | x                     |
@@ -1479,9 +1431,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub number-of-limbs; $x @abstract; get;
+      match $x sub number-of-limbs; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x                                |
@@ -1502,12 +1454,12 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
       $name type super-name @abstract;
       $location type location-name, sub super-name;
-      get;
+     
       """
     Then uniquely identify answer concepts
       | name             | location            |
@@ -1543,18 +1495,18 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Then connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $t owns $a @key; get;
+      match $t owns $a @key;
       """
     Then uniquely identify answer concepts
       | t                | a                               |
       | label:person     | label:email                     |
       | label:child      | label:email                     |
       | label:employment | label:employment-reference-code |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $t owns $a @unique; get;
+      match $t owns $a @unique;
       """
     Then uniquely identify answer concepts
       | t            | a              |
@@ -1562,84 +1514,75 @@ Feature: TypeQL Define Query
       | label:child  | label:phone-nr |
 
 
-  Scenario: redefining inherited annotations throws
+  Scenario: redefining inherited annotations throws for types, does not for capabilities
     Then typeql define
       """
       define entity child sub person, owns email @key;
       """
-    Then transaction commits; fails
-    Then connection open schema transaction for database: typedb
+    Then transaction commits
+    When connection open schema transaction for database: typedb
     Then typeql define
       """
       define entity child sub person, owns phone-nr @unique;
       """
-    Then transaction commits; fails
-
-
-  Scenario: annotations are inherited through overrides
-    Given typeql define
-      """
-      define
-      entity person @abstract;
-      attribute phone-nr @abstract;
-      entity child sub person, owns mobile as phone-nr;
-      attribute mobile sub phone-nr;
-      """
-    Given transaction commits
-    Then connection open schema transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $t owns $a @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | t            | a              |
-      | label:person | label:phone-nr |
-      | label:child  | label:mobile   |
-    Given typeql define
-      """
-      define
-      entity child @abstract;
-      attribute mobile @abstract;
-      entity infant sub child, owns baby-phone-nr as mobile;
-      attribute baby-phone-nr sub mobile;
-      """
-    Given transaction commits
-    Then connection open read transaction for database: typedb
-    When get answers of typeql get
-      """
-      match $t owns $a @unique; get;
-      """
-    Then uniquely identify answer concepts
-      | t            | a                   |
-      | label:person | label:phone-nr      |
-      | label:child  | label:mobile        |
-      | label:infant | label:baby-phone-nr |
-
-
-  Scenario: redefining inherited annotations on overrides throws
-    Given typeql define
-      """
-      define
-      entity person @abstract;
-      attribute phone-nr @abstract;
-      entity child sub person, owns mobile as phone-nr;
-      attribute mobile sub phone-nr;
-      """
     Then transaction commits
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql define
       """
-      define entity child owns mobile as phone-nr @unique;
+      define email @abstract; attribute working-email sub email, value string @regex("^.*@.*$");
       """
     Then transaction commits; fails
 
 
-  Scenario: defining a less strict annotation on an inherited ownership throws
-    When typeql define
+  Scenario: type cannot override owns
+    Then typeql define; parsing fails
       """
-      define entity child sub person, owns email @unique;
+      define
+      entity person @abstract;
+      attribute phone-nr @abstract;
+      entity child sub person, owns mobile as phone-nr;
       """
-    Then transaction commits; fails
+
+
+    # TODO: Should be checked without override
+#  Scenario: annotations are inherited through overrides
+#    Given typeql define
+#      """
+#      define
+#      entity person @abstract;
+#      attribute phone-nr @abstract;
+#      entity child sub person, owns mobile as phone-nr;
+#      attribute mobile sub phone-nr;
+#      """
+#    Given transaction commits
+#    Then connection open schema transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $t owns $a @unique;
+#      """
+#    Then uniquely identify answer concepts
+#      | t            | a              |
+#      | label:person | label:phone-nr |
+#      | label:child  | label:mobile   |
+#    Given typeql define
+#      """
+#      define
+#      entity child @abstract;
+#      attribute mobile @abstract;
+#      entity infant sub child, owns baby-phone-nr as mobile;
+#      attribute baby-phone-nr sub mobile;
+#      """
+#    Given transaction commits
+#    Then connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $t owns $a @unique;
+#      """
+#    Then uniquely identify answer concepts
+#      | t            | a                   |
+#      | label:person | label:phone-nr      |
+#      | label:child  | label:mobile        |
+#      | label:infant | label:baby-phone-nr |
 
 
   ###################
@@ -1657,9 +1600,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type person, owns name; get;
+      match $x label person, owns name;
       """
     Then answer size is: 1
 
@@ -1695,9 +1638,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1713,9 +1656,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1752,9 +1695,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns barcode @key; get;
+      match $x owns barcode @key;
       """
     Then uniquely identify answer concepts
       | x             |
@@ -1823,9 +1766,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employer; get;
+      match $x relates employer;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1864,9 +1807,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
-      match $x @regex("^A.*$"); get;
+      match $x @regex("^A.*$");
       """
     Then uniquely identify answer concepts
       | x          |
@@ -1938,9 +1881,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name @key; get;
+      match $x owns name @key;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1955,16 +1898,16 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email; get;
+      match $x owns email;
       """
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns email @key; get;
+      match $x owns email @key;
       """
     Then answer size is: 0
 
@@ -2052,17 +1995,17 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given connection open write transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns $y @unique; get;
+      match $x owns $y @unique;
       """
     Then uniquely identify answer concepts
       | x            | y              |
       | label:person | label:email    |
       | label:person | label:phone-nr |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match person owns $y @key; get;
+      match person owns $y @key;
       """
     Then answer size is: 0
     Given typeql insert; fails
@@ -2125,9 +2068,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub person; $x @abstract; get;
+      match $x sub person; $x @abstract;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -2148,9 +2091,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub friendship @abstract; get;
+      match $x sub friendship @abstract;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -2170,9 +2113,9 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub age @abstract; get;
+      match $x sub age @abstract;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2309,9 +2252,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub shoe-size; get;
+      match $x sub shoe-size;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -2339,9 +2282,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub organism; get;
+      match $x sub organism;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -2480,9 +2423,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type child, plays $r; get;
+      match $x label child, plays $r;
       """
     Then uniquely identify answer concepts
       | x           | r                         |
@@ -2502,9 +2445,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type child, owns $y; get;
+      match $x label child, owns $y;
       """
     Then uniquely identify answer concepts
       | x           | y              |
@@ -2525,9 +2468,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type child, owns $y @key; get;
+      match $x label child, owns $y @key;
       """
     Then uniquely identify answer concepts
       | x           | y                  |
@@ -2545,9 +2488,9 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type part-time-employment, relates $r; get;
+      match $x label part-time-employment, relates $r;
       """
     Then uniquely identify answer concepts
       | x                          | r                         |
@@ -2568,9 +2511,9 @@ Feature: TypeQL Define Query
     # already existing one. It might contradict the test!
     Given transaction closes
     Given connection open read transaction for database: typedb
-    Then typeql get; fails
+    Then typeql fails
       """
-      match $x type dog; get;
+      match $x label dog;
       """
 
 
@@ -2604,9 +2547,9 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates function; $x plays recursive-function:function; get;
+      match $x relates function; $x plays recursive-function:function;
       """
     Then uniquely identify answer concepts
       | x                        |

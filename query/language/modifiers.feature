@@ -76,10 +76,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
@@ -109,10 +109,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       """
     Then order of answer concepts is
@@ -121,10 +121,10 @@ Feature: TypeQL Query Modifiers
       | key:ref:2 | attr:name:Frederick  |
       | key:ref:0 | attr:name:Gary       |
       | key:ref:1 | attr:name:Jemima     |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y desc;
       """
     Then order of answer concepts is
@@ -147,10 +147,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y;
       """
     Then order of answer concepts is
@@ -173,12 +173,12 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa person, has age $a;
         ?to20 = 20 - $a;
-      get;
+
       sort
         ?to20 desc;
       """
@@ -202,10 +202,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y, has ref $r, has age $a;
-      get;
+
       sort $y, $a, $r asc;
       """
     Then order of answer concepts is
@@ -228,10 +228,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y, has ref $r, has age $a;
-      get;
+
       sort $y asc, $a desc, $r desc;
       """
     Then order of answer concepts is
@@ -254,10 +254,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       limit 3;
       """
@@ -280,10 +280,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       offset 2;
       """
@@ -305,10 +305,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       offset 1;
       limit 2;
@@ -331,10 +331,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       limit 0;
       """
@@ -353,10 +353,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has name $y;
-      get;
+
       sort $y asc;
       offset 5;
       """
@@ -376,10 +376,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match $x isa name;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
@@ -404,10 +404,10 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has age $y;
-      get;
+
       sort $y asc;
       limit 2;
       """
@@ -415,10 +415,10 @@ Feature: TypeQL Query Modifiers
       | x         | y           |
       | key:ref:0 | attr:age:2  |
       | key:ref:4 | attr:age:2  |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa person, has age $y;
-      get;
+
       sort $y asc;
       offset 2;
       limit 2;
@@ -439,7 +439,7 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Then typeql throws exception
       """
       match
         $x isa person, has age $y;
@@ -458,11 +458,11 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Then typeql throws exception
       """
       match
         $x isa person, attribute $a;
-      get;
+
       sort $a asc;
       """
 
@@ -493,20 +493,20 @@ Feature: TypeQL Query Modifiers
     Given session opens transaction of type: read
 
     # ascending
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x < <pivot>;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
       | x         |
       | key:ref:1 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x <= <pivot>;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
@@ -514,20 +514,20 @@ Feature: TypeQL Query Modifiers
       | key:ref:1 |
       | key:ref:0 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x > <pivot>;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
       | x         |
       | key:ref:2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x >= <pivot>;
-      get;
+
       sort $x asc;
       """
     Then order of answer concepts is
@@ -536,20 +536,20 @@ Feature: TypeQL Query Modifiers
       | key:ref:2 |
 
     # descending
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x < <pivot>;
-      get;
+
       sort $x desc;
       """
     Then order of answer concepts is
       | x         |
       | key:ref:1 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x <= <pivot>;
-      get;
+
       sort $x desc;
       """
     Then order of answer concepts is
@@ -557,20 +557,20 @@ Feature: TypeQL Query Modifiers
       | key:ref:0 |
       | key:ref:1 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x > <pivot>;
-      get;
+
       sort $x desc;
       """
     Then order of answer concepts is
       | x         |
       | key:ref:2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa <attr>; $x >= <pivot>;
-      get;
+
       sort $x desc;
       """
     Then order of answer concepts is
@@ -617,7 +617,7 @@ Feature: TypeQL Query Modifiers
     Given session opens transaction of type: read
 
     # ascending
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref;
       get $x;
@@ -631,7 +631,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:0 |
       | key:ref:3 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x < <fourthValuePivot>;
       get $x;
@@ -642,7 +642,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:2 |
       | key:ref:1 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x <= <fourthValuePivot>;
       get $x;
@@ -654,7 +654,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:1 |
       | key:ref:4 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x > <fourthValuePivot>;
       get $x;
@@ -665,7 +665,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:0 |
       | key:ref:3 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x >= <fourthValuePivot>;
       get $x;
@@ -678,7 +678,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:3 |
 
     # descending
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref;
       get $x;
@@ -692,7 +692,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:1 |
       | key:ref:2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x < <fourthValuePivot>;
       get $x;
@@ -703,7 +703,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:1 |
       | key:ref:2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x <= <fourthValuePivot>;
       get $x;
@@ -715,7 +715,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:1 |
       | key:ref:2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x > <fourthValuePivot>;
       get $x;
@@ -726,7 +726,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:3 |
       | key:ref:0 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match $x isa $t; $t owns ref; $x >= <fourthValuePivot>;
       get $x;
@@ -761,7 +761,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql get group
+    When get answers of typeql read query group
       """
       match $x isa person, has ref $r, has name $n;
       get $r, $n;
@@ -788,7 +788,7 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given session opens transaction of type: read
-    When get answers of typeql get group
+    When get answers of typeql read query group
       """
       match $x isa person, has name $y;
       get $x, $y;
@@ -896,11 +896,11 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
       $x isa person, has name $n;
-      get;
+
       sort $n;
       """
     Then uniquely identify answer concepts
@@ -935,11 +935,11 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
       $x isa person, has email "dummy@gmail.com";
-      get;
+
       """
     Then uniquely identify answer concepts
       | x         |

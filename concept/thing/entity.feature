@@ -65,14 +65,14 @@ Feature: Concept Entity
     When $alice = attribute(username) put instance with value: alice
     When entity $a set has: $alice
     Then entity $a get has(username) contain: $alice
-    Then entity $a get has with annotations: @key; contain: $alice
+    Then entity $a get key has; contain: $alice
     Then attribute $alice get owners contain: $a
     When transaction commits
     When connection open read transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
     When $alice = attribute(username) get instance with value: alice
     Then entity $a get has(username) contain: $alice
-    Then entity $a get has with annotations: @key; contain: $alice
+    Then entity $a get key has; contain: $alice
     Then attribute $alice get owners contain: $a
 
   Scenario: Entity can unset keys
@@ -81,7 +81,7 @@ Feature: Concept Entity
     When entity $a set has: $alice
     When entity $a unset has: $alice
     Then entity $a get has(username) do not contain: $alice
-    Then entity $a get has with annotations: @key; do not contain: $alice
+    Then entity $a get key has; do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     When entity $a set has: $alice
     When transaction commits
@@ -91,7 +91,7 @@ Feature: Concept Entity
     Then entity $a get has(username) contain: $alice
     When entity $a unset has: $alice
     Then entity $a get has(username) do not contain: $alice
-    Then entity $a get has with annotations: @key; do not contain: $alice
+    Then entity $a get key has; do not contain: $alice
     Then attribute $alice get owners do not contain: $a
     Then transaction commits; fails
 

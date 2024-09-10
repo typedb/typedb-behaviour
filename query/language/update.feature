@@ -90,9 +90,9 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person, has name $n; get;
+      match $x isa person, has name $n;
       """
     Then uniquely identify answer concepts
       | x         | n               |
@@ -180,12 +180,12 @@ Feature: TypeQL Update Query
       """
     Then transaction commits
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
       (named: $p, name: $nc) isa naming;
       $nc has name $n;
-      get;
+
       """
     Then uniquely identify answer concepts
       | p         | n                  |
@@ -196,12 +196,12 @@ Feature: TypeQL Update Query
       | key:ref:4 | attr:name:Alex     |
       | key:ref:5 | attr:name:Bob      |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
       $p isa person;
       $p has name $n;
-      get;
+
       """
     Then answer size is: 0
 

@@ -85,7 +85,7 @@ Feature: Recursion Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (subordinate: $x, superior: $y) isa big-location-hierarchy; get;
+      match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -154,7 +154,7 @@ Feature: Recursion Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role31: $x, role32: $y) isa relation3; get;
+      match (role31: $x, role32: $y) isa relation3;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -217,7 +217,7 @@ Feature: Recursion Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role31: $x, role32: $y) isa relation3; get;
+      match (role31: $x, role32: $y) isa relation3;
       """
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
     Then verify answer size is: 2
@@ -225,7 +225,7 @@ Feature: Recursion Resolution
     Then verify answers are complete
     Given reasoning query
       """
-      match (role21: $x, role22: $y) isa relation2; get;
+      match (role21: $x, role22: $y) isa relation2;
       """
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
     Then verify answer size is: 2
@@ -262,7 +262,7 @@ Feature: Recursion Resolution
       """
     Given reasoning query
       """
-      match $x isa dream; get; limit 10;
+      match $x isa dream; limit 10;
       """
     Then verify answer size is: 10
 
@@ -352,14 +352,14 @@ Feature: Recursion Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $p isa pair, has name 'ff'; get;
+      match $p isa pair, has name 'ff';
       """
     Then verify answer size is: 16
     Then verify answers are sound
     # Then verify answers are complete  # Not yet supported
     Given reasoning query
       """
-      match $p isa pair; get;
+      match $p isa pair;
       """
     Then verify answer size is: 64
     Then verify answers are sound
@@ -559,7 +559,7 @@ Feature: Recursion Resolution
       """
     Given reasoning query
       """
-      match (ancestor: $X, descendant: $Y) isa ancestorship; get;
+      match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
     Then verify answer size is: 10
     Then verify answers are sound
@@ -578,7 +578,7 @@ Feature: Recursion Resolution
       """
     Given reasoning query
       """
-      match ($X, $Y) isa ancestorship; get;
+      match ($X, $Y) isa ancestorship;
       """
     Then verify answer size is: 20
     Then verify answers are sound
@@ -860,7 +860,7 @@ Feature: Recursion Resolution
     Then verify answers are complete
     Then verify answer set is equivalent for query
       """
-      match $x has index 'a2'; get;
+      match $x has index 'a2';
       """
 
 
@@ -942,7 +942,7 @@ Feature: Recursion Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (from: $x, to: $y) isa reachable; get;
+      match (from: $x, to: $y) isa reachable;
       """
     Then verify answer size is: 7
     Then verify answers are sound
@@ -1217,7 +1217,7 @@ Feature: Recursion Resolution
       """
     Given reasoning query
       """
-      match (from: $x, to: $y) isa RevSG; get;
+      match (from: $x, to: $y) isa RevSG;
       """
     Then verify answer size is: 11
     Then verify answers are sound
@@ -1607,7 +1607,7 @@ Feature: Recursion Resolution
     Then verify answers are complete
     Then verify answer set is equivalent for query
       """
-      match $y isa b-entity; get;
+      match $y isa b-entity;
       """
 
 
@@ -1758,5 +1758,5 @@ Feature: Recursion Resolution
 
     Then verify answer set is equivalent for query
       """
-      match $y isa a-entity; get;
+      match $y isa a-entity;
       """

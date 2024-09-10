@@ -56,10 +56,14 @@ Feature: TypeQL Redefine Query
       """
       redefine entity person plays employment:employee, plays income:earner, owns name @card(0..) @regex("^.*$"), owns email @key, owns phone-nr @unique;
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine entity person owns phone-nr @unique, owns name @regex("^.*$") @card(0..), plays income:earner, owns email @key, plays employment:employee;
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine entity person owns phone-nr @unique, owns name @regex("^.*$");
@@ -71,14 +75,23 @@ Feature: TypeQL Redefine Query
       """
       redefine entity person plays employment:employee;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine entity person owns name @regex("^.*$") @card(0..);
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine entity person plays income:earner;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine entity child sub empty-entity;
@@ -93,9 +106,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub person; get;
+      match $x sub person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -104,9 +117,9 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined entity subtype inherits playable roles from its parent type
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -119,9 +132,9 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x plays employment:employee; get;
+      match $x plays employment:employee;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -137,9 +150,9 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -152,6 +165,9 @@ Feature: TypeQL Redefine Query
       """
       redefine entity child relates employee;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine entity child relates employee[];
@@ -163,7 +179,7 @@ Feature: TypeQL Redefine Query
       """
       define entity person owns name[];
       """
-    When transaction closes
+    Given transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql redefine
@@ -173,9 +189,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name[]; get;
+      match $x owns name[];
       """
     Then uniquely identify answer concepts
       | x            |
@@ -190,9 +206,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns name; get;
+      match $x owns name;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -274,14 +290,20 @@ Feature: TypeQL Redefine Query
       """
       redefine relation employment relates employee @card(1..), plays income:source, owns start-date @card(0..), owns employment-reference-code @key;
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine relation employment plays income:source, relates employee @card(1..), owns employment-reference-code @key, owns start-date @card(0..);
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine relation part-time-employment sub empty-relation, relates part-time-role;
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine relation part-time-employment relates part-time-role, sub empty-relation;
@@ -293,14 +315,23 @@ Feature: TypeQL Redefine Query
       """
       redefine relation employment relates employee @card(1..);
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine relation employment plays income:source;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine relation part-time-employment sub empty-relation;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine relation part-time-employment relates part-time-role;
@@ -315,9 +346,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub employment; get;
+      match $x sub employment;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -326,9 +357,9 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined relation subtype inherits roles from its supertype
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -341,9 +372,9 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                          |
@@ -359,9 +390,9 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then uniquely identify answer concepts
       | x                          |
@@ -374,7 +405,7 @@ Feature: TypeQL Redefine Query
       """
       define relation employment relates employee[];
       """
-    When transaction closes
+    Given transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql redefine
@@ -384,9 +415,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee[]; get;
+      match $x relates employee[];
       """
     Then uniquely identify answer concepts
       | x                |
@@ -401,9 +432,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x relates employee; get;
+      match $x relates employee;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -422,7 +453,7 @@ Feature: TypeQL Redefine Query
       """
       define relation employment owns start-date[];
       """
-    When transaction closes
+    Given transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql redefine
@@ -432,9 +463,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns start-date[]; get;
+      match $x owns start-date[];
       """
     Then uniquely identify answer concepts
       | x                |
@@ -449,9 +480,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x owns start-date; get;
+      match $x owns start-date;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -512,6 +543,8 @@ Feature: TypeQL Redefine Query
       """
       redefine attribute email @independent, value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; parsing fails
       """
       redefine
@@ -524,11 +557,17 @@ Feature: TypeQL Redefine Query
       """
       redefine attribute email @independent;
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine
       attribute email value string @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz") @regex("^.*@.*$");
       """
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
     Then typeql redefine; fails
       """
       redefine
@@ -551,12 +590,12 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x type <label>;
         attribute $x;
-      get;
+
       """
     Then answer size is: 1
 
@@ -585,9 +624,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub data; get;
+      match $x sub data;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -603,9 +642,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x type empty-sub-data, value decimal; get;
+      match $x type empty-sub-data, value decimal;
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -696,7 +735,7 @@ Feature: TypeQL Redefine Query
       | independent      | independent      | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
       | key              | key              | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
       | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
       | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
       | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
@@ -732,7 +771,7 @@ Feature: TypeQL Redefine Query
     Examples:
       | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
       | abstract         | abstract         |             | ; fails       | commits          |
-      | cascade          | cascade          |             | ; fails       | commits          |
+#      | cascade          | cascade          |             | ; fails       | commits          | # TODO: Cascade is temporarily turned off
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
       | independent      | independent      | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
@@ -777,7 +816,7 @@ Feature: TypeQL Redefine Query
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
       | key              | key              | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           |  # TODO: Cascade is temporarily turned off
       | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
       | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
       | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
@@ -819,7 +858,7 @@ Feature: TypeQL Redefine Query
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
       | key              | key              | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
       | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
       | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
       | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
@@ -879,7 +918,7 @@ Feature: TypeQL Redefine Query
       | independent      | independent      | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
       | key              | key              | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
       | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
       | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
       | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
@@ -942,7 +981,7 @@ Feature: TypeQL Redefine Query
       | abstract         | abstract         | ; fails     | ; fails       | closes           |
       | independent      | independent      | ; fails     | ; fails       | closes           |
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns
@@ -1002,7 +1041,7 @@ Feature: TypeQL Redefine Query
       | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
       | abstract         | abstract         | ; fails     | ; fails       | closes           |
       | independent      | independent      | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns lists
@@ -1059,7 +1098,7 @@ Feature: TypeQL Redefine Query
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
       | unique           | unique           | ; fails     | ; fails       | closes           |
       | key              | key              | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
       | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
       | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
       | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
@@ -1121,7 +1160,7 @@ Feature: TypeQL Redefine Query
       | abstract         | abstract         | ; fails     | ; fails       | closes           |
       | independent      | independent      | ; fails     | ; fails       | closes           |
       | distinct         | distinct         | ; fails     | ; fails       | closes           |
-      | cascade          | cascade          | ; fails     | ; fails       | closes           |
+#      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
       | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
       | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
 
@@ -1189,9 +1228,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub apple-product; get;
+      match $x sub apple-product;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -1217,9 +1256,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub vacation; get;
+      match $x sub vacation;
       """
     Then uniquely identify answer concepts
       | x                |
@@ -1249,9 +1288,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub organism; get;
+      match $x sub organism;
       """
     Then uniquely identify answer concepts
       | x              |
@@ -1290,9 +1329,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1330,9 +1369,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -1373,9 +1412,9 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub pigeon; get;
+      match $x sub pigeon;
       """
     Then uniquely identify answer concepts
       | x            |

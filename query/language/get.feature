@@ -60,7 +60,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $z isa person, has name $x, has age $y;
@@ -72,7 +72,7 @@ Feature: TypeQL Get Query
 
 
   Scenario: when a 'get' has unbound variables, an error is thrown
-    Then typeql get; throws exception
+    Then typeql throws exception
       """
       match $x isa person; get $y;
       """
@@ -89,7 +89,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $z isa person, has name $x, has age $y;
@@ -112,7 +112,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $n, has ref $r;
@@ -124,7 +124,7 @@ Feature: TypeQL Get Query
       | n               | r               |
       | attr:name:Klaus | attr:ref:0      |
 
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $n, has ref $r;
@@ -153,51 +153,51 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
+
       """
     Then answer size is: 9
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
+
       count;
       """
     Then aggregate value is: 9
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
+
       """
     Then answer size is: 6
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
+
       count;
       """
     Then aggregate value is: 6
 
 
   Scenario: the 'count' of an empty answer set is zero
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has name "Voldemort";
-      get;
+
       count;
       """
     Then aggregate value is: 0
@@ -228,10 +228,10 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has <attr> $y;
-      get;
+
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -275,10 +275,10 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has weight $y;
-      get;
+
       std $y;
       """
     # Note: This is the sample standard deviation, NOT the population standard deviation
@@ -296,14 +296,14 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has name $y, has age $z;
-      get;
+
       sum $z;
       """
     Then aggregate value is: 65
-    Then get answer of typeql get aggregate
+    Then get answer of typeql read query aggregate
       """
       match $x isa person, has name $y, has age $z;
       get $y, $z;
@@ -322,10 +322,10 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has age $y;
-      get;
+
       <agg_type> $y;
       """
     Then aggregate value is: <agg_val>
@@ -348,10 +348,10 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has age $y;
-      get;
+
       median $y;
       """
     Then aggregate value is: 36.5
@@ -370,10 +370,10 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has income $y;
-      get;
+
       <agg_type> $y;
       """
     Then aggregate answer is empty
@@ -392,7 +392,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person;
-      get;
+
       <agg_type> $y;
       """
 
@@ -417,7 +417,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person;
-      get;
+
       min $x;
       """
 
@@ -448,7 +448,7 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person, has <attr> $y;
-      get;
+
       <agg_type> $y;
       """
 
@@ -488,16 +488,16 @@ Feature: TypeQL Get Query
     Then typeql get aggregate; throws exception
       """
       match $x isa person, has attribute $y;
-      get;
+
       sum $y;
       """
 
 
   Scenario: when taking the sum of an empty set, even if any matches would definitely be strings, no error is thrown and an empty answer is returned
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match $x isa person, has name $y;
-      get;
+
       sum $y;
       """
     Then aggregate answer is empty
@@ -520,9 +520,9 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match ($x, $y) isa friendship; get;
+      match ($x, $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | x         | y         |
@@ -538,10 +538,10 @@ Feature: TypeQL Get Query
       | key:ref:3 | key:ref:0 |
       | key:ref:3 | key:ref:1 |
       | key:ref:3 | key:ref:2 |
-    When get answers of typeql get group
+    When get answers of typeql read query group
       """
       match ($x, $y) isa friendship;
-      get;
+
       group $x;
       """
     Then answer groups are
@@ -571,7 +571,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get group
+    When get answers of typeql read query group
       """
       match
        $x isa person, has ref $r;
@@ -623,14 +623,14 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
-    When get answers of typeql get group aggregate
+    When get answers of typeql read query group aggregate
       """
       match ($x, $y) isa friendship;
-      get;
+
       group $x;
       count;
       """
@@ -657,7 +657,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
       $x isa company;
@@ -675,7 +675,7 @@ Feature: TypeQL Get Query
       | key:ref:0 | key:ref:3 | key:ref:4 |
       | key:ref:1 | key:ref:4 | key:ref:2 |
       | key:ref:1 | key:ref:4 | key:ref:3 |
-    Then get answers of typeql get group aggregate
+    Then get answers of typeql read query group aggregate
       """
       match
         $x isa company;
@@ -709,13 +709,13 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get group aggregate
+    When get answers of typeql read query group aggregate
       """
       match
         $x isa company;
         $y isa person, has age $z;
         ($x, $y) isa employment;
-      get;
+
       group $x;
       max $z;
       """
@@ -737,7 +737,7 @@ Feature: TypeQL Get Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get group aggregate
+    When get answers of typeql read query group aggregate
       """
       match
        $p isa person, has name $name, has age $a;
@@ -775,7 +775,7 @@ Feature: TypeQL Get Query
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get group aggregate
+    When get answers of typeql read query group aggregate
       """
       match $x isa person, has income $y;
       get $x, $y;

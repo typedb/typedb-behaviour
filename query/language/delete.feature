@@ -73,21 +73,21 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
       | key:name:Bob |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa friendship; get;
+      match $x isa friendship;
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -120,9 +120,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -154,9 +154,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -188,9 +188,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa friendship; get;
+      match $x isa friendship;
       """
     Then answer size is: 0
 
@@ -216,9 +216,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then answer size is: 0
 
@@ -248,9 +248,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x            |
@@ -279,9 +279,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
@@ -396,12 +396,12 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
       $x isa person;
       $r ($x) isa friendship;
-      get;
+
       """
     Then answer size is: 0
 
@@ -440,9 +440,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match (friend: $x, friend: $y) isa friendship; get;
+      match (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | x               | y               |
@@ -475,17 +475,17 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x               |
       | key:name:Bob    |
       | key:name:Carrie |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x) isa friendship; get;
+      match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | r         | x               |
@@ -516,9 +516,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x) isa friendship; get;
+      match $r (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | r         | x            |
@@ -548,9 +548,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -582,9 +582,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -616,9 +616,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then uniquely identify answer concepts
       | r         | x             | y             |
@@ -675,9 +675,9 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r (friend: $x, friend: $y) isa friendship; get;
+      match $r (friend: $x, friend: $y) isa friendship;
       """
     Then answer size is: 0
 
@@ -690,9 +690,9 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r has email $a, has email $b; get;
+      match $r has email $a, has email $b;
       """
     Then answer size is: 0
 
@@ -707,9 +707,9 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; $y isa person; get;
+      match $x isa person; $y isa person;
       """
     Then answer size is: 0
 
@@ -778,9 +778,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -810,9 +810,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -943,9 +943,9 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $rel (chef: $p) isa ship-crew; get;
+      match $rel (chef: $p) isa ship-crew;
       """
     Then uniquely identify answer concepts
       | rel       | p               |
@@ -960,9 +960,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $rel (chef: $p) isa ship-crew; get;
+      match $rel (chef: $p) isa ship-crew;
       """
     Then answer size is: 0
 
@@ -994,9 +994,9 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has age 18; get;
+      match $x has age 18;
       """
     Then uniquely identify answer concepts
       | x             |
@@ -1011,9 +1011,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has age 18; get;
+      match $x has age 18;
       """
     Then answer size is: 0
 
@@ -1131,9 +1131,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
@@ -1181,9 +1181,9 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
@@ -1198,9 +1198,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then answer size is: 0
 
@@ -1229,9 +1229,9 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then uniquely identify answer concepts
       | x         | d                   |
@@ -1246,14 +1246,14 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x has duration $d; get;
+      match $x has duration $d;
       """
     Then answer size is: 0
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     Then answer size is: 0
 
@@ -1318,26 +1318,26 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $f (friend: $x) isa friendship; get;
+      match $f (friend: $x) isa friendship;
       """
     Then uniquely identify answer concepts
       | f         | x             |
       | key:ref:2 | key:name:Alex |
       | key:ref:2 | key:name:John |
       | key:ref:3 | key:name:Alex |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $n isa name; get;
+      match $n isa name;
       """
     Then uniquely identify answer concepts
       | n               |
       | attr:name:John  |
       | attr:name:Alex  |
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person, has lastname $n; get;
+      match $x isa person, has lastname $n;
       """
     Then uniquely identify answer concepts
       | x             | n                    |
@@ -1391,9 +1391,9 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person, has lastname $n; get;
+      match $x isa person, has lastname $n;
       """
     Then answer size is: 0
 
@@ -1405,7 +1405,7 @@ Feature: TypeQL Delete Query
   Scenario: deleting a variable not in the query throws, even if there were no matches
     Then typeql delete; throws exception
       """
-      match $x isa person; delete $n isa name; get;
+      match $x isa person; delete $n isa name;
       """
 
 
@@ -1438,9 +1438,9 @@ Feature: TypeQL Delete Query
     Given transaction commits
 
     When session opens transaction of type: write
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa name; get;
+      match $x isa name;
       """
     Then uniquely identify answer concepts
       | x                  |
