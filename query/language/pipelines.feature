@@ -9,8 +9,7 @@ Feature: TypeQL pipelines
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
+    Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
     Given typeql define
       """
@@ -46,15 +45,36 @@ Feature: TypeQL pipelines
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql read query
+    Given get answers of typeql read query
     """
     match
       $p isa person, has name $name;
-    match
       $p has age $age;
     """
     Then uniquely identify answer concepts
-      | p         | name            | age |
-      | key:ref:0 | attr:name:Alice | 10  |
-      | key:ref:1 | attr:name:Bob   | 11  |
+      | p         | name            | age          |
+      | key:ref:0 | attr:name:Alice | attr:age:10  |
+      | key:ref:1 | attr:name:Bob   | attr:age:11  |
+
+
+  Scenario: A match can be used to bind variables, and chained with an insert for constraints.
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $name "Alice" isa name; $age 10 isa age;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+    """
+    match
+      $name isa name; $age isa age;
+    insert
+      $p isa person, has ref 0, has $name, has $age;
+    """
+    Then uniquely identify answer concepts
+      | p         | name            | age          |
+      | key:ref:0 | attr:name:Alice | attr:age:10  |
 
