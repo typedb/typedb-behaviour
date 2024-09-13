@@ -44,7 +44,7 @@ Feature: TypeQL pipelines
     """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open read transaction for database: typedb
     Given get answers of typeql read query
     """
     match
@@ -100,6 +100,36 @@ Feature: TypeQL pipelines
     Then uniquely identify answer concepts
       | p              |
       | key:ref:0      |
+
+  Scenario: A match can be chained with a delete and insert to emulate an update.
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $p1 isa person, has name "Alice", has age 10, has ref 0;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    match
+      $p1 isa person, has name "Alice", has age $age;
+    delete
+      has $age of $p1;
+    insert
+      $p1 has age 11;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match
+      $p isa person, has name $name, has age $age;
+    """
+    Then uniquely identify answer concepts
+      | p         | name            | age          |
+      | key:ref:0 | attr:name:Alice | attr:age:11  |
 
 
   Scenario: A stream can be sorted on a set of variables
