@@ -15,7 +15,7 @@ Feature: Concept Owns
     Given create entity type: person
     Given create entity type: customer
     Given create entity type: subscriber
-    # Notice: supertypes are the same, but can be specialisden for the second subtype inside the tests
+    # Notice: supertypes are the same, but can be specialised for the second subtype inside the tests
     Given entity(customer) set supertype: person
     Given entity(subscriber) set supertype: person
     Given entity(person) set annotation: @abstract
@@ -27,7 +27,7 @@ Feature: Concept Owns
     Given relation(registration) create role: registration-object
     Given create relation type: profile
     Given relation(profile) create role: profile-object
-    # Notice: supertypes are the same, but can be specialisden for the second subtype inside the tests
+    # Notice: supertypes are the same, but can be specialised for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(profile) set supertype: description
     Given relation(description) set annotation: @abstract
@@ -327,7 +327,7 @@ Feature: Concept Owns
     Then entity(ent00) unset owns: attr0; fails
     Then entity(ent1) set supertype: ent01; fails
 
-  Scenario: A type may not declare ownership of an attribute that has been specialisden by an inherited ownership
+  Scenario: A type may not declare ownership of an attribute that has been specialised by an inherited ownership
     When create attribute type: attr0
     When attribute(attr0) set value type: string
     When attribute(attr0) set annotation: @abstract
@@ -638,15 +638,15 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | double        |
@@ -672,7 +672,7 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<subtype-name>) set owns: work-email
     When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns contain:
       | work-email |
       | name       |
@@ -823,7 +823,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare specialisden owns as owns
+  Scenario Outline: <root-type> types cannot redeclare specialised owns as owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1315,7 +1315,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(work-email) set specialise: email; fails
     When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1323,7 +1323,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(work-email) set specialise: email; fails
     When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
     When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialisden(work-email) get label: email
+    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
     Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -1367,7 +1367,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare ordered specialisden owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered specialised owns as owns
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1469,10 +1469,10 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
     When attribute(name) set supertype: other
     When <root-type>(<subtype-name>) get owns(name) set specialise: other
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     When create attribute type: surname
     When attribute(surname) set annotation: @abstract
     When attribute(surname) set value type: <value-type>
@@ -1482,18 +1482,18 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(name) unset specialise
     When attribute(name) set supertype: surname
     When <root-type>(<subtype-name>) get owns(name) set specialise: surname
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: surname
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: surname
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
     Then attribute(name) set supertype: other; fails
     When <root-type>(<subtype-name>) get owns(name) unset specialise
     When attribute(name) set supertype: other
     When <root-type>(<subtype-name>) get owns(name) set specialise: other
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     When <root-type>(<supertype-name>) get owns(surname) set ordering: unordered
     Then attribute(name) set supertype: surname; fails
     When <root-type>(<subtype-name>) get owns(name) unset specialise
@@ -1501,7 +1501,7 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(name) set specialise: surname; fails
     When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
     When <root-type>(<subtype-name>) get owns(name) set specialise: surname
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: surname
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
     Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
@@ -1510,7 +1510,7 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: surname
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
     Then attribute(name) set supertype: other; fails
     When <root-type>(<subtype-name>) get owns(name) unset specialise
     When attribute(name) set supertype: other
@@ -1520,13 +1520,13 @@ Feature: Concept Owns
     Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<supertype-name>) get owns(other) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: other
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
     Examples:
       | root-type | supertype-name | subtype-name | value-type    |
       | entity    | person         | customer     | decimal       |
@@ -1638,11 +1638,11 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) unset specialise
     When <root-type>(<subtype-name>) unset supertype
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset owns: surname
     When <root-type>(<subtype-name-2>) set owns: surname
@@ -1655,11 +1655,11 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) get owns(surname) unset specialise
     When <root-type>(<subtype-name>) unset supertype
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name-2>) get owns specialised(surname) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name-2>) get owns specialised(surname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
       | entity    | person         | customer     | subscriber     | datetime-tz |
@@ -1682,11 +1682,11 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) get owns(surname) unset specialise
     When attribute(surname) unset supertype
     Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(surname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
     When create attribute type: subsurname
     When attribute(subsurname) set supertype: surname
     When <root-type>(<subtype-name>) unset owns: surname
@@ -1706,11 +1706,11 @@ Feature: Concept Owns
     When attribute(subsurname) set annotation: @abstract
     When attribute(surname) unset supertype
     Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(subsurname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(subsurname) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialisden(subsurname) does not exist
+    Then <root-type>(<subtype-name>) get owns specialised(subsurname) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | value-type  |
       | entity    | person         | customer     | datetime-tz |
@@ -1756,15 +1756,15 @@ Feature: Concept Owns
     When <root-type>(<supertype-name>) set owns: another-literal
     Then attribute(name) set supertype: another-literal; fails
     When attribute(name) set supertype: latin-text
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: text
-    Then <root-type>(<subtype-name-2>) get owns specialisden(surname) get label: literal
-    Then <root-type>(<subtype-name-2>) get owns specialisden(matronymic-surname) get label: name
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns specialised(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns specialised(matronymic-surname) get label: name
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: latin-text
-    Then <root-type>(<subtype-name>) get owns specialisden(name) get label: text
-    Then <root-type>(<subtype-name-2>) get owns specialisden(surname) get label: literal
-    Then <root-type>(<subtype-name-2>) get owns specialisden(matronymic-surname) get label: name
+    Then <root-type>(<subtype-name>) get owns specialised(name) get label: text
+    Then <root-type>(<subtype-name-2>) get owns specialised(surname) get label: literal
+    Then <root-type>(<subtype-name-2>) get owns specialised(matronymic-surname) get label: name
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
       | entity    | person         | customer     | subscriber     | datetime-tz |

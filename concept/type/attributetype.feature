@@ -206,7 +206,7 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     Then attribute(timestamp) set supertype: timestamp; fails
 
-  Scenario: The schema may not be modified in a way that an specialisden owns attribute is no longer inherited by the specialising type
+  Scenario: The schema may not be modified in a way that an specialised owns attribute is no longer inherited by the specialising type
     When create attribute type: attr0
     When attribute(attr0) set annotation: @abstract
     When create attribute type: attr1
@@ -1972,38 +1972,38 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get constraint categories do not contain: @values
 
-  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and specialisden by a subset of arguments
+  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: specialisden-name
-    When attribute(specialisden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
-    When attribute(specialisden-name) set annotation: @values(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
+    When attribute(specialised-name) set annotation: @values(<args-specialise>)
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
     Then attribute(name) get constraints do not contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
     Then attribute(name) get constraints do not contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations contain: @values(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise                              |
       | long        | 1, 10, 20, 30                                                                | 10, 30                                     |
@@ -2016,28 +2016,28 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be specialisden by the @values of not a subset of arguments
+  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be specialised by the @values of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: specialisden-name
-    When attribute(specialisden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
-    Then attribute(specialisden-name) set annotation: @values(<args-specialise>); fails
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) set annotation: @values(<args-specialise>); fails
     Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(specialisden-name) get constraints contain: @values(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise            |
       | long        | 1, 10, 20, 30                                                                | 10, 31                   |
@@ -2359,40 +2359,40 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get constraints do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
 
-  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and specialisden by a subset of arguments
+  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: specialisden-name
-    When attribute(specialisden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
-    When attribute(specialisden-name) set annotation: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
+    When attribute(specialised-name) set annotation: @range(<args-specialise>)
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get constraints do not contain: @range(<args-specialise>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args-specialise>)
-    Then attribute(specialisden-name) get constraints do not contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations contain: @range(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints do not contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get constraints do not contain: @range(<args-specialise>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args-specialise>)
-    Then attribute(specialisden-name) get constraints do not contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations contain: @range(<args-specialise>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints do not contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                             |
       | long        | 1..10                            | 1..5                                      |
@@ -2403,28 +2403,28 @@ Feature: Concept Attribute Type
       | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
 
-  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be specialisden by the @range of not a subset of arguments
+  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be specialised by the @range of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: specialisden-name
-    When attribute(specialisden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
-    Then attribute(specialisden-name) set annotation: @range(<args-specialise>); fails
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) set annotation: @range(<args-specialise>); fails
     Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(specialisden-name) get constraints contain: @range(<args>)
-    Then attribute(specialisden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                             |
       | long        | 1..10                            | -1..5                                     |

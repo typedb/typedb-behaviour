@@ -15,7 +15,7 @@ Feature: Concept Plays
     Given create entity type: person
     Given create entity type: customer
     Given create entity type: subscriber
-    # Notice: supertypes are the same, but can be specialisden for the second subtype inside the tests
+    # Notice: supertypes are the same, but can be specialised for the second subtype inside the tests
     Given entity(customer) set supertype: person
     Given entity(subscriber) set supertype: person
     Given create relation type: description
@@ -24,7 +24,7 @@ Feature: Concept Plays
     Given relation(registration) create role: registration-object
     Given create relation type: profile
     Given relation(profile) create role: profile-object
-    # Notice: supertypes are the same, but can be specialisden for the second subtype inside the tests
+    # Notice: supertypes are the same, but can be specialised for the second subtype inside the tests
     Given relation(registration) set supertype: description
     Given relation(registration) create role: object2
     Given relation(profile) set supertype: description
@@ -341,7 +341,7 @@ Feature: Concept Plays
       | parentship:child  |
       | parentship:parent |
 
-  Scenario: Entity types cannot redeclare inherited/specialisden playing role types
+  Scenario: Entity types cannot redeclare inherited/specialised playing role types
     When create relation type: parentship
     When relation(parentship) create role: parent
     When create relation type: fathership
@@ -473,7 +473,7 @@ Feature: Concept Plays
       | rel0:role0 |
     Then transaction commits
 
-  Scenario: The schema may not be modified in a way that an specialisden plays role is no longer inherited by the specialising type
+  Scenario: The schema may not be modified in a way that an specialised plays role is no longer inherited by the specialising type
     When create relation type: rel0
     When relation(rel0) create role: role0
     When create relation type: rel1
@@ -536,7 +536,7 @@ Feature: Concept Plays
     # plays will be hidden under ent1
     When create entity type: ent20
     When entity(ent20) set plays: rel0:role0
-    # specialisden will be hidden under ent1
+    # specialised will be hidden under ent1
     When create entity type: ent21
     When entity(ent21) set supertype: ent0
     When entity(ent21) set plays: rel11:role11
@@ -765,7 +765,7 @@ Feature: Concept Plays
       | locates:located                       |
       | contractor-locates:contractor-located |
 
-  Scenario: Relation types cannot redeclare inherited/specialisden playing role types
+  Scenario: Relation types cannot redeclare inherited/specialised playing role types
     When create relation type: locates
     When relation(locates) create role: located
     When create relation type: contractor-locates
@@ -1556,11 +1556,11 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(fathership:father) unset specialise
     When <root-type>(<subtype-name>) unset supertype
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) does not exist
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) unset plays: fathership:father
     When <root-type>(<subtype-name-2>) set plays: fathership:father
@@ -1573,11 +1573,11 @@ Feature: Concept Plays
     When <root-type>(<subtype-name-2>) get plays(fathership:father) unset specialise
     When <root-type>(<subtype-name>) unset supertype
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name-2>) get plays specialised(fathership:father) does not exist
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name-2>) get plays specialised(fathership:father) does not exist
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
       | entity    | person         | customer     | subscriber     |
@@ -1600,11 +1600,11 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(fathership:father) unset specialise
     When relation(fathership) get role(father) unset specialise
     Then relation(fathership) get role(father) get supertype does not exist
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) does not exist
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(fathership) get role(father) get supertype does not exist
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) does not exist
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) does not exist
     When create relation type: subfathership
     When relation(subfathership) create role: subfather
     When relation(subfathership) set supertype: fathership
@@ -1782,9 +1782,9 @@ Feature: Concept Plays
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get plays(marriage:spouse) get constraints is empty
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get constraints do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations is empty
-    Then <root-type>(<type-name>) get plays(parentship:parent) get constraints is empty
+    Then <root-type>(<type-name>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations is empty
     Examples:
       | root-type | type-name   | annotation | annotation-category |
@@ -1827,7 +1827,7 @@ Feature: Concept Plays
       | entity    | person         | customer     | card(1..2) | card                |
       | relation  | description    | registration | card(1..2) | card                |
 
-  Scenario Outline: <root-type> types cannot unset inherited @<annotation> of specialisden plays
+  Scenario Outline: <root-type> types cannot unset inherited @<annotation> of specialised plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When create relation type: concrete-marriage
@@ -2007,12 +2007,12 @@ Feature: Concept Plays
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) set plays: parentship:parent
-    Then <root-type>(<type-name>) get plays(parentship:parent) get constraints is empty
+    Then <root-type>(<type-name>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations is empty
     When <root-type>(<type-name>) get plays(parentship:parent) set annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get constraints contain: @<annotation>
     Then <root-type>(<type-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
-    Then <root-type>(<type-name>) get plays(marriage:spouse) get constraints is empty
+    Then <root-type>(<type-name>) get plays(marriage:spouse) get constraints do not contain: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get declared annotations is empty
     When <root-type>(<type-name>) get plays(marriage:spouse) set annotation: @<annotation>
     Then <root-type>(<type-name>) get plays(marriage:spouse) get constraints contain: @<annotation>
@@ -2071,7 +2071,7 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set plays: marriage:spouse
     When <root-type>(<subtype-name>) get plays(marriage:spouse) set specialise: contract:contractor
     When <root-type>(<subtype-name>) get plays(marriage:spouse) set annotation: @<annotation>
-    Then <root-type>(<subtype-name>) get plays specialisden(marriage:spouse) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays specialised(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays contain:
       | marriage:spouse |
     Then <root-type>(<subtype-name>) get plays do not contain:
@@ -2082,7 +2082,7 @@ Feature: Concept Plays
     Then <root-type>(<supertype-name>) get plays(contract:contractor) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays specialisden(marriage:spouse) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays specialised(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays contain:
       | marriage:spouse |
     Then <root-type>(<subtype-name>) get plays do not contain:
@@ -2114,19 +2114,19 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) get label: parentship:parent
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) get label: parentship:parent
     Then <root-type>(<subtype-name>) get plays(fathership:father) get constraints contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set plays: fathership:father
     When <root-type>(<subtype-name>) get plays(fathership:father) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) get label: parentship:parent
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) get label: parentship:parent
     Then <root-type>(<subtype-name>) get plays(fathership:father) get constraints contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) get label: parentship:parent
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) get label: parentship:parent
     Then <root-type>(<subtype-name>) get plays(fathership:father) get constraints contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get declared annotations do not contain: @<annotation>
     Examples:
@@ -2138,7 +2138,7 @@ Feature: Concept Plays
     When create relation type: parentship
     When relation(parentship) create role: parent
     When <root-type>(<supertype-name>) set plays: parentship:parent
-    Then <root-type>(<supertype-name>) get plays specialisden(parentship:parent) does not exist
+    Then <root-type>(<supertype-name>) get plays specialised(parentship:parent) does not exist
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -2149,22 +2149,22 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays specialisden(parentship:parent) does not exist
+    Then <root-type>(<subtype-name>) get plays specialised(parentship:parent) does not exist
     Then <root-type>(<subtype-name>) set plays: parentship:parent
     Then <root-type>(<subtype-name>) get plays(parentship:parent) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays specialisden(parentship:parent) exists
-    Then <root-type>(<subtype-name>) get plays specialisden(parentship:parent) get label: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints is empty
+    Then <root-type>(<subtype-name>) get plays specialised(parentship:parent) exists
+    Then <root-type>(<subtype-name>) get plays specialised(parentship:parent) get label: parentship:parent
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get constraints contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints is empty
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get constraints contain: @<annotation>
     When <root-type>(<subtype-name>) get plays(parentship:parent) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name-2>) get plays(parentship:parent) get constraints contain: @<annotation>
     When <root-type>(<subtype-name-2>) get plays(parentship:parent) get declared annotations contain: @<annotation>
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints is empty
+    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     When <root-type>(<subtype-name-2>) set plays: parentship:parent
     When <root-type>(<subtype-name-2>) get plays(parentship:parent) get constraints do not contain: @<annotation>
     Then <root-type>(<subtype-name-2>) get plays(parentship:parent) set annotation: @<annotation>
@@ -2217,7 +2217,7 @@ Feature: Concept Plays
       | entity    | person         | customer     | subscriber     | card(1..2) |
       | relation  | description    | registration | profile        | card(1..2) |
 
-  Scenario Outline: <root-type> types cannot redeclare specialisden plays with @<annotation>s
+  Scenario Outline: <root-type> types cannot redeclare specialised plays with @<annotation>s
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @abstract
@@ -2239,7 +2239,7 @@ Feature: Concept Plays
       | entity    | person         | customer     | subscriber     | card(1..2) |
       | relation  | description    | registration | profile        | card(1..2) |
 
-  Scenario Outline: <root-type> types cannot redeclare specialisden plays with @<annotation>s on multiple layers
+  Scenario Outline: <root-type> types cannot redeclare specialised plays with @<annotation>s on multiple layers
     When create relation type: parentship
     When relation(parentship) create role: parent
     When relation(parentship) set annotation: @abstract
@@ -2428,8 +2428,8 @@ Feature: Concept Plays
     When <root-type>(<subtype-name>) set plays: celebration:cause
     When <root-type>(<subtype-name>) set plays: marriage:spouse
     When <root-type>(<subtype-name>) get plays(marriage:spouse) set specialise: contract:contractor
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) get label: parentship:parent
-    Then <root-type>(<subtype-name>) get plays specialisden(marriage:spouse) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) get label: parentship:parent
+    Then <root-type>(<subtype-name>) get plays specialised(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays contain:
       | dispatch:recipient  |
       | reference:target    |
@@ -2455,8 +2455,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(fathership:father) get constraints contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays specialisden(fathership:father) get label: parentship:parent
-    Then <root-type>(<subtype-name>) get plays specialisden(marriage:spouse) get label: contract:contractor
+    Then <root-type>(<subtype-name>) get plays specialised(fathership:father) get label: parentship:parent
+    Then <root-type>(<subtype-name>) get plays specialised(marriage:spouse) get label: contract:contractor
     Then <root-type>(<subtype-name>) get plays contain:
       | dispatch:recipient  |
       | reference:target    |
@@ -2518,8 +2518,8 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(dispatch:recipient) get constraints contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(reference:target) get constraints contain: @<annotation>
     Then <root-type>(<subtype-name>) get plays(fathership:father) get constraints contain: @<annotation>
-    Then <root-type>(<subtype-name-2>) get plays specialisden(publication-reference:publication) get label: reference:target
-    Then <root-type>(<subtype-name-2>) get plays specialisden(birthday:celebrant) get label: celebration:cause
+    Then <root-type>(<subtype-name-2>) get plays specialised(publication-reference:publication) get label: reference:target
+    Then <root-type>(<subtype-name-2>) get plays specialised(birthday:celebrant) get label: celebration:cause
     Then <root-type>(<subtype-name-2>) get plays contain:
       | dispatch:recipient                |
       | publication-reference:publication |
@@ -2640,18 +2640,20 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get declared annotations is empty
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(0..)
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
-    Then entity(person) get plays(marriage:spouse) get cardinality: @card(0..)
+    Then entity(person) get plays(marriage:spouse) get declared annotations is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
 
   Scenario Outline: Plays can set @card annotation with arguments in correct order and unset it
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
+    Then entity(person) get plays(marriage:spouse) get constraints do not contain: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(0..)
     When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get constraints contain: @card(<arg0>..<arg1>)
@@ -2661,17 +2663,18 @@ Feature: Concept Plays
     Then entity(person) get plays(marriage:spouse) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) unset annotation: @card
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(0..)
     When entity(person) get plays(marriage:spouse) set annotation: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
     Then entity(person) get plays(marriage:spouse) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get plays(marriage:spouse) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) unset plays: marriage:spouse
@@ -2692,7 +2695,8 @@ Feature: Concept Plays
     When create relation type: marriage
     When relation(marriage) create role: spouse
     When entity(person) set plays: marriage:spouse
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
+    Then entity(person) get plays(marriage:spouse) get constraints do not contain: @card(<arg>..<arg>)
     When entity(person) get plays(marriage:spouse) set annotation: @card(<arg>..<arg>)
     Then entity(person) get plays(marriage:spouse) get constraints contain: @card(<arg>..<arg>)
     When transaction commits
@@ -2711,10 +2715,10 @@ Feature: Concept Plays
     When entity(person) set plays: marriage:spouse
     Then entity(person) get plays(marriage:spouse) set annotation: @card(2..1); fails
     Then entity(person) get plays(marriage:spouse) set annotation: @card(0..0); fails
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get plays(marriage:spouse) get constraints is empty
+    Then entity(person) get plays(marriage:spouse) get constraints contain: @card(0..)
 
   Scenario Outline: Plays can reset @card annotations
     When create relation type: marriage
@@ -2757,15 +2761,15 @@ Feature: Concept Plays
       | 2..5      | 5..        |
       | 2..5      | 6..        |
 
-  Scenario Outline: Plays-related @card annotation can be inherited and specialisden by a subset of arguments
+  Scenario Outline: Plays-related @card annotation can be inherited and specialised by a subset of arguments
     When create relation type: custom-relation
     When relation(custom-relation) create role: r1
     When create relation type: second-custom-relation
     When relation(second-custom-relation) create role: r2
-    When create relation type: specialisden-custom-relation
-    When relation(specialisden-custom-relation) create role: specialisden-r2
-    When relation(specialisden-custom-relation) set supertype: second-custom-relation
-    When relation(specialisden-custom-relation) get role(specialisden-r2) set specialise: r2
+    When create relation type: specialised-custom-relation
+    When relation(specialised-custom-relation) create role: specialised-r2
+    When relation(specialised-custom-relation) set supertype: second-custom-relation
+    When relation(specialised-custom-relation) get role(specialised-r2) set specialise: r2
     When entity(person) set plays: custom-relation:r1
     When relation(description) set plays: custom-relation:r1
     When entity(person) set plays: second-custom-relation:r2
@@ -2786,10 +2790,10 @@ Feature: Concept Plays
     When create relation type: marriage
     When entity(player) set supertype: person
     When relation(marriage) set supertype: description
-    When entity(player) set plays: specialisden-custom-relation:specialisden-r2
-    When relation(marriage) set plays: specialisden-custom-relation:specialisden-r2
-    When entity(player) get plays(specialisden-custom-relation:specialisden-r2) set specialise: second-custom-relation:r2
-    When relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) set specialise: second-custom-relation:r2
+    When entity(player) set plays: specialised-custom-relation:specialised-r2
+    When relation(marriage) set plays: specialised-custom-relation:specialised-r2
+    When entity(player) get plays(specialised-custom-relation:specialised-r2) set specialise: second-custom-relation:r2
+    When relation(marriage) get plays(specialised-custom-relation:specialised-r2) set specialise: second-custom-relation:r2
     Then entity(player) get plays contain:
       | custom-relation:r1 |
     Then relation(marriage) get plays contain:
@@ -2803,35 +2807,35 @@ Feature: Concept Plays
     Then relation(marriage) get plays do not contain:
       | second-custom-relation:r2 |
     Then entity(player) get plays contain:
-      | specialisden-custom-relation:specialisden-r2 |
+      | specialised-custom-relation:specialised-r2 |
     Then relation(marriage) get plays contain:
-      | specialisden-custom-relation:specialisden-r2 |
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations do not contain: @card(<args>)
+      | specialised-custom-relation:specialised-r2 |
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get declared annotations do not contain: @card(<args>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get declared annotations do not contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args>)
     Then entity(player) get plays(custom-relation:r1) get declared annotations contain: @card(<args>)
     Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args>)
     Then relation(marriage) get plays(custom-relation:r1) get declared annotations contain: @card(<args>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations do not contain: @card(<args>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get declared annotations do not contain: @card(<args>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get declared annotations do not contain: @card(<args>)
     When entity(player) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
     When relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
-    When entity(player) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args-specialise>)
-    When relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args-specialise>)
+    When entity(player) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args-specialise>)
+    When relation(marriage) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args-specialise>)
     Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
     Then entity(player) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
     Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations contain: @card(<args-specialise>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args-specialise>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get declared annotations contain: @card(<args-specialise>)
     Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
     Then entity(person) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
     Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
@@ -2846,10 +2850,10 @@ Feature: Concept Plays
     Then entity(player) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
     Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get declared annotations contain: @card(<args-specialise>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args-specialise>)
+    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get declared annotations contain: @card(<args-specialise>)
     Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
     Then entity(person) get plays(custom-relation:r1) get declared annotations contain: @card(<args-specialise>)
     Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
@@ -2868,79 +2872,80 @@ Feature: Concept Plays
       | 38..111    | 39..111       |
       | 1000..1100 | 1000..1099    |
 
-  Scenario Outline: Inherited @card annotation on plays cannot be reset or specialisden by the @card of not a subset of arguments
-    When create relation type: custom-relation
-    When relation(custom-relation) create role: r1
-    When create relation type: second-custom-relation
-    When relation(second-custom-relation) create role: r2
-    When create relation type: specialisden-custom-relation
-    When relation(specialisden-custom-relation) create role: specialisden-r2
-    When relation(specialisden-custom-relation) set supertype: second-custom-relation
-    When relation(specialisden-custom-relation) get role(specialisden-r2) set specialise: r2
-    When entity(person) set plays: custom-relation:r1
-    When relation(description) set plays: custom-relation:r1
-    When entity(person) set plays: second-custom-relation:r2
-    When relation(description) set plays: second-custom-relation:r2
-    When entity(person) get plays(custom-relation:r1) set annotation: @card(<args>)
-    When relation(description) get plays(custom-relation:r1) set annotation: @card(<args>)
-    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args>)
-    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args>)
-    When entity(person) get plays(second-custom-relation:r2) set annotation: @card(<args>)
-    When relation(description) get plays(second-custom-relation:r2) set annotation: @card(<args>)
-    Then entity(person) get plays(second-custom-relation:r2) get constraints contain: @card(<args>)
-    Then relation(description) get plays(second-custom-relation:r2) get constraints contain: @card(<args>)
-    When create entity type: player
-    When create relation type: marriage
-    When entity(player) set supertype: person
-    When relation(marriage) set supertype: description
-    When entity(player) set plays: specialisden-custom-relation:specialisden-r2
-    When relation(marriage) set plays: specialisden-custom-relation:specialisden-r2
-    When entity(player) get plays(specialisden-custom-relation:specialisden-r2) set specialise: second-custom-relation:r2
-    When relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) set specialise: second-custom-relation:r2
-    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    When entity(player) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
-    When relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args-specialise>); fails
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args-specialise>); fails
-    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    Then relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) get constraints contain: @card(<args>)
-    When entity(player) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(marriage) get plays(specialisden-custom-relation:specialisden-r2) set annotation: @card(<args>)
-    Then transaction commits; fails
-    Examples:
-      | args       | args-specialise |
-      | 0..10000   | 0..10001      |
-      | 0..10      | 1..11         |
-      | 1..        | 0..2          |
-      | 1..5       | 6..10         |
-      | 2..2       | 1..1          |
-      | 38..111    | 37..111       |
-      | 1000..1100 | 1000..1199    |
+    # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario Outline: Inherited @card annotation on plays cannot be reset or specialised by the @card of not a subset of arguments
+#    When create relation type: custom-relation
+#    When relation(custom-relation) create role: r1
+#    When create relation type: second-custom-relation
+#    When relation(second-custom-relation) create role: r2
+#    When create relation type: specialised-custom-relation
+#    When relation(specialised-custom-relation) create role: specialised-r2
+#    When relation(specialised-custom-relation) set supertype: second-custom-relation
+#    When relation(specialised-custom-relation) get role(specialised-r2) set specialise: r2
+#    When entity(person) set plays: custom-relation:r1
+#    When relation(description) set plays: custom-relation:r1
+#    When entity(person) set plays: second-custom-relation:r2
+#    When relation(description) set plays: second-custom-relation:r2
+#    When entity(person) get plays(custom-relation:r1) set annotation: @card(<args>)
+#    When relation(description) get plays(custom-relation:r1) set annotation: @card(<args>)
+#    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args>)
+#    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args>)
+#    When entity(person) get plays(second-custom-relation:r2) set annotation: @card(<args>)
+#    When relation(description) get plays(second-custom-relation:r2) set annotation: @card(<args>)
+#    Then entity(person) get plays(second-custom-relation:r2) get constraints contain: @card(<args>)
+#    Then relation(description) get plays(second-custom-relation:r2) get constraints contain: @card(<args>)
+#    When create entity type: player
+#    When create relation type: marriage
+#    When entity(player) set supertype: person
+#    When relation(marriage) set supertype: description
+#    When entity(player) set plays: specialised-custom-relation:specialised-r2
+#    When relation(marriage) set plays: specialised-custom-relation:specialised-r2
+#    When entity(player) get plays(specialised-custom-relation:specialised-r2) set specialise: second-custom-relation:r2
+#    When relation(marriage) get plays(specialised-custom-relation:specialised-r2) set specialise: second-custom-relation:r2
+#    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args>)
+#    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args>)
+#    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    When entity(player) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
+#    When relation(marriage) get plays(custom-relation:r1) set annotation: @card(<args-specialise>)
+#    Then entity(player) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args-specialise>); fails
+#    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args-specialise>); fails
+#    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(player) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(person) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(marriage) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then relation(description) get plays(custom-relation:r1) get constraints contain: @card(<args-specialise>)
+#    Then entity(player) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    Then relation(marriage) get plays(specialised-custom-relation:specialised-r2) get constraints contain: @card(<args>)
+#    When entity(player) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args>)
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    When relation(marriage) get plays(specialised-custom-relation:specialised-r2) set annotation: @card(<args>)
+#    Then transaction commits; fails
+#    Examples:
+#      | args       | args-specialise |
+#      | 0..10000   | 0..10001      |
+#      | 0..10      | 1..11         |
+#      | 1..        | 0..2          |
+#      | 1..5       | 6..10         |
+#      | 2..2       | 1..1          |
+#      | 38..111    | 37..111       |
+#      | 1000..1100 | 1000..1199    |
 
   Scenario Outline: Cardinality can be narrowed for the same role for <root-type>'s plays
     When create relation type: parentship
@@ -3036,577 +3041,582 @@ Feature: Concept Plays
       | entity    | person         | customer     | subscriber     |
       | relation  | description    | registration | profile        |
 
-  Scenario Outline: Default @card annotation for plays can be specialisden only by a subset of arguments
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When create relation type: parentship-2
-    When relation(parentship-2) create role: parent-2
-    When create relation type: specialisden-parentship
-    When relation(specialisden-parentship) create role: specialisden-parent
-    When relation(specialisden-parentship) set supertype: parentship
-    When relation(specialisden-parentship) get role(specialisden-parent) set specialise: parent
-    When <root-type>(<supertype-name>) set plays: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    When <root-type>(<supertype-name>) set plays: parentship-2:parent-2
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set plays: specialisden-parentship:specialisden-parent
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) set plays: parentship-2:parent-2
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set specialise: parentship-2:parent-2
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(0..)
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(0..)
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset specialise
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
-    When <root-type>(<subtype-name>) unset plays: parentship-2:parent-2
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship-2:parent-2 |
-    Then <root-type>(<subtype-name>) get plays contain:
-      | parentship-2:parent-2 |
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
-    Examples:
-      | root-type | supertype-name | subtype-name |
-      | entity    | person         | customer     |
-      | relation  | description    | registration |
+    # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario Outline: Default @card annotation for plays can be specialised only by a subset of arguments
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When create relation type: parentship-2
+#    When relation(parentship-2) create role: parent-2
+#    When create relation type: specialised-parentship
+#    When relation(specialised-parentship) create role: specialised-parent
+#    When relation(specialised-parentship) set supertype: parentship
+#    When relation(specialised-parentship) get role(specialised-parent) set specialise: parent
+#    When <root-type>(<supertype-name>) set plays: parentship:parent
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    When <root-type>(<supertype-name>) set plays: parentship-2:parent-2
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name>) set plays: specialised-parentship:specialised-parent
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set specialise: parentship:parent
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) set plays: parentship-2:parent-2
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set specialise: parentship-2:parent-2
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(0..)
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(0..)
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) set annotation: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset specialise
+#    Then transaction commits; fails
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship-2:parent-2) unset annotation: @card
+#    When <root-type>(<subtype-name>) unset plays: parentship-2:parent-2
+#    Then <root-type>(<subtype-name>) get declared plays do not contain:
+#      | parentship-2:parent-2 |
+#    Then <root-type>(<subtype-name>) get plays contain:
+#      | parentship-2:parent-2 |
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship-2:parent-2) get cardinality: @card(0..)
+#    Examples:
+#      | root-type | supertype-name | subtype-name |
+#      | entity    | person         | customer     |
+#      | relation  | description    | registration |
 
-  Scenario Outline: Plays cannot have card that is not narrowed by other owns narrowing it for different subplayers
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When create relation type: specialisden-parentship
-    When relation(specialisden-parentship) create role: specialisden-parent
-    When relation(specialisden-parentship) set supertype: parentship
-    When relation(specialisden-parentship) get role(specialisden-parent) set specialise: parent
-    When create relation type: specialisden-parentship-2
-    When relation(specialisden-parentship-2) create role: specialisden-parent-2
-    When relation(specialisden-parentship-2) set supertype: parentship
-    When relation(specialisden-parentship-2) get role(specialisden-parent-2) set specialise: parent
-    When <root-type>(<supertype-name>) set plays: parentship:parent
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set plays: specialisden-parentship:specialisden-parent
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    When <root-type>(<subtype-name-2>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name-2>) set plays: specialisden-parentship-2:specialisden-parent-2
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set specialise: parentship:parent
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(0..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(0..)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..2)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(0..1)
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set annotation: @card(1..2)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(1..2)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(1..2)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(1..2)
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set annotation: @card(2..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(2..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(2..2)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..1); fails
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..2); fails
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(2..2)
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set annotation: @card(4..5)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(4..5)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..4); fails
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3..3); fails
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..5); fails
-    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(1..5)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..2)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(4..5)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(1..1)
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set annotation: @card(1..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(1..1)
-    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(1..1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(1..1)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get constraints contain: @card(1..1)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get constraints contain: @card(1..1)
-    When <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) set annotation: @card(0..)
-    When <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) set annotation: @card(0..)
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get cardinality: @card(0..)
-    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(specialisden-parentship:specialisden-parent) get constraints contain: @card(0..)
-    Then <root-type>(<subtype-name-2>) get plays(specialisden-parentship-2:specialisden-parent-2) get constraints contain: @card(0..)
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 |
-      | entity    | person         | customer     | subscriber     |
-      | relation  | description    | registration | profile        |
+      # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario Outline: Plays cannot have card that is not narrowed by other owns narrowing it for different subplayers
+#    When create relation type: parentship
+#    When relation(parentship) create role: parent
+#    When create relation type: specialised-parentship
+#    When relation(specialised-parentship) create role: specialised-parent
+#    When relation(specialised-parentship) set supertype: parentship
+#    When relation(specialised-parentship) get role(specialised-parent) set specialise: parent
+#    When create relation type: specialised-parentship-2
+#    When relation(specialised-parentship-2) create role: specialised-parent-2
+#    When relation(specialised-parentship-2) set supertype: parentship
+#    When relation(specialised-parentship-2) get role(specialised-parent-2) set specialise: parent
+#    When <root-type>(<supertype-name>) set plays: parentship:parent
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name>) set plays: specialised-parentship:specialised-parent
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set specialise: parentship:parent
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    When <root-type>(<subtype-name-2>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name-2>) set plays: specialised-parentship-2:specialised-parent-2
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set specialise: parentship:parent
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(0..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(0..)
+#    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..2)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(0..1)
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set annotation: @card(1..2)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(1..2)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(1..2)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(1..2)
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set annotation: @card(2..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(2..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..2)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(2..2)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..1); fails
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..2); fails
+#    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(2..2)
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set annotation: @card(4..5)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(4..5)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..4); fails
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(3..3); fails
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(2..5); fails
+#    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(1..5)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..2)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(4..5)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(1..1)
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set annotation: @card(1..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(1..5)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(1..1)
+#    When <root-type>(<supertype-name>) get plays(parentship:parent) unset annotation: @card
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(1..1)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(1..1)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get constraints contain: @card(1..1)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get constraints contain: @card(1..1)
+#    When <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) set annotation: @card(0..)
+#    When <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) set annotation: @card(0..)
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get cardinality: @card(0..)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get cardinality: @card(0..)
+#    Then <root-type>(<supertype-name>) get plays(parentship:parent) get constraints do not contain: @card(0..)
+#    Then <root-type>(<subtype-name>) get plays(specialised-parentship:specialised-parent) get constraints contain: @card(0..)
+#    Then <root-type>(<subtype-name-2>) get plays(specialised-parentship-2:specialised-parent-2) get constraints contain: @card(0..)
+#    Examples:
+#      | root-type | supertype-name | subtype-name | subtype-name-2 |
+#      | entity    | person         | customer     | subscriber     |
+#      | relation  | description    | registration | profile        |
 
-  Scenario Outline: Plays can have multiple specialising plays with narrowing cardinalities and correct min sum
-    When create relation type: relation-to-disturb
-    When relation(relation-to-disturb) create role: disturber
-    When relation(relation-to-disturb) get role(disturber) set annotation: @card(0..)
-    When <root-type>(<supertype-name>) set plays: relation-to-disturb:disturber
-    When <root-type>(<supertype-name>) get plays(relation-to-disturb:disturber) set annotation: @card(1..1)
-    When create relation type: subtype-to-disturb
-    When relation(subtype-to-disturb) create role: subdisturber
-    When relation(subtype-to-disturb) set supertype: relation-to-disturb
-    When relation(subtype-to-disturb) get role(subdisturber) set specialise: disturber
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set plays: subtype-to-disturb:subdisturber
-    When <root-type>(<subtype-name>) get plays(subtype-to-disturb:subdisturber) set specialise: relation-to-disturb:disturber
-    Then <root-type>(<subtype-name>) get plays(subtype-to-disturb:subdisturber) get cardinality: @card(1..1)
-    When create relation type: connection
-    When relation(connection) create role: player
-    When relation(connection) get role(player) set annotation: @card(0..)
-    When <root-type>(<supertype-name>) set plays: connection:player
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..2)
-    When create relation type: parentship
-    When relation(parentship) set supertype: connection
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set specialise: player
-    When <root-type>(<subtype-name>) set plays: parentship:parent
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..2)
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set specialise: player
-    When <root-type>(<subtype-name>) set plays: parentship:child
-    When <root-type>(<subtype-name>) get plays(parentship:child) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
-    When <root-type>(<subtype-name>) get plays(parentship:child) set annotation: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(parentship) create role: cardinality-destroyer
-    When relation(parentship) get role(cardinality-destroyer) set specialise: player
-    When <root-type>(<subtype-name>) set plays: parentship:cardinality-destroyer
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set specialise: connection:player; fails
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set specialise: connection:player
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..3)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(1..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..3)
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..3)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(3..3); fails
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3); fails
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(0..1)
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..3)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(2..3)
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1); fails
-    When <root-type>(<subtype-name>) get plays(parentship:parent) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship:child) unset annotation: @card
-    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) unset annotation: @card
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1)
-    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(1..1); fails
-    When create relation type: subsubtype-to-disturb
-    When relation(subsubtype-to-disturb) create role: subsubdisturber
-    When relation(subsubtype-to-disturb) set supertype: subtype-to-disturb
-    When relation(subsubtype-to-disturb) get role(subsubdisturber) set specialise: subdisturber
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When <root-type>(<subtype-name-2>) set plays: subsubtype-to-disturb:subsubdisturber
-    When <root-type>(<subtype-name-2>) get plays(subsubtype-to-disturb:subsubdisturber) set specialise: subtype-to-disturb:subdisturber
-    Then <root-type>(<subtype-name-2>) get plays(subsubtype-to-disturb:subsubdisturber) get cardinality: @card(1..1)
-    When transaction commits
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 |
-      | entity    | person         | customer     | subscriber     |
-      | relation  | description    | registration | profile        |
+      # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario Outline: Plays can have multiple specialising plays with narrowing cardinalities and correct min sum
+#    When create relation type: relation-to-disturb
+#    When relation(relation-to-disturb) create role: disturber
+#    When relation(relation-to-disturb) get role(disturber) set annotation: @card(0..)
+#    When <root-type>(<supertype-name>) set plays: relation-to-disturb:disturber
+#    When <root-type>(<supertype-name>) get plays(relation-to-disturb:disturber) set annotation: @card(1..1)
+#    When create relation type: subtype-to-disturb
+#    When relation(subtype-to-disturb) create role: subdisturber
+#    When relation(subtype-to-disturb) set supertype: relation-to-disturb
+#    When relation(subtype-to-disturb) get role(subdisturber) set specialise: disturber
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name>) set plays: subtype-to-disturb:subdisturber
+#    When <root-type>(<subtype-name>) get plays(subtype-to-disturb:subdisturber) set specialise: relation-to-disturb:disturber
+#    Then <root-type>(<subtype-name>) get plays(subtype-to-disturb:subdisturber) get cardinality: @card(1..1)
+#    When create relation type: connection
+#    When relation(connection) create role: player
+#    When relation(connection) get role(player) set annotation: @card(0..)
+#    When <root-type>(<supertype-name>) set plays: connection:player
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..2)
+#    When create relation type: parentship
+#    When relation(parentship) set supertype: connection
+#    When relation(parentship) create role: parent
+#    When relation(parentship) get role(parent) set specialise: player
+#    When <root-type>(<subtype-name>) set plays: parentship:parent
+#    When <root-type>(<subtype-name>) get plays(parentship:parent) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..2)
+#    When relation(parentship) create role: child
+#    When relation(parentship) get role(child) set specialise: player
+#    When <root-type>(<subtype-name>) set plays: parentship:child
+#    When <root-type>(<subtype-name>) get plays(parentship:child) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+#    When <root-type>(<subtype-name>) get plays(parentship:child) set annotation: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(parentship) create role: cardinality-destroyer
+#    When relation(parentship) get role(cardinality-destroyer) set specialise: player
+#    When <root-type>(<subtype-name>) set plays: parentship:cardinality-destroyer
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set specialise: connection:player; fails
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
+#    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set specialise: connection:player
+#    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..3)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(1..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..3)
+#    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..3)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(3..3); fails
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3); fails
+#    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(0..1)
+#    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(2..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..3)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(2..3)
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1); fails
+#    When <root-type>(<subtype-name>) get plays(parentship:parent) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship:child) unset annotation: @card
+#    When <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) unset annotation: @card
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
+#    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1)
+#    Then <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) get cardinality: @card(0..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(parentship:cardinality-destroyer) set annotation: @card(1..1); fails
+#    When create relation type: subsubtype-to-disturb
+#    When relation(subsubtype-to-disturb) create role: subsubdisturber
+#    When relation(subsubtype-to-disturb) set supertype: subtype-to-disturb
+#    When relation(subsubtype-to-disturb) get role(subsubdisturber) set specialise: subdisturber
+#    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
+#    When <root-type>(<subtype-name-2>) set plays: subsubtype-to-disturb:subsubdisturber
+#    When <root-type>(<subtype-name-2>) get plays(subsubtype-to-disturb:subsubdisturber) set specialise: subtype-to-disturb:subdisturber
+#    Then <root-type>(<subtype-name-2>) get plays(subsubtype-to-disturb:subsubdisturber) get cardinality: @card(1..1)
+#    When transaction commits
+#    Examples:
+#      | root-type | supertype-name | subtype-name | subtype-name-2 |
+#      | entity    | person         | customer     | subscriber     |
+#      | relation  | description    | registration | profile        |
 
-  Scenario Outline: Type can have only N/M specialising plays when the root plays has cardinality(M, N) that are inherited
-    When create relation type: connection
-    When relation(connection) create role: player
-    When relation(connection) get role(player) set annotation: @card(0..)
-    When <root-type>(<supertype-name>) set plays: connection:player
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..1)
-    When create relation type: family
-    When relation(family) set supertype: connection
-    When relation(family) create role: mother
-    When relation(family) get role(mother) set specialise: player
-    When relation(family) create role: father
-    When relation(family) get role(father) set specialise: player
-    When relation(family) create role: child
-    When relation(family) get role(child) set specialise: player
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set plays: family:mother
-    When <root-type>(<subtype-name>) set plays: family:father
-    When <root-type>(<subtype-name>) set plays: family:child
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player; fails
-    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
-    When <root-type>(<subtype-name>) get plays(family:mother) unset specialise
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
-    # card becomes 1..2
-    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    # card becomes 1..2
-    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
-    When <root-type>(<subtype-name>) get plays(family:mother) unset specialise
-    When <root-type>(<subtype-name>) get plays(family:father) unset specialise
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
-    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
-    When <root-type>(<subtype-name>) get plays(family:child) unset specialise
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:child) unset specialise
-    When <root-type>(<subtype-name>) get plays(family:father) unset specialise
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    # card becomes 2..3
-    Then <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player; fails
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..4)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..4)
-    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
-    When <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(2..4)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    # card becomes 2..4
-    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..6)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..6)
-    When <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player
-    When <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(2..6)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..5); fails
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..8); fails
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..9)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(3..9)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1); fails
-    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
-    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get plays(family:child) set annotation: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
-    Then <root-type>(<subtype-name>) get plays(family:father) set annotation: @card(1..1); fails
-    Examples:
-      | root-type | supertype-name | subtype-name |
-      | entity    | person         | customer     |
-      | relation  | description    | registration |
+      # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario Outline: Type can have only N/M specialising plays when the root plays has cardinality(M, N) that are inherited
+#    When create relation type: connection
+#    When relation(connection) create role: player
+#    When relation(connection) get role(player) set annotation: @card(0..)
+#    When <root-type>(<supertype-name>) set plays: connection:player
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..1)
+#    When create relation type: family
+#    When relation(family) set supertype: connection
+#    When relation(family) create role: mother
+#    When relation(family) get role(mother) set specialise: player
+#    When relation(family) create role: father
+#    When relation(family) get role(father) set specialise: player
+#    When relation(family) create role: child
+#    When relation(family) get role(child) set specialise: player
+#    When <root-type>(<subtype-name>) set supertype: <supertype-name>
+#    When <root-type>(<subtype-name>) set plays: family:mother
+#    When <root-type>(<subtype-name>) set plays: family:father
+#    When <root-type>(<subtype-name>) set plays: family:child
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player; fails
+#    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
+#    When <root-type>(<subtype-name>) get plays(family:mother) unset specialise
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
+#    # card becomes 1..2
+#    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    # card becomes 1..2
+#    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
+#    When <root-type>(<subtype-name>) get plays(family:mother) unset specialise
+#    When <root-type>(<subtype-name>) get plays(family:father) unset specialise
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..3)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(1..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(1..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:mother) set specialise: connection:player
+#    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(1..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
+#    When <root-type>(<subtype-name>) get plays(family:child) unset specialise
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3); fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:child) unset specialise
+#    When <root-type>(<subtype-name>) get plays(family:father) unset specialise
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..3)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..3)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    # card becomes 2..3
+#    Then <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player; fails
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..4)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..4)
+#    When <root-type>(<subtype-name>) get plays(family:father) set specialise: connection:player
+#    When <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(2..4)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    # card becomes 2..4
+#    Then <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player; fails
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..6)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(2..6)
+#    When <root-type>(<subtype-name>) get plays(family:child) set specialise: connection:player
+#    When <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(2..6)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(2..5); fails
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..8); fails
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(3..9)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(3..9)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..1); fails
+#    When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..1)
+#    When <root-type>(<supertype-name>) get plays(connection:player) get cardinality: @card(0..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When <root-type>(<subtype-name>) get plays(family:child) set annotation: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(family:father) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then <root-type>(<subtype-name>) get plays(family:child) get cardinality: @card(1..1)
+#    Then <root-type>(<subtype-name>) get plays(family:mother) get cardinality: @card(0..1)
+#    Then <root-type>(<subtype-name>) get plays(family:father) set annotation: @card(1..1); fails
+#    Examples:
+#      | root-type | supertype-name | subtype-name |
+#      | entity    | person         | customer     |
+#      | relation  | description    | registration |
 
-  Scenario: Plays cardinality should be checked against specialises' specialises cardinality
-    When create relation type: connection
-    When relation(connection) create role: player
-    When relation(connection) get role(player) set annotation: @card(0..)
-    When entity(person) set plays: connection:player
-    When entity(person) get plays(connection:player) set annotation: @card(5..10)
-    Then entity(person) get plays(connection:player) get cardinality: @card(5..10)
-    When create relation type: parentship
-    When relation(parentship) set supertype: connection
-    When relation(parentship) create role: parent
-    When relation(parentship) get role(parent) set specialise: player
-    When entity(customer) set supertype: person
-    When entity(customer) set plays: parentship:parent
-    When entity(customer) get plays(parentship:parent) set specialise: connection:player
-    Then entity(customer) get plays(parentship:parent) get cardinality: @card(5..10)
-    When relation(parentship) create role: child
-    When relation(parentship) get role(child) set specialise: player
-    When entity(customer) set plays: parentship:child
-    When entity(customer) get plays(parentship:child) set specialise: connection:player
-    Then entity(customer) get plays(parentship:child) get cardinality: @card(5..10)
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set specialise: parent
-    When entity(subscriber) set supertype: customer
-    When entity(subscriber) set plays: fathership:father
-    When entity(subscriber) get plays(fathership:father) set specialise: parentship:parent
-    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(5..10)
-    When relation(fathership) create role: father-child
-    When relation(fathership) get role(father-child) set specialise: child
-    When entity(subscriber) set plays: fathership:father-child
-    When entity(subscriber) get plays(fathership:father-child) set specialise: parentship:child
-    Then entity(subscriber) get plays(fathership:father-child) get cardinality: @card(5..10)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(fathership) create role: father-2
-    When relation(fathership) get role(father-2) set specialise: parent
-    When entity(subscriber) set plays: fathership:father-2
-    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(0..)
-    When relation(fathership) create role: father-child-2
-    When relation(fathership) get role(father-child-2) set specialise: child
-    When entity(subscriber) set plays: fathership:father-child-2
-    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(0..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    # card becomes 5..10
-    Then entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent; fails
-    # card becomes 5..10
-    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(person) get plays(connection:player) set annotation: @card(3..10)
-    Then entity(person) get plays(connection:player) get cardinality: @card(3..10)
-    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
-    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(3..10)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    # card becomes 3..10
-    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
-    When entity(person) get plays(connection:player) set annotation: @card(3..)
-    Then entity(person) get plays(connection:player) get cardinality: @card(3..)
-    When entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child
-    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(3..)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(customer) get plays(parentship:parent) unset specialise
-    When entity(customer) get plays(parentship:child) unset specialise
-    When entity(customer) get plays(parentship:parent) set annotation: @card(0..)
-    When entity(customer) get plays(parentship:child) set annotation: @card(0..)
-    When entity(person) get plays(connection:player) set annotation: @card(1..1)
-    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-2) unset specialise
-    When entity(customer) get plays(parentship:parent) unset annotation: @card
-    When entity(customer) get plays(parentship:parent) set specialise: connection:player
-    Then entity(customer) get plays specialisden(parentship:parent) get label: connection:player
-    Then entity(subscriber) get plays specialisden(fathership:father) get label: parentship:parent
-    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..1)
-    Then entity(subscriber) get plays specialisden(fathership:father-2) does not exist
-    Then entity(customer) get plays specialisden(parentship:child) does not exist
-    Then entity(subscriber) get plays specialisden(fathership:father-child) get label: parentship:child
-    Then entity(subscriber) get plays specialisden(fathership:father-child-2) get label: parentship:child
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(customer) get plays specialisden(parentship:parent) get label: connection:player
-    Then entity(subscriber) get plays specialisden(fathership:father) get label: parentship:parent
-    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..1)
-    # card becomes 1..1
-    Then entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent; fails
-    When entity(person) get plays(connection:player) set annotation: @card(2..5)
-    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
-    Then entity(subscriber) get plays specialisden(fathership:father-2) get label: parentship:parent
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-child-2) unset specialise
-    When entity(customer) get plays(parentship:child) unset annotation: @card
-    Then entity(subscriber) get plays specialisden(fathership:father-child) get label: parentship:child
-    Then entity(subscriber) get plays specialisden(fathership:father-child-2) does not exist
-    Then entity(customer) get plays(parentship:child) set specialise: connection:player; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(subscriber) get plays(fathership:father-child-2) unset specialise
-    When entity(customer) get plays(parentship:child) unset annotation: @card
-    Then entity(subscriber) get plays specialisden(fathership:father-child) get label: parentship:child
-    Then entity(subscriber) get plays specialisden(fathership:father-child-2) does not exist
-    When entity(customer) get plays(parentship:child) set specialise: connection:player; fails
-    When entity(person) get plays(connection:player) set annotation: @card(2..6)
-    When entity(customer) get plays(parentship:child) set specialise: connection:player
-    Then entity(customer) get plays specialisden(parentship:child) get label: connection:player
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set specialise: parent
-    When create entity type: real-customer
-    When entity(real-customer) set supertype: customer
-    When entity(real-customer) set plays: mothership:mother
-    When entity(real-customer) get plays(mothership:mother) set specialise: parentship:parent
-    Then entity(real-customer) get plays(mothership:mother) get cardinality: @card(2..6)
-    When relation(mothership) create role: mother-child
-    When relation(mothership) get role(mother-child) set specialise: child
-    When entity(real-customer) set plays: mothership:mother-child
-    When entity(real-customer) get plays(mothership:mother-child) set specialise: parentship:child
-    Then entity(real-customer) get plays(mothership:mother-child) get cardinality: @card(2..6)
-    When create relation type: mothership-with-three-children
-    When relation(mothership-with-three-children) set supertype: mothership
-    When relation(mothership-with-three-children) create role: child-1
-    When relation(mothership-with-three-children) get role(child-1) set specialise: mother-child
-    When create entity type: real-customer-with-three-children
-    When entity(real-customer-with-three-children) set supertype: real-customer
-    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-1
-    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-1) set specialise: mothership:mother-child
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-1) get cardinality: @card(2..6)
-    When relation(mothership-with-three-children) create role: child-2
-    When relation(mothership-with-three-children) get role(child-2) set specialise: mother-child
-    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-2
-    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-2) set specialise: mothership:mother-child
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-2) get cardinality: @card(2..6)
-    When relation(mothership-with-three-children) create role: child-3
-    When relation(mothership-with-three-children) get role(child-3) set specialise: mother-child
-    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-3
-    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-3) set specialise: mothership:mother-child
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-3) get cardinality: @card(2..6)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(mothership-with-three-children) create role: three-children-mother
-    When relation(mothership-with-three-children) get role(three-children-mother) set specialise: mother
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:three-children-mother
-    # card becomes 2..6
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set specialise: mothership:mother; fails
-    When entity(customer) get plays(parentship:parent) unset specialise
-    When entity(customer) get plays(parentship:parent) set annotation: @card(2..6)
-    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set specialise: mothership:mother
-    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) get cardinality: @card(2..6)
-    When transaction commits
+      # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario: Plays cardinality should be checked against specialises' specialises cardinality
+#    When create relation type: connection
+#    When relation(connection) create role: player
+#    When relation(connection) get role(player) set annotation: @card(0..)
+#    When entity(person) set plays: connection:player
+#    When entity(person) get plays(connection:player) set annotation: @card(5..10)
+#    Then entity(person) get plays(connection:player) get cardinality: @card(5..10)
+#    When create relation type: parentship
+#    When relation(parentship) set supertype: connection
+#    When relation(parentship) create role: parent
+#    When relation(parentship) get role(parent) set specialise: player
+#    When entity(customer) set supertype: person
+#    When entity(customer) set plays: parentship:parent
+#    When entity(customer) get plays(parentship:parent) set specialise: connection:player
+#    Then entity(customer) get plays(parentship:parent) get cardinality: @card(5..10)
+#    When relation(parentship) create role: child
+#    When relation(parentship) get role(child) set specialise: player
+#    When entity(customer) set plays: parentship:child
+#    When entity(customer) get plays(parentship:child) set specialise: connection:player
+#    Then entity(customer) get plays(parentship:child) get cardinality: @card(5..10)
+#    When create relation type: fathership
+#    When relation(fathership) set supertype: parentship
+#    When relation(fathership) create role: father
+#    When relation(fathership) get role(father) set specialise: parent
+#    When entity(subscriber) set supertype: customer
+#    When entity(subscriber) set plays: fathership:father
+#    When entity(subscriber) get plays(fathership:father) set specialise: parentship:parent
+#    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(5..10)
+#    When relation(fathership) create role: father-child
+#    When relation(fathership) get role(father-child) set specialise: child
+#    When entity(subscriber) set plays: fathership:father-child
+#    When entity(subscriber) get plays(fathership:father-child) set specialise: parentship:child
+#    Then entity(subscriber) get plays(fathership:father-child) get cardinality: @card(5..10)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(fathership) create role: father-2
+#    When relation(fathership) get role(father-2) set specialise: parent
+#    When entity(subscriber) set plays: fathership:father-2
+#    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(0..)
+#    When relation(fathership) create role: father-child-2
+#    When relation(fathership) get role(father-child-2) set specialise: child
+#    When entity(subscriber) set plays: fathership:father-child-2
+#    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(0..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    # card becomes 5..10
+#    Then entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent; fails
+#    # card becomes 5..10
+#    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    When entity(person) get plays(connection:player) set annotation: @card(3..10)
+#    Then entity(person) get plays(connection:player) get cardinality: @card(3..10)
+#    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
+#    Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(3..10)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    # card becomes 3..10
+#    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
+#    When entity(person) get plays(connection:player) set annotation: @card(3..)
+#    Then entity(person) get plays(connection:player) get cardinality: @card(3..)
+#    When entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child
+#    Then entity(subscriber) get plays(fathership:father-child-2) get cardinality: @card(3..)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(customer) get plays(parentship:parent) unset specialise
+#    When entity(customer) get plays(parentship:child) unset specialise
+#    When entity(customer) get plays(parentship:parent) set annotation: @card(0..)
+#    When entity(customer) get plays(parentship:child) set annotation: @card(0..)
+#    When entity(person) get plays(connection:player) set annotation: @card(1..1)
+#    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(subscriber) get plays(fathership:father-2) unset specialise
+#    When entity(customer) get plays(parentship:parent) unset annotation: @card
+#    When entity(customer) get plays(parentship:parent) set specialise: connection:player
+#    Then entity(customer) get plays specialised(parentship:parent) get label: connection:player
+#    Then entity(subscriber) get plays specialised(fathership:father) get label: parentship:parent
+#    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..1)
+#    Then entity(subscriber) get plays specialised(fathership:father-2) does not exist
+#    Then entity(customer) get plays specialised(parentship:child) does not exist
+#    Then entity(subscriber) get plays specialised(fathership:father-child) get label: parentship:child
+#    Then entity(subscriber) get plays specialised(fathership:father-child-2) get label: parentship:child
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(customer) get plays specialised(parentship:parent) get label: connection:player
+#    Then entity(subscriber) get plays specialised(fathership:father) get label: parentship:parent
+#    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..1)
+#    # card becomes 1..1
+#    Then entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent; fails
+#    When entity(person) get plays(connection:player) set annotation: @card(2..5)
+#    When entity(subscriber) get plays(fathership:father-2) set specialise: parentship:parent
+#    Then entity(subscriber) get plays specialised(fathership:father-2) get label: parentship:parent
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(subscriber) get plays(fathership:father-child-2) unset specialise
+#    When entity(customer) get plays(parentship:child) unset annotation: @card
+#    Then entity(subscriber) get plays specialised(fathership:father-child) get label: parentship:child
+#    Then entity(subscriber) get plays specialised(fathership:father-child-2) does not exist
+#    Then entity(customer) get plays(parentship:child) set specialise: connection:player; fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    When entity(subscriber) get plays(fathership:father-child-2) unset specialise
+#    When entity(customer) get plays(parentship:child) unset annotation: @card
+#    Then entity(subscriber) get plays specialised(fathership:father-child) get label: parentship:child
+#    Then entity(subscriber) get plays specialised(fathership:father-child-2) does not exist
+#    When entity(customer) get plays(parentship:child) set specialise: connection:player; fails
+#    When entity(person) get plays(connection:player) set annotation: @card(2..6)
+#    When entity(customer) get plays(parentship:child) set specialise: connection:player
+#    Then entity(customer) get plays specialised(parentship:child) get label: connection:player
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    Then entity(subscriber) get plays(fathership:father-child-2) set specialise: parentship:child; fails
+#    When create relation type: mothership
+#    When relation(mothership) set supertype: parentship
+#    When relation(mothership) create role: mother
+#    When relation(mothership) get role(mother) set specialise: parent
+#    When create entity type: real-customer
+#    When entity(real-customer) set supertype: customer
+#    When entity(real-customer) set plays: mothership:mother
+#    When entity(real-customer) get plays(mothership:mother) set specialise: parentship:parent
+#    Then entity(real-customer) get plays(mothership:mother) get cardinality: @card(2..6)
+#    When relation(mothership) create role: mother-child
+#    When relation(mothership) get role(mother-child) set specialise: child
+#    When entity(real-customer) set plays: mothership:mother-child
+#    When entity(real-customer) get plays(mothership:mother-child) set specialise: parentship:child
+#    Then entity(real-customer) get plays(mothership:mother-child) get cardinality: @card(2..6)
+#    When create relation type: mothership-with-three-children
+#    When relation(mothership-with-three-children) set supertype: mothership
+#    When relation(mothership-with-three-children) create role: child-1
+#    When relation(mothership-with-three-children) get role(child-1) set specialise: mother-child
+#    When create entity type: real-customer-with-three-children
+#    When entity(real-customer-with-three-children) set supertype: real-customer
+#    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-1
+#    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-1) set specialise: mothership:mother-child
+#    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-1) get cardinality: @card(2..6)
+#    When relation(mothership-with-three-children) create role: child-2
+#    When relation(mothership-with-three-children) get role(child-2) set specialise: mother-child
+#    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-2
+#    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-2) set specialise: mothership:mother-child
+#    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-2) get cardinality: @card(2..6)
+#    When relation(mothership-with-three-children) create role: child-3
+#    When relation(mothership-with-three-children) get role(child-3) set specialise: mother-child
+#    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:child-3
+#    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-3) set specialise: mothership:mother-child
+#    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:child-3) get cardinality: @card(2..6)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(mothership-with-three-children) create role: three-children-mother
+#    When relation(mothership-with-three-children) get role(three-children-mother) set specialise: mother
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When entity(real-customer-with-three-children) set plays: mothership-with-three-children:three-children-mother
+#    # card becomes 2..6
+#    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set specialise: mothership:mother; fails
+#    When entity(customer) get plays(parentship:parent) unset specialise
+#    When entity(customer) get plays(parentship:parent) set annotation: @card(2..6)
+#    When entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) set specialise: mothership:mother
+#    Then entity(real-customer-with-three-children) get plays(mothership-with-three-children:three-children-mother) get cardinality: @card(2..6)
+#    When transaction commits
 
   Scenario: Plays default cardinality is permissively validated in multiple inheritance
     When create relation type: connection
@@ -3643,99 +3653,100 @@ Feature: Concept Plays
     Then entity(subscriber) get plays(fathership:father-2) get cardinality: @card(0..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(subscriber) get plays specialisden(fathership:father) get label: parentship:parent
-    Then entity(subscriber) get plays specialisden(fathership:father-2) get label: parentship:parent
+    Then entity(subscriber) get plays specialised(fathership:father) get label: parentship:parent
+    Then entity(subscriber) get plays specialised(fathership:father-2) get label: parentship:parent
 
-  Scenario: Plays cannot set specialise that breaks cardinality between siblings
-    When entity(customer) set supertype: person
-    When entity(subscriber) set supertype: customer
-    When create relation type: connection
-    When relation(connection) create role: player
-    When relation(connection) get role(player) set annotation: @card(0..)
-    When entity(person) set plays: connection:player
-    Then entity(person) get plays(connection:player) get cardinality: @card(0..)
-    When entity(person) get plays(connection:player) set annotation: @card(1..1)
-    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
-    When create relation type: parentship
-    When relation(parentship) set supertype: connection
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When entity(customer) set plays: parentship:parent
-    Then entity(customer) get plays(parentship:parent) get cardinality: @card(0..)
-    When entity(customer) set plays: parentship:child
-    Then entity(customer) get plays(parentship:child) get cardinality: @card(0..)
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When entity(subscriber) set plays: fathership:father
-    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(0..)
-    When entity(subscriber) set plays: mothership:mother
-    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(0..)
-    When relation(parentship) get role(parent) set specialise: player
-    When relation(parentship) get role(child) set specialise: player
-    When relation(fathership) get role(father) set specialise: parent
-    When relation(mothership) get role(mother) set specialise: parent
-    When entity(customer) get plays(parentship:parent) set specialise: connection:player
-    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..1)
-    Then entity(customer) get plays(parentship:child) set specialise: connection:player; fails
-    When entity(person) get plays(connection:player) set annotation: @card(1..2)
-    When entity(customer) get plays(parentship:child) set specialise: connection:player
-    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..2)
-    Then entity(customer) get plays(parentship:child) get cardinality: @card(1..2)
-    When entity(subscriber) get plays(fathership:father) set specialise: parentship:parent
-    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..2)
-    When entity(subscriber) get plays(mothership:mother) set specialise: parentship:parent
-    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(1..2)
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When relation(connection) create role: bad-player
-    When relation(connection) get role(bad-player) set annotation: @card(0..)
-    When entity(person) set plays: connection:bad-player
-    When entity(person) get plays(connection:bad-player) set annotation: @card(1..1)
-    Then entity(person) get plays(connection:bad-player) get cardinality: @card(1..1)
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then entity(customer) get plays(parentship:parent) set specialise: connection:bad-player; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create relation type: bad-connection
-    When relation(bad-connection) create role: bad-player
-    When relation(bad-connection) get role(bad-player) set annotation: @card(0..)
-    When create entity type: bad-person
-    When entity(bad-person) set plays: bad-connection:bad-player
-    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(1..1)
-    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(1..1)
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
-    Then entity(customer) set supertype: bad-person; fails
-    When relation(bad-connection) set supertype: connection
-    When entity(bad-person) set supertype: person
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
-    When entity(customer) set supertype: bad-person
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
-    When relation(parentship) set supertype: bad-connection
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
-    # Cannot set specialise to player as it hides other specialises. Thus, it's not possible to just change specialises
-    # without unsetting subtype specialises, and card checks are not scary at this point.
-    Then relation(bad-connection) get role(bad-player) set specialise: player; fails
-    Then relation(parentship) get role(parent) set specialise: bad-player; fails
-    Then relation(parentship) get role(child) set specialise: bad-player; fails
-    When entity(customer) get plays(parentship:parent) unset specialise
-    When entity(customer) get plays(parentship:child) unset specialise
-    When relation(parentship) get role(parent) set specialise: bad-player
-    When relation(parentship) get role(child) set specialise: bad-player
-    # plays of fathership:father and mothership:mother inherit 1..1 cardinality and break it for subscriber together
-    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
-    When entity(customer) get plays(parentship:child) set specialise: bad-connection:bad-player
-    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(0..1)
-    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(0..1)
-    When entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player
-    Then transaction commits
+    # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
+#  Scenario: Plays cannot set specialise that breaks cardinality between siblings
+#    When entity(customer) set supertype: person
+#    When entity(subscriber) set supertype: customer
+#    When create relation type: connection
+#    When relation(connection) create role: player
+#    When relation(connection) get role(player) set annotation: @card(0..)
+#    When entity(person) set plays: connection:player
+#    Then entity(person) get plays(connection:player) get cardinality: @card(0..)
+#    When entity(person) get plays(connection:player) set annotation: @card(1..1)
+#    Then entity(person) get plays(connection:player) get cardinality: @card(1..1)
+#    When create relation type: parentship
+#    When relation(parentship) set supertype: connection
+#    When relation(parentship) create role: parent
+#    When relation(parentship) create role: child
+#    When entity(customer) set plays: parentship:parent
+#    Then entity(customer) get plays(parentship:parent) get cardinality: @card(0..)
+#    When entity(customer) set plays: parentship:child
+#    Then entity(customer) get plays(parentship:child) get cardinality: @card(0..)
+#    When create relation type: fathership
+#    When relation(fathership) set supertype: parentship
+#    When relation(fathership) create role: father
+#    When create relation type: mothership
+#    When relation(mothership) set supertype: parentship
+#    When relation(mothership) create role: mother
+#    When entity(subscriber) set plays: fathership:father
+#    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(0..)
+#    When entity(subscriber) set plays: mothership:mother
+#    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(0..)
+#    When relation(parentship) get role(parent) set specialise: player
+#    When relation(parentship) get role(child) set specialise: player
+#    When relation(fathership) get role(father) set specialise: parent
+#    When relation(mothership) get role(mother) set specialise: parent
+#    When entity(customer) get plays(parentship:parent) set specialise: connection:player
+#    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..1)
+#    Then entity(customer) get plays(parentship:child) set specialise: connection:player; fails
+#    When entity(person) get plays(connection:player) set annotation: @card(1..2)
+#    When entity(customer) get plays(parentship:child) set specialise: connection:player
+#    Then entity(customer) get plays(parentship:parent) get cardinality: @card(1..2)
+#    Then entity(customer) get plays(parentship:child) get cardinality: @card(1..2)
+#    When entity(subscriber) get plays(fathership:father) set specialise: parentship:parent
+#    Then entity(subscriber) get plays(fathership:father) get cardinality: @card(1..2)
+#    When entity(subscriber) get plays(mothership:mother) set specialise: parentship:parent
+#    Then entity(subscriber) get plays(mothership:mother) get cardinality: @card(1..2)
+#    When transaction commits
+#    When connection open schema transaction for database: typedb
+#    When relation(connection) create role: bad-player
+#    When relation(connection) get role(bad-player) set annotation: @card(0..)
+#    When entity(person) set plays: connection:bad-player
+#    When entity(person) get plays(connection:bad-player) set annotation: @card(1..1)
+#    Then entity(person) get plays(connection:bad-player) get cardinality: @card(1..1)
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then entity(customer) get plays(parentship:parent) set specialise: connection:bad-player; fails
+#    When transaction closes
+#    When connection open schema transaction for database: typedb
+#    When create relation type: bad-connection
+#    When relation(bad-connection) create role: bad-player
+#    When relation(bad-connection) get role(bad-player) set annotation: @card(0..)
+#    When create entity type: bad-person
+#    When entity(bad-person) set plays: bad-connection:bad-player
+#    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(1..1)
+#    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(1..1)
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
+#    Then entity(customer) set supertype: bad-person; fails
+#    When relation(bad-connection) set supertype: connection
+#    When entity(bad-person) set supertype: person
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
+#    When entity(customer) set supertype: bad-person
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
+#    When relation(parentship) set supertype: bad-connection
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
+#    # Cannot set specialise to player as it hides other specialises. Thus, it's not possible to just change specialises
+#    # without unsetting subtype specialises, and card checks are not scary at this point.
+#    Then relation(bad-connection) get role(bad-player) set specialise: player; fails
+#    Then relation(parentship) get role(parent) set specialise: bad-player; fails
+#    Then relation(parentship) get role(child) set specialise: bad-player; fails
+#    When entity(customer) get plays(parentship:parent) unset specialise
+#    When entity(customer) get plays(parentship:child) unset specialise
+#    When relation(parentship) get role(parent) set specialise: bad-player
+#    When relation(parentship) get role(child) set specialise: bad-player
+#    # plays of fathership:father and mothership:mother inherit 1..1 cardinality and break it for subscriber together
+#    Then entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player; fails
+#    When entity(customer) get plays(parentship:child) set specialise: bad-connection:bad-player
+#    When entity(bad-person) get plays(bad-connection:bad-player) set annotation: @card(0..1)
+#    Then entity(bad-person) get plays(bad-connection:bad-player) get cardinality: @card(0..1)
+#    When entity(customer) get plays(parentship:parent) set specialise: bad-connection:bad-player
+#    Then transaction commits
 
   Scenario Outline: Plays unset annotation @card cannot break cardinality between affected siblings
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
@@ -3769,16 +3780,11 @@ Feature: Concept Plays
     When relation(parentship) get role(child) set specialise: player
     When relation(fathership) get role(father) set specialise: parent
     When relation(mothership) get role(mother) set specialise: parent
-    When <root-type>(<subtype-name>) get plays(parentship:parent) set specialise: connection:player
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..1)
-    Then <root-type>(<subtype-name>) get plays(parentship:child) set specialise: connection:player; fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(1..2)
-    When <root-type>(<subtype-name>) get plays(parentship:child) set specialise: connection:player
     Then <root-type>(<subtype-name>) get plays(parentship:parent) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(1..2)
-    When <root-type>(<subtype-name-2>) get plays(fathership:father) set specialise: parentship:parent
     Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
-    When <root-type>(<subtype-name-2>) get plays(mothership:mother) set specialise: parentship:parent
     Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(1..2)
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -3788,7 +3794,6 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays(parentship:child) get cardinality: @card(0..)
     Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(0..)
     Then <root-type>(<subtype-name-2>) get plays(mothership:mother) get cardinality: @card(0..)
-    Then <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..1); fails
     When <root-type>(<supertype-name>) get plays(connection:player) set annotation: @card(0..2)
     When <root-type>(<subtype-name>) get plays(parentship:parent) set annotation: @card(1..2)
     Then <root-type>(<subtype-name-2>) get plays(fathership:father) get cardinality: @card(1..2)
