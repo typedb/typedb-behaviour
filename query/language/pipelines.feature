@@ -18,7 +18,7 @@ Feature: TypeQL pipelines
         plays friendship:friend,
         plays employment:employee,
         owns name,
-        owns age;
+        owns age @card(0..);
       entity company owns ref @key,
         plays employment:employer,
         owns name;
@@ -135,3 +135,38 @@ Feature: TypeQL pipelines
       | p              |
       | key:ref:1      |
 
+
+  Scenario: Sort, offset, limit can be combined
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $p1 isa person, has age 0, has age 1, has age 2, has age 3, has ref 0;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match
+      $p1 isa person, has age $age;
+    sort $age;
+    offset 2;
+    limit 1;
+    """
+    Then uniquely identify answer concepts
+      | age             |
+      | attr:age:2      |
+
+    Given get answers of typeql read query
+    """
+    match
+      $p1 isa person, has age $age;
+    sort $age desc;
+    offset 2;
+    limit 2;
+    """
+    Then uniquely identify answer concepts
+      | age             |
+      | attr:age:1      |
+      | attr:age:0      |
