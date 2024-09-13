@@ -1826,9 +1826,6 @@ Feature: Concept Owns Annotations
 #    When create attribute type: custom-attribute
 #    When attribute(custom-attribute) set value type: long
 #    When entity(person) set owns: custom-attribute
-#    #  TODO: Make it only for typeql
-##    Then entity(person) get owns(custom-attribute) set annotation: @subkey; fails
-##    Then entity(person) get owns(custom-attribute) set annotation: @subkey(); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @subkey("LABEL"); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @subkey(福); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @subkey(d./';;p480909!208923r09zlmk*((*£*()(@£Q**&$@)); fails
@@ -2163,7 +2160,7 @@ Feature: Concept Owns Annotations
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
 
-    # TODO: Struct parsing is not supported now
+    # TODO: Struct parsing is not supported in concept api tests now
 #  Scenario: Owns cannot set @values annotation for struct value type
 #    When create attribute type: custom-attribute
 #    When attribute(custom-attribute) set value type: custom-struct
@@ -2174,55 +2171,6 @@ Feature: Concept Owns Annotations
 #    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct{custom-field: "string"}); fails
 #    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct("string")); fails
 #    When entity(person) get owns(custom-attribute) set annotation: @values(custom-struct(custom-field: "string")); fails
-
-  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Owns cannot set @values annotation without value type
-#    When create attribute type: custom-attribute
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @values(<args>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @values(<args>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @values(<args>)
-#    Then entity(person) get owns(custom-attribute) set annotation: @values(<args>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @values(<args>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @values(<args>)
-#    Examples:
-#      | args                                                                  |
-#      | 0                                                                     |
-#      | 1                                                                     |
-#      | -1                                                                    |
-#      | 1, 2                                                                  |
-#      | -9223372036854775808, 9223372036854775807                             |
-#      | ""                                                                    |
-#      | "1"                                                                   |
-#      | "福"                                                                   |
-#      | "s", "S"                                                              |
-#      | "Scout", "Stone Guard", "High Warlord"                 |
-#      | true                                                                  |
-#      | false                                                                 |
-#      | false, true                                                           |
-#      | 0.0                                                                   |
-#      | -3.444, 3.445                                                         |
-#      | 0.00001, 0.0001, 0.001, 0.01                                          |
-#      | 2024-06-04                                                            |
-#      | 1970-01-01                                                            |
-#      | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
-#      | 2024-06-04T16:35:02                                                   |
-#      | 2024-06-04T16:35:02.103                                               |
-#      | 2024-06-04+0000                                                       |
-#      | 2024-06-04 Asia/Kathmandu                                             |
-#      | 2024-06-04T16:35:02+0100                                              |
-#      | 2024-06-04T16:35:02.1+0100                                            |
-#      | 2024-06-04T16:35:02.10+0100                                           |
-#      | P2M                                                                   |
-#      | P1Y2M3DT4H5M6.789S                                                    |
 
   Scenario Outline: Owns @values annotation correctly validates nanoseconds
     When create attribute type: today
@@ -2284,87 +2232,6 @@ Feature: Concept Owns Annotations
       | datetime-tz | 2024-05-07+0100, 2024-05-10+0100 |
       | duration    | P1Y, P2Y                         |
 
-    #  TODO: Make it only for typeql
-#  Scenario Outline: Owns cannot have @values annotation with empty arguments
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @values; fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @values(); fails
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | value-type |
-#      | long       |
-#      | double     |
-#      | decimal    |
-#      | string     |
-#      | boolean    |
-#      | date       |
-#      | datetime   |
-#      | datetime-tz |
-#      | duration   |
-
-#   TODO: Make it only for typeql
-#  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with arguments of invalid value or type
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @values(<args>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | value-type | args                            |
-#      | long       | 0.1                             |
-#      | long       | "string"                        |
-#      | long       | true                            |
-#      | long       | 2024-06-04                      |
-#      | long       | 2024-06-04+0010                 |
-#      | double     | "string"                        |
-#      | double     | true                            |
-#      | double     | 2024-06-04                      |
-#      | double     | 2024-06-04+0010                 |
-#      | decimal    | "string"                        |
-#      | decimal    | true                            |
-#      | decimal    | 2024-06-04                      |
-#      | decimal    | 2024-06-04+0010                 |
-#      | string     | 123                             |
-#      | string     | true                            |
-#      | string     | 2024-06-04                      |
-#      | string     | 2024-06-04+0010                 |
-#      | string     | 'notstring'                     |
-#      | string     | ""                              |
-#      | boolean    | 123                             |
-#      | boolean    | "string"                        |
-#      | boolean    | 2024-06-04                      |
-#      | boolean    | 2024-06-04+0010                 |
-#      | boolean    | truefalse                       |
-#      | date       | 123                             |
-#      | date       | "string"                        |
-#      | date       | true                            |
-#      | date       | 2024-06-04+0010                 |
-#      | date       | 2024-06-04+0010T16:35           |
-#      | datetime   | 123                             |
-#      | datetime   | "string"                        |
-#      | datetime   | true                            |
-#      | datetime   | 2024-06-04+0010                 |
-#      | datetime-tz | 123                             |
-#      | datetime-tz | "string"                        |
-#      | datetime-tz | true                            |
-#      | datetime-tz | 2024-06-04                      |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
-#      | duration   | 123                             |
-#      | duration   | "string"                        |
-#      | duration   | true                            |
-#      | duration   | 2024-06-04                      |
-#      | duration   | 2024-06-04+0100                 |
-#      | duration   | 1Y                              |
-#      | duration   | year                            |
-
   Scenario Outline: Owns can reset @values annotation with different arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -2388,33 +2255,6 @@ Feature: Concept Owns Annotations
       | datetime    | 2024-05-05      | 2024-06-05      |
       | datetime-tz | 2024-05-05+0100 | 2024-05-05+0010 |
       | duration    | P1Y             | P2Y             |
-
-  # TODO: Make it only for typeql
-#  Scenario Outline: Owns cannot have @values annotation for <value-type> value type with duplicated args
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | value-type | arg0                        | arg1                         | arg2                         |
-#      | long       | 1                           | 1                            | 1                            |
-#      | long       | 1                           | 1                            | 2                            |
-#      | long       | 1                           | 2                            | 1                            |
-#      | long       | 1                           | 2                            | 2                            |
-#      | double     | 0.1                         | 0.0001                       | 0.0001                       |
-#      | decimal    | 0.1                         | 0.0001                       | 0.0001                       |
-#      | string     | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
-#      | string     | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
-#      | boolean    | true                        | true                         | false                        |
-#      | date       | 2024-06-04                  | 2024-01-04                   | 2024-06-04                   |
-#      | datetime   | 2024-06-04T16:35:02.101     | 2024-06-04T16:35:02.101      | 2024-06-04                   |
-#      | datetime   | 2020-06-04T16:35:02.10      | 2025-06-05T16:35             | 2025-06-05T16:35             |
-#      | datetime-tz | 2020-06-04T16:35:02.10+0100 | 2020-06-04T16:35:02.10+0000  | 2020-06-04T16:35:02.10+0100  |
-#      | duration   | P1Y1M                       | P1Y1M                        | P1Y2M                        |
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and specialisden by a subset of arguments
     When create attribute type: custom-attribute
@@ -2881,86 +2721,6 @@ Feature: Concept Owns Annotations
       | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
       | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
-    # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Owns cannot set @range annotation without value type
-#    When create attribute type: custom-attribute
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>..<arg1>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Examples:
-#      | arg0                         | arg1                                                  |
-#      | 0                            | 1                                                     |
-#      | 1                            | 2                                                     |
-#      | 0                            | 2                                                     |
-#      | -1                           | 1                                                     |
-#      | -9223372036854775808         | 9223372036854775807                                   |
-#      | "A"                          | "a"                                                   |
-#      | "a"                          | "z"                                                   |
-#      | "A"                          | "福"                                                   |
-#      | "AA"                         | "AAA"                                                 |
-#      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-#      | false                        | true                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-#      | 2024-06-04+0000              | 2024-06-05+0000                                       |
-#      | 2024-06-04+0100              | 2048-06-04+0100                                       |
-#      | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-#      | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
-#      | P1Y                          | P2Y                                                   |
-#      | P2M                          | P1Y2M                                                 |
-#      | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
-#      | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
-
-    #  TODO: Make it only for typeql
-#  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with less than two args
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When entity(person) set owns: custom-attribute
-#    Then entity(person) get owns(custom-attribute) set annotation: @range; fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @range(); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @range(<arg0>); fails
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | value-type | arg0            |
-#      | long       | 1               |
-#      | double     | 1.0             |
-#      | decimal    | 1.0             |
-#      | string     | "1"             |
-#      | boolean    | false           |
-#      | date       | 2024-06-04      |
-#      | datetime   | 2024-06-04      |
-#      | datetime-tz | 2024-06-04+0100 |
-
   Scenario Outline: Owns can reset @range annotation with the same argument
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -3016,7 +2776,7 @@ Feature: Concept Owns Annotations
       | datetime    | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
       | datetime-tz | 2024-05-05+0100..2024-05-06+0100 | 2024-05-05+0100..2024-05-07+0100 |
 
-  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with incorrect arguments
+  Scenario Outline: Owns cannot have @range annotation for <value-type> value type with duplicated arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
@@ -3028,69 +2788,13 @@ Feature: Concept Owns Annotations
     Examples:
       | value-type  | arg0                     | args                     |
       | long        | 1                        | 1                        |
-      # TODO: Most of the cases are only for typeql
-#      | long        | 1                               | 2, 3                                               |
-#      | long        | 1                               | "string"                                           |
-#      | long        | 1                               | 2, "string"                                        |
-#      | long        | 1                               | 2, "string", true, 2024-06-04, 55                  |
-#      | long        | "string"                        | 1                                                  |
-#      | long        | true                            | 1                                                  |
-#      | long        | 2024-06-04                      | 1                                                  |
-#      | long        | 2024-06-04+0010                 | 1                                                  |
       | double      | 1.0                      | 1.0                      |
-#      | double      | 1.0                             | 2.0, 3.0                                           |
-#      | double      | 1.0                             | "string"                                           |
-#      | double      | "string"                        | 1.0                                                |
-#      | double      | true                            | 1.0                                                |
-#      | double      | 2024-06-04                      | 1.0                                                |
-#      | double      | 2024-06-04+0010                 | 1.0                                                |
       | decimal     | 1.0                      | 1.0                      |
-#      | decimal     | 1.0                             | 2.0, 3.0                                           |
-#      | decimal     | 1.0                             | "string"                                           |
-#      | decimal     | "string"                        | 1.0                                                |
-#      | decimal     | true                            | 1.0                                                |
-#      | decimal     | 2024-06-04                      | 1.0                                                |
-#      | decimal     | 2024-06-04+0010                 | 1.0                                                |
       | string      | "123"                    | "123"                    |
-#      | string      | "123"                           | "1234", "12345"                                    |
-#      | string      | "123"                           | 123                                                |
-#      | string      | 123                             | "123"                                              |
-#      | string      | true                            | "str"                                              |
-#      | string      | 2024-06-04                      | "str"                                              |
-#      | string      | 2024-06-04+0010                 | "str"                                              |
-#      | string      | 'notstring'                     | "str"                                              |
-#      | string      | ""                              | "str"                                              |
       | boolean     | false                    | false                    |
-#      | boolean     | true                            | true                                               |
-#      | boolean     | true                            | 123                                                |
-#      | boolean     | 123                             | true                                               |
-#      | boolean     | "string"                        | true                                               |
-#      | boolean     | 2024-06-04                      | true                                               |
-#      | boolean     | 2024-06-04+0010                 | true                                               |
-#      | boolean     | truefalse                       | true                                               |
       | date        | 2030-06-04               | 2030-06-04               |
-#      | date        | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
-#      | date        | 2030-06-04                      | 123                                                |
-#      | date        | 123                             | 2030-06-04                                         |
-#      | date        | "string"                        | 2030-06-04                                         |
-#      | date        | true                            | 2030-06-04                                         |
-#      | date        | 2024-06-04+0010                 | 2030-06-04                                         |
-#      | date        | 2024-06-04T16:00:00             | 2030-06-04                                         |
       | datetime    | 2030-06-04               | 2030-06-04               |
-#      | datetime    | 2030-06-04                      | 2030-06-05, 2030-06-06                             |
-#      | datetime    | 2030-06-04                      | 123                                                |
-#      | datetime    | 123                             | 2030-06-04                                         |
-#      | datetime    | "string"                        | 2030-06-04                                         |
-#      | datetime    | true                            | 2030-06-04                                         |
-#      | datetime    | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime-tz | 2030-06-04 Europe/London | 2030-06-04 Europe/London |
-#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London, 2030-06-06 Europe/London |
-#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
-#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
-#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
-#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and specialisden by a subset of arguments
     When create attribute type: custom-attribute
@@ -3526,18 +3230,6 @@ Feature: Concept Owns Annotations
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When entity(person) set owns: custom-attribute
-    #  TODO: Make it only for typeql
-#    Then entity(person) get owns(custom-attribute) set annotation: @card; fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(*); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(1..2..3); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(-1..1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(0..0.1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(0..1.5); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(..); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card(1.."2"); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @card("1"..2); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(2..1); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0..0); fails
     Then entity(person) get owns(custom-attribute) get constraints is empty
@@ -4822,32 +4514,6 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @distinct
     Then attribute(custom-attribute) get value type is none
 
-    #  TODO: Make it only for typeql
-#  Scenario Outline: Owns cannot have @distinct annotation for <value-type> with arguments
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When entity(person) set owns: custom-attribute
-#    When entity(person) get owns(custom-attribute) set ordering: ordered
-#    Then entity(person) get owns(custom-attribute) set annotation: @distinct(); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @distinct(1); fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @distinct("1"); fails
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | value-type    |
-#      | long          |
-#      | string        |
-#      | boolean       |
-#      | double        |
-#      | decimal       |
-#      | date          |
-#      | datetime      |
-#      | datetime-tz    |
-#      | duration      |
-#      | custom-struct |
-
   Scenario Outline: Owns can reset @distinct annotations
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -5138,9 +4804,6 @@ Feature: Concept Owns Annotations
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
-    #  TODO: Make it only for typeql
-#    Then entity(person) get owns(custom-attribute) set annotation: @regex; fails
-#    Then entity(person) get owns(custom-attribute) set annotation: @regex(); fails
     Then entity(person) get owns(custom-attribute) set annotation: @regex(<args>); fails
     Then entity(person) get owns(custom-attribute) get constraints is empty
     When transaction commits
@@ -5149,16 +4812,6 @@ Feature: Concept Owns Annotations
     Examples:
       | args |
       | ""   |
-      # TODO: Make it only for typeql
-#      | "\S+", "\S+"          |
-#      | "one", "two", "three" |
-#      | 123             |
-#      | 2024-06-04+0100 |
-#      | 2024-06-04      |
-#      | true            |
-#      | 123.54543       |
-#      | value           |
-#      | P1Y             |
 
   Scenario Outline: Owns can reset @regex annotation of the same argument
     When create attribute type: custom-attribute
@@ -5322,29 +4975,6 @@ Feature: Concept Owns Annotations
     When attribute(custom-attribute) set value type: string
     Then attribute(custom-attribute) get value type: string
     Then transaction commits
-
-########################
-# not compatible @annotations: @abstract, @cascade, @independent, @replace
-########################
-
-    #  TODO: Make it only for typeql
-#  Scenario Outline: <root-type> cannot own with @abstract, @cascade, @independent, and @replace annotations for <value-type> value type
-#    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: <value-type>
-#    When <root-type>(<type-name>) set owns: custom-attribute
-#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @abstract; fails
-#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @cascade; fails
-#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @independent; fails
-#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @replace; fails
-#    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @does-not-exist; fails
-#    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints is empty
-#    Examples:
-#      | root-type | type-name   | value-type |
-#      | entity    | person      | long       |
-#      | relation  | description | string     |
 
 ########################
 # @annotations combinations:

@@ -1260,18 +1260,6 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
 
-#  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @abstract annotation with arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @abstract(); fails
-#    Then attribute(name) set annotation: @abstract(1); fails
-#    Then attribute(name) set annotation: @abstract(1, 2); fails
-#    Then attribute(name) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
-
   Scenario: Abstract attribute type cannot set non-abstract supertype
     When create attribute type: name
     Then attribute(name) get constraints do not contain: @abstract
@@ -1414,20 +1402,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-
-  #  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @regex annotation with wrong arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @regex; fails
-#    Then attribute(name) set annotation: @regex(); fails
-#    Then attribute(name) set annotation: @regex(1); fails
-#    Then attribute(name) set annotation: @regex(1, 2); fails
-#    Then attribute(name) set annotation: @regex("val1", "val2"); fails
-#    Then attribute(name) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
 
   Scenario: Attribute type cannot set @regex annotation with invalid value
     When create attribute type: name
@@ -1759,19 +1733,6 @@ Feature: Concept Attribute Type
     Then attribute(name) get supertype does not exist
     Then attribute(name) get constraints do not contain: @independent
 
-#  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @independent annotation with arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @independent(); fails
-#    Then attribute(name) set annotation: @independent(1); fails
-#    Then attribute(name) set annotation: @independent(1, 2); fails
-#    Then attribute(name) set annotation: @independent("val1"); fails
-#    Then attribute(name) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
-
 ########################
 # @values
 ########################
@@ -1854,7 +1815,7 @@ Feature: Concept Attribute Type
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
 
-    # TODO: Struct parsing is not supported now
+    # TODO: Struct parsing is not supported in concept api tests now
 #  Scenario: Attribute type cannot set @values annotation for struct value type
 #    When create attribute type: email
 #    When attribute(email) set value type: custom-struct
@@ -1864,54 +1825,6 @@ Feature: Concept Attribute Type
 #    When attribute(email) set annotation: @values(custom-struct{custom-field: "string"}); fails
 #    When attribute(email) set annotation: @values(custom-struct("string")); fails
 #    When attribute(email) set annotation: @values(custom-struct(custom-field: "string")); fails
-
-  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Attribute types without a value type cannot set @values annotation
-#    When create attribute type: email
-#    Then attribute(email) set annotation: @values(<args>); fails
-#    Then attribute(email) get constraints do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(email) get constraints do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    Then attribute(email) set annotation: @values(<args>); fails
-#    Then attribute(email) get constraints do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get constraints do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    Examples:
-#      | args                                                                  |
-#      | 0                                                                     |
-#      | 1                                                                     |
-#      | -1                                                                    |
-#      | 1, 2                                                                  |
-#      | -9223372036854775808, 9223372036854775807                             |
-#      | ""                                                                    |
-#      | "1"                                                                   |
-#      | "福"                                                                   |
-#      | "s", "S"                                                              |
-#      | "Scout", "Stone Guard", "High Warlord"                 |
-#      | true                                                                  |
-#      | false                                                                 |
-#      | false, true                                                           |
-#      | 0.0                                                                   |
-#      | -3.444, 3.445                                                         |
-#      | 0.00001, 0.0001, 0.001, 0.01                                          |
-#      | 2024-06-04                                                            |
-#      | 1970-01-01                                                            |
-#      | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
-#      | 2024-06-04T16:35:02                                                   |
-#      | 2024-06-04T16:35:02.103                                               |
-#      | 2024-06-04+0000                                                       |
-#      | 2024-06-04 Asia/Kathmandu                                             |
-#      | 2024-06-04T16:35:02+0100                                              |
-#      | 2024-06-04T16:35:02.1+0100                                            |
-#      | 2024-06-04T16:35:02.10+0100                                           |
-#      | P2M                                                                   |
-#      | P1Y2M3DT4H5M6.789S                                                    |
 
   Scenario Outline: Attribute type @values annotation correctly validates nanoseconds
     When create attribute type: today
@@ -1960,87 +1873,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(first-name) get constraints contain: @values("value", "value2")
     Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
-
-#   TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @values; fails
-#    Then attribute(name) set annotation: @values(); fails
-#    Then attribute(name) get constraints is empty
-#    Then attribute(name) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
-#    Then attribute(name) get declared annotations is empty
-#    Examples:
-#      | value-type |
-#      | long       |
-#      | double     |
-#      | decimal    |
-#      | string     |
-#      | boolean    |
-#      | date       |
-#      | datetime   |
-#      | datetime-tz |
-#      | duration   |
-
-  # TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @values(<args>); fails
-#    Then attribute(name) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
-#    Examples:
-#      | value-type  | args                            |
-#      | long        | 0.1                             |
-#      | long        | "string"                        |
-#      | long        | true                            |
-#      | long        | 2024-06-04                      |
-#      | long        | 2024-06-04+0010                 |
-#      | double      | "string"                        |
-#      | double      | true                            |
-#      | double      | 2024-06-04                      |
-#      | double      | 2024-06-04+0010                 |
-#      | decimal     | "string"                        |
-#      | decimal     | true                            |
-#      | decimal     | 2024-06-04                      |
-#      | decimal     | 2024-06-04+0010                 |
-#      | string      | 123                             |
-#      | string      | true                            |
-#      | string      | 2024-06-04                      |
-#      | string      | 2024-06-04+0010                 |
-#      | string      | 'notstring'                     |
-#      | string      | ""                              |
-#      | boolean     | 123                             |
-#      | boolean     | "string"                        |
-#      | boolean     | 2024-06-04                      |
-#      | boolean     | 2024-06-04+0010                 |
-#      | boolean     | truefalse                       |
-#      | date        | 123                             |
-#      | date        | "string"                        |
-#      | date        | true                            |
-#      | date        | 2024-06-04+0010                 |
-#      | date        | 2024-06-04T16:35:02             |
-#      | datetime    | 123                             |
-#      | datetime    | "string"                        |
-#      | datetime    | true                            |
-#      | datetime    | 2024-06-04+0010                 |
-#      | datetime-tz | 123                             |
-#      | datetime-tz | "string"                        |
-#      | datetime-tz | true                            |
-#      | datetime-tz | 2024-06-04                      |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
-#      | duration    | 123                             |
-#      | duration    | "string"                        |
-#      | duration    | true                            |
-#      | duration    | 2024-06-04                      |
-#      | duration    | 2024-06-04+0100                 |
-#      | duration    | 1Y                              |
-#      | duration    | year                            |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @values annotation
     When create attribute type: name
@@ -2397,7 +2229,7 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
       | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
-    # TODO: Struct parsing is not supported now
+    # TODO: Struct parsing is not supported in typeql now
 #  Scenario: Attribute type cannot set @range annotation for struct value type
 #    When create attribute type: name
 #    When attribute(name) set value type: custom-struct
@@ -2407,62 +2239,6 @@ Feature: Concept Attribute Type
 #    When attribute(name) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
 #    When attribute(name) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
 #    When attribute(name) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
-
-  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Attribute types without a value type cannot set @range annotation
-#    When create attribute type: email
-#    Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-#    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-#    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Examples:
-#      | arg0                         | arg1                                                  |
-#      | 0                            | 1                                                     |
-#      | 1                            | 2                                                     |
-#      | 0                            | 2                                                     |
-#      | -1                           | 1                                                     |
-#      | -9223372036854775808         | 9223372036854775807                                   |
-#      | "A"                          | "a"                                                   |
-#      | "a"                          | "z"                                                   |
-#      | "A"                          | "福"                                                   |
-#      | "AA"                         | "AAA"                                                 |
-#      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-#      | false                        | true                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-#      | 2024-06-04+0000              | 2024-06-05+0000                                       |
-#      | 2024-06-04+0100              | 2048-06-04+0100                                       |
-#      | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-#      | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
-#      | P1Y                          | P2Y                                                   |
-#      | P2M                          | P1Y2M                                                 |
-#      | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
-#      | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
 
   Scenario: Attribute types' @range annotation can be inherited
     When create attribute type: name
@@ -2478,31 +2254,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get constraints contain: @range(3..5)
     Then attribute(first-name) get declared annotations do not contain: @range(3..5)
 
-    # TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @range; fails
-#    Then attribute(name) set annotation: @range(); fails
-#    Then attribute(name) get constraints is empty
-#    Then attribute(name) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get constraints is empty
-#    Then attribute(name) get declared annotations is empty
-#    Examples:
-#      | value-type  |
-#      | long        |
-#      | double      |
-#      | decimal     |
-#      | string      |
-#      | boolean     |
-#      | date        |
-#      | datetime    |
-#      | datetime-tz |
-#      | duration    |
-
-  Scenario Outline: Attribute type with <value-type> value type cannot set @range with incorrect arguments
+  Scenario Outline: Attribute type with <value-type> value type cannot set @range with duplicated arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @range(<arg0>..<args>); fails
@@ -2513,70 +2265,15 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
-    # TODO: Most of these cases are only for typeql!
       | value-type  | arg0                     | args                     |
       | long        | 1                        | 1                        |
-#      | long        | 1                               | 2..3                                               |
-#      | long        | 1                               | "string"                                           |
-#      | long        | 1                               | 2.."string"                                        |
-#      | long        | 1                               | 2.."string"..true..2024-06-04..55                  |
-#      | long        | "string"                        | 1                                                  |
-#      | long        | true                            | 1                                                  |
-#      | long        | 2024-06-04                      | 1                                                  |
-#      | long        | 2024-06-04+0010                 | 1                                                  |
       | double      | 1.0                      | 1.0                      |
-#      | double      | 1.0                             | 2.0..3.0                                           |
-#      | double      | 1.0                             | "string"                                           |
-#      | double      | "string"                        | 1.0                                                |
-#      | double      | true                            | 1.0                                                |
-#      | double      | 2024-06-04                      | 1.0                                                |
-#      | double      | 2024-06-04+0010                 | 1.0                                                |
       | decimal     | 1.0                      | 1.0                      |
-#      | decimal     | 1.0                             | 2.0..3.0                                           |
-#      | decimal     | 1.0                             | "string"                                           |
-#      | decimal     | "string"                        | 1.0                                                |
-#      | decimal     | true                            | 1.0                                                |
-#      | decimal     | 2024-06-04                      | 1.0                                                |
-#      | decimal     | 2024-06-04+0010                 | 1.0                                                |
       | string      | "123"                    | "123"                    |
-#      | string      | "123"                           | "1234".."12345"                                    |
-#      | string      | "123"                           | 123                                                |
-#      | string      | 123                             | "123"                                              |
-#      | string      | true                            | "str"                                              |
-#      | string      | 2024-06-04                      | "str"                                              |
-#      | string      | 2024-06-04+0010                 | "str"                                              |
-#      | string      | 'notstring'                     | "str"                                              |
-#      | string      | ""                              | "str"                                              |
       | boolean     | false                    | false                    |
-#      | boolean     | true                            | true                                               |
-#      | boolean     | true                            | 123                                                |
-#      | boolean     | 123                             | true                                               |
-#      | boolean     | "string"                        | true                                               |
-#      | boolean     | 2024-06-04                      | true                                               |
-#      | boolean     | 2024-06-04+0010                 | true                                               |
-#      | boolean     | truefalse                       | true                                               |
       | date        | 2030-06-04               | 2030-06-04               |
-#      | date        | 2030-06-04                      | 2030-06-05..2030-06-06                             |
-#      | date        | 2030-06-04                      | 123                                                |
-#      | date        | 123                             | 2030-06-04                                         |
-#      | date        | "string"                        | 2030-06-04                                         |
-#      | date        | true                            | 2030-06-04                                         |
-#      | date        | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime    | 2030-06-04               | 2030-06-04               |
-#      | datetime    | 2030-06-04                      | 2030-06-05..2030-06-06                             |
-#      | datetime    | 2030-06-04                      | 123                                                |
-#      | datetime    | 123                             | 2030-06-04                                         |
-#      | datetime    | "string"                        | 2030-06-04                                         |
-#      | datetime    | true                            | 2030-06-04                                         |
-#      | datetime    | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime-tz | 2030-06-04 Europe/London | 2030-06-04 Europe/London |
-#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London..2030-06-06 Europe/London |
-#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
-#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
-#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
-#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name
@@ -2767,38 +2464,6 @@ Feature: Concept Attribute Type
     When connection open read transaction for database: typedb
     Then attribute(surname) get constraints contain: @range(1..3)
     Then attribute(surname) get value type: long
-
-########################
-# not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
-########################
-
-  #  TODO: Make it only for typeql
-#  Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
-#    When create attribute type: email
-#    When attribute(email) set value type: <value-type>
-#    Then attribute(email) set annotation: @distinct; fails
-#    Then attribute(email) set annotation: @key; fails
-#    Then attribute(email) set annotation: @unique; fails
-#    Then attribute(email) set annotation: @subkey(LABEL); fails
-#    Then attribute(email) set annotation: @card(1..2); fails
-#    Then attribute(email) set annotation: @cascade; fails
-#    Then attribute(email) set annotation: @replace; fails
-#    Then attribute(email) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get constraints is empty
-#    Examples:
-#      | value-type    |
-#      | long          |
-#      | double        |
-#      | decimal       |
-#      | string        |
-#      | boolean       |
-#      | date          |
-#      | datetime      |
-#      | datetime-tz    |
-#      | duration      |
-#      | custom-struct |
 
 ########################
 # @annotations combinations:

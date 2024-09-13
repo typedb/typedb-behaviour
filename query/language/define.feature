@@ -1133,6 +1133,117 @@ Feature: TypeQL Define Query
 #      | cascade          | # TODO: Cascade is temporarily turned off
 
 
+  Scenario Outline: cannot set annotation @<annotation> to owns of attribute type of wrong <value-type>
+    Then typeql define; fails
+      """
+      define
+      attribute description<value-type>;
+      entity player owns description @<annotation>;
+      """
+    Examples:
+      | annotation                                            | value-type          |
+      | regex("A")                                            | , value bool        |
+      | regex("A")                                            | , value long        |
+      | regex("A")                                            | , value double      |
+      | regex("A")                                            | , value decimal     |
+      | regex("A")                                            | , value date        |
+      | regex("A")                                            | , value datetime    |
+      | regex("A")                                            | , value datetime-tz |
+      | regex("A")                                            | , value duration    |
+      | regex("A")                                            |                     |
+
+      | range("A".."B")                                       |                     |
+      | range(1..2)                                           |                     |
+      | range("A".."B")                                       | , value long        |
+      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | , value long        |
+      | range("A".."B")                                       | , value datetime    |
+      | range(1..2)                                           | , value datetime    |
+      | range(1..2)                                           | , value string      |
+      | range(-9223372036854775808..9223372036854775807)      | , value string      |
+      | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | , value string      |
+      | range(2024-06-04..2024-06-05)                         | , value double      |
+      | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | , value date        |
+      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | , value date        |
+
+      | values("A", 2)                                        |                     |
+      | values("A")                                           |                     |
+      | values(false)                                         |                     |
+      | values(0)                                             |                     |
+      | values("A", 2)                                        | , value long        |
+      | values("A", "B")                                      | , value long        |
+      | values(0.1)                                           | , value long        |
+      | values("string")                                      | , value long        |
+      | values(true)                                          | , value long        |
+      | values(2024-06-04)                                    | , value long        |
+      | values(2024-06-04+0010)                               | , value long        |
+      | values("string")                                      | , value double      |
+      | values(true)                                          | , value double      |
+      | values(2024-06-04)                                    | , value double      |
+      | values(2024-06-04+0010)                               | , value double      |
+      | values("string")                                      | , value decimal     |
+      | values(true)                                          | , value decimal     |
+      | values(2024-06-04)                                    | , value decimal     |
+      | values(2024-06-04+0010)                               | , value decimal     |
+      | values("A", 2)                                        | , value string      |
+      | values(123)                                           | , value string      |
+      | values(true)                                          | , value string      |
+      | values(2024-06-04)                                    | , value string      |
+      | values(2024-06-04+0010)                               | , value string      |
+      | values(notstring)                                     | , value string      |
+      | values("")                                            | , value string      |
+      | values(truefalse)                                     | , value boolean     |
+      | values(123)                                           | , value date        |
+      | values(2024-06-04+0010)                               | , value date        |
+      | values(2024-06-04T16:35:02)                           | , value date        |
+      | values("福")                                           | , value date        |
+      | values(2024-06-04+0010)                               | , value datetime    |
+      | values(2024-06-04)                                    | , value datetime-tz |
+      | values(2024-06-04 NotRealTimeZone/Zone)               | , value datetime-tz |
+      | values(123)                                           | , value duration    |
+      | values("string")                                      | , value duration    |
+      | values(2024-06-04)                                    | , value duration    |
+      | values(2024-06-04+0100)                               | , value duration    |
+      | values(1Y)                                            | , value duration    |
+      | values(year)                                          | , value duration    |
+
+
+  Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to owns
+    Then typeql define; fails
+      """
+      define
+      attribute description, value <value-type>;
+      entity player owns description @values(<arg0>, <arg1>, <arg0>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      attribute description, value <value-type>;
+      entity player owns description @values(<arg0>, <arg0>, <arg1>);
+      """
+
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      attribute description, value <value-type>;
+      entity player owns description @values(<arg1>, <arg0>, <arg0>);
+      """
+    Examples:
+      | arg0                     | arg1                     | value-type  |
+      | 1                        | 2                        | long        |
+      | 112.2                    | 134.3                    | double      |
+      | 124.4                    | 124.0                    | decimal     |
+      | false                    | true                     | boolean     |
+      | "hi"                     | "bye"                    | string      |
+      | 2024-09-13               | 2024-09-15               | date        |
+      | 2024-09-13T15:07:03      | 2024-10-13T15:07:04      | datetime    |
+      | 2024-09-13T15:07:03+0100 | 2024-10-13T15:07:04+0100 | datetime-tz |
+      | 1P1Y2M3DT4M6.789S        | P1Y2M3DT4H5.789S         | duration    |
+
+
   Scenario Outline: can set annotation @<annotation> to owns lists
     Then typeql define
       """
@@ -1209,6 +1320,106 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+  Scenario Outline: cannot set annotation @<annotation> to wrong value typee <value-type>
+    Then typeql define; fails
+      """
+      define
+      attribute description value <value-type> @<annotation>;
+      """
+    Examples:
+      | annotation                                            | value-type  |
+      | regex("A")                                            | bool        |
+      | regex("A")                                            | long        |
+      | regex("A")                                            | double      |
+      | regex("A")                                            | decimal     |
+      | regex("A")                                            | date        |
+      | regex("A")                                            | datetime    |
+      | regex("A")                                            | datetime-tz |
+      | regex("A")                                            | duration    |
+
+      | range("A".."B")                                       | long        |
+      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | long        |
+      | range("A".."B")                                       | datetime    |
+      | range(1..2)                                           | datetime    |
+      | range(1..2)                                           | string      |
+      | range(-9223372036854775808..9223372036854775807)      | string      |
+      | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | string      |
+      | range(2024-06-04..2024-06-05)                         | double      |
+      | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | date        |
+      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | date        |
+
+      | values("A", 2)                                        | long        |
+      | values("A", "B")                                      | long        |
+      | values(0.1)                                           | long        |
+      | values("string")                                      | long        |
+      | values(true)                                          | long        |
+      | values(2024-06-04)                                    | long        |
+      | values(2024-06-04+0010)                               | long        |
+      | values("string")                                      | double      |
+      | values(true)                                          | double      |
+      | values(2024-06-04)                                    | double      |
+      | values(2024-06-04+0010)                               | double      |
+      | values("string")                                      | decimal     |
+      | values(true)                                          | decimal     |
+      | values(2024-06-04)                                    | decimal     |
+      | values(2024-06-04+0010)                               | decimal     |
+      | values("A", 2)                                        | string      |
+      | values(123)                                           | string      |
+      | values(true)                                          | string      |
+      | values(2024-06-04)                                    | string      |
+      | values(2024-06-04+0010)                               | string      |
+      | values(notstring)                                     | string      |
+      | values("")                                            | string      |
+      | values(truefalse)                                     | boolean     |
+      | values(123)                                           | date        |
+      | values(2024-06-04+0010)                               | date        |
+      | values(2024-06-04T16:35:02)                           | date        |
+      | values("福")                                           | date        |
+      | values(2024-06-04+0010)                               | datetime    |
+      | values(2024-06-04)                                    | datetime-tz |
+      | values(2024-06-04 NotRealTimeZone/Zone)               | datetime-tz |
+      | values(123)                                           | duration    |
+      | values("string")                                      | duration    |
+      | values(2024-06-04)                                    | duration    |
+      | values(2024-06-04+0100)                               | duration    |
+      | values(1Y)                                            | duration    |
+      | values(year)                                          | duration    |
+
+
+  Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to value type
+    Then typeql define; fails
+      """
+      define
+      attribute description value <value-type> @values(<arg0>, <arg1>, <arg0>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      attribute description value <value-type> @values(<arg0>, <arg0>, <arg1>);
+      """
+
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; fails
+      """
+      define
+      attribute description value <value-type> @values(<arg1>, <arg0>, <arg0>);
+      """
+    Examples:
+      | arg0                     | arg1                     | value-type  |
+      | 1                        | 2                        | long        |
+      | 112.2                    | 134.3                    | double      |
+      | 124.4                    | 124.0                    | decimal     |
+      | false                    | true                     | boolean     |
+      | "hi"                     | "bye"                    | string      |
+      | 2024-09-13               | 2024-09-15               | date        |
+      | 2024-09-13T15:07:03      | 2024-10-13T15:07:04      | datetime    |
+      | 2024-09-13T15:07:03+0100 | 2024-10-13T15:07:04+0100 | datetime-tz |
+      | 1P1Y2M3DT4M6.789S        | P1Y2M3DT4H5.789S         | duration    |
+
+
   Scenario Outline: cannot set annotation @<annotation> to value types
     Then typeql define; fails
       """
@@ -1245,7 +1456,259 @@ Feature: TypeQL Define Query
       | range("1".."2")  |
       | values("1", "2") |
 
+
     # TODO: Same "cannot set annotation" for alias when aliases are implemented?
+
+
+  Scenario Outline: cannot set @abstract annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      entity player @abstract(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      relation parentship @abstract(<args>), relates parent;
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      attribute characteristics @abstract(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      relation parentship relates parent @abstract(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @abstract(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player plays employment:employee @abstract(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1, 2     |
+      | 1..2     |
+      | A        |
+      | "A"      |
+      | "A", "B" |
+      | "A".."B" |
+
+
+  Scenario Outline: cannot set @distinct annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      relation parentship relates parent[] @distinct(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name[] @distinct(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1, 2     |
+      | 1..2     |
+      | A        |
+      | "A"      |
+      | "A", "B" |
+      | "A".."B" |
+
+
+  Scenario Outline: cannot set @independent annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      attribute characteristics @independent(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1, 2     |
+      | 1..2     |
+      | A        |
+      | "A"      |
+      | "A", "B" |
+      | "A".."B" |
+
+
+  Scenario Outline: cannot set @unique annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @unique(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1, 2     |
+      | 1..2     |
+      | A        |
+      | "A"      |
+      | "A", "B" |
+      | "A".."B" |
+
+
+  Scenario Outline: cannot set @key annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @key(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1, 2     |
+      | 1..2     |
+      | A        |
+      | "A"      |
+      | "A", "B" |
+      | "A".."B" |
+
+
+  Scenario Outline: cannot set @card annotation with invalid arguments
+    Then typeql define; parsing fails
+      """
+      define
+      relation parentship relates parent @card(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @card(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player plays employment:employee @card(<args>);
+      """
+    Examples:
+      | args          |
+      |               |
+      | 1             |
+      | 1, 2          |
+      | 1, 2, 3       |
+      | A             |
+      | "A"           |
+      | "A", "B"      |
+      | "A".."B"      |
+      | "A".."B".."C" |
+      | 1.1.."B"      |
+      | 1.1..2        |
+      | 1.1..2.2      |
+      | 1.2           |
+      | ..2           |
+      | -1..2         |
+
+
+  Scenario Outline: cannot set @regex annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      attribute characteristics @regex(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @regex(<args>);
+      """
+    Examples:
+      | args     |
+      |          |
+      | 1        |
+      | 1.2      |
+      | abcd     |
+      | 0..2     |
+      | "A".."B" |
+      | "A", "B" |
+      | "A" "B"  |
+      | "A       |
+      | A"       |
+      | """      |
+      | "\"      |
+
+
+  Scenario Outline: cannot set @range annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      attribute characteristics @range(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @range(<args>);
+      """
+    Examples:
+      | args    |
+      |         |
+      | 1       |
+      | 1, 2    |
+      | 1..     |
+      | 1.2     |
+      | abcd    |
+      | A..B    |
+      | "A"."B" |
+
+
+  Scenario Outline: cannot set @values annotation with arguments
+    Then typeql define; parsing fails
+      """
+      define
+      attribute characteristics @values(<args>);
+      """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql define; parsing fails
+      """
+      define
+      entity player owns name @values(<args>);
+      """
+    Examples:
+      | args |
+      |      |
+      | 1,   |
+      | 1..2 |
+      | 1. 2 |
+      | 1A2  |
+      | 1A 2 |
+
+
+    # TODO: Add a test for @cascade when it appears again
 
 
   ##################
@@ -1974,7 +2437,6 @@ Feature: TypeQL Define Query
       $y isa person, has phone-nr "456", has email "xyz@gmail.com";
       """
     Given transaction commits
-
 
 
   Scenario: a key ownership can be converted to a unique ownership

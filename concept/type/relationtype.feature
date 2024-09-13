@@ -381,13 +381,13 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
 
-    # TODO: Make it only for typeql
-#  Scenario: Roles cannot subtype itself
-#    When create relation type: marriage
-#    When relation(marriage) create role: wife
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then relation(marriage) get role(wife) set specialise: wife; fails
+    # TODO: Make it only for typeql?
+  Scenario: Roles cannot subtype itself
+    When create relation type: marriage
+    When relation(marriage) create role: wife
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(marriage) get role(wife) set specialise: wife; fails
 
   Scenario: Relation types can inherit related role types
     When create relation type: parentship
@@ -1008,17 +1008,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get constraints do not contain: @abstract
     Then relation(parentship) get role(child) get declared annotations do not contain: @abstract
 
-# TODO: Make it only for typeql
-#  Scenario: Relation type cannot set @abstract annotation with arguments
-#    When create relation type: parentship
-#    Then relation(parentship) set annotation: @abstract(); fails
-#    Then relation(parentship) set annotation: @abstract(1); fails
-#    Then relation(parentship) set annotation: @abstract(1, 2); fails
-#    Then relation(parentship) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get constraints is empty
-
   Scenario: Relation types must have at least one role even if it's abstract
     When create relation type: connection
     Then transaction commits; fails
@@ -1306,36 +1295,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get constraints contain: @cascade
     Then relation(fathership) get declared annotations do not contain: @cascade
 
-  #  TODO: Make it only for typeql
-#  Scenario: Relation type cannot set @cascade annotation with arguments
-#    When create relation type: parentship
-#    Then relation(parentship) set annotation: @cascade(); fails
-#    Then relation(parentship) set annotation: @cascade(1); fails
-#    Then relation(parentship) set annotation: @cascade(1, 2); fails
-#    Then relation(parentship) get constraints is empty
-
-########################
-# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, @regex
-########################
-
-  #  TODO: Make it only for typeql
-#  Scenario: Relation type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @independent, @replace, and @regex annotations
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) set annotation: @distinct; fails
-#    Then relation(parentship) set annotation: @key; fails
-#    Then relation(parentship) set annotation: @unique; fails
-#    Then relation(parentship) set annotation: @subkey(LABEL); fails
-#    Then relation(parentship) set annotation: @values(1, 2); fails
-#    Then relation(parentship) set annotation: @range(1, 2); fails
-#    Then relation(parentship) set annotation: @card(1..2); fails
-#    Then relation(parentship) set annotation: @independent; fails
-#    Then relation(parentship) set annotation: @replace; fails
-#    Then relation(parentship) set annotation: @regex("val"); fails
-#    Then relation(parentship) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get constraints is empty
 
 ########################
 # @annotations combinations:
@@ -2448,18 +2407,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get constraints contain: @abstract
     Then relation(parentship) get role(parent) get declared annotations contain: @abstract
 
-#  TODO: Make it only for typeql
-#  Scenario: Roles cannot set @abstract annotation with arguments
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) get role(parent) set annotation: @abstract(); fails
-#    Then relation(parentship) get role(parent) set annotation: @abstract(1); fails
-#    Then relation(parentship) get role(parent) set annotation: @abstract(1, 2); fails
-#    Then relation(parentship) get role(parent) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get constraints is empty
-
   Scenario: Inherited Roles' @abstract annotation is persistent
     When create relation type: parentship
     When relation(parentship) set annotation: @abstract
@@ -2745,19 +2692,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get constraints contain: @distinct
     Then relation(parentship) get role(parent) get declared annotations contain: @distinct
 
-#  TODO: Make it only for typeql
-#  Scenario: Ordered roles cannot set @distinct annotation with arguments
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When relation(parentship) get role(parent) set ordering: ordered
-#    Then relation(parentship) get role(parent) set annotation: @distinct(); fails
-#    Then relation(parentship) get role(parent) set annotation: @distinct(1); fails
-#    Then relation(parentship) get role(parent) set annotation: @distinct(1, 2); fails
-#    Then relation(parentship) get role(parent) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get constraints is empty
-
   Scenario: Inherited ordered roles' @distinct annotation is persistent
     When create relation type: parentship
     When relation(parentship) create role: parent
@@ -2990,18 +2924,6 @@ Feature: Concept Relation Type and Role Type
   Scenario: Relation type cannot have @card annotation for with invalid arguments
     When create relation type: parentship
     When relation(parentship) create role: parent
-    #  TODO: Make it only for typeql
-#    Then relation(parentship) get role(parent) set annotation: @card(); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(1); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(*); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(1..2..3); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(-1..1); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0..0.1); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(0..1.5); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(..); fails
-#    Then relation(parentship) get role(parent) set annotation: @card(1.."2"); fails
-#    Then relation(parentship) get role(parent) set annotation: @card("1"..2); fails
     Then relation(parentship) get role(parent) set annotation: @card(2..1); fails
     Then relation(parentship) get role(parent) set annotation: @card(0..0); fails
     Then relation(parentship) get role(parent) get constraints is empty
@@ -3929,34 +3851,6 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(parent) get cardinality: @card(1..1)
     Then relation(fathership) get role(father) get cardinality: @card(1..1)
     Then transaction commits
-
-########################
-# relates not compatible @annotations: @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, @regex
-########################
-
-  #  TODO: Make it only for typeql
-#  Scenario: Relation's role cannot have @key, @unique, @subkey, @values, @range, @abstract, @cascade, @independent, @replace, and @regex annotations
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) get role(parent) set annotation: @key; fails
-#    Then relation(parentship) get role(parent) set annotation: @unique; fails
-#    Then relation(parentship) get role(parent) set annotation: @subkey; fails
-#    Then relation(parentship) get role(parent) set annotation: @subkey(LABEL); fails
-#    Then relation(parentship) get role(parent) set annotation: @values; fails
-#    Then relation(parentship) get role(parent) set annotation: @values(1, 2); fails
-#    Then relation(parentship) get role(parent) set annotation: @range; fails
-#    Then relation(parentship) get role(parent) set annotation: @range(1, 2); fails
-#    Then relation(parentship) get role(parent) set annotation: @abstract; fails
-#    Then relation(parentship) gest role(parent) set annotation: @cascade; fails
-#    Then relation(parentship) get role(parent) set annotation: @independent; fails
-#    Then relation(parentship) get role(parent) set annotation: @replace; fails
-#    Then relation(parentship) get role(parent) set annotation: @regex; fails
-#    Then relation(parentship) get role(parent) set annotation: @regex("val"); fails
-#    Then relation(parentship) get role(parent) set annotation: @does-not-exist; fails
-#    Then relation(parentship) get role(parent) get constraints is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(parentship) get role(parent) get constraints is empty
 
 ########################
 # relates @annotations combinations:

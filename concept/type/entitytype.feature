@@ -224,7 +224,7 @@ Feature: Concept Entity Type
       | annotation | annotation-category |
       | abstract   | abstract            |
 
-    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+    # TODO: Uncomment this test and when there appear inherited constraints (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set or unset inherited @<annotation>
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
@@ -257,7 +257,7 @@ Feature: Concept Entity Type
 #      | annotation | annotation-category |
 #      |            |                     |
 
-    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+    # TODO: Uncomment this test and when there appear inherited constraints (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set supertype with the same @<annotation> until it is explicitly unset from type
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
@@ -298,7 +298,7 @@ Feature: Concept Entity Type
 #      | annotation | annotation-category |
 #      |            |                     |
 
-    # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+    # TODO: Uncomment this test and when there appear inherited constraints (abstract is not inherited)
 #  Scenario Outline: Entity type loses inherited @<annotation> if supertype is unset
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
@@ -329,7 +329,7 @@ Feature: Concept Entity Type
 #      | annotation |
 #      |     |
 
-  # TODO: Uncomment this test and when there appear inherited annotations (abstract is not inherited)
+  # TODO: Uncomment this test and when there appear inherited constraints (abstract is not inherited)
 #  Scenario Outline: Entity type cannot set redundant duplicated @<annotation> while inheriting it
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
@@ -374,19 +374,6 @@ Feature: Concept Entity Type
     When connection open read transaction for database: typedb
     Then entity(company) get constraints contain: @abstract
     Then entity(company) get declared annotations contain: @abstract
-
-#  TODO: Make it only for typeql
-#  Scenario: Entity cannot set @abstract annotation with arguments
-#    When create entity type: person
-#    Then entity(person) set annotation: @abstract(); fails
-#    Then entity(person) set annotation: @abstract(1); fails
-#    Then entity(person) set annotation: @abstract(1, 2); fails
-#    Then entity(person) get constraints is empty
-#    Then entity(person) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get constraints is empty
-#    Then entity(person) get declared annotations is empty
 
   Scenario: Entity type can reset @abstract annotation
     When create entity type: person
@@ -520,27 +507,3 @@ Feature: Concept Entity Type
     When connection open read transaction for database: typedb
     Then entity(person) get constraints do not contain: @abstract
     Then entity(player) get constraints do not contain: @abstract
-
-########################
-# not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
-########################
-#  TODO: Make it only for typeql
-#  Scenario: Entity type cannot have @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, and @regex annotations
-#    When create entity type: person
-#    Then entity(person) set annotation: @distinct; fails
-#    Then entity(person) set annotation: @key; fails
-#    Then entity(person) set annotation: @unique; fails
-#    Then entity(person) set annotation: @subkey(LABEL); fails
-#    Then entity(person) set annotation: @values(1, 2); fails
-#    Then entity(person) set annotation: @range(1, 2); fails
-#    Then entity(person) set annotation: @card(1..2); fails
-#    Then entity(person) set annotation: @cascade; fails
-#    Then entity(person) set annotation: @independent; fails
-#    Then entity(person) set annotation: @replace; fails
-#    Then entity(person) set annotation: @regex("val"); fails
-#    Then entity(person) get constraints is empty
-#    Then entity(person) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get constraints is empty
-#    Then entity(person) get declared annotations is empty
