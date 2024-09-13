@@ -1662,7 +1662,7 @@ get;
       """
 
 
-  Scenario: overridden uniqueness is respected
+  Scenario: specialised uniqueness is respected
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql define
@@ -1671,7 +1671,7 @@ get;
       entity person abstract;
       attribute email value string, abstract;
       attribute email-outlook sub email, value string;
-      entity child sub person, owns email-outlook as email;
+      entity child sub person, owns email-outlook;
       """
     Given transaction commits
     Given transaction closes
@@ -1684,6 +1684,7 @@ get;
     Then transaction commits
     Given connection open write transaction for database: typedb
     Then typeql insert; throws exception
+    # TODO: Looks like it throws exception because of "email-outlOKO", not as expected...
       """
       insert $x isa child, has email-outloko "abc@outlook.com", has ref 1;
       """

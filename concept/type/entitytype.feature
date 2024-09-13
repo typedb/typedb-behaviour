@@ -181,26 +181,26 @@ Feature: Concept Entity Type
   Scenario Outline: Entity type can set and unset @<annotation>
     When create entity type: person
     When entity(person) set annotation: @<annotation>
-    Then entity(person) get annotations contain: @<annotation>
-    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get constraints contain: @<annotation>
+    Then entity(person) get constraint categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     When entity(person) unset annotation: @<annotation-category>
-    Then entity(person) get annotations do not contain: @<annotation>
-    Then entity(person) get annotation categories do not contain: @<annotation-category>
+    Then entity(person) get constraints do not contain: @<annotation>
+    Then entity(person) get constraint categories do not contain: @<annotation-category>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations do not contain: @<annotation>
-    Then entity(person) get annotation categories do not contain: @<annotation-category>
+    Then entity(person) get constraints do not contain: @<annotation>
+    Then entity(person) get constraint categories do not contain: @<annotation-category>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When entity(person) set annotation: @<annotation>
-    Then entity(person) get annotations contain: @<annotation>
-    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get constraints contain: @<annotation>
+    Then entity(person) get constraint categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations contain: @<annotation>
-    Then entity(person) get annotation categories contain: @<annotation-category>
+    Then entity(person) get constraints contain: @<annotation>
+    Then entity(person) get constraint categories contain: @<annotation-category>
     Then entity(person) get declared annotations contain: @<annotation>
     Examples:
       | annotation | annotation-category |
@@ -208,17 +208,17 @@ Feature: Concept Entity Type
 
   Scenario Outline: Entity type can unset not set @<annotation>
     When create entity type: person
-    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get constraints do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When entity(person) unset annotation: @<annotation-category>
-    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get constraints do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get constraints do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     When entity(person) unset annotation: @<annotation-category>
-    Then entity(person) get annotations do not contain: @<annotation>
+    Then entity(person) get constraints do not contain: @<annotation>
     Then entity(person) get declared annotations do not contain: @<annotation>
     Examples:
       | annotation | annotation-category |
@@ -230,28 +230,28 @@ Feature: Concept Entity Type
 #    When entity(person) set annotation: @<annotation>
 #    When create entity type: player
 #    When entity(player) set supertype: person
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When entity(player) set annotation: @<annotation>
 #    Then transaction commits; fails
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    Then entity(player) unset annotation: @<annotation-category>; fails
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    Examples:
 #      | annotation | annotation-category |
@@ -261,38 +261,38 @@ Feature: Concept Entity Type
 #  Scenario Outline: Entity type cannot set supertype with the same @<annotation> until it is explicitly unset from type
 #    When create entity type: person
 #    When entity(person) set annotation: @<annotation>
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
 #    When create entity type: player
 #    When entity(player) set annotation: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations contain: @<annotation>
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations contain: @<annotation>
 #    When entity(player) set supertype: person
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations contain: @<annotation>
 #    Then transaction commits; fails
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations contain: @<annotation>
 #    When entity(player) set supertype: person
 #    When entity(player) unset annotation: @<annotation-category>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
 #    Then entity(person) get declared annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    Examples:
 #      | annotation | annotation-category |
@@ -304,27 +304,27 @@ Feature: Concept Entity Type
 #    When entity(person) set annotation: @<annotation>
 #    When create entity type: player
 #    When entity(player) set supertype: person
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    When entity(player) unset supertype
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations do not contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints do not contain: @<annotation>
 #    When entity(player) set supertype: person
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    Then entity(player) get declared annotations do not contain: @<annotation>
 #    When entity(player) unset supertype
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations do not contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints do not contain: @<annotation>
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then entity(person) get annotations contain: @<annotation>
-#    Then entity(player) get annotations do not contain: @<annotation>
+#    Then entity(person) get constraints contain: @<annotation>
+#    Then entity(player) get constraints do not contain: @<annotation>
 #    Examples:
 #      | annotation |
 #      |     |
@@ -344,8 +344,8 @@ Feature: Concept Entity Type
 #    When entity(person) unset annotation: @<annotation>
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then entity(person) get annotations do not contain: @<annotation>
-#    Then entity(player) get annotations contain: @<annotation>
+#    Then entity(person) get constraints do not contain: @<annotation>
+#    Then entity(player) get constraints contain: @<annotation>
 #    When entity(person) set annotation: @<annotation>
 #    Then transaction commits; fails
 #    Examples:
@@ -359,20 +359,20 @@ Feature: Concept Entity Type
     When create entity type: person
     When entity(person) set annotation: @abstract
     When create entity type: company
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(company) get annotations do not contain: @abstract
-    Then entity(person) get annotations contain: @abstract
+    Then entity(company) get constraints do not contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(company) get declared annotations do not contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When entity(company) set annotation: @abstract
-    Then entity(company) get annotations contain: @abstract
+    Then entity(company) get constraints contain: @abstract
     Then entity(company) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(company) get annotations contain: @abstract
+    Then entity(company) get constraints contain: @abstract
     Then entity(company) get declared annotations contain: @abstract
 
 #  TODO: Make it only for typeql
@@ -381,24 +381,24 @@ Feature: Concept Entity Type
 #    Then entity(person) set annotation: @abstract(); fails
 #    Then entity(person) set annotation: @abstract(1); fails
 #    Then entity(person) set annotation: @abstract(1, 2); fails
-#    Then entity(person) get annotations is empty
+#    Then entity(person) get constraints is empty
 #    Then entity(person) get declared annotations is empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then entity(person) get annotations is empty
+#    Then entity(person) get constraints is empty
 #    Then entity(person) get declared annotations is empty
 
   Scenario: Entity type can reset @abstract annotation
     When create entity type: person
     When entity(person) set annotation: @abstract
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When entity(person) set annotation: @abstract
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
 
   Scenario: Entity types can subtype non abstract entity types
@@ -406,7 +406,7 @@ Feature: Concept Entity Type
     When create entity type: player
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
     Then entity(person) get declared annotations do not contain: @abstract
     When entity(player) set supertype: person
     Then entity(player) get supertypes contain:
@@ -419,107 +419,107 @@ Feature: Concept Entity Type
   Scenario: Entity type cannot inherit @abstract annotation, but can set it being a subtype
     When create entity type: person
     When entity(person) set annotation: @abstract
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When create entity type: player
     When entity(player) set supertype: person
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     Then entity(player) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     Then entity(player) get declared annotations do not contain: @abstract
     When entity(player) set annotation: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
 
   Scenario: Entity type can set @abstract annotation and then set abstract supertype
     When create entity type: person
     When entity(person) set annotation: @abstract
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
     When create entity type: player
     When entity(player) set annotation: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
     When entity(player) set supertype: person
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get declared annotations contain: @abstract
     Then entity(player) get supertype: person
 
   Scenario: Abstract entity type cannot set non-abstract supertype
     When create entity type: person
-    Then entity(person) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
     When create entity type: player
     When entity(player) set annotation: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) set supertype: person; fails
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get supertypes do not contain:
       | person |
     Then entity(player) set supertype: person; fails
     When entity(person) set annotation: @abstract
     When entity(player) set supertype: person
-    Then entity(person) get annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get supertype: person
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(player) get supertype: person
 
   Scenario: Entity type cannot set @abstract annotation while having non-abstract supertype and cannot unset @abstract while having abstract subtype
     When create entity type: person
-    Then entity(person) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
     When create entity type: player
     When entity(player) set supertype: person
     Then entity(player) set annotation: @abstract; fails
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     Then entity(player) set annotation: @abstract; fails
     When entity(person) set annotation: @abstract
     When entity(player) set annotation: @abstract
-    Then entity(person) get annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
-    Then entity(player) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
+    Then entity(player) get constraints contain: @abstract
     Then entity(person) unset annotation: @abstract; fails
     When entity(player) unset annotation: @abstract
     When entity(person) unset annotation: @abstract
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get annotations do not contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(person) get constraints do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
 
 ########################
 # not compatible @annotations: @distinct, @key, @unique, @subkey, @values, @range, @card, @cascade, @independent, @replace, @regex
@@ -538,9 +538,9 @@ Feature: Concept Entity Type
 #    Then entity(person) set annotation: @independent; fails
 #    Then entity(person) set annotation: @replace; fails
 #    Then entity(person) set annotation: @regex("val"); fails
-#    Then entity(person) get annotations is empty
+#    Then entity(person) get constraints is empty
 #    Then entity(person) get declared annotations is empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then entity(person) get annotations is empty
+#    Then entity(person) get constraints is empty
 #    Then entity(person) get declared annotations is empty

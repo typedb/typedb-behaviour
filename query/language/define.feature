@@ -434,7 +434,7 @@ Feature: TypeQL Define Query
       | label:student-part-time-employment |
 
 
-  Scenario: a relation type's role can be overridden in a child relation type using 'as'
+  Scenario: a relation type's role can be specialised in a child relation type using 'as'
     When typeql define
       """
       define
@@ -466,7 +466,7 @@ Feature: TypeQL Define Query
       | label:father-sonhood |
 
 
-  Scenario: when a relation type's role is overridden, it creates a sub-role of the parent role type
+  Scenario: when a relation type's role is specialised, it creates a sub-role of the parent role type
     When typeql define
       """
       define
@@ -489,7 +489,7 @@ Feature: TypeQL Define Query
       | label:father-sonhood:father | label:father-sonhood:son |
 
 
-  Scenario: an overridden role is no longer associated with the relation type that overrides it
+  Scenario: a specialised role is no longer associated with the relation type that specialises it
     Given typeql define
       """
       define relation part-time-employment sub employment, relates part-timer as employee;
@@ -506,7 +506,7 @@ Feature: TypeQL Define Query
       | label:employment |
 
 
-  Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
+  Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
     Then typeql define; fails
       """
       define
@@ -534,7 +534,7 @@ Feature: TypeQL Define Query
       | label:pilot-employment |
 
 
-  Scenario Outline: types cannot override plays in any <mode>
+  Scenario Outline: types cannot specialise plays in any <mode>
     Then typeql define; parsing fails
       """
         define
@@ -1534,7 +1534,7 @@ Feature: TypeQL Define Query
     Then transaction commits; fails
 
 
-  Scenario: type cannot override owns
+  Scenario: type cannot specialise owns
     Then typeql define; parsing fails
       """
       define
@@ -1544,8 +1544,8 @@ Feature: TypeQL Define Query
       """
 
 
-    # TODO: Should be checked without override
-#  Scenario: annotations are inherited through overrides
+    # TODO: Should be checked without specialise
+#  Scenario: annotations are inherited through specialises
 #    Given typeql define
 #      """
 #      define
@@ -2511,7 +2511,7 @@ Feature: TypeQL Define Query
     # already existing one. It might contradict the test!
     Given transaction closes
     Given connection open read transaction for database: typedb
-    Then typeql fails
+    Then typeql get; fails
       """
       match $x label dog;
       """

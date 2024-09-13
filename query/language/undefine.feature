@@ -727,7 +727,7 @@ Feature: TypeQL Undefine Query
       | label:part-time | label:employment:employee |
 
   # TODO
-  Scenario: removing a role from a super relation type also removes roles that override it in its subtypes (?)
+  Scenario: removing a role from a super relation type also removes roles that specialise it in its subtypes (?)
 
   # TODO
   Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just its parent role (?)

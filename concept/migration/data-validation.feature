@@ -276,9 +276,9 @@ Feature: Data validation
     Then entity(person) set annotation: @abstract
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get annotations contain: @abstract
+    Then entity(person) get constraints contain: @abstract
     Then entity(person) get declared annotations contain: @abstract
-    Then entity(player) get annotations do not contain: @abstract
+    Then entity(player) get constraints do not contain: @abstract
     Then entity(player) get declared annotations do not contain: @abstract
     Then entity(player) get instances is not empty
 
@@ -289,7 +289,7 @@ Feature: Data validation
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set specialise: parent
     When create entity type: person
     When entity(person) set plays: fathership:father
     Then transaction commits
@@ -303,13 +303,13 @@ Feature: Data validation
     When relation(parentship) get role(parent) set annotation: @abstract
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then relation(parentship) get annotations contain: @abstract
+    Then relation(parentship) get constraints contain: @abstract
     Then relation(parentship) get declared annotations contain: @abstract
-    Then relation(fathership) get annotations do not contain: @abstract
+    Then relation(fathership) get constraints do not contain: @abstract
     Then relation(fathership) get declared annotations do not contain: @abstract
-    Then relation(parentship) get role(parent) get annotations contain: @abstract
+    Then relation(parentship) get role(parent) get constraints contain: @abstract
     Then relation(parentship) get role(parent) get declared annotations contain: @abstract
-    Then relation(fathership) get role(father) get annotations do not contain: @abstract
+    Then relation(fathership) get role(father) get constraints do not contain: @abstract
     Then relation(fathership) get role(father) get declared annotations do not contain: @abstract
     Then relation(fathership) get instances is not empty
 
@@ -337,7 +337,7 @@ Feature: Data validation
     When create relation type: fathership
     When relation(fathership) create role: father
     When relation(fathership) set supertype: parentship
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set specialise: parent
     When create entity type: person
     When entity(person) set plays: fathership:father
     Then transaction commits
@@ -347,10 +347,10 @@ Feature: Data validation
     When relation $f add player for role(father): $p
     Then transaction commits
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) unset override
+    When relation(fathership) get role(father) unset specialise
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) unset override
+    When relation(fathership) get role(father) unset specialise
     When relation(fathership) unset supertype
     Then delete relation type: parentship
     Then transaction commits
@@ -375,7 +375,7 @@ Feature: Data validation
     When relation $f add player for role(father): $p
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(fathership) get role(father) set override: parent
+    When relation(fathership) get role(father) set specialise: parent
     Then transaction commits
     When connection open write transaction for database: typedb
     When $f = relation(fathership) create new instance
@@ -473,7 +473,7 @@ Feature: Data validation
     # The default card is 1..1 and we have instances of rel1!
     Then relation(rel1) create role: role1; fails
     When relation(rel1) create role: role1, with @card(0..1)
-    Then relation(rel1) get role(role1) set override: role00; fails
+    Then relation(rel1) get role(role1) set specialise: role00; fails
 
 
   Scenario: Instances of role-playing not in the schema must not exist
@@ -482,7 +482,7 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create entity type: ent00
     Given entity(ent00) set plays: rel0:role0
     Given create entity type: ent1
@@ -507,20 +507,20 @@ Feature: Data validation
     When transaction closes
     Given connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel1:role1
-    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+    Then entity(ent1) get plays(rel1:role1) set specialise: rel0:role0; fails
 
     When transaction closes
     Given connection open schema transaction for database: typedb
     Then entity(ent1) set supertype: ent01; fails
 
 
-  Scenario: Instances of role-playing hidden by a relates override must not exist
+  Scenario: Instances of role-playing hidden by a relates specialise must not exist
     Given create relation type: rel0
     Given relation(rel0) create role: role0
     Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create entity type: ent00
     Given entity(ent00) set plays: rel0:role0
     Given entity(ent00) set plays: rel1:role1
@@ -539,7 +539,7 @@ Feature: Data validation
     When relation $rel1 add player for role(role1): $ent00
     Then transaction commits
 
-    # With no 'plays' override, we can still play the parent role in the parent relation
+    # With no 'plays' specialise, we can still play the parent role in the parent relation
     Given connection open write transaction for database: typedb
     When $ent00 = entity(ent00) create new instance
     When $rel0 = relation(rel0) create new instance
@@ -547,19 +547,19 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: Instances of role-playing hidden by a plays override must not exist
+  Scenario: Instances of role-playing hidden by a plays specialise must not exist
     Given create relation type: rel0
     Given relation(rel0) create role: role0
     Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create entity type: ent00
     Given entity(ent00) set plays: rel0:role0
     Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
     Given entity(ent1) set plays: rel1:role1
-    Given entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Given entity(ent1) get plays(rel1:role1) set specialise: rel0:role0
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -575,18 +575,18 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: A type may not override a role it plays through inheritance if instances of that type playing that role exist
+  Scenario: A type may not specialise a role it plays through inheritance if instances of that type playing that role exist
     Given create relation type: rel0
     Given relation(rel0) create role: role0
     Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create entity type: ent00
     Given entity(ent00) set plays: rel0:role0
     Given create entity type: ent1
     Given entity(ent1) set supertype: ent00
-    # Without the override
+    # Without the specialise
     Given entity(ent1) set plays: rel1:role1
     Given transaction commits
 
@@ -598,7 +598,7 @@ Feature: Data validation
 
     Given connection open schema transaction for database: typedb
     Given entity(ent1) set plays: rel1:role1
-    Then entity(ent1) get plays(rel1:role1) set override: rel0:role0; fails
+    Then entity(ent1) get plays(rel1:role1) set specialise: rel0:role0; fails
 
 
   Scenario: A type may not be moved if it has instances of it owning an attribute which would be lost as a result of that move
@@ -626,7 +626,7 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) set supertype: rel0
     Given relation(rel1) create role: role1
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create entity type: ent0
     Given entity(ent0) set plays: rel0:role0
     Given create entity type: ent10
@@ -636,7 +636,7 @@ Feature: Data validation
     Given create entity type: ent11
     Given entity(ent11) set supertype: ent0
     Given entity(ent11) set plays: rel1:role1
-    Given entity(ent11) get plays(rel1:role1) set override: rel0:role0
+    Given entity(ent11) get plays(rel1:role1) set specialise: rel0:role0
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given $ent2 = entity(ent2) create new instance
@@ -840,10 +840,10 @@ Feature: Data validation
     When entity(ent0c) set plays: rel0a:rol0a2
     When create relation type: rel0a2
     When relation(rel0a2) set supertype: rel0a
-    When relation(rel0a2) create role: override
+    When relation(rel0a2) create role: specialise
     When relation(rel0a) get role(rol0a) set annotation: @card(0..)
-    When relation(rel0a2) get role(override) set override: rol0a
-    Then relation(rel0a2) get roles contain:
+    When relation(rel0a2) get role(specialise) set specialise: rol0a
+    Then relation(rel0a2) get relates contain:
       | rel0a:rol0a2 |
     When transaction commits
 
@@ -1164,12 +1164,12 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
     When entity(person) get owns(email) set annotation: @key
-    Then entity(person) get owns(email) get annotations contain: @key
-    Then entity(person) get owns(username) get annotations contain: @key
+    Then entity(person) get owns(email) get constraints contain: @key
+    Then entity(person) get owns(username) get constraints contain: @key
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(email) get annotations contain: @key
-    Then entity(person) get owns(username) get annotations contain: @key
+    Then entity(person) get owns(email) get constraints contain: @key
+    Then entity(person) get owns(username) get constraints contain: @key
 
 
   Scenario: When the super-type of a type is changed, the data is consistent with the @key annotations on ownerships
@@ -1268,7 +1268,7 @@ Feature: Data validation
     Then entity(ent0u) get owns(attr0) set annotation: @card(1..1); fails
 
 
-  Scenario: Owns data is validated to be unique for all siblings overriding an owns with @unique
+  Scenario: Owns data is validated to be unique for all siblings specialising an owns with @unique
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
@@ -1287,10 +1287,10 @@ Feature: Data validation
     Given entity(ent0) set owns: attr0
     Given entity(ent1) set owns: attr1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent2) set owns: attr2
     Given entity(ent2) set supertype: ent0
-    Given entity(ent2) get owns(attr2) set override: attr0
+    Given entity(ent2) get owns(attr2) set specialise: attr0
     Given entity(ent0) get owns(attr0) set annotation: @card(0..)
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -1347,7 +1347,7 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: Owns data is validated to be unique for all siblings overriding an owns with @key
+  Scenario: Owns data is validated to be unique for all siblings specialising an owns with @key
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
@@ -1366,10 +1366,10 @@ Feature: Data validation
     Given entity(ent0) set owns: attr0
     Given entity(ent1) set owns: attr1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent2) set owns: attr2
     Given entity(ent2) set supertype: ent0
-    Given entity(ent2) get owns(attr2) set override: attr0
+    Given entity(ent2) get owns(attr2) set specialise: attr0
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given $ent1 = entity(ent1) create new instance with key(ref): ent1
@@ -1452,8 +1452,8 @@ Feature: Data validation
     When entity(ent1) set owns: attr1
     When entity(ent1) set owns: attr2
     When entity(ent1) set supertype: ent0
-    When entity(ent1) get owns(attr1) set override: attr0
-    When entity(ent1) get owns(attr2) set override: attr0
+    When entity(ent1) get owns(attr1) set specialise: attr0
+    When entity(ent1) get owns(attr2) set specialise: attr0
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1511,7 +1511,7 @@ Feature: Data validation
     When entity(ent0) set owns: attr01
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
     When attribute(attr0) set supertype: attr01
-    When entity(ent1) get owns(attr1) set override: attr01
+    When entity(ent1) get owns(attr1) set specialise: attr01
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1521,7 +1521,7 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
     Then entity(ent0) get owns(attr01) set annotation: @regex("val\d+"); fails
     Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+"); fails
     When transaction closes
@@ -1533,9 +1533,9 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0
-    # To override all abstract interfaces:
-    Then entity(ent1) get owns(attr2) set override: attr01
+    Then entity(ent1) get owns(attr1) set specialise: attr0
+    # To specialise all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set specialise: attr01
     Then transaction commits
 
 
@@ -1559,8 +1559,8 @@ Feature: Data validation
     When entity(ent1) set owns: attr1
     When entity(ent1) set owns: attr2
     When entity(ent1) set supertype: ent0
-    When entity(ent1) get owns(attr1) set override: attr0
-    When entity(ent1) get owns(attr2) set override: attr0
+    When entity(ent1) get owns(attr1) set specialise: attr0
+    When entity(ent1) get owns(attr2) set specialise: attr0
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1621,7 +1621,7 @@ Feature: Data validation
     When entity(ent0) set owns: attr01
     When entity(ent0) get owns(attr01) set annotation: @range("val".."val9999")
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
-    When entity(ent1) get owns(attr1) set override: attr01
+    When entity(ent1) get owns(attr1) set specialise: attr01
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1631,7 +1631,7 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
     Then entity(ent0) get owns(attr01) set annotation: @range("val1".."val9"); fails
     Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails
     When transaction closes
@@ -1643,9 +1643,9 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0
-    # To override all abstract interfaces:
-    Then entity(ent1) get owns(attr2) set override: attr01
+    Then entity(ent1) get owns(attr1) set specialise: attr0
+    # To specialise all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set specialise: attr01
     Then transaction commits
 
 
@@ -1735,8 +1735,8 @@ Feature: Data validation
     When entity(ent1) set owns: attr2
     When entity(ent1) get owns(attr2) set ordering: ordered
     When entity(ent1) set supertype: ent0
-    When entity(ent1) get owns(attr1) set override: attr0
-    When entity(ent1) get owns(attr2) set override: attr0
+    When entity(ent1) get owns(attr1) set specialise: attr0
+    When entity(ent1) get owns(attr2) set specialise: attr0
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1796,7 +1796,7 @@ Feature: Data validation
     When attribute(attr0) unset value type
     When entity(ent0) set owns: attr01
     When entity(ent0) get owns(attr01) set ordering: ordered
-    When entity(ent1) get owns(attr1) set override: attr01
+    When entity(ent1) get owns(attr1) set specialise: attr01
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1810,7 +1810,7 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0; fails
+    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
     Then entity(ent0) get owns(attr01) set annotation: @distinct; fails
     Then entity(ent1) get owns(attr1) set annotation: @distinct; fails
     When transaction closes
@@ -1823,9 +1823,9 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set override: attr0
-    # To override all abstract interfaces:
-    Then entity(ent1) get owns(attr2) set override: attr01
+    Then entity(ent1) get owns(attr1) set specialise: attr0
+    # To specialise all abstract interfaces:
+    Then entity(ent1) get owns(attr2) set specialise: attr01
     Then transaction commits
 
   Scenario: Relates data is revalidated with set @distinct
@@ -1841,10 +1841,10 @@ Feature: Data validation
     When relation(rel1) set supertype: rel0
     When relation(rel1) create role: rol1
     When relation(rel1) get role(rol1) set ordering: ordered
-    When relation(rel1) get role(rol1) set override: rel0:rol0
+    When relation(rel1) get role(rol1) set specialise: rel0:rol0
     When relation(rel1) create role: rol2
     When relation(rel1) get role(rol2) set ordering: ordered
-    When relation(rel1) get role(rol2) set override: rel0:rol0
+    When relation(rel1) get role(rol2) set specialise: rel0:rol0
     When create entity type: ent0
     When create entity type: ent1
     When entity(ent0) set annotation: @abstract
@@ -1853,8 +1853,8 @@ Feature: Data validation
     When entity(ent1) set plays: rel1:rol1
     When entity(ent1) set plays: rel1:rol2
     When entity(ent1) set supertype: ent0
-    When entity(ent1) get plays(rel1:rol1) set override: rel0:rol0
-    When entity(ent1) get plays(rel1:rol2) set override: rel0:rol0
+    When entity(ent1) get plays(rel1:rol1) set specialise: rel0:rol0
+    When entity(ent1) get plays(rel1:rol2) set specialise: rel0:rol0
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1912,11 +1912,11 @@ Feature: Data validation
     When relation(rel01) get role(rol01) set ordering: ordered
     When relation(rel0) set supertype: rel01
     When relation(rel0) unset owns: ref
-    Then relation(rel1) get role(rol1) set override: rel01:rol01; fails
-    When entity(ent1) get plays(rel1:rol1) unset override
-    When relation(rel1) get role(rol1) set override: rel01:rol01
+    Then relation(rel1) get role(rol1) set specialise: rel01:rol01; fails
+    When entity(ent1) get plays(rel1:rol1) unset specialise
+    When relation(rel1) get role(rol1) set specialise: rel01:rol01
     When entity(ent0) set plays: rel01:rol01
-    When entity(ent1) get plays(rel1:rol1) set override: rel01:rol01
+    When entity(ent1) get plays(rel1:rol1) set specialise: rel01:rol01
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1929,9 +1929,9 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(rol1) set override: rol0; fails
-    When entity(ent1) get plays(rel1:rol1) unset override
-    Then relation(rel1) get role(rol1) set override: rol0; fails
+    Then relation(rel1) get role(rol1) set specialise: rol0; fails
+    When entity(ent1) get plays(rel1:rol1) unset specialise
+    Then relation(rel1) get role(rol1) set specialise: rol0; fails
     Then relation(rel01) get role(rol01) set annotation: @distinct; fails
     Then relation(rel1) get role(rol1) set annotation: @distinct; fails
     When transaction closes
@@ -1944,15 +1944,15 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(rol1) set override: rol0; fails
-    When entity(ent1) get plays(rel1:rol1) unset override
-    Then relation(rel1) get role(rol1) set override: rol0
-    When entity(ent1) get plays(rel1:rol1) set override: rel0:rol0
-    # To override all abstract interfaces:
-    Then relation(rel1) get role(rol2) set override: rol01; fails
-    When entity(ent1) get plays(rel1:rol2) unset override
-    Then relation(rel1) get role(rol2) set override: rol01
-    When entity(ent1) get plays(rel1:rol2) set override: rel01:rol01
+    Then relation(rel1) get role(rol1) set specialise: rol0; fails
+    When entity(ent1) get plays(rel1:rol1) unset specialise
+    Then relation(rel1) get role(rol1) set specialise: rol0
+    When entity(ent1) get plays(rel1:rol1) set specialise: rel0:rol0
+    # To specialise all abstract interfaces:
+    Then relation(rel1) get role(rol2) set specialise: rol01; fails
+    When entity(ent1) get plays(rel1:rol2) unset specialise
+    Then relation(rel1) get role(rol2) set specialise: rol01
+    When entity(ent1) get plays(rel1:rol2) set specialise: rel01:rol01
     Then transaction commits
 
 
@@ -1974,9 +1974,9 @@ Feature: Data validation
     Given entity(ent1) set owns: ref
     Given entity(ent1) set owns: attr1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent1) set owns: attr2
-    Given entity(ent1) get owns(attr2) set override: attr0
+    Given entity(ent1) get owns(attr2) set specialise: attr0
     Given entity(ent0) get owns(attr0) set annotation: @card(0..1)
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -2029,7 +2029,7 @@ Feature: Data validation
     When attribute(attr3) set supertype: attr0
     When entity(ent1) set owns: attr3
     When entity(ent1) get owns(attr3) set annotation: @card(2..2); fails
-    When entity(ent1) get owns(attr3) set override: attr0
+    When entity(ent1) get owns(attr3) set specialise: attr0
     Then entity(ent1) get owns(attr3) set annotation: @card(2..2); fails
     When entity(ent0) get owns(attr0) set annotation: @card(1..3); fails
     When transaction commits
@@ -2065,7 +2065,7 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr4
-    When entity(ent1) get owns(attr4) set override: attr4
+    When entity(ent1) get owns(attr4) set specialise: attr4
     When entity(ent1) get owns(attr4) set annotation: @regex("attr4.*")
     When transaction commits
     When connection open write transaction for database: typedb
@@ -2099,10 +2099,10 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent0) set supertype: ent00
-    Then entity(ent0) get owns(attr0) set override: attr00; fails
+    Then entity(ent0) get owns(attr0) set specialise: attr00; fails
     Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
     When entity(ent00) get owns(attr00) set annotation: @card(1..3)
-    Then entity(ent0) get owns(attr0) set override: attr00; fails
+    Then entity(ent0) get owns(attr0) set specialise: attr00; fails
     Then entity(ent0) get owns(attr0) set annotation: @card(1..2); fails
     Then entity(ent0) get owns(attr0) set annotation: @card(1..3); fails
     When entity(ent0) get owns(attr0) set annotation: @card(0..3)
@@ -2123,10 +2123,10 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When entity(ent0) set supertype: ent00
-    Then entity(ent0) get owns(attr0) set override: attr00; fails
+    Then entity(ent0) get owns(attr0) set specialise: attr00; fails
     Then entity(ent0) get owns(attr0) set annotation: @card(1..2); fails
     When entity(ent0) get owns(attr0) set annotation: @card(1..3)
-    When entity(ent0) get owns(attr0) set override: attr00
+    When entity(ent0) get owns(attr0) set specialise: attr00
     When entity(ent0) get owns(attr0) unset annotation: @card
     Then entity(ent0) get owns(attr0) get cardinality: @card(1..3)
     When transaction commits
@@ -2137,12 +2137,12 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When entity(ent0) set owns: attr5
-    Then entity(ent0) get owns(attr5) set override: attr00; fails
+    Then entity(ent0) get owns(attr5) set specialise: attr00; fails
     When entity(ent0) set owns: attr5_l
-    Then entity(ent0) get owns(attr5_l) set override: attr00; fails
+    Then entity(ent0) get owns(attr5_l) set specialise: attr00; fails
     When entity(ent00) get owns(attr00) set annotation: @card(0..3)
-    Then entity(ent0) get owns(attr5) set override: attr00
-    Then entity(ent0) get owns(attr5_l) set override: attr00
+    Then entity(ent0) get owns(attr5) set specialise: attr00
+    Then entity(ent0) get owns(attr5_l) set specialise: attr00
     When transaction commits
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
@@ -2220,9 +2220,9 @@ Feature: Data validation
     When entity $ent1 set has: $attr1_2
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) unset override; fails
-    When entity(ent1) get owns(attr2) unset override
-    When entity(ent1) get owns(attr3) unset override
+    Then entity(ent1) get owns(attr1) unset specialise; fails
+    When entity(ent1) get owns(attr2) unset specialise
+    When entity(ent1) get owns(attr3) unset specialise
     When transaction commits
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
@@ -2230,7 +2230,7 @@ Feature: Data validation
     When entity $ent1 unset has: $attr1
     Then transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent1) get owns(attr1) unset override
+    When entity(ent1) get owns(attr1) unset specialise
     Then entity(ent1) get owns(attr1) get cardinality: @card(0..1)
     Then entity(ent1) unset owns: attr1; fails
     Then transaction commits; fails
@@ -2244,7 +2244,7 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset owns: attr1
-    When entity(ent1) get owns(attr2) set override: attr0
+    When entity(ent1) get owns(attr2) set specialise: attr0
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset supertype; fails
@@ -2271,7 +2271,7 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset supertype; fails
-    When entity(ent1) get owns(attr2) unset override
+    When entity(ent1) get owns(attr2) unset specialise
     Then entity(ent1) unset supertype; fails
     When entity(ent1) unset owns: attr4
     When entity(ent1) unset supertype
@@ -2325,10 +2325,10 @@ Feature: Data validation
     Given entity(ent0) set owns: attr0
     Given entity(ent1) set owns: attr1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent2) set owns: attr2
     Given entity(ent2) set supertype: ent0
-    Given entity(ent2) get owns(attr2) set override: attr0
+    Given entity(ent2) get owns(attr2) set specialise: attr0
     Given entity(ent0) get owns(attr0) set annotation: @card(0..)
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -2397,7 +2397,7 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: Owns cardinality is correctly validated after multiple redeclaring overrides
+  Scenario: Owns cardinality is correctly validated after multiple redeclaring specialises
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
     Given attribute(attr0) set annotation: @abstract
@@ -2425,19 +2425,19 @@ Feature: Data validation
     Given entity(ent4) set supertype: ent3
     Given entity(ent1) set owns: attr1
     Given entity(ent1) set owns: attr2
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent1) get owns(attr1) set annotation: @card(0..4)
-    Given entity(ent1) get owns(attr2) set override: attr0
+    Given entity(ent1) get owns(attr2) set specialise: attr0
     Given entity(ent2) set owns: attr1
-    Given entity(ent2) get owns(attr1) set override: attr1
+    Given entity(ent2) get owns(attr1) set specialise: attr1
     Given entity(ent2) get owns(attr1) set annotation: @card(0..3)
     Given entity(ent3) set owns: attr1
-    Given entity(ent3) get owns(attr1) set override: attr1
+    Given entity(ent3) get owns(attr1) set specialise: attr1
     Given entity(ent3) get owns(attr1) set annotation: @card(1..2)
     Given transaction commits
     Given connection open schema transaction for database: typedb
     When entity(ent4) set owns: attr3
-    Then entity(ent4) get owns(attr3) set override: attr0; fails
+    Then entity(ent4) get owns(attr3) set specialise: attr0; fails
     Given transaction commits
     Given connection open write transaction for database: typedb
     When $ent1 = entity(ent1) create new instance with key(ref): ent1
@@ -2568,10 +2568,10 @@ Feature: Data validation
     Given entity(ent0) get owns(attr0) set ordering: ordered
     Given entity(ent1) set owns: attr1
     Given entity(ent1) get owns(attr1) set ordering: ordered
-    Given entity(ent1) get owns(attr1) set override: attr0
+    Given entity(ent1) get owns(attr1) set specialise: attr0
     Given entity(ent1) set owns: attr2
     Given entity(ent1) get owns(attr2) set ordering: ordered
-    Given entity(ent1) get owns(attr2) set override: attr0
+    Given entity(ent1) get owns(attr2) set specialise: attr0
     Given entity(ent0) get owns(attr0) set annotation: @card(0..6)
     Given entity(ent1) get owns(attr1) set annotation: @card(1..4)
     Then transaction commits
@@ -2673,11 +2673,11 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) create role: role1
     Given relation(rel1) set supertype: rel0
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create relation type: rel2
     Given relation(rel2) create role: role2
     Given relation(rel2) set supertype: rel0
-    Given relation(rel2) get role(role2) set override: role0
+    Given relation(rel2) get role(role2) set specialise: role0
     Given create attribute type: ref
     Given attribute(ref) set value type: string
     Given relation(rel0) set owns: ref
@@ -2690,9 +2690,9 @@ Feature: Data validation
     Given entity(ent1) get owns(ref) set annotation: @key
     Given entity(ent1) set plays: rel1:role1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Given entity(ent1) get plays(rel1:role1) set specialise: rel0:role0
     Given entity(ent1) set plays: rel2:role2
-    Given entity(ent1) get plays(rel2:role2) set override: rel0:role0
+    Given entity(ent1) get plays(rel2:role2) set specialise: rel0:role0
     Given entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -2743,11 +2743,11 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     Then relation(rel1) create role: role3; fails
     When relation(rel1) create role: role3, with @card(0..)
-    When relation(rel1) get role(role3) set override: role0
+    When relation(rel1) get role(role3) set specialise: role0
     When relation(rel1) get role(role3) unset annotation: @card
     When entity(ent1) set plays: rel1:role3
     When entity(ent1) get plays(rel1:role3) set annotation: @card(2..2); fails
-    When entity(ent1) get plays(rel1:role3) set override: rel0:role0
+    When entity(ent1) get plays(rel1:role3) set specialise: rel0:role0
     Then entity(ent1) get plays(rel1:role3) set annotation: @card(2..2); fails
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3); fails
     When transaction commits
@@ -2773,7 +2773,7 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(rel2) create role: role4
-    When relation(rel2) get role(role4) set override: role0
+    When relation(rel2) get role(role4) set specialise: role0
     When entity(ent0) set plays: rel2:role4
     When transaction commits
     When connection open write transaction for database: typedb
@@ -2783,7 +2783,7 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel2:role4
-    When entity(ent1) get plays(rel2:role4) set override: rel2:role4
+    When entity(ent1) get plays(rel2:role4) set specialise: rel2:role4
     When entity(ent1) get plays(rel2:role4) set annotation: @card(0..1)
     When transaction commits
     When connection open write transaction for database: typedb
@@ -2813,28 +2813,28 @@ Feature: Data validation
     When relation(rel00) get role(role00) set annotation: @abstract
     When relation(rel0) set supertype: rel00
     Then relation(rel0) get role(role0) unset annotation: @card; fails
-    When relation(rel0) get role(role0) set override: role00
+    When relation(rel0) get role(role0) set specialise: role00
     When relation(rel0) get role(role0) unset annotation: @card
     When create relation type: rel5
     When relation(rel5) set supertype: rel00
     When relation(rel5) set owns: ref
     When relation(rel5) get owns(ref) set annotation: @key
     When relation(rel5) create role: role5
-    When relation(rel5) get role(role5) set override: role00
+    When relation(rel5) get role(role5) set specialise: role00
     Then relation(rel1) create role: role5; fails
     When relation(rel1) create role: role5, with @card(0..)
     Then relation(rel1) get role(role5) unset annotation: @card; fails
-    When relation(rel1) get role(role5) set override: role0
+    When relation(rel1) get role(role5) set specialise: role0
     When relation(rel1) get role(role5) unset annotation: @card
     When entity(ent00) set plays: rel00:role00
     When entity(ent00) get plays(rel00:role00) set annotation: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent0) set supertype: ent00
-    Then entity(ent0) get plays(rel0:role0) set override: rel00:role00; fails
+    Then entity(ent0) get plays(rel0:role0) set specialise: rel00:role00; fails
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
     When entity(ent00) get plays(rel00:role00) set annotation: @card(1..3)
-    Then entity(ent0) get plays(rel0:role0) set override: rel00:role00; fails
+    Then entity(ent0) get plays(rel0:role0) set specialise: rel00:role00; fails
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..2); fails
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..3); fails
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
@@ -2855,10 +2855,10 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When entity(ent0) set supertype: ent00
-    Then entity(ent0) get plays(rel0:role0) set override: rel00:role00; fails
+    Then entity(ent0) get plays(rel0:role0) set specialise: rel00:role00; fails
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..2); fails
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
-    When entity(ent0) get plays(rel0:role0) set override: rel00:role00
+    When entity(ent0) get plays(rel0:role0) set specialise: rel00:role00
     When entity(ent0) get plays(rel0:role0) unset annotation: @card
     Then entity(ent0) get plays(rel0:role0) get cardinality: @card(1..3)
     When transaction commits
@@ -2869,12 +2869,12 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When entity(ent0) set plays: rel1:role5
-    Then entity(ent0) get plays(rel1:role5) set override: rel00:role00; fails
+    Then entity(ent0) get plays(rel1:role5) set specialise: rel00:role00; fails
     When entity(ent0) set plays: rel5:role5
-    Then entity(ent0) get plays(rel5:role5) set override: rel00:role00; fails
+    Then entity(ent0) get plays(rel5:role5) set specialise: rel00:role00; fails
     When entity(ent00) get plays(rel00:role00) set annotation: @card(0..3)
-    Then entity(ent0) get plays(rel1:role5) set override: rel00:role00
-    Then entity(ent0) get plays(rel5:role5) set override: rel00:role00
+    Then entity(ent0) get plays(rel1:role5) set specialise: rel00:role00
+    Then entity(ent0) get plays(rel5:role5) set specialise: rel00:role00
     When transaction commits
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
@@ -2954,11 +2954,11 @@ Feature: Data validation
     When relation $rel1_2 add player for role(role1): $ent1
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(ent1) get plays(rel2:role2) unset override
-    When entity(ent1) get plays(rel1:role3) unset override
+    When entity(ent1) get plays(rel2:role2) unset specialise
+    When entity(ent1) get plays(rel1:role3) unset specialise
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get plays(rel1:role1) unset override
+    Then entity(ent1) get plays(rel1:role1) unset specialise
     Then entity(ent1) get plays(rel1:role1) get cardinality: @card(0..)
     Then entity(ent1) unset plays: rel1:role1; fails
     Then transaction commits; fails
@@ -2974,7 +2974,7 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset plays: rel1:role1
-    When entity(ent1) get plays(rel2:role2) set override: rel0:role0
+    When entity(ent1) get plays(rel2:role2) set specialise: rel0:role0
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset supertype; fails
@@ -2999,7 +2999,7 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(ent1) unset supertype; fails
-    When entity(ent1) get plays(rel2:role2) unset override
+    When entity(ent1) get plays(rel2:role2) unset specialise
     When entity(ent1) unset supertype
     When create entity type: ent000
     When entity(ent000) set plays: rel2:role4
@@ -3042,11 +3042,11 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) create role: role1
     Given relation(rel1) set supertype: rel0
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create relation type: rel2
     Given relation(rel2) create role: role2
     Given relation(rel2) set supertype: rel0
-    Given relation(rel2) get role(role2) set override: role0
+    Given relation(rel2) get role(role2) set specialise: role0
     Given create attribute type: ref
     Given attribute(ref) set value type: string
     Given relation(rel0) set owns: ref
@@ -3060,10 +3060,10 @@ Feature: Data validation
     Given entity(ent0) get owns(ref) set annotation: @key
     Given entity(ent1) set plays: rel1:role1
     Given entity(ent1) set supertype: ent0
-    Given entity(ent1) get plays(rel1:role1) set override: rel0:role0
+    Given entity(ent1) get plays(rel1:role1) set specialise: rel0:role0
     Given entity(ent2) set plays: rel2:role2
     Given entity(ent2) set supertype: ent0
-    Given entity(ent2) get plays(rel2:role2) set override: rel0:role0
+    Given entity(ent2) get plays(rel2:role2) set specialise: rel0:role0
     Given entity(ent0) get plays(rel0:role0) set annotation: @card(0..)
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -3132,7 +3132,7 @@ Feature: Data validation
     Then transaction commits
 
 
-  Scenario: Plays cardinality is correctly validated after multiple redeclaring overrides
+  Scenario: Plays cardinality is correctly validated after multiple redeclaring specialises
     Given create relation type: rel0
     Given relation(rel0) create role: role0
     Given relation(rel0) set annotation: @abstract
@@ -3141,11 +3141,11 @@ Feature: Data validation
     Given create relation type: rel
     Given relation(rel) set supertype: rel0
     Given relation(rel) create role: role1
-    Given relation(rel) get role(role1) set override: role0
+    Given relation(rel) get role(role1) set specialise: role0
     Given relation(rel) create role: role2
-    Given relation(rel) get role(role2) set override: role0
+    Given relation(rel) get role(role2) set specialise: role0
     Given relation(rel) create role: role3
-    Given relation(rel) get role(role3) set override: role0
+    Given relation(rel) get role(role3) set specialise: role0
     Given create attribute type: ref
     Given attribute(ref) set value type: string
     Given relation(rel) set owns: ref
@@ -3164,19 +3164,19 @@ Feature: Data validation
     Given entity(ent4) set supertype: ent3
     Given entity(ent1) set plays: rel:role1
     Given entity(ent1) set plays: rel:role2
-    Given entity(ent1) get plays(rel:role1) set override: rel0:role0
+    Given entity(ent1) get plays(rel:role1) set specialise: rel0:role0
     Given entity(ent1) get plays(rel:role1) set annotation: @card(0..4)
-    Given entity(ent1) get plays(rel:role2) set override: rel0:role0
+    Given entity(ent1) get plays(rel:role2) set specialise: rel0:role0
     Given entity(ent2) set plays: rel:role1
-    Given entity(ent2) get plays(rel:role1) set override: rel:role1
+    Given entity(ent2) get plays(rel:role1) set specialise: rel:role1
     Given entity(ent2) get plays(rel:role1) set annotation: @card(0..3)
     Given entity(ent3) set plays: rel:role1
-    Given entity(ent3) get plays(rel:role1) set override: rel:role1
+    Given entity(ent3) get plays(rel:role1) set specialise: rel:role1
     Given entity(ent3) get plays(rel:role1) set annotation: @card(1..2)
     Given transaction commits
     Given connection open schema transaction for database: typedb
     When entity(ent4) set plays: rel:role3
-    Then entity(ent4) get plays(rel:role3) set override: rel0:role0; fails
+    Then entity(ent4) get plays(rel:role3) set specialise: rel0:role0; fails
     Given transaction commits
     Given connection open write transaction for database: typedb
     When $ent1 = entity(ent1) create new instance with key(ref): ent1
@@ -3291,11 +3291,11 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) create role: role1
     Given relation(rel1) set supertype: rel0
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given relation(rel1) create role: role2
-    Then relation(rel1) get role(role2) set override: role0; fails
+    Then relation(rel1) get role(role2) set specialise: role0; fails
     When relation(relX) get role(role0) set annotation: @card(0..1)
-    When relation(rel1) get role(role2) set override: role0
+    When relation(rel1) get role(role2) set specialise: role0
     When create attribute type: ref
     When attribute(ref) set value type: string
     When relation(rel1) set owns: ref
@@ -3367,7 +3367,7 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     Then relation(rel1) create role: role3; fails
     When relation(rel1) create role: role3, with @card(0..2)
-    When relation(rel1) get role(role3) set override: role0
+    When relation(rel1) get role(role3) set specialise: role0
     When relation(rel1) get role(role3) unset annotation: @card
     When entity(ent1) set plays: rel1:role3
     Then relation(rel1) get role(role3) set annotation: @card(2..2); fails
@@ -3396,7 +3396,7 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     When relation(rel0) create role: role4; fails
     When relation(rel0) create role: role4, with @card(0..1)
-    When relation(rel0) get role(role4) set override: role0; fails
+    When relation(rel0) get role(role4) set specialise: role0; fails
     When entity(ent1) set plays: rel0:role4
     When transaction commits
     When connection open write transaction for database: typedb
@@ -3469,17 +3469,17 @@ Feature: Data validation
     When relation $rel1 add player for role(role2): $ent2_2
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset override; fails
+    Then relation(rel1) get role(role1) unset specialise; fails
     When relation(rel1) get role(role1) set annotation: @card(0..1)
-    When relation(rel1) get role(role1) unset override
-    When relation(rel1) get role(role2) unset override; fails
+    When relation(rel1) get role(role1) unset specialise
+    When relation(rel1) get role(role2) unset specialise; fails
     When relation(rel1) get role(role2) set annotation: @card(2..2)
-    Then relation(rel1) get role(role2) unset override
+    Then relation(rel1) get role(role2) unset specialise
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(rel1) get role(role3) unset override; fails
+    When relation(rel1) get role(role3) unset specialise; fails
     When relation(rel1) get role(role3) set annotation: @card(0..)
-    Then relation(rel1) get role(role3) unset override
+    Then relation(rel1) get role(role3) unset specialise
     Then relation(rel1) unset supertype; fails
     Then transaction commits; fails
     When connection open write transaction for database: typedb
@@ -3501,9 +3501,9 @@ Feature: Data validation
     When relation $rel1 remove player for role(role4): $ent1_2
     When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(rel1) get role(role3) unset override; fails
+    When relation(rel1) get role(role3) unset specialise; fails
     When relation(rel1) get role(role3) set annotation: @card(0..)
-    Then relation(rel1) get role(role3) unset override
+    Then relation(rel1) get role(role3) unset specialise
     Then relation(rel1) unset supertype
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -3549,11 +3549,11 @@ Feature: Data validation
     Given create relation type: rel1
     Given relation(rel1) create role: role1
     Given relation(rel1) set supertype: rel0
-    Given relation(rel1) get role(role1) set override: role0
+    Given relation(rel1) get role(role1) set specialise: role0
     Given create relation type: rel2
     Given relation(rel2) create role: role2
     Given relation(rel2) set supertype: rel0
-    Given relation(rel2) get role(role2) set override: role0
+    Given relation(rel2) get role(role2) set specialise: role0
     Given create attribute type: ref
     Given attribute(ref) set value type: string
     Given relation(rel0) set owns: ref
@@ -3659,10 +3659,10 @@ Feature: Data validation
     Given relation(rel) set supertype: rel0
     Given relation(rel) create role: role1
     Given relation(rel) get role(role1) set ordering: ordered
-    Given relation(rel) get role(role1) set override: role0
+    Given relation(rel) get role(role1) set specialise: role0
     Given relation(rel) create role: role2
     Given relation(rel) get role(role2) set ordering: ordered
-    Given relation(rel) get role(role2) set override: role0
+    Given relation(rel) get role(role2) set specialise: role0
     Given create entity type: ent0
     Given entity(ent0) set annotation: @abstract
     Given entity(ent0) set plays: rel0:role0
@@ -3672,8 +3672,8 @@ Feature: Data validation
     Given entity(ent) set supertype: ent0
     Given entity(ent) set plays: rel:role1
     Given entity(ent) set plays: rel:role2
-    Given entity(ent) get plays(rel:role1) set override: rel0:role0
-    Given entity(ent) get plays(rel:role2) set override: rel0:role0
+    Given entity(ent) get plays(rel:role1) set specialise: rel0:role0
+    Given entity(ent) get plays(rel:role2) set specialise: rel0:role0
     Given relation(rel0) get role(role0) set annotation: @card(0..6)
     Given relation(rel) get role(role1) set annotation: @card(1..4)
     Then transaction commits

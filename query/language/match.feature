@@ -588,7 +588,7 @@ Feature: TypeQL Match Clause
 
   # TODO cannot currently query for schema with 'as'
   @ignore
-  Scenario: 'relates' with 'as' matches relation types that override the specified roleplayer
+  Scenario: 'relates' with 'as' matches relation types that specialise the specified roleplayer
     Given typeql define
       """
       define
@@ -607,7 +607,7 @@ Feature: TypeQL Match Clause
       | label:close-friendship |
 
 
-  Scenario: 'relates' without 'as' does not match relation types that override the specified roleplayer
+  Scenario: 'relates' without 'as' does not match relation types that specialise the specified roleplayer
     Given typeql define
       """
       define

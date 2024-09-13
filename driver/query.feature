@@ -66,7 +66,7 @@ Feature: TypeDB Driver Queries
 
   # A define query should already successfully run as part of Background and multiple other tests
 
-  Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
+  Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
