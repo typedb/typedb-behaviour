@@ -134,7 +134,7 @@ Feature: TypeQL pipelines
       | key:ref:0 | attr:name:Alice | attr:age:11  |
 
 
-  Scenario: A stream can be sorted on a set of variables
+  Scenario: A stream can be sorted
     Given connection open write transaction for database: typedb
     Given typeql write query
     """
