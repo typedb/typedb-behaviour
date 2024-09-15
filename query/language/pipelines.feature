@@ -18,7 +18,7 @@ Feature: TypeQL pipelines
         plays friendship:friend,
         plays employment:employee,
         owns name,
-        owns age @card(0..);
+        owns age;
       entity company owns ref @key,
         plays employment:employer,
         owns name;
@@ -27,8 +27,8 @@ Feature: TypeQL pipelines
       relation employment owns ref @key,
         relates employee,
         relates employer;
-      attribute name value string;
-      attribute age value long;
+      attribute name @independent, value string;
+      attribute age @independent, value long;
       attribute ref value long;
       """
     Given transaction commits
@@ -49,6 +49,7 @@ Feature: TypeQL pipelines
     """
     match
       $p isa person, has name $name;
+    match
       $p has age $age;
     """
     Then uniquely identify answer concepts
@@ -100,6 +101,7 @@ Feature: TypeQL pipelines
     Then uniquely identify answer concepts
       | p              |
       | key:ref:0      |
+
 
   Scenario: A match can be chained with a delete and insert to emulate an update.
     Given connection open write transaction for database: typedb
@@ -171,7 +173,8 @@ Feature: TypeQL pipelines
     Given typeql write query
     """
     insert
-      $p1 isa person, has age 0, has age 1, has age 2, has age 3, has ref 0;
+      $a0 0 isa age; $a1 1 isa age; $a2 2 isa age; $a3 3 isa age;
+      $n0 "Alice" isa name; $n1 "Bob" isa name; $n2 "Chris" isa name; $n3 "Dan" isa name;
     """
     Given transaction commits
 
@@ -179,24 +182,15 @@ Feature: TypeQL pipelines
     Given get answers of typeql read query
     """
     match
-      $p1 isa person, has age $age;
-    sort $age;
-    offset 2;
-    limit 1;
-    """
-    Then uniquely identify answer concepts
-      | age             |
-      | attr:age:2      |
-
-    Given get answers of typeql read query
-    """
-    match
-      $p1 isa person, has age $age;
-    sort $age desc;
-    offset 2;
+      $age isa age; $name isa name;
+    sort $age desc, $name;
+    offset 5;
+    limit 4;
+    sort $name, $age;
     limit 2;
     """
     Then uniquely identify answer concepts
-      | age             |
-      | attr:age:1      |
-      | attr:age:0      |
+      | name             | age             |
+      | attr:name:Alice  | attr:age:1      |
+      | attr:name:Bob    | attr:age:2      |
+
