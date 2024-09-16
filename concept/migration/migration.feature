@@ -31,35 +31,12 @@ Feature: Schema migration
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @unique
-    Then transaction commits; fails
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set specialise: attr0
-    Then entity(ent1) get owns(attr0) set annotation: @unique; fails
-    Given transaction closes
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @unique
-    Then entity(ent1) get owns(attr0) set specialise: attr0; fails
-    Given transaction closes
-
-    Given connection open schema transaction for database: typedb
     Then entity(ent0) unset owns: attr0; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @key
-    # Can't commit yet, because of the redundant declarations
-    Then transaction commits; fails
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @key
+    When entity(ent1) get owns(attr0) set annotation: @unique
     When entity(ent0) unset owns: attr0
     Then transaction commits
 
@@ -79,13 +56,6 @@ Feature: Schema migration
     Given $attr0 = attribute(attr0) put instance with value: "attr0"
     Given entity $ent1 set has: $attr0
     Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-
-    When entity(ent0) set owns: attr0
-    When entity(ent0) get owns(attr0) set annotation: @key
-    # Can't commit yet, because of the redundant declarations
-    Then transaction commits; fails
 
     Given connection open schema transaction for database: typedb
     When entity(ent0) set owns: attr0
@@ -331,11 +301,6 @@ Feature: Schema migration
     When attribute(dog-name) set supertype: name
     When attribute(dog-name) unset value type
     When attribute(person-name) unset value type
-    When entity(person) set owns: person-name
-    When entity(person) get owns(person-name) set annotation: @key
-    When entity(person) get owns(person-name) set specialise: name
-    When entity(dog) set owns: dog-name
-    When entity(dog) get owns(dog-name) set specialise: name
     Then transaction commits
 
 
