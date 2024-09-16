@@ -947,6 +947,8 @@ Feature: TypeQL Define Query
   # ANNOTATIONS #
   ###############
 
+  # TODO: Add tests for structs and their fields
+
   Scenario Outline: can set annotation @<annotation> to entity types
     Then typeql define
       """
