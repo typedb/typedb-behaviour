@@ -1155,7 +1155,7 @@ Feature: TypeQL Define Query
       | range("A".."B")                                       |                     |
       | range(1..2)                                           |                     |
       | range("A".."B")                                       | , value long        |
-      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | , value long        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value long        |
       | range("A".."B")                                       | , value datetime    |
       | range(1..2)                                           | , value datetime    |
       | range(1..2)                                           | , value string      |
@@ -1163,7 +1163,7 @@ Feature: TypeQL Define Query
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | , value string      |
       | range(2024-06-04..2024-06-05)                         | , value double      |
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | , value date        |
-      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | , value date        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value date        |
 
       | values("A", 2)                                        |                     |
       | values("A")                                           |                     |
@@ -1175,36 +1175,32 @@ Feature: TypeQL Define Query
       | values("string")                                      | , value long        |
       | values(true)                                          | , value long        |
       | values(2024-06-04)                                    | , value long        |
-      | values(2024-06-04+0010)                               | , value long        |
+      | values(2024-06-04T00:00:00+0010)                      | , value long        |
       | values("string")                                      | , value double      |
       | values(true)                                          | , value double      |
       | values(2024-06-04)                                    | , value double      |
-      | values(2024-06-04+0010)                               | , value double      |
+      | values(2024-06-04T00:00:00+0010)                      | , value double      |
       | values("string")                                      | , value decimal     |
       | values(true)                                          | , value decimal     |
       | values(2024-06-04)                                    | , value decimal     |
-      | values(2024-06-04+0010)                               | , value decimal     |
+      | values(2024-06-04T00:00:00+0010)                      | , value decimal     |
       | values("A", 2)                                        | , value string      |
       | values(123)                                           | , value string      |
       | values(true)                                          | , value string      |
       | values(2024-06-04)                                    | , value string      |
-      | values(2024-06-04+0010)                               | , value string      |
-      | values(notstring)                                     | , value string      |
-      | values("")                                            | , value string      |
-      | values(truefalse)                                     | , value boolean     |
+      | values(2024-06-04T00:00:00+0010)                      | , value string      |
       | values(123)                                           | , value date        |
-      | values(2024-06-04+0010)                               | , value date        |
+      | values(2024-06-04T00:00:00+0010)                      | , value date        |
       | values(2024-06-04T16:35:02)                           | , value date        |
       | values("福")                                           | , value date        |
-      | values(2024-06-04+0010)                               | , value datetime    |
+      | values(2024-06-04T00:00:00+0010)                      | , value datetime    |
       | values(2024-06-04)                                    | , value datetime-tz |
-      | values(2024-06-04 NotRealTimeZone/Zone)               | , value datetime-tz |
+      | values(2024-06-04T00:00:00 Europe/Belfast)            | , value datetime-tz |
       | values(123)                                           | , value duration    |
       | values("string")                                      | , value duration    |
       | values(2024-06-04)                                    | , value duration    |
-      | values(2024-06-04+0100)                               | , value duration    |
-      | values(1Y)                                            | , value duration    |
-      | values(year)                                          | , value duration    |
+      | values(2024-06-04T00:00:00+0100)                      | , value duration    |
+      | values("year")                                        | , value duration    |
 
 
   Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to owns
@@ -1215,6 +1211,7 @@ Feature: TypeQL Define Query
       entity player owns description @values(<arg0>, <arg1>, <arg0>);
       """
 
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
@@ -1223,7 +1220,7 @@ Feature: TypeQL Define Query
       entity player owns description @values(<arg0>, <arg0>, <arg1>);
       """
 
-
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
@@ -1241,7 +1238,7 @@ Feature: TypeQL Define Query
       | 2024-09-13               | 2024-09-15               | date        |
       | 2024-09-13T15:07:03      | 2024-10-13T15:07:04      | datetime    |
       | 2024-09-13T15:07:03+0100 | 2024-10-13T15:07:04+0100 | datetime-tz |
-      | 1P1Y2M3DT4M6.789S        | P1Y2M3DT4H5.789S         | duration    |
+      | "P1Y2M3DT4M6.789S"       | "P1Y2M3DT4H5.789S"       | duration    |
 
 
   Scenario Outline: can set annotation @<annotation> to owns lists
@@ -1320,7 +1317,7 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
-  Scenario Outline: cannot set annotation @<annotation> to wrong value typee <value-type>
+  Scenario Outline: cannot set annotation @<annotation> to wrong value type <value-type>
     Then typeql define; fails
       """
       define
@@ -1338,7 +1335,7 @@ Feature: TypeQL Define Query
       | regex("A")                                            | duration    |
 
       | range("A".."B")                                       | long        |
-      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | long        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | long        |
       | range("A".."B")                                       | datetime    |
       | range(1..2)                                           | datetime    |
       | range(1..2)                                           | string      |
@@ -1346,7 +1343,7 @@ Feature: TypeQL Define Query
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | string      |
       | range(2024-06-04..2024-06-05)                         | double      |
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | date        |
-      | range(P1Y2M3DT4H5M6.788S..P1Y2M3DT4H5M6.789S)         | date        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | date        |
 
       | values("A", 2)                                        | long        |
       | values("A", "B")                                      | long        |
@@ -1354,36 +1351,32 @@ Feature: TypeQL Define Query
       | values("string")                                      | long        |
       | values(true)                                          | long        |
       | values(2024-06-04)                                    | long        |
-      | values(2024-06-04+0010)                               | long        |
+      | values(2024-06-04T00:00:00+0010)                      | long        |
       | values("string")                                      | double      |
       | values(true)                                          | double      |
       | values(2024-06-04)                                    | double      |
-      | values(2024-06-04+0010)                               | double      |
+      | values(2024-06-04T00:00:00+0010)                      | double      |
       | values("string")                                      | decimal     |
       | values(true)                                          | decimal     |
       | values(2024-06-04)                                    | decimal     |
-      | values(2024-06-04+0010)                               | decimal     |
+      | values(2024-06-04T00:00:00+0010)                      | decimal     |
       | values("A", 2)                                        | string      |
       | values(123)                                           | string      |
       | values(true)                                          | string      |
       | values(2024-06-04)                                    | string      |
-      | values(2024-06-04+0010)                               | string      |
-      | values(notstring)                                     | string      |
-      | values("")                                            | string      |
-      | values(truefalse)                                     | boolean     |
+      | values(2024-06-04T00:00:00+0010)                      | string      |
       | values(123)                                           | date        |
-      | values(2024-06-04+0010)                               | date        |
+      | values(2024-06-04T00:00:00+0010)                      | date        |
       | values(2024-06-04T16:35:02)                           | date        |
       | values("福")                                           | date        |
-      | values(2024-06-04+0010)                               | datetime    |
+      | values(2024-06-04T00:00:00+0010)                      | datetime    |
       | values(2024-06-04)                                    | datetime-tz |
-      | values(2024-06-04 NotRealTimeZone/Zone)               | datetime-tz |
+      | values(2024-06-04T00:00:00 Europe/Belfast)            | datetime-tz |
       | values(123)                                           | duration    |
       | values("string")                                      | duration    |
       | values(2024-06-04)                                    | duration    |
-      | values(2024-06-04+0100)                               | duration    |
-      | values(1Y)                                            | duration    |
-      | values(year)                                          | duration    |
+      | values(2024-06-04T00:00:00+0100)                      | duration    |
+      | values("year")                                        | duration    |
 
 
   Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to value type
@@ -1393,6 +1386,7 @@ Feature: TypeQL Define Query
       attribute description value <value-type> @values(<arg0>, <arg1>, <arg0>);
       """
 
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
@@ -1400,7 +1394,7 @@ Feature: TypeQL Define Query
       attribute description value <value-type> @values(<arg0>, <arg0>, <arg1>);
       """
 
-
+    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql define; fails
       """
@@ -1417,7 +1411,7 @@ Feature: TypeQL Define Query
       | 2024-09-13               | 2024-09-15               | date        |
       | 2024-09-13T15:07:03      | 2024-10-13T15:07:04      | datetime    |
       | 2024-09-13T15:07:03+0100 | 2024-10-13T15:07:04+0100 | datetime-tz |
-      | 1P1Y2M3DT4M6.789S        | P1Y2M3DT4H5.789S         | duration    |
+      | "P1Y2M3DT4M6.789S"       | "P1Y2M3DT4H5.789S"       | duration    |
 
 
   Scenario Outline: cannot set annotation @<annotation> to value types
@@ -1592,7 +1586,7 @@ Feature: TypeQL Define Query
       | "A".."B" |
 
 
-  Scenario Outline: cannot set @card annotation with invalid arguments
+  Scenario Outline: cannot set @card annotation with invalid arguments <args>
     Then typeql define; parsing fails
       """
       define
@@ -1615,7 +1609,6 @@ Feature: TypeQL Define Query
     Examples:
       | args          |
       |               |
-      | 1             |
       | 1, 2          |
       | 1, 2, 3       |
       | A             |
@@ -1628,7 +1621,6 @@ Feature: TypeQL Define Query
       | 1.1..2.2      |
       | 1.2           |
       | ..2           |
-      | -1..2         |
 
 
   Scenario Outline: cannot set @regex annotation with arguments
@@ -1660,7 +1652,7 @@ Feature: TypeQL Define Query
       | "\"      |
 
 
-  Scenario Outline: cannot set @range annotation with arguments
+  Scenario Outline: cannot set @range annotation with invalid arguments <args>
     Then typeql define; parsing fails
       """
       define
@@ -1676,16 +1668,14 @@ Feature: TypeQL Define Query
     Examples:
       | args    |
       |         |
-      | 1       |
       | 1, 2    |
-      | 1..     |
       | 1.2     |
       | abcd    |
       | A..B    |
       | "A"."B" |
 
 
-  Scenario Outline: cannot set @values annotation with arguments
+  Scenario Outline: cannot set @values annotation with invalid arguments <args>
     Then typeql define; parsing fails
       """
       define
@@ -1700,8 +1690,7 @@ Feature: TypeQL Define Query
       """
     Examples:
       | args |
-      |      |
-      | 1,   |
+      | 1 2  |
       | 1..2 |
       | 1. 2 |
       | 1A2  |
@@ -2973,6 +2962,7 @@ Feature: TypeQL Define Query
     # already existing one. It might contradict the test!
     Given transaction closes
     Given connection open read transaction for database: typedb
+    # TODO: What did this "fails" mean?
     Then typeql get; fails
       """
       match $x label dog;
