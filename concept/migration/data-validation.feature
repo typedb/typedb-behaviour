@@ -37,7 +37,8 @@ Feature: Data validation
 
   Scenario: Relation types that have instances cannot be deleted
     When create relation type: marriage
-    When relation(marriage) create role: wife, with @card(0..1)
+    When relation(marriage) create role: wife
+    When relation(marriage) get role(wife) set annotation: @card(0..1)
     When create entity type: person
     When entity(person) set plays: marriage:wife
     When transaction commits
@@ -472,7 +473,8 @@ Feature: Data validation
     Given connection open schema transaction for database: typedb
     # The default card is 1..1 and we have instances of rel1!
     Then relation(rel1) create role: role1; fails
-    When relation(rel1) create role: role1, with @card(0..1)
+    When relation(rel1) create role: role1
+    Then relation(rel1) get role(role1) get cardinality: @card(0..1)
     Then relation(rel1) get role(role1) set specialise: role00; fails
 
 
@@ -2741,8 +2743,8 @@ Feature: Data validation
     Then relation $rel2 get players for role(role2) do not contain: $ent1
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(rel1) create role: role3; fails
-    When relation(rel1) create role: role3, with @card(0..)
+    When relation(rel1) create role: role3
+    When relation(rel1) get role(role3) set annotation: @card(0..)
     When relation(rel1) get role(role3) set specialise: role0
     When relation(rel1) get role(role3) unset annotation: @card
     When entity(ent1) set plays: rel1:role3
@@ -2808,7 +2810,8 @@ Feature: Data validation
     When create entity type: ent00
     When entity(ent00) set annotation: @abstract
     When create relation type: rel00
-    When relation(rel00) create role: role00, with @card(0..)
+    When relation(rel00) create role: role00
+    When relation(rel00) get role(role00) set annotation: @card(0..)
     When relation(rel00) set annotation: @abstract
     When relation(rel00) get role(role00) set annotation: @abstract
     When relation(rel0) set supertype: rel00
@@ -2822,7 +2825,8 @@ Feature: Data validation
     When relation(rel5) create role: role5
     When relation(rel5) get role(role5) set specialise: role00
     Then relation(rel1) create role: role5; fails
-    When relation(rel1) create role: role5, with @card(0..)
+    When relation(rel1) create role: role5
+    When relation(rel1) get role(role5) set annotation: @card(0..)
     Then relation(rel1) get role(role5) unset annotation: @card; fails
     When relation(rel1) get role(role5) set specialise: role0
     When relation(rel1) get role(role5) unset annotation: @card
@@ -3366,7 +3370,8 @@ Feature: Data validation
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(rel1) create role: role3; fails
-    When relation(rel1) create role: role3, with @card(0..2)
+    When relation(rel1) create role: role3
+    When relation(rel1) get role(role3) set annotation: @card(0..2)
     When relation(rel1) get role(role3) set specialise: role0
     When relation(rel1) get role(role3) unset annotation: @card
     When entity(ent1) set plays: rel1:role3
@@ -3395,7 +3400,8 @@ Feature: Data validation
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When relation(rel0) create role: role4; fails
-    When relation(rel0) create role: role4, with @card(0..1)
+    When relation(rel0) create role: role4
+    When relation(rel0) get role(role4) set annotation: @card(0..1)
     When relation(rel0) get role(role4) set specialise: role0; fails
     When entity(ent1) set plays: rel0:role4
     When transaction commits

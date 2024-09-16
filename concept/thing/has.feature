@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Ordered Ownership
+Feature: Concept Ownership
 
   Background:
     Given typedb starts
@@ -25,21 +25,16 @@ Feature: Concept Ordered Ownership
     Given create attribute type: not-owned-string
     Given attribute(not-owned-string) set value type: string
     Given attribute(not-owned-string) set annotation: @independent
-    Given create entity type: person
-    Given entity(person) set owns: username
-    Given entity(person) get owns(username) set annotation: @key
-    Given entity(person) set owns: name
-    Given entity(person) set owns: birth-date
-    Given entity(person) set owns: email
-    Given entity(person) get owns(email) set ordering: ordered
     Given create relation type: parentship
-    Given relation(parentship) create role: parent, with @card(0..)
+    Given relation(parentship) create role: parent
+    Given relation(parentship) get role(parent) set annotation: @card(0..)
     Given relation(parentship) set owns: username
     Given relation(parentship) get owns(username) set annotation: @key
     Given relation(parentship) set owns: name
     Given relation(parentship) set owns: birth-date
     Given relation(parentship) set owns: email
     Given relation(parentship) get owns(email) set ordering: ordered
+    Given create entity type: person
     Given entity(person) set owns: username
     Given entity(person) get owns(username) set annotation: @key
     Given entity(person) set owns: name
@@ -158,28 +153,37 @@ Feature: Concept Ordered Ownership
     When $l = relation(parentship) create new instance with key(username): "l"
     When $n = attribute(not-owned-string) put instance with value: "I am not owned"
     Then entity $k set has: $n; fails
-    Then entity $l set has: $n; fails
+    Then relation $l set has: $n; fails
 
   Scenario: Can set has only for attribute with value type string that satisfies the regular expression on owns
     Given transaction closes
     Given connection open schema transaction for database: typedb
     When entity(person) get owns(name) set annotation: @regex("\S+@\S+\.\S+")
+    When entity(person) get owns(email) set annotation: @regex("\S+@\S+\.\S+")
+    When attribute(name) set annotation: @independent
+    When attribute(email) set annotation: @independent
     When transaction commits
     When connection open write transaction for database: typedb
-    When $correct = attribute(email) put instance with value: alice@email.com
-    Then attribute $correct exists
-    When $incorrect = attribute(name) put instance with value: alice-email-com
-    Then attribute $incorrect exists
+    When $correct_n = attribute(name) put instance with value: alice@email.com
+    When $correct_e = attribute(email) put instance with value: alice@email.com
+    When $incorrect_n = attribute(name) put instance with value: alice-email-com
+    When $incorrect_e = attribute(email) put instance with value: alice-email-com
     When $p = entity(person) create new instance with key(username): "p"
-    When entity $p set has: $correct
-    Then entity $p set has: $incorrect; fails
+    Then entity $p set has: $incorrect_n; fails
+    When entity $p set has: $correct_n
+    Then entity $p set has(email[]): [$incorrect_e]; fails
+    When entity $p set has(email[]): [$correct_e]
     When transaction commits
     When connection open read transaction for database: typedb
-    When $correct = attribute(email) get instance with value: alice@email.com
-    When $incorrect = attribute(email) get instance with value: alice-email-com
+    When $correct_n = attribute(name) get instance with value: alice@email.com
+    When $incorrect_n = attribute(name) get instance with value: alice-email-com
+    When $correct_e = attribute(email) get instance with value: alice@email.com
+    When $incorrect_e = attribute(email) get instance with value: alice-email-com
     When $p = entity(person) get instance with key(username): "p"
-    Then entity $p get has(name) contain: $correct
-    Then entity $p get has(name) do not contain: $incorrect
+    Then entity $p get has(name) contain: $correct_n
+    Then entity $p get has(name) do not contain: $incorrect_n
+    Then entity $p get has(email) contain: $correct_e
+    Then entity $p get has(email) do not contain: $incorrect_e
 
   Scenario: Attribute with value type string that does not satisfy the regular expression cannot be set as "has"    Given transaction closes
     Given transaction closes
@@ -194,7 +198,7 @@ Feature: Concept Ordered Ownership
     When create attribute type: limited-value
     When attribute(limited-value) set value type: <value-type>
     When attribute(limited-value) set annotation: @independent
-    When entity(peron) set owns: limited-value
+    When entity(person) set owns: limited-value
     When entity(person) get owns(limited-value) set annotation: @values(<values-args>)
     When transaction commits
     When connection open write transaction for database: typedb
@@ -247,7 +251,7 @@ Feature: Concept Ordered Ownership
     When create attribute type: limited-value
     When attribute(limited-value) set value type: <value-type>
     When attribute(limited-value) set annotation: @independent
-    When entity(peron) set owns: limited-value
+    When entity(person) set owns: limited-value
     When entity(person) get owns(limited-value) set annotation: @range(<range-args>)
     When transaction commits
     When connection open write transaction for database: typedb
@@ -295,6 +299,8 @@ Feature: Concept Ordered Ownership
 
 
   Scenario: Dependent attributes without owners can be seen only before commit
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
     Given create attribute type: ind-attr
     Given create attribute type: dep-attr
     Given attribute(ind-attr) set annotation: @independent
