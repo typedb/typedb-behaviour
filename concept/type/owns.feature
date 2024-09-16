@@ -131,41 +131,31 @@ Feature: Concept Owns
 #    When connection open read transaction for database: typedb
 #    Then entity(person) get owns is empty
 
-  Scenario: Non-abstract entity type cannot own abstract attribute with and without value type
+  Scenario: Non-abstract entity type can own abstract attribute with and without value type
     When create entity type: player
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    Then entity(player) set owns: name; fails
-    Then entity(player) set owns: email; fails
+    Then entity(player) set owns: name
+    Then entity(player) set owns: email
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(player) set owns: name; fails
-    Then entity(player) set owns: email; fails
-    Then entity(player) get owns is empty
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create attribute type: attr0
-    When attribute(attr0) set value type: string
-    When attribute(attr0) set annotation: @abstract
-    When create entity type: ent0
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(ent0) set owns: attr0; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(ent0) set annotation: @abstract
-    When entity(ent0) set owns: attr0
+    Then entity(player) get owns contain:
+      | name  |
+      | email |
+    When create attribute type: concrete-name
+    When attribute(concrete-name) set supertype: name
+    When attribute(concrete-name) set value type: string
+    Then entity(player) get owns do not contain:
+      | concrete-name |
+    When entity(player) set owns: concrete-name
+    Then entity(player) get owns contain:
+      | name          |
+      | email         |
+      | concrete-name |
     Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(ent0) unset annotation: @abstract; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set supertype: ent0
-    Then transaction commits; fails
 
   Scenario: Abstract entity type cannot own non-abstract attribute without value type
     When create entity type: player
@@ -203,7 +193,7 @@ Feature: Concept Owns
       | name  |
       | email |
 
-  Scenario: Entity type cannot unset abstract annotation if it owns an abstract attribute
+  Scenario: Entity type can unset @abstract annotation if it owns an abstract attribute
     When create entity type: player
     When entity(player) set annotation: @abstract
     When create attribute type: name
@@ -211,18 +201,17 @@ Feature: Concept Owns
     When entity(player) set owns: name
     When entity(player) get owns contain:
       | name |
-    Then entity(player) unset annotation: @abstract; fails
-    Then entity(player) get constraints contain: @abstract
-    Then entity(player) get declared annotations contain: @abstract
+    Then entity(player) unset annotation: @abstract
+    Then entity(player) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then entity(player) get owns(name) get ordering: unordered
     When transaction commits
-    When connection open schema transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(player) get owns contain:
       | name |
-    Then entity(player) get constraints contain: @abstract
-    Then entity(player) get declared annotations contain: @abstract
-    Then entity(player) unset annotation: @abstract; fails
-    Then entity(player) get constraints contain: @abstract
-    Then entity(player) get declared annotations contain: @abstract
+    Then entity(player) get owns(name) get ordering: unordered
+    Then entity(player) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
 
   Scenario Outline: Relation types can own and unset attributes
     When create attribute type: license
@@ -300,34 +289,7 @@ Feature: Concept Owns
     Then entity(ent1) set supertype: ent00
     Then transaction commits; fails
 
-  Scenario: A type may only specialise an ownership it inherits
-    When create attribute type: attr0
-    When attribute(attr0) set value type: string
-    When attribute(attr0) set annotation: @abstract
-    When create attribute type: attr1
-    When attribute(attr1) set supertype: attr0
-    When create entity type: ent00
-    When entity(ent00) set annotation: @abstract
-    When entity(ent00) set owns: attr0
-    When create entity type: ent01
-    When entity(ent01) set annotation: @abstract
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set owns: attr1
-    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set owns: attr1
-    When entity(ent1) get owns(attr1) set specialise: attr0
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(ent00) unset owns: attr0; fails
-    Then entity(ent1) set supertype: ent01; fails
-
-  Scenario: A type may not declare ownership of an attribute that has been specialised by an inherited ownership
+  Scenario: A type can redeclare ownership of an attribute that has been declared multiple layers above
     When create attribute type: attr0
     When attribute(attr0) set value type: string
     When attribute(attr0) set annotation: @abstract
@@ -344,68 +306,20 @@ Feature: Concept Owns
     When entity(ent1) set supertype: ent0
     When entity(ent1) set annotation: @abstract
     When entity(ent1) set owns: attr1
-    When entity(ent1) get owns(attr1) set specialise: attr0
     When transaction commits
     When connection open schema transaction for database: typedb
     When create entity type: ent2
     When entity(ent2) set supertype: ent1
     When entity(ent2) set annotation: @abstract
     Then entity(ent2) set owns: attr2
-    Then entity(ent2) get owns(attr2) set specialise: attr0; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent2
-    When entity(ent2) set supertype: ent1
-    When entity(ent2) set annotation: @abstract
-    When entity(ent1) unset owns: attr1
-    When entity(ent2) set owns: attr2
-    When entity(ent2) get owns(attr2) set specialise: attr0
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr1
-    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent3
-    When entity(ent3) set annotation: @abstract
-    When entity(ent3) set owns: attr0
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(ent3) set supertype: ent2; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create entity type: ent4
-    When entity(ent4) set annotation: @abstract
-    When entity(ent4) set owns: attr0
-    When entity(ent4) set supertype: ent3
-    When entity(ent3) unset owns: attr0
+    Then entity(ent2) set owns: attr0
+    Then entity(ent2) get owns(attr0) set annotation: @regex("just to specialise")
     When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(ent4) get supertype: ent3
-    Then entity(ent4) get owns contain:
-      | attr0 |
-    Then entity(ent3) get owns do not contain:
-      | attr0 |
-    Then entity(ent3) set supertype: ent2; fails
+    Then connection open read transaction for database: typedb
+    Then entity(ent0) get owns(attr0) get declared annotations do not contain: @regex("just to specialise")
+    Then entity(ent2) get owns(attr0) get declared annotations contain: @regex("just to specialise")
 
-  Scenario: A type may only specialise an ownership it inherits with a subtype of the inherited attribute
-    When create attribute type: attr0
-    When attribute(attr0) set value type: string
-    When attribute(attr0) set annotation: @abstract
-    When create attribute type: attr1
-    When attribute(attr1) set value type: string
-    # Same, but the attributes are not subtypes
-    When create entity type: ent00
-    When entity(ent00) set annotation: @abstract
-    When entity(ent00) set owns: attr0
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create entity type: ent1
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set owns: attr1
-    Then entity(ent1) get owns(attr1) set specialise: attr0; fails
-
-  Scenario: A concrete type must specialise any ownerships of abstract attributes it inherits
+  Scenario: A concrete type can have ownerships of abstract attributes
     When create attribute type: attr00
     When attribute(attr00) set value type: string
     When attribute(attr00) set annotation: @abstract
@@ -424,30 +338,13 @@ Feature: Concept Owns
     When entity(ent01) set owns: attr01
     When create entity type: ent1
     When transaction commits
-    # inherits abstract ownership but does not specialise
     When connection open schema transaction for database: typedb
     When entity(ent1) set supertype: ent00
-    Then transaction commits; fails
-    # declares concrete ownership with a subtype but is missing specialise clause
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set owns: attr10
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set owns: attr10
-    When entity(ent1) get owns(attr10) set specialise: attr00
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(ent1) set supertype: ent00
     When entity(ent1) set owns: attr10
-    When entity(ent1) get owns(attr10) set specialise: attr00
     Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr11
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(ent1) set supertype: ent01; fails
 
   Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -490,7 +387,7 @@ Feature: Concept Owns
 #    When connection open read transaction for database: typedb
 #    Then relation(marriage) get owns is empty
 
-  Scenario: Non-abstract relation type cannot own abstract attribute with and without value type
+  Scenario: Non-abstract relation type can own abstract attribute with and without value type
     When create relation type: reference
     When relation(reference) create role: target
     When create attribute type: name
@@ -498,36 +395,24 @@ Feature: Concept Owns
     When create attribute type: email
     When attribute(email) set value type: string
     When attribute(email) set annotation: @abstract
-    Then relation(reference) set owns: name; fails
-    Then relation(reference) set owns: email; fails
+    Then relation(reference) set owns: name
+    Then relation(reference) set owns: email
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(reference) set owns: name; fails
-    Then relation(reference) set owns: email; fails
-    Then relation(reference) get owns is empty
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create attribute type: attr0
-    When attribute(attr0) set value type: string
-    When attribute(attr0) set annotation: @abstract
-    When create relation type: rel0
-    When relation(rel0) create role: role0
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(rel0) set owns: attr0; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When relation(rel0) set annotation: @abstract
-    When relation(rel0) set owns: attr0
+    Then relation(reference) get owns contain:
+      | name  |
+      | email |
+    When create attribute type: concrete-name
+    When attribute(concrete-name) set supertype: name
+    When attribute(concrete-name) set value type: string
+    Then relation(reference) get owns do not contain:
+      | concrete-name |
+    When relation(reference) set owns: concrete-name
+    Then relation(reference) get owns contain:
+      | name          |
+      | email         |
+      | concrete-name |
     Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then relation(rel0) unset annotation: @abstract; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When create relation type: rel1
-    When relation(rel1) set supertype: rel0
-    When relation(rel1) create role: role1
-    Then transaction commits; fails
 
   Scenario: Abstract relation type cannot own non-abstract attribute without value type
     When create relation type: reference
@@ -566,18 +451,17 @@ Feature: Concept Owns
     When relation(reference) set owns: name
     When relation(reference) get owns contain:
       | name |
-    Then relation(reference) unset annotation: @abstract; fails
-    Then relation(reference) get constraints contain: @abstract
-    Then relation(reference) get declared annotations contain: @abstract
+    Then relation(reference) unset annotation: @abstract
+    Then relation(reference) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then relation(reference) get owns(name) get ordering: unordered
     When transaction commits
-    When connection open schema transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(reference) get owns contain:
       | name |
-    Then relation(reference) get constraints contain: @abstract
-    Then relation(reference) get declared annotations contain: @abstract
-    Then relation(reference) unset annotation: @abstract; fails
-    Then relation(reference) get constraints contain: @abstract
-    Then relation(reference) get declared annotations contain: @abstract
+    Then relation(reference) get owns(name) get ordering: unordered
+    Then relation(reference) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
 
     # TODO: Only for typeql
 #  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
@@ -627,119 +511,6 @@ Feature: Concept Owns
 #    When connection open read transaction for database: typedb
 #    Then struct(wallet) get owns is empty
 
-  Scenario Outline: <root-type> types can re-specialise owns
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | double        |
-      | entity    | person         | customer     | date          |
-      | entity    | person         | customer     | datetime      |
-      | entity    | person         | customer     | custom-struct |
-      | relation  | description    | registration | long          |
-      | relation  | description    | registration | decimal       |
-      | relation  | description    | registration | string        |
-      | relation  | description    | registration | datetime-tz   |
-
-  Scenario Outline: <root-type> types can unset specialise of inherited owns
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set owns: work-email
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | name |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | email |
-    When <root-type>(<subtype-name>) get owns(work-email) unset specialise
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | email      |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | email |
-      | name  |
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | email |
-      | name  |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | email |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | name |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | email |
-    When <root-type>(<subtype-name>) get owns(work-email) unset specialise
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | email      |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | email |
-      | name  |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns contain:
-      | work-email |
-      | email      |
-      | name       |
-    Then <root-type>(<subtype-name>) get declared owns contain:
-      | work-email |
-    Then <root-type>(<subtype-name>) get declared owns do not contain:
-      | email |
-      | name  |
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | double     |
-      | relation  | description    | registration | long       |
-
   Scenario Outline: <root-type> types can unset not set owns
     When create attribute type: email
     When attribute(email) set value type: string
@@ -781,7 +552,7 @@ Feature: Concept Owns
       | entity    | person      |
       | relation  | description |
 
-  Scenario Outline: <root-type> types cannot redeclare inherited owns as owns
+  Scenario Outline: <root-type> types cannot redeclare inherited owns without specialisation
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When create attribute type: name
@@ -792,10 +563,6 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns contain:
       | name |
     When <root-type>(<subtype-name>) set owns: name
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: name
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -823,75 +590,6 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare specialised owns as owns
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: customer-name
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) set owns: customer-name
-    When <root-type>(<subtype-name-2>) get owns(customer-name) set specialise: name
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name-2>) set owns: name
-    When <root-type>(<subtype-name>) get owns(customer-name) set specialise: name
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(customer-name) set specialise: name
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(customer-name) set specialise: name
-    When <root-type>(<subtype-name-2>) set owns: customer-name
-    Then <root-type>(<subtype-name-2>) set owns: name; fails
-    Then <root-type>(<subtype-name-2>) get owns(customer-name) set specialise: name; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber     | boolean    |
-      | entity    | person         | customer     | subscriber     | long       |
-      | relation  | description    | registration | profile        | duration   |
-      | relation  | description    | registration | profile        | double     |
-
-  Scenario Outline: <root-type> types cannot specialise declared owns with owns
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: first-name
-    When attribute(first-name) set supertype: name
-    When <root-type>(<type-name>) set annotation: @abstract
-    When <root-type>(<type-name>) set owns: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: first-name
-    Then <root-type>(<type-name>) get owns(first-name) set specialise: first-name; fails
-    Then <root-type>(<type-name>) get owns(first-name) set specialise: name; fails
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | string     |
-      | relation  | description | string     |
-
-  Scenario Outline: <root-type> types cannot specialise inherited owns other than with their subtypes
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When create attribute type: reference
-    When attribute(reference) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: reference
-    Then <root-type>(<subtype-name>) get owns(reference) set specialise: reference; fails
-    Then <root-type>(<subtype-name>) get owns(reference) set specialise: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | double     |
-      | relation  | description    | registration | string     |
-
   Scenario Outline: <root-type> types cannot unset inherited ownership
     When create attribute type: username
     When attribute(username) set value type: <value-type>
@@ -913,37 +611,41 @@ Feature: Concept Owns
       | entity    | person         | customer     | string     |
       | relation  | description    | registration | long       |
 
-  Scenario Outline: <root-type> types can specialise inherited owns multiple times
+    # TODO: Move to annotation tests
+  Scenario Outline: <root-type> types can have multiple subtypes of attribute type affected by its constraints
     When create attribute type: name
-    When attribute(name) set value type: <value-type>
+    When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
     When create attribute type: second-name
     When attribute(second-name) set supertype: name
     When <root-type>(<supertype-name>) set owns: name
+    When <root-type>(<supertype-name>) get owns(name) set annotation: @regex("test")
     Then <root-type>(<supertype-name>) get owns contain:
       | name |
     When <root-type>(<subtype-name>) set owns: first-name
     When <root-type>(<subtype-name>) set owns: second-name
-    When <root-type>(<subtype-name>) get owns(first-name) set specialise: name
-    When <root-type>(<subtype-name>) get owns(second-name) set specialise: name
+    When <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @regex("test")
+    When <root-type>(<supertype-name>) get constraints for owned attribute(first-name) do not contain: @regex("test")
+    When <root-type>(<supertype-name>) get constraints for owned attribute(second-name) do not contain: @regex("test")
+    When <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @regex("test")
+    When <root-type>(<subtype-name>) get constraints for owned attribute(first-name) contain: @regex("test")
+    When <root-type>(<subtype-name>) get constraints for owned attribute(second-name) contain: @regex("test")
     Then <root-type>(<subtype-name>) get owns contain:
+      | name        |
       | first-name  |
       | second-name |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | name |
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
+      | name        |
       | first-name  |
       | second-name |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | name |
     Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | string     |
-      | relation  | description    | registration | long       |
+      | root-type | supertype-name | subtype-name |
+      | entity    | person         | customer     |
+      | relation  | description    | registration |
 
   Scenario Outline: Abstract <root-type> can own and non-abstract <root-type> can inherit non-abstract attribute
     When create attribute type: username
@@ -1045,14 +747,16 @@ Feature: Concept Owns
     When entity(person) get owns(name) set ordering: ordered
     When entity(person) set owns: email
     When entity(person) get owns(email) set ordering: ordered
-    Then entity(person) set owns: name
-    When entity(person) get owns(name) set ordering: ordered
+    Then entity(person) set owns: name; fails
+    When entity(person) set owns: name[]
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) set owns: email
-    Then entity(person) get owns(email) get ordering: unordered
-    When entity(person) get owns(email) set ordering: ordered
+    Then entity(person) set owns: email; fails
+    When entity(person) set owns: email[]
     Then entity(person) get owns(email) get ordering: ordered
+    When entity(person) get owns(email) set ordering: unordered
+    Then entity(person) get owns(email) get ordering: unordered
+    Then transaction commits
     Examples:
       | value-type    |
       | long          |
@@ -1164,14 +868,16 @@ Feature: Concept Owns
     When relation(reference) get owns(name) set ordering: ordered
     When relation(reference) set owns: email
     When relation(reference) get owns(email) set ordering: ordered
-    Then relation(reference) set owns: name
-    When relation(reference) get owns(name) set ordering: ordered
+    Then relation(reference) set owns: name; fails
+    When relation(reference) set owns: name[]
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(reference) set owns: email
-    Then relation(reference) get owns(email) get ordering: unordered
-    When relation(reference) get owns(email) set ordering: ordered
+    Then relation(reference) set owns: email; fails
+    When relation(reference) set owns: email[]
     Then relation(reference) get owns(email) get ordering: ordered
+    When relation(reference) get owns(email) set ordering: unordered
+    Then relation(reference) get owns(email) get ordering: unordered
+    Then transaction commits
     Examples:
       | value-type    |
       | long          |
@@ -1211,7 +917,7 @@ Feature: Concept Owns
     Then relation(reference) get owns(name) get ordering: ordered
     Then relation(reference) get owns(email) get ordering: ordered
 
-  Scenario: Relation type cannot unset @abstract annotation if it has ordered ownership of abstract attribute
+  Scenario: Relation type can unset @abstract annotation if it has ordered ownership of abstract attribute
     When create relation type: reference
     When relation(reference) create role: target
     When relation(reference) set annotation: @abstract
@@ -1221,17 +927,17 @@ Feature: Concept Owns
     When relation(reference) get owns contain:
       | name |
     When relation(reference) get owns(name) set ordering: ordered
-    Then relation(reference) unset annotation: @abstract; fails
-    Then relation(reference) get constraints contain: @abstract
+    Then relation(reference) unset annotation: @abstract
+    Then relation(reference) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then relation(reference) get owns(name) get ordering: ordered
     When transaction commits
-    When connection open schema transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then relation(reference) get owns contain:
       | name |
     Then relation(reference) get owns(name) get ordering: ordered
-    Then relation(reference) get constraints contain: @abstract
-    Then relation(reference) unset annotation: @abstract; fails
-    Then relation(reference) get constraints contain: @abstract
+    Then relation(reference) get constraints do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
 
   Scenario Outline: <root-type> can change ordering of owns
     When create attribute type: name
@@ -1277,67 +983,15 @@ Feature: Concept Owns
       | entity    | person      | duration   |
       | relation  | description | string     |
 
-  Scenario Outline: <root-type> can set ordering (but only the same) for ownership after setting an specialise or an annotation
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set specialise: name
-    When <root-type>(<subtype-name>) get owns(surname) set annotation: @card(0..1)
-    Then <root-type>(<subtype-name>) get owns(surname) set ordering: ordered; fails
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(surname) set ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(surname) get ordering: ordered
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | duration   |
-      | relation  | description    | registration | string     |
-
-  Scenario Outline: <root-type> types can re-specialise ordered ownership
-    When create attribute type: email
-    When attribute(email) set value type: <value-type>
-    When attribute(email) set annotation: @abstract
-    When create attribute type: work-email
-    When attribute(work-email) set supertype: email
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: email
-    When <root-type>(<supertype-name>) get owns(email) set ordering: ordered
-    Then <root-type>(<supertype-name>) get owns(email) get ordering: ordered
-    When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set owns: work-email
-    Then <root-type>(<subtype-name>) get owns(work-email) set specialise: email; fails
-    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: work-email
-    Then <root-type>(<subtype-name>) get owns(work-email) set specialise: email; fails
-    When <root-type>(<subtype-name>) get owns(work-email) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(work-email) set specialise: email
-    Then <root-type>(<subtype-name>) get owns specialised(work-email) get label: email
-    Then <root-type>(<subtype-name>) get owns(work-email) get ordering: ordered
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | long       |
-      | relation  | description    | registration | string     |
-
-  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns as owns
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns as owns without specialisation
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    Then <root-type>(<subtype-name>) set owns: name
+    Then <root-type>(<subtype-name>) set owns: name; fails
+    When <root-type>(<subtype-name>) set owns: name[]
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
@@ -1346,19 +1000,18 @@ Feature: Concept Owns
       | relation  | description    | registration | string     |
       | relation  | description    | registration | datetime   |
 
-  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns in multiple layers of inheritance
+  Scenario Outline: <root-type> types cannot redeclare ordered inherited owns in multiple layers of inheritance without specialisation
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When create attribute type: customer-name
     When attribute(customer-name) set supertype: name
     When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    When <root-type>(<subtype-name>) set owns: customer-name
-    When <root-type>(<subtype-name>) get owns(customer-name) set ordering: ordered
+    When <root-type>(<supertype-name>) set owns: name[]
+    When <root-type>(<subtype-name>) set owns: customer-name[]
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: name
+    Then <root-type>(<subtype-name-2>) set owns: name; fails
+    When <root-type>(<subtype-name-2>) set owns: name[]
     Then transaction commits; fails
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
@@ -1367,30 +1020,7 @@ Feature: Concept Owns
       | relation  | description    | registration | profile        | decimal       |
       | relation  | description    | registration | profile        | string        |
 
-  Scenario Outline: <root-type> types cannot redeclare ordered specialised owns as owns
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When attribute(name) set annotation: @abstract
-    When create attribute type: customer-name
-    When attribute(customer-name) set supertype: name
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set ordering: ordered
-    When <root-type>(<subtype-name>) set owns: customer-name
-    When <root-type>(<subtype-name>) get owns(customer-name) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(customer-name) set specialise: name
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    Then <root-type>(<subtype-name-2>) set owns: name; fails
-    When <root-type>(<subtype-name-2>) set owns: customer-name
-    Then transaction commits; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber     | boolean    |
-      | entity    | person         | customer     | subscriber     | long       |
-      | relation  | description    | registration | profile        | duration   |
-      | relation  | description    | registration | profile        | double     |
-
-  Scenario Outline: <root-type> types cannot specialise ordered declared owns by declared owns
+  Scenario Outline: <root-type> types cannot own super and sub attribute types of different orderings
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1401,32 +1031,26 @@ Feature: Concept Owns
     When <root-type>(<type-name>) get owns(name) set ordering: ordered
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: first-name
-    When <root-type>(<type-name>) get owns(first-name) set ordering: ordered
-    Then <root-type>(<type-name>) get owns(first-name) set specialise: first-name; fails
-    Then <root-type>(<type-name>) get owns(first-name) set specialise: name; fails
+    Then <root-type>(<type-name>) set owns: first-name; fails
+    When <root-type>(<type-name>) set owns: first-name[]
+    Then <root-type>(<type-name>) get owns(first-name) get ordering: ordered
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<type-name>) get owns(first-name) set ordering: unordered; fails
+    Then <root-type>(<type-name>) get owns(name) set ordering: unordered; fails
+    When <root-type>(<type-name>) unset owns: first-name
+    Then <root-type>(<type-name>) set owns: first-name; fails
+    When <root-type>(<type-name>) get owns(name) set ordering: unordered
+    When <root-type>(<type-name>) set owns: first-name
+    Then <root-type>(<type-name>) get owns(first-name) get ordering: unordered
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns(name) get ordering: unordered
+    Then <root-type>(<type-name>) get owns(first-name) get ordering: unordered
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
       | relation  | description | string     |
-
-  Scenario Outline: <root-type> types cannot specialise ordered inherited owns other than with their subtypes
-    When create attribute type: username
-    When attribute(username) set value type: <value-type>
-    When create attribute type: reference
-    When attribute(reference) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: username
-    When <root-type>(<supertype-name>) get owns(username) set ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) set owns: reference
-    When <root-type>(<subtype-name>) get owns(reference) set ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(reference) set specialise: reference; fails
-    Then <root-type>(<subtype-name>) get owns(reference) set specialise: username; fails
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type |
-      | entity    | person         | customer     | double     |
-      | relation  | description    | registration | string     |
 
   Scenario Outline: <root-type> types cannot unset inherited ordered ownership
     When create attribute type: username
@@ -1454,84 +1078,6 @@ Feature: Concept Owns
       | entity    | person         | customer     | string     |
       | relation  | description    | registration | long       |
 
-  Scenario Outline: Ownerships can set specialise only if ordering matches for <root-type>
-    When create attribute type: other
-    When attribute(other) set annotation: @abstract
-    When attribute(other) set value type: <value-type>
-    When <root-type>(<supertype-name>) set annotation: @abstract
-    When <root-type>(<supertype-name>) set owns: other
-    When <root-type>(<supertype-name>) get owns(other) set ordering: ordered
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set annotation: @abstract
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    When attribute(name) set supertype: other
-    When <root-type>(<subtype-name>) get owns(name) set specialise: other
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    When create attribute type: surname
-    When attribute(surname) set annotation: @abstract
-    When attribute(surname) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: surname
-    When <root-type>(<supertype-name>) get owns(surname) set ordering: ordered
-    Then attribute(name) set supertype: surname; fails
-    When <root-type>(<subtype-name>) get owns(name) unset specialise
-    When attribute(name) set supertype: surname
-    When <root-type>(<subtype-name>) get owns(name) set specialise: surname
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
-    Then attribute(name) set supertype: other; fails
-    When <root-type>(<subtype-name>) get owns(name) unset specialise
-    When attribute(name) set supertype: other
-    When <root-type>(<subtype-name>) get owns(name) set specialise: other
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    When <root-type>(<supertype-name>) get owns(surname) set ordering: unordered
-    Then attribute(name) set supertype: surname; fails
-    When <root-type>(<subtype-name>) get owns(name) unset specialise
-    When attribute(name) set supertype: surname
-    Then <root-type>(<subtype-name>) get owns(name) set specialise: surname; fails
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) set specialise: surname
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
-    Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(other) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: surname
-    Then attribute(name) set supertype: other; fails
-    When <root-type>(<subtype-name>) get owns(name) unset specialise
-    When attribute(name) set supertype: other
-    Then <root-type>(<subtype-name>) get owns(name) set specialise: other; fails
-    When <root-type>(<supertype-name>) get owns(other) set ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) set specialise: other
-    Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(other) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(surname) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
-    Then <root-type>(<supertype-name>) get owns(other) get ordering: unordered
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: other
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type    |
-      | entity    | person         | customer     | decimal       |
-      | relation  | description    | registration | custom-struct |
-
   Scenario Outline: Ownerships with subtypes and supertypes can change ordering only together for <root-type>
     When create attribute type: literal
     When attribute(literal) set annotation: @abstract
@@ -1547,71 +1093,45 @@ Feature: Concept Owns
     When <root-type>(<subtype-name>) set annotation: @abstract
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: literal
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set annotation: @abstract
     When <root-type>(<subtype-name-2>) set owns: surname
-    When <root-type>(<subtype-name-2>) get owns(surname) set specialise: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(literal) set ordering: ordered; fails
     Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
+    When attribute(name) unset supertype
+    Then <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
+    Then attribute(name) set supertype: literal; fails
     Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered; fails
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: ordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: ordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: ordered; fails
+    When <root-type>(<subtype-name-2>) unset owns: surname
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: ordered
+    When attribute(name) set supertype: literal
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name-2>) set owns: surname; fails
+    When <root-type>(<subtype-name-2>) set owns: surname[]
+    Then transaction commits
+    When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
     Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(literal) get ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(name) get ordering: ordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: ordered
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(literal) set ordering: unordered; fails
     Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
-    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
+    When <root-type>(<supertype-name>) unset owns: literal
     Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<supertype-name>) get owns(literal) set ordering: unordered
-    When <root-type>(<subtype-name>) get owns(name) set ordering: unordered
-    When <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered; fails
+    When attribute(surname) unset supertype
+    Then <root-type>(<subtype-name>) get owns(name) set ordering: unordered
+    Then <root-type>(<subtype-name-2>) get owns(surname) set ordering: unordered
+    When <root-type>(<supertype-name>) set owns: literal
     Then <root-type>(<supertype-name>) get owns(literal) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
-    When transaction commits
+    Then transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(literal) get ordering: unordered
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
@@ -1621,156 +1141,7 @@ Feature: Concept Owns
       | entity    | person         | customer     | subscriber     | decimal       |
       | relation  | description    | registration | profile        | custom-struct |
 
-  Scenario Outline: <root-type> types cannot unset supertype while having owns specialise
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When attribute(name) set value type: <value-type>
-    When create attribute type: surname
-    When attribute(surname) set supertype: name
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set specialise: name
-    Then <root-type>(<subtype-name>) unset supertype; fails
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) unset supertype; fails
-    When <root-type>(<subtype-name>) get owns(surname) unset specialise
-    When <root-type>(<subtype-name>) unset supertype
-    Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) unset owns: surname
-    When <root-type>(<subtype-name-2>) set owns: surname
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When <root-type>(<subtype-name-2>) get owns(surname) set specialise: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name-2>) unset supertype; fails
-    Then <root-type>(<subtype-name>) unset supertype; fails
-    When <root-type>(<subtype-name-2>) get owns(surname) unset specialise
-    When <root-type>(<subtype-name>) unset supertype
-    Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get owns specialised(surname) does not exist
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get supertype does not exist
-    Then <root-type>(<subtype-name-2>) get owns specialised(surname) does not exist
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
-      | entity    | person         | customer     | subscriber     | datetime-tz |
-      | relation  | description    | registration | profile        | double      |
-
-  Scenario Outline: Attribute type cannot unset supertype while having <root-type>'s owns specialise
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When attribute(name) set value type: <value-type>
-    When create attribute type: surname
-    When attribute(surname) set annotation: @abstract
-    When attribute(surname) set supertype: name
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set owns: surname
-    When <root-type>(<subtype-name>) get owns(surname) set specialise: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When attribute(surname) unset supertype; fails
-    When <root-type>(<subtype-name>) get owns(surname) unset specialise
-    When attribute(surname) unset supertype
-    Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(surname) does not exist
-    When create attribute type: subsurname
-    When attribute(subsurname) set supertype: surname
-    When <root-type>(<subtype-name>) unset owns: surname
-    When <root-type>(<subtype-name>) set owns: subsurname
-    Then <root-type>(<subtype-name>) get owns(subsurname) set specialise: name; fails
-    When attribute(surname) set supertype: name
-    When <root-type>(<subtype-name>) get owns(subsurname) set specialise: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When attribute(subsurname) set annotation: @abstract
-    Then attribute(subsurname) unset supertype; fails
-    Then attribute(surname) unset supertype; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) get owns(subsurname) unset specialise
-    When attribute(surname) unset supertype; fails
-    When attribute(subsurname) set annotation: @abstract
-    When attribute(surname) unset supertype
-    Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(subsurname) does not exist
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(surname) get supertype does not exist
-    Then <root-type>(<subtype-name>) get owns specialised(subsurname) does not exist
-    Examples:
-      | root-type | supertype-name | subtype-name | value-type  |
-      | entity    | person         | customer     | datetime-tz |
-      | relation  | description    | registration | double      |
-
-  Scenario Outline: Attribute type can change supertype only if <root-type>'s owns specialises are in the inheritance tree of supertype
-    When create attribute type: literal
-    When attribute(literal) set annotation: @abstract
-    When attribute(literal) set value type: <value-type>
-    When create attribute type: text
-    When attribute(text) set annotation: @abstract
-    When attribute(text) set supertype: literal
-    When create attribute type: latin-text
-    When attribute(latin-text) set annotation: @abstract
-    When attribute(latin-text) set supertype: text
-    When create attribute type: name
-    When attribute(name) set annotation: @abstract
-    When attribute(name) set supertype: text
-    When create attribute type: surname
-    When attribute(surname) set annotation: @abstract
-    When attribute(surname) set supertype: name
-    When create attribute type: matronymic-surname
-    When attribute(matronymic-surname) set annotation: @abstract
-    When attribute(matronymic-surname) set supertype: surname
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
-    When <root-type>(<supertype-name>) set owns: literal
-    When <root-type>(<supertype-name>) set owns: text
-    When <root-type>(<supertype-name>) set owns: latin-text
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name-2>) set owns: surname
-    When <root-type>(<subtype-name-2>) set owns: matronymic-surname
-    When <root-type>(<subtype-name>) get owns(name) set specialise: text
-    When <root-type>(<subtype-name-2>) get owns(surname) set specialise: literal
-    When <root-type>(<subtype-name-2>) get owns(matronymic-surname) set specialise: name
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(name) set supertype: literal; fails
-    When create attribute type: another-literal
-    When attribute(another-literal) set annotation: @abstract
-    When attribute(another-literal) set value type: <value-type>
-    Then attribute(name) set supertype: another-literal; fails
-    When <root-type>(<supertype-name>) set owns: another-literal
-    Then attribute(name) set supertype: another-literal; fails
-    When attribute(name) set supertype: latin-text
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: text
-    Then <root-type>(<subtype-name-2>) get owns specialised(surname) get label: literal
-    Then <root-type>(<subtype-name-2>) get owns specialised(matronymic-surname) get label: name
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get supertype: latin-text
-    Then <root-type>(<subtype-name>) get owns specialised(name) get label: text
-    Then <root-type>(<subtype-name-2>) get owns specialised(surname) get label: literal
-    Then <root-type>(<subtype-name-2>) get owns specialised(matronymic-surname) get label: name
-    Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type  |
-      | entity    | person         | customer     | subscriber     | datetime-tz |
-      | relation  | description    | registration | profile        | double      |
-
-  Scenario Outline: <root-type> type cannot redeclare ownership specialising another attribute type
+  Scenario Outline: <root-type> type can only redeclare ownership if it specialises the inherited one with an annotation
     When create attribute type: literal
     When attribute(literal) set annotation: @abstract
     When attribute(literal) set value type: string
@@ -1785,44 +1156,18 @@ Feature: Concept Owns
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: literal
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: name
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: literal
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: name
     When <root-type>(<subtype-name>) get owns(name) set annotation: @regex("Accept me, please")
     Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @regex("Accept me, please")
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @regex("Accept me, please")
+    Then <root-type>(<supertype-name>) get owns(literal) get declared annotations do not contain: @regex("Accept me, please")
+    Then <root-type>(<subtype-name>) get owns(literal) get declared annotations do not contain: @regex("Accept me, please")
+    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @regex("Accept me, please")
+    Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @regex("Accept me, please")
+    Then <root-type>(<supertype-name>) get owns(literal) get constraints do not contain: @regex("Accept me, please")
+    Then <root-type>(<subtype-name>) get owns(literal) get constraints do not contain: @regex("Accept me, please")
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
       | relation  | description    | registration |
-
-  Scenario Outline: <root-type> can't change supertype if specialise is lost even if it has another owns for the same attribute type
-    When <root-type>(<supertype-name-2>) unset supertype
-    When create attribute type: name
-    When attribute(name) set value type: <value-type>
-    When <root-type>(<supertype-name>) set owns: name
-    When <root-type>(<supertype-name>) get owns(name) set annotation: @card(0..7)
-    When <root-type>(<subtype-name>) set supertype: <supertype-name>
-    When <root-type>(<subtype-name>) set owns: name
-    When <root-type>(<subtype-name>) get owns(name) set specialise: name
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @key
-    When <root-type>(<supertype-name-2>) set owns: name
-    Then <root-type>(<subtype-name>) set supertype: <supertype-name-2>; fails
-    When <root-type>(<subtype-name>) get owns(name) unset specialise
-    When <root-type>(<subtype-name>) set supertype: <supertype-name-2>
-    When <root-type>(<subtype-name>) get owns(name) set specialise: name
-    Then transaction commits
-    Examples:
-      | root-type | supertype-name | subtype-name | supertype-name-2 | value-type |
-      | entity    | person         | customer     | subscriber       | long       |
-      | relation  | description    | registration | profile          | date       |

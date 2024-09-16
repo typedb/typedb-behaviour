@@ -473,7 +473,7 @@ Feature: Concept Plays
       | rel0:role0 |
     Then transaction commits
 
-  Scenario: The schema may not be modified in a way that an specialised plays role is no longer inherited by the specialising type
+  Scenario: The schema may not be modified in a way that a specialised plays role is no longer inherited by the specialising type
     When create relation type: rel0
     When relation(rel0) create role: role0
     When create relation type: rel1
@@ -987,120 +987,6 @@ Feature: Concept Plays
     Then <root-type>(<subtype-name>) get plays contain:
       | parentship:parent |
     Then <root-type>(<subtype-name>) unset plays: parentship:parent; fails
-    Examples:
-      | root-type | supertype-name | subtype-name |
-      | entity    | person         | customer     |
-      | relation  | description    | registration |
-
-  Scenario Outline: <root-type> types can specialise inherited plays multiple times
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set specialise: parent
-    When create relation type: mothership
-    When relation(mothership) set supertype: parentship
-    When relation(mothership) create role: mother
-    When relation(mothership) get role(mother) set specialise: parent
-    When <root-type>(<supertype-name>) set plays: parentship:parent
-    When <root-type>(<supertype-name>) get plays(parentship:parent) set annotation: @card(0..2)
-    Then <root-type>(<supertype-name>) get plays contain:
-      | parentship:parent |
-    When <root-type>(<subtype-name>) set plays: fathership:father
-    When <root-type>(<subtype-name>) set plays: mothership:mother
-    When <root-type>(<subtype-name>) get plays(fathership:father) set specialise: parentship:parent
-    When <root-type>(<subtype-name>) get plays(mothership:mother) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | mothership:mother |
-    Then <root-type>(<subtype-name>) get plays do not contain:
-      | parentship:parent |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | mothership:mother |
-    Then <root-type>(<subtype-name>) get plays do not contain:
-      | parentship:parent |
-    Examples:
-      | root-type | supertype-name | subtype-name |
-      | entity    | person         | customer     |
-      | relation  | description    | registration |
-
-  Scenario Outline: <root-type> types can unset specialise of inherited plays
-    When create relation type: parentship
-    When relation(parentship) create role: parent
-    When relation(parentship) create role: child
-    When create relation type: fathership
-    When relation(fathership) set supertype: parentship
-    When relation(fathership) create role: father
-    When relation(fathership) get role(father) set specialise: parent
-    When <root-type>(<supertype-name>) set plays: parentship:parent
-    When <root-type>(<supertype-name>) set plays: parentship:child
-    When <root-type>(<subtype-name>) set plays: fathership:father
-    When <root-type>(<subtype-name>) get plays(fathership:father) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:child |
-    Then <root-type>(<subtype-name>) get plays do not contain:
-      | parentship:parent |
-    When <root-type>(<subtype-name>) get plays(fathership:father) unset specialise
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:parent |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When <root-type>(<subtype-name>) get plays(fathership:father) set specialise: parentship:parent
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:child |
-    Then <root-type>(<subtype-name>) get plays do not contain:
-      | parentship:parent |
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:child |
-    Then <root-type>(<subtype-name>) get plays do not contain:
-      | parentship:parent |
-    When <root-type>(<subtype-name>) get plays(fathership:father) unset specialise
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:parent |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:parent |
-      | parentship:child  |
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get plays contain:
-      | fathership:father |
-      | parentship:parent |
-      | parentship:child  |
-    Then <root-type>(<subtype-name>) get declared plays contain:
-      | fathership:father |
-    Then <root-type>(<subtype-name>) get declared plays do not contain:
-      | parentship:parent |
-      | parentship:child  |
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
