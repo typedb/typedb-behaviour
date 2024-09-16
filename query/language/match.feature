@@ -826,7 +826,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa ganesh;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
@@ -834,7 +834,7 @@ Feature: TypeQL Match Clause
       """
       match ($x, $y) isa $type; $type label jakas-relacja;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
@@ -842,7 +842,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa $type; $type label polok;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
@@ -1215,7 +1215,7 @@ Feature: TypeQL Match Clause
       """
       match (person: $x);
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
@@ -1223,7 +1223,7 @@ Feature: TypeQL Match Clause
       """
       match ($x) isa person;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
@@ -1231,7 +1231,7 @@ Feature: TypeQL Match Clause
       """
       match ($x) isa bottle-of-rum;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
@@ -1239,7 +1239,7 @@ Feature: TypeQL Match Clause
       """
       match (rolein-rolein-rolein: $rolein);
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
@@ -1247,7 +1247,7 @@ Feature: TypeQL Match Clause
       """
       match (friend: $x) isa employment;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
