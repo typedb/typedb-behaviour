@@ -172,3 +172,37 @@ Feature: Concept Role Players
     Then relation $p1 get players for role(info) contain: $p2
     Then relation $p2 get players for role(info) contain: $p1
     Then relation $p3 get players for role(info) contain: $p3
+
+
+  Scenario: Role players of subtypes of a role type cannot be inserted to a related supertype list
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create relation type: rel0
+    When relation(rel0) create role: rol0[]
+    When relation(rel0) set owns: ref
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: rol1[]
+    When relation(rel1) get role(rol1) set specialise: rol0
+    When relation(rel1) create role: rol2[]
+    When relation(rel1) get role(rol2) set specialise: rol0
+    When create entity type: ent1
+    When entity(ent1) set owns: ref
+    When entity(ent1) set plays: rel1:rol1
+    When create entity type: ent2
+    When entity(ent2) set owns: ref
+    When entity(ent2) set plays: rel1:rol2
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    Then relation $rel1 set players for role(rol1[]): [$ent1, $ent2]; fails
+    Then relation $rel1 set players for role(rol2[]): [$ent1, $ent2]; fails
+    Then relation $rel1 set players for role(rol0[]): [$ent1, $ent2]; fails
+    When $rel0 = relation(rel0) create new instance with key(ref): rel0
+    Then relation $rel0 set players for role(rol0[]): [$ent1, $ent2]; fails
+

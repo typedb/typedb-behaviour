@@ -393,3 +393,28 @@ Feature: Concept Ownership
     Then attribute $ind2 is none: false
     Then attribute(ind-attr) get instances contain: $ind1
     Then attribute(ind-attr) get instances contain: $ind2
+
+  Scenario: Subtypes of attribute type can be inserted to an owned supertype list
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent1
+    When entity(ent1) set owns: ref
+    When entity(ent1) set owns: attr0[]
+    When entity(ent1) get owns(attr0) set annotation: @card(0..)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) put instance with value: "val"
+    When $attr2_val1 = attribute(attr2) put instance with value: "val1"
+    When entity $ent1 set has(attr0[]): [$attr1_val, $attr2_val1]
+    Then transaction commits

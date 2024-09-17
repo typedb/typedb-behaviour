@@ -1559,19 +1559,52 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     Then entity(ent0) get owns(attr01) set annotation: @regex("val\d+\d+"); fails
-    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+\d+\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+\d+")
     Then entity(ent1) get owns(attr2) set annotation: @regex("val\d+\d+"); fails
     When entity(ent1) get owns(attr2) set annotation: @regex("val\d*")
+    When entity(ent1) get owns(attr1) unset annotation: @regex
     When transaction commits
 
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
     When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
+    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr2_val; fails
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr2) set annotation: @regex("$val\d^"); fails
+    Then entity(ent1) get owns(attr2) set annotation: @regex("val\d")
+    When entity(ent0) get owns(attr0) unset annotation: @regex
+    When entity(ent1) get owns(attr2) unset annotation: @regex
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When $attr2_val = attribute(attr2) get instance with value: "val"
     Then entity $ent1 set has: $attr1_val
+    Then entity $ent1 set has: $attr2_val
     Then transaction commits
 
     When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr2) set annotation: @regex("val\d"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d"); fails
     Then entity(ent1) get owns(attr2) set annotation: @regex("val\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d+"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d+"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("$val\d*^"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d"); fails
+    Then entity(ent1) get owns(attr2) set annotation: @regex("$val\d*^"); fails
+    Then entity(ent1) get owns(attr2) set annotation: @regex("val\d"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @regex("$val\d*^"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d"); fails
+    Then entity(ent1) get owns(attr1) set annotation: @regex("val\d*")
+    Then entity(ent1) get owns(attr2) set annotation: @regex("val\d*")
+    Then entity(ent0) get owns(attr0) set annotation: @regex("val\d*")
     When transaction closes
 
     When connection open write transaction for database: typedb
@@ -1581,7 +1614,9 @@ Feature: Data validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    When entity(ent1) get owns(attr2) set annotation: @regex("val\d+")
+    When entity(ent1) get owns(attr2) set annotation: @regex("val\d+"); fails
+    When entity(ent0) get owns(attr0) set annotation: @regex("val\d+"); fails
+    When entity(ent1) get owns(attr1) set annotation: @regex("val\d+")
     Then transaction commits
 
 
@@ -1663,10 +1698,25 @@ Feature: Data validation
     When attribute(attr01) set annotation: @abstract
     When attribute(attr01) set value type: string
     When attribute(attr0) set supertype: attr01
-    When attribute(attr0) unset value type
+    Then entity(ent0) set owns: attr01; fails
+    When attribute(attr0) unset supertype
     When entity(ent0) set owns: attr01
+    Then attribute(attr0) set supertype: attr01; fails
     When entity(ent0) get owns(attr01) set annotation: @range("val".."val9999")
+    Then attribute(attr0) set supertype: attr01; fails
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
+    When attribute(attr0) set supertype: attr01
+    When attribute(attr0) unset value type
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    Then entity $ent1 set has: $attr1_val; fails
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) unset annotation: @range
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -1834,16 +1884,31 @@ Feature: Data validation
     When $ent1 = entity(ent1) get instance with key(ref): ent1
     When $attr1_val = attribute(attr1) get instance with value: "val"
     When $attr2_val = attribute(attr2) get instance with value: "val"
-    When entity $ent1 set has(attr1[]): [$attr1_val, $attr1_val]
+    When entity $ent1 set has(attr1[]): [$attr1_val, $attr1_val]; fails
     Then entity $ent1 set has(attr2[]): [$attr2_val, $attr2_val]; fails
-    Then entity $ent1 get has(attr1[]) is [$attr1_val, $attr1_val]: true
+    Then entity $ent1 get has(attr1[]) is [$attr1_val, $attr1_val]: false
+    Then entity $ent1 get has(attr1[]) is [$attr1_val]: true
     Then entity $ent1 get has(attr2[]) is [$attr2_val]: true
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) unset annotation: @distinct
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $attr1_val = attribute(attr1) get instance with value: "val"
+    When entity $ent1 set has(attr1[]): [$attr1_val, $attr1_val]
+    Then entity $ent1 get has(attr1[]) is [$attr1_val, $attr1_val]: true
+    Then entity $ent1 get has(attr1[]) is [$attr1_val]: false
     When transaction commits
 
     When connection open schema transaction for database: typedb
     Then entity(ent0) get owns(attr01) set annotation: @distinct; fails
+    Then entity(ent0) get owns(attr0) set annotation: @distinct; fails
     Then entity(ent1) get owns(attr1) set annotation: @distinct; fails
-    When transaction closes
+    Then entity(ent1) get owns(attr2) set annotation: @distinct
+    When transaction commits
 
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
