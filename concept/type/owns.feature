@@ -113,24 +113,6 @@ Feature: Concept Owns
       | datetime      |
       | custom-struct |
 
-    # TODO: Only for typeql
-#  Scenario: Entity types cannot own entities, relations, roles, structs, structs fields, and non-existing things
-#    When create entity type: car
-#    When create relation type: credit
-#    When relation(credit) create role: creditor
-#    When create struct: passport
-#    When struct(passport) create field: birthday, with value type: datetime
-#    Then entity(person) set owns: car; fails
-#    Then entity(person) set owns: credit; fails
-#    Then entity(person) set owns: credit:creditor; fails
-#    Then entity(person) set owns: passport; fails
-#    Then entity(person) set owns: passport:birthday; fails
-#    Then entity(person) set owns: does-not-exist; fails
-#    Then entity(person) get owns is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then entity(person) get owns is empty
-
   Scenario: Non-abstract entity type can own abstract attribute with and without value type
     When create entity type: player
     When create attribute type: name
@@ -365,28 +347,6 @@ Feature: Concept Owns
       | boolean    |
       | date       |
 
-    # TODO: Only for typeql
-#  Scenario: Relation types cannot own entities, relations, roles, structs, structs fields, and non-existing things
-#    When create relation type: credit
-#    When relation(credit) create role: creditor
-#    When create relation type: marriage
-#    When relation(marriage) create role: spouse
-#    When create struct: passport-document
-#    When struct(passport-document) create field: first-name, with value type: string
-#    When struct(passport-document) create field: surname, with value type: string
-#    When struct(passport-document) create field: birthday, with value type: datetime
-#    Then relation(marriage) set owns: person; fails
-#    Then relation(marriage) set owns: credit; fails
-#    Then relation(marriage) set owns: credit:creditor; fails
-#    Then relation(marriage) set owns: passport; fails
-#    Then relation(marriage) set owns: passport:birthday; fails
-#    Then relation(marriage) set owns: marriage:spouse; fails
-#    Then relation(marriage) set owns: does-not-exist; fails
-#    Then relation(marriage) get owns is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then relation(marriage) get owns is empty
-
   Scenario: Non-abstract relation type can own abstract attribute with and without value type
     When create relation type: reference
     When relation(reference) create role: target
@@ -462,54 +422,6 @@ Feature: Concept Owns
     Then relation(reference) get owns(name) get ordering: unordered
     Then relation(reference) get constraints do not contain: @abstract
     Then attribute(name) get constraints contain: @abstract
-
-    # TODO: Only for typeql
-#  Scenario: Attribute types cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
-#    When create attribute type: surname
-#    When create relation type: marriage
-#    When relation(marriage) create role: spouse
-#    When attribute(surname) set value type: string
-#    When create struct: passport
-#    When struct(passport) create field: first-name, with value type: string
-#    When struct(passport) create field: surname, with value type: string
-#    When struct(passport) create field: birthday, with value type: datetime
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set owns: person; fails
-#    Then attribute(name) set owns: surname; fails
-#    Then attribute(name) set owns: marriage; fails
-#    Then attribute(name) set owns: marriage:spouse; fails
-#    Then attribute(name) set owns: passport; fails
-#    Then attribute(name) set owns: passport:birthday; fails
-#    Then attribute(name) set owns: does-not-exist; fails
-#    Then attribute(name) get owns is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get owns is empty
-
-  # TODO: Only for typeql
-#  Scenario: structs cannot own entities, attributes, relations, roles, structs, structs fields, and non-existing things
-#    When create attribute type: name
-#    When create relation type: marriage
-#    When relation(marriage) create role: spouse
-#    When attribute(surname) set value type: string
-#    When create struct: passport
-#    When struct(passport) create field: birthday, with value type: datetime
-#    When create struct: wallet
-#    When struct(wallet) create field: currency, with value type: string
-#    When struct(wallet) create field: value, with value type: double
-#    Then struct(wallet) set owns: person; fails
-#    Then struct(wallet) set owns: name; fails
-#    Then struct(wallet) set owns: marriage; fails
-#    Then struct(wallet) set owns: marriage:spouse; fails
-#    Then struct(wallet) set owns: passport; fails
-#    Then struct(wallet) set owns: passport:birthday; fails
-#    Then struct(wallet) set owns: wallet:currency; fails
-#    Then struct(wallet) set owns: does-not-exist; fails
-#    Then struct(wallet) get owns is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then struct(wallet) get owns is empty
 
   Scenario Outline: <root-type> types can unset not set owns
     When create attribute type: email

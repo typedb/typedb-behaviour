@@ -384,7 +384,6 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(marriage) set supertype: marriage; fails
 
-    # TODO: Make it only for typeql?
   Scenario: Roles cannot subtype itself
     When create relation type: marriage
     When relation(marriage) create role: wife
@@ -599,21 +598,6 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
     Then relation(biological-fathership) get relates(parentship:parent) is specialising: true
     Then relation(biological-fathership) get relates(fathership:father) is specialising: false
-
-    # TODO: Only for typeql
-#  Scenario: Relation types cannot specialise declared related role types
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    Then relation(parentship) create role: father
-#    Then relation(parentship) get role(father) set specialise: parent; fails
-
-  # TODO: Only for typeql
-#  Scenario: Role cannot set supertype role if it's not a part of its relation type's supertype
-#    When create relation type: parentship
-#    When relation(parentship) create role: parent
-#    When create relation type: fathership
-#    When relation(fathership) create role: father
-#    Then relation(fathership) get role(father) set specialise: parent; fails
 
   Scenario: Relation types cannot redeclare inherited role without changes
     When create relation type: parentship
