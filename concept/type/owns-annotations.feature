@@ -54,50 +54,52 @@ Feature: Concept Owns Annotations
     When <root-type>(<type-name>) set owns: custom-attribute
     When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @<constraint>
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraint categories contain: @<annotation-category>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories contain: @<annotation-category>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @<constraint>
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraint categories contain: @<annotation-category>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories contain: @<annotation-category>
     When <root-type>(<type-name>) get owns(custom-attribute) unset annotation: @<annotation-category>
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints do not contain: @<constraint>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories do not contain: @<annotation-category>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints do not contain: @<constraint>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories do not contain: @<annotation-category>
     When <root-type>(<type-name>) get owns(custom-attribute) set annotation: @<annotation>
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @<constraint>
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraint categories contain: @<annotation-category>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories contain: @<annotation-category>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @<constraint>
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraint categories contain: @<annotation-category>
     Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations contain: @<annotation>
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotation categories contain: @<annotation-category>
     When <root-type>(<type-name>) unset owns: custom-attribute
     Then <root-type>(<type-name>) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get owns is empty
     Examples:
-      | root-type | type-name   | annotation       | annotation-category | constraint       | value-type |
-      | entity    | person      | key              | key                 | unique           | string     |
-      | entity    | person      | unique           | unique              | unique           | string     |
-#      | entity    | person      | subkey(LABEL)    | subkey              |subkey(LABEL)    | string     |
-      | entity    | person      | values("1", "2") | values              | values("1", "2") | string     |
-      | entity    | person      | range("1".."2")  | range               | range("1".."2")  | string     |
-      | entity    | person      | card(1..1)       | card                | card(1..1)       | string     |
-      | entity    | person      | regex("\S+")     | regex               | regex("\S+")     | string     |
-      | relation  | description | key              | key                 | unique           | string     |
-      | relation  | description | unique           | unique              | unique           | string     |
-#      | relation  | description | subkey(LABEL)    | subkey              |subkey(LABEL)    | string     |
-      | relation  | description | values("1", "2") | values              | values("1", "2") | string     |
-      | relation  | description | range("1".."2")  | range               | range("1".."2")  | string     |
-      | relation  | description | card(1..1)       | card                | card(1..1)       | string     |
-      | relation  | description | regex("\S+")     | regex               | regex("\S+")     | string     |
+      | root-type | type-name   | annotation       | annotation-category | constraint       | constraint-category | value-type |
+      | entity    | person      | key              | key                 | unique           | unique              | string     |
+      | entity    | person      | unique           | unique              | unique           | unique              | string     |
+#      | entity    | person      | subkey(LABEL)    | subkey              | subkey(LABEL)    | subkey              | string     |
+      | entity    | person      | values("1", "2") | values              | values("1", "2") | values              | string     |
+      | entity    | person      | range("1".."2")  | range               | range("1".."2")  | range               | string     |
+      | entity    | person      | card(1..1)       | card                | card(1..1)       | card                | string     |
+      | entity    | person      | regex("\S+")     | regex               | regex("\S+")     | regex               | string     |
+      | relation  | description | key              | key                 | unique           | unique              | string     |
+      | relation  | description | unique           | unique              | unique           | unique              | string     |
+#      | relation  | description | subkey(LABEL)    | subkey              | subkey(LABEL)    | subkey              | string     |
+      | relation  | description | values("1", "2") | values              | values("1", "2") | values              | string     |
+      | relation  | description | range("1".."2")  | range               | range("1".."2")  | range               | string     |
+      | relation  | description | card(1..1)       | card                | card(1..1)       | card                | string     |
+      | relation  | description | regex("\S+")     | regex               | regex("\S+")     | regex               | string     |
 
   Scenario Outline: <root-type> types can have owns with @<annotation> alongside pure owns
     When create attribute type: email
@@ -319,37 +321,49 @@ Feature: Concept Owns Annotations
     When attribute(playername) set supertype: username
     When <root-type>(<supertype-name>) set owns: username
     When <root-type>(<subtype-name>) set owns: playername
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(playername) set annotation: @<annotation>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(playername) set annotation: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     Examples:
@@ -369,7 +383,7 @@ Feature: Concept Owns Annotations
       | relation  | description    | registration | card(1..1)       | card                | card(1..1)       |
       | relation  | description    | registration | regex("\S+")     | regex               | regex("\S+")     |
 
-  Scenario Outline: <root-type> types cannot set and unset @<annotation> of specialised ownership with inherited annotation
+  Scenario Outline: <root-type> types can set and unset @<annotation> of specialised ownership with inherited annotation
     When create attribute type: username
     When attribute(username) set value type: string
     When attribute(username) set annotation: @abstract
@@ -378,45 +392,32 @@ Feature: Concept Owns Annotations
     When <root-type>(<supertype-name>) set owns: username
     When <root-type>(<supertype-name>) get owns(username) set annotation: @<annotation>
     When <root-type>(<subtype-name>) set owns: playername
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>; fails
+    Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(playername) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(playername) set annotation: @<annotation>
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(username) contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(playername) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>; fails
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
-    Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
-    Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
-    When <root-type>(<subtype-name>) get owns(playername) set annotation: @<annotation>
-    When <root-type>(<subtype-name>) get owns(playername) unset annotation: @<annotation-category>
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
-    Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations contain: @<annotation>
     Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @<constraint>
-    Then <root-type>(<supertype-name>) get owns(username) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(playername) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(playername) get declared annotations do not contain: @<annotation>
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | annotation-category | constraint       |
       | entity    | person         | customer     | key              | key                 | unique           |
@@ -663,8 +664,7 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name>) get owns(username) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | name |
+      | name     |
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(username) get constraints contain: @<constraint>
@@ -673,8 +673,7 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
       | username |
-    Then <root-type>(<subtype-name>) get owns do not contain:
-      | name |
+      | name     |
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(username) get constraints contain: @<constraint>
@@ -708,20 +707,24 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name>) set annotation: @abstract
     Then <root-type>(<subtype-name>) get owns contain:
       | email |
+    Then <root-type>(<subtype-name>) get owns(email) get declared annotations contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(email) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(email) contain: @<constraint>
     When <root-type>(<subtype-name>) set owns: work-email
+    Then <root-type>(<subtype-name>) get owns(work-email) get declared annotations do not contain: @<annotation>
     Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(work-email) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name>) set owns: work-email
-    Then <root-type>(<subtype-name>) get owns(work-email) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(work-email) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(work-email) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(work-email) get declared annotations do not contain: @<annotation>
+    Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
     Examples:
       | root-type | supertype-name | subtype-name | annotation       | constraint       | value-type |
       | entity    | person         | customer     | key              | unique           | string     |
@@ -759,19 +762,32 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name>) set owns: surname
     When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
     Then <root-type>(<subtype-name>) get owns(surname) get label: surname
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @<constraint>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @<constraint>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
-    Then <root-type>(<subtype-name-2>) set owns: name; fails
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(surname) contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get constraints contain: @<constraint>
     When <root-type>(<subtype-name-2>) set owns: surname
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(surname) contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get declared annotations do not contain: @<annotation>
     When <root-type>(<subtype-name-2>) get owns(surname) set annotation: @<annotation>
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(surname) contain: @<constraint>
     Then <root-type>(<subtype-name-2>) get owns(surname) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(surname) get declared annotations contain: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When <root-type>(<subtype-name-2>) set owns: surname
@@ -953,7 +969,7 @@ Feature: Concept Owns Annotations
       | relation  | description    | registration | profile        | card(1..1)       | string     |
       | relation  | description    | registration | profile        | regex("\S+")     | string     |
 
-  Scenario Outline: <root-type> subtypes can redeclare owns with @<annotation>s after it is unset from supertype
+  Scenario Outline: <root-type> subtypes can specialise owns with @<annotation>
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -962,34 +978,39 @@ Feature: Concept Owns Annotations
     When <root-type>(<supertype-name>) set annotation: @abstract
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set annotation: @<annotation>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @<annotation>
     When <root-type>(<subtype-name>) set owns: surname
-    Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(surname) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @<annotation>
-    Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(surname) get constraints do not contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get declared annotations do not contain: @<annotation>
     When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
-    Then transaction commits; fails
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(surname) get declared annotations contain: @<annotation>
+    Then transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(name) unset annotation: @<annotation-category>
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations is empty
-    Then <root-type>(<subtype-name>) get owns(surname) get constraints do not contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(surname) get declared annotations is empty
-    When <root-type>(<subtype-name>) get owns(surname) set annotation: @<annotation>
-    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations is empty
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @<constraint>
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations is empty
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(surname) contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(surname) get declared annotations contain: @<annotation>
     Examples:
@@ -1014,7 +1035,7 @@ Feature: Concept Owns Annotations
     When attribute(username) set value type: string
     When attribute(username) set annotation: @abstract
     When create attribute type: score
-    When attribute(score) set value type: double
+    When attribute(score) set value type: string
     When attribute(score) set annotation: @abstract
     When create attribute type: reference
     When attribute(reference) set annotation: @abstract
@@ -1196,7 +1217,10 @@ Feature: Concept Owns Annotations
       | name     |
     Then <root-type>(<subtype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(reference) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(work-email) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(username) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(reference) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<subtype-name>) get owns contain:
@@ -1220,7 +1244,10 @@ Feature: Concept Owns Annotations
       | name     |
     Then <root-type>(<subtype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(reference) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(work-email) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(username) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(reference) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
     When create attribute type: license
     When attribute(license) set supertype: reference
     When create attribute type: points
@@ -1251,7 +1278,10 @@ Feature: Concept Owns Annotations
       | name     |
     Then <root-type>(<subtype-name>) get owns(username) get constraints contain: @<constraint>
     Then <root-type>(<subtype-name>) get owns(reference) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name>) get owns(work-email) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(username) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(reference) contain: @<constraint>
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(work-email) contain: @<constraint>
     Then <root-type>(<subtype-name-2>) get owns contain:
       | username   |
       | license    |
@@ -1276,8 +1306,11 @@ Feature: Concept Owns Annotations
       | name       |
       | rating     |
     Then <root-type>(<subtype-name-2>) get owns(username) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name-2>) get owns(license) get constraints contain: @<constraint>
-    Then <root-type>(<subtype-name-2>) get owns(work-email) get constraints contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(license) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get owns(work-email) get constraints do not contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(username) contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(license) contain: @<constraint>
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(work-email) contain: @<constraint>
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | annotation       | constraint       |
       | entity    | person         | customer     | subscriber     | key              | unique           |
@@ -1375,6 +1408,29 @@ Feature: Concept Owns Annotations
 ## @key
 #########################
 
+  Scenario: Owns with @card(1..1) and @unique annotations without @key is not a key
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value type: string
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @card(1..1)
+    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) is key: false
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute) is key: false
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute) is key: false
+    When entity(person) get owns(custom-attribute) unset annotation: @unique
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
+    Then entity(person) get owns(custom-attribute) is key: false
+    When entity(person) get owns(custom-attribute) unset annotation: @card
+    Then entity(person) get owns(custom-attribute) set annotation: @key
+    Then entity(person) get owns(custom-attribute) is key: true
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) is key: true
+
   Scenario Outline: Owns can set @key annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -1468,99 +1524,48 @@ Feature: Concept Owns Annotations
       | double        |
       | custom-struct |
 
-  Scenario: Owns can set @key annotation for empty value type and specialise it with keyable value type
+  Scenario: Owns cannot set @key annotation for empty value type
     When create attribute type: id
     Then attribute(id) get value type is none
     When attribute(id) set annotation: @abstract
     When entity(person) set owns: id
-    When entity(person) get owns(id) set annotation: @key
-    Then entity(person) get owns(id) is key: true
-    When create attribute type: name
-    When attribute(name) set supertype: id
-    When attribute(name) set value type: string
-    When create attribute type: seq
-    When attribute(seq) set supertype: id
-    When attribute(seq) set value type: long
-    When create attribute type: unknown
-    When attribute(unknown) set supertype: id
-    When attribute(unknown) set annotation: @abstract
-    When create attribute type: bad
-    When attribute(bad) set supertype: id
-    When attribute(bad) set value type: double
-    When create entity type: named-person
-    When entity(named-person) set supertype: person
-    Then entity(named-person) get owns(id) is key: true
-    When entity(named-person) set owns: name
-    Then entity(named-person) get owns(name) is key: true
-    When create entity type: seqed-person
-    When entity(seqed-person) set supertype: person
-    When entity(seqed-person) set annotation: @abstract
-    Then entity(seqed-person) get owns(id) is key: true
-    When entity(seqed-person) set owns: seq
-    Then entity(seqed-person) get owns(seq) is key: true
-    When create entity type: unknown-person
-    When entity(unknown-person) set supertype: person
-    When entity(unknown-person) set annotation: @abstract
-    Then entity(unknown-person) get owns(id) is key: true
-    When entity(unknown-person) set owns: unknown
-    Then entity(unknown-person) get owns(unknown) is key: true
-    Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: custom-struct; fails
-    When create entity type: bad-person
-    When entity(bad-person) set supertype: person
-    When entity(bad-person) set annotation: @abstract
-    Then entity(bad-person) get owns(id) is key: true
-    When entity(bad-person) set owns: bad
-    Then entity(bad-person) get owns(bad) is key: false
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When entity(unknown-person) get owns(unknown) set annotation: @key
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get value type: string
-    Then entity(named-person) get owns(name) is key: true
-    Then attribute(seq) get value type: long
-    Then entity(seqed-person) get owns(seq) is key: true
-    Then attribute(unknown) get value type is none
-    Then entity(unknown-person) get owns(unknown) is key: true
-    Then attribute(bad) get value type: double
-    Then entity(bad-person) get owns(bad) is key: false
-    Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: custom-struct; fails
-    When attribute(unknown) set value type: long
-    Then attribute(unknown) get value type: long
-    Then entity(unknown-person) get owns(unknown) is key: true
+    When entity(person) get owns(id) set annotation: @key; fails
+    Then entity(person) get owns(id) get declared annotations do not contain: @key
+    Then entity(person) get constraints for owned attribute(id) do not contain: @unique
+    Then entity(person) get owns(id) get constraints do not contain: @unique
+    Then entity(person) get constraints for owned attribute(id) do not contain: @card(1..1)
+    Then entity(person) get owns(id) get constraints do not contain: @card(1..1)
+    Then entity(person) get owns(id) is key: false
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(unknown) get value type: long
-    Then entity(unknown-person) get owns(unknown) is key: true
+    Then entity(person) get owns(id) get declared annotations do not contain: @key
+    Then entity(person) get constraints for owned attribute(id) do not contain: @unique
+    Then entity(person) get owns(id) get constraints do not contain: @unique
+    Then entity(person) get constraints for owned attribute(id) do not contain: @card(1..1)
+    Then entity(person) get owns(id) get constraints do not contain: @card(1..1)
+    Then entity(person) get owns(id) is key: false
 
-  Scenario: Attribute type can unset value type if it has owns with @key annotation
+  Scenario: Attribute type cannot unset value type if it has owns with @key annotation
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set annotation: @abstract
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @key
-    When attribute(custom-attribute) unset value type
-    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) unset value type; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) unset annotation: @key
     When attribute(custom-attribute) unset value type
     Then attribute(custom-attribute) get value type is none
-    When entity(person) get owns(custom-attribute) set annotation: @key
+    Then entity(person) get owns(custom-attribute) set annotation: @key; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) set annotation: @key
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) is key: true
     Then attribute(custom-attribute) get value type: string
-    When attribute(custom-attribute) unset value type
-    Then attribute(custom-attribute) get value type is none
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) unset value type; fails
 
   Scenario Outline: Owns can set @key annotation for ordered ownership
     When create attribute type: custom-attribute
@@ -1600,7 +1605,7 @@ Feature: Concept Owns Annotations
       | double        |
       | custom-struct |
 
-  Scenario Outline: Cannot set multiple specialises on the same type for a @key owns because of the cardinality
+  Scenario Outline: Can set multiple specialises on the same type for a @key owns even if the cardinality is blocked
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
@@ -1635,7 +1640,7 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name>) get owns(surname) get cardinality: @card(1..1)
     Then <root-type>(<subtype-name>) get owns(third-name) get cardinality: @card(0..1)
     When <root-type>(<subtype-name>) get owns(surname) unset annotation: @key
-    Then <root-type>(<supertype-name>) get owns(name) set annotation: @key; fails
+    Then <root-type>(<supertype-name>) get owns(name) set annotation: @key
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
@@ -1656,7 +1661,11 @@ Feature: Concept Owns Annotations
     When attribute(letter) set annotation: @abstract
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: name
-    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(1..1)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(0..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
     When <root-type>(<subtype-name>) set owns: letter
     When create attribute type: surname
     When attribute(surname) set supertype: name
@@ -1665,18 +1674,19 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name-2>) set owns: first-name
     When <root-type>(<subtype-name-2>) set owns: surname
-    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get owns(first-name) get cardinality: @card(0..1)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(first-name) contain: @card(1..1)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(first-name) contain: @card(0..1)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..1)
     When <root-type>(<supertype-name>) get owns(literal) unset annotation: @key
     Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(0..1)
-    Then <root-type>(<supertype-name>) get owns(literal) set annotation: @key; fails
-    Then <root-type>(<supertype-name>) get owns(literal) set annotation: @key; fails
     When <root-type>(<supertype-name>) get owns(literal) set annotation: @key
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..1)
     When transaction commits
     When connection open schema transaction for database: typedb
     When <root-type>(<supertype-name>) get owns(literal) unset annotation: @key
-    Then <root-type>(<subtype-name>) get owns(name) set annotation: @key; fails
     When <root-type>(<subtype-name>) get owns(name) set annotation: @key
     When <root-type>(<subtype-name>) get owns(name) unset annotation: @key
     Then transaction commits
@@ -1960,98 +1970,43 @@ Feature: Concept Owns Annotations
       | double        |
       | custom-struct |
 
-  Scenario: Owns can set @unique annotation for empty value type and specialise it with keyable value type
+  Scenario: Owns cannot set @unique annotation for empty value type
     When create attribute type: id
     Then attribute(id) get value type is none
     When attribute(id) set annotation: @abstract
     When entity(person) set owns: id
-    When entity(person) get owns(id) set annotation: @unique
-    Then entity(person) get owns(id) get constraints contain: @unique
-    When create attribute type: name
-    When attribute(name) set supertype: id
-    When attribute(name) set value type: string
-    When create attribute type: seq
-    When attribute(seq) set supertype: id
-    When attribute(seq) set value type: long
-    When create attribute type: unknown
-    When attribute(unknown) set supertype: id
-    When attribute(unknown) set annotation: @abstract
-    When create attribute type: bad
-    When attribute(bad) set supertype: id
-    When attribute(bad) set value type: double
-    When create entity type: named-person
-    When entity(named-person) set supertype: person
-    Then entity(named-person) get owns(id) get constraints contain: @unique
-    When entity(named-person) set owns: name
-    Then entity(named-person) get owns(name) get constraints contain: @unique
-    When create entity type: seqed-person
-    When entity(seqed-person) set supertype: person
-    Then entity(seqed-person) get owns(id) get constraints contain: @unique
-    When entity(seqed-person) set owns: seq
-    Then entity(seqed-person) get owns(seq) get constraints contain: @unique
-    When create entity type: unknown-person
-    When entity(unknown-person) set annotation: @abstract
-    When entity(unknown-person) set supertype: person
-    Then entity(unknown-person) get owns(id) get constraints contain: @unique
-    When entity(unknown-person) set owns: unknown
-    Then entity(unknown-person) get owns(unknown) get constraints contain: @unique
-    Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: custom-struct; fails
-    When create entity type: bad-person
-    When entity(bad-person) set supertype: person
-    Then entity(bad-person) get owns(id) get constraints contain: @unique
-    When entity(bad-person) set owns: bad
-    Then entity(bad-person) get owns(bad) get constraints do not contain: @unique
-    When entity(bad-person) set annotation: @abstract
+    When entity(person) get owns(id) set annotation: @unique; fails
+    Then entity(person) get constraints for owned attribute(id) do not contain: @unique
+    Then entity(person) get owns(id) get constraints do not contain: @unique
     When transaction commits
     When connection open schema transaction for database: typedb
-    When entity(unknown-person) get owns(unknown) set annotation: @unique
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get value type: string
-    Then entity(named-person) get owns(name) get constraints contain: @unique
-    Then attribute(seq) get value type: long
-    Then entity(seqed-person) get owns(seq) get constraints contain: @unique
-    Then attribute(unknown) get value type is none
-    Then entity(unknown-person) get owns(unknown) get constraints contain: @unique
-    Then attribute(bad) get value type: double
-    Then entity(bad-person) get owns(bad) get constraints do not contain: @unique
-    Then attribute(unknown) set value type: double; fails
-    Then attribute(unknown) set value type: custom-struct; fails
-    When attribute(unknown) set value type: long
-    Then attribute(unknown) get value type: long
-    Then entity(unknown-person) get owns(unknown) get constraints contain: @unique
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(unknown) get value type: long
-    Then entity(unknown-person) get owns(unknown) get constraints contain: @unique
+    Then entity(person) get constraints for owned attribute(id) do not contain: @unique
+    Then entity(person) get owns(id) get constraints do not contain: @unique
+    When entity(person) get owns(id) set annotation: @unique; fails
+    Then entity(person) get constraints for owned attribute(id) do not contain: @unique
+    Then entity(person) get owns(id) get constraints do not contain: @unique
 
-  Scenario: Attribute type can unset value type if it has owns with @unique annotation
+  Scenario: Attribute type cannot unset value type if it has owns with @unique annotation
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set annotation: @abstract
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @unique
-    When attribute(custom-attribute) unset value type
-    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) unset value type; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: custom-struct; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) unset annotation: @unique
     When attribute(custom-attribute) unset value type
     Then attribute(custom-attribute) get value type is none
-    When entity(person) get owns(custom-attribute) set annotation: @unique
+    Then entity(person) get owns(custom-attribute) set annotation: @unique; fails
     When attribute(custom-attribute) set value type: string
     When entity(person) get owns(custom-attribute) set annotation: @unique
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraints contain: @unique
     Then attribute(custom-attribute) get value type: string
-    When attribute(custom-attribute) unset value type
-    Then attribute(custom-attribute) get value type is none
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(custom-attribute) get value type is none
+    Then attribute(custom-attribute) unset value type; fails
 
   Scenario Outline: Ordered owns can set @unique annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
@@ -2309,62 +2264,84 @@ Feature: Concept Owns Annotations
       | custom-attribute |
     Then relation(marriage) get owns contain:
       | custom-attribute |
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args>)
-    Then entity(player) get owns do not contain:
-      | second-custom-attribute |
-    Then relation(marriage) get owns do not contain:
-      | second-custom-attribute |
     Then entity(player) get owns contain:
+      | second-custom-attribute      |
       | specialised-custom-attribute |
     Then relation(marriage) get owns contain:
+      | second-custom-attribute      |
       | specialised-custom-attribute |
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @values(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @values(<args-specialise>)
-    When entity(person) get owns(second-custom-attribute) set annotation: @values(<args-specialise>)
-    When relation(description) get owns(second-custom-attribute) set annotation: @values(<args-specialise>)
+    When entity(player) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>)
+    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
+    Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then relation(description) get owns(second-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
+    Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @values(<args-specialise>)
-    Then relation(description) get owns(second-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise                            |
       | long        | 1, 10, 20, 30                                                                | 10, 30                                     |
@@ -2377,7 +2354,7 @@ Feature: Concept Owns Annotations
       | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on owns for <value-type> value type cannot be reset or specialised by the @values of not a subset of arguments
+  Scenario Outline: Inherited @values annotation on owns for <value-type> value type can be reset or specialised by the @values of not a subset of arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
@@ -2405,33 +2382,56 @@ Feature: Concept Owns Annotations
     When relation(marriage) set owns: specialised-custom-attribute
     Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @values(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @values(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>); fails
-    Then relation(marriage) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>); fails
-    Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    When entity(player) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>)
+    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
+    Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    When connection open read transaction for database: typedb
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @values(<args>)
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(player) get owns(specialised-custom-attribute) set annotation: @values(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @values(<args>)
-    Then transaction commits; fails
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @values(<args-specialise>)
+    Then entity(player) get owns(custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @values(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @values(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @values(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @values(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise          |
       | long        | 1, 10, 20, 30                                                                | 10, 31                   |
@@ -2452,19 +2452,28 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
-    Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
-    Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @values(2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @values(2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
@@ -2473,12 +2482,18 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
@@ -2486,25 +2501,31 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     When <root-type>(<subtype-name-2>) set owns: name
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1, 2, 3); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(0, 2, 3); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(0, 1, 2, 3, 4, 5); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(2, 3, 4, 5, 6); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(1); fails
     When <root-type>(<subtype-name-2>) get owns(name) set annotation: @values(2, 3)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(2, 3)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @values(2, 3)
@@ -2513,18 +2534,27 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @values(2, 3)
     When transaction commits
     When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(0, 1, 2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @values(2, 3, 4, 5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @values(2, 3, 4, 5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @values(2, 3)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @values(2, 3)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @values(2, 3)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @values(2, 3)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @values(2, 3)
@@ -2561,11 +2591,13 @@ Feature: Concept Owns Annotations
     Then attribute(surname) get value type: long
     When entity(person) get owns(name) set annotation: @values(1, 2, 3)
     When entity(customer) get owns(surname) unset annotation: @values
-    Then entity(customer) get owns(surname) get constraints contain: @values(1, 2, 3)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @values(1, 2, 3)
+    Then entity(customer) get owns(surname) get constraints do not contain: @values(1, 2, 3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(customer) get owns(surname) get constraints contain: @values(1, 2, 3)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @values(1, 2, 3)
+    Then entity(customer) get owns(surname) get constraints do not contain: @values(1, 2, 3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -2842,70 +2874,84 @@ Feature: Concept Owns Annotations
       | custom-attribute |
     Then relation(marriage) get owns contain:
       | custom-attribute |
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args>)
-    Then entity(player) get owns do not contain:
-      | second-custom-attribute |
-    Then relation(marriage) get owns do not contain:
-      | second-custom-attribute |
     Then entity(player) get owns contain:
+      | second-custom-attribute      |
       | specialised-custom-attribute |
     Then relation(marriage) get owns contain:
+      | second-custom-attribute      |
       | specialised-custom-attribute |
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @range(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @range(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @range(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @range(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @range(<args-specialise>)
     When entity(player) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>)
     When relation(marriage) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>)
-    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
-    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
-    Then relation(description) get owns(second-custom-attribute) get constraints contain: @range(<args>)
-    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(person) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
-    Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
-    Then relation(description) get owns(second-custom-attribute) get constraints contain: @range(<args>)
-    Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(person) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
       | long        | 1..10                            | 1..5                                      |
@@ -2916,7 +2962,7 @@ Feature: Concept Owns Annotations
       | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
 
-  Scenario Outline: Inherited @range annotation on owns for <value-type> value type cannot be reset or specialised by the @range of not a subset of arguments
+  Scenario Outline: Inherited @range annotation on owns for <value-type> value type can be reset or specialised by the @range of not a subset of arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
@@ -2944,33 +2990,56 @@ Feature: Concept Owns Annotations
     When relation(marriage) set owns: specialised-custom-attribute
     Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @range(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @range(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>); fails
-    Then relation(marriage) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>); fails
-    Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
+    When entity(player) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>)
+    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
+    Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     When transaction commits
-    When connection open schema transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
+    When connection open read transaction for database: typedb
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then relation(description) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @range(<args>)
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(player) get owns(specialised-custom-attribute) set annotation: @range(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @range(<args>)
-    Then transaction commits; fails
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(person) get owns(second-custom-attribute) get constraints contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @range(<args-specialise>)
+    Then entity(player) get owns(custom-attribute) get constraints contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @range(<args>)
+    Then entity(player) get owns(custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @range(<args>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) do not contain: @range(<args-specialise>)
+    Then entity(player) get owns(second-custom-attribute) get constraints do not contain: @range(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
+    Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
       | long        | 1..10                            | -1..5                                     |
@@ -2989,19 +3058,28 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name>) set owns: name
-    Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
-    Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @range(0..5)
-    Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @range(0..5)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
-    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
-    When <root-type>(<subtype-name>) get owns(name) set annotation: @range(2..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
+    When <root-type>(<subtype-name>) get owns(name) set annotation: @range(2..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(2..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @range(2..5)
@@ -3010,12 +3088,18 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..5)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(2..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @range(2..5)
@@ -3024,49 +3108,64 @@ Feature: Concept Owns Annotations
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..5)
     When <root-type>(<subtype-name-2>) set owns: name
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(1..3); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..3); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..5); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(2..6); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(0..1); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(2..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..5)
     When <root-type>(<subtype-name-2>) get owns(name) set annotation: @range(2..3)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(2..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
-    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(1..3)
-    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(1..3)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @range(2..3)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..3)
+    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(2..3)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @range(2..3)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(2..3)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..3)
     When transaction commits
     When connection open read transaction for database: typedb
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(0..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(0..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @range(0..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(0..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(0..5)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..5)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @range(2..5)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @range(2..5)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2..5)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @range(2..5)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @range(2..5)
-    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(1..3)
-    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(1..3)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @range(2..3)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @range(2..3)
+    Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @range(2..3)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @range(2..3)
-    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
-    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(1..3)
+    Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @range(2..3)
+    Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @range(2..3)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @range(2..3)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 |
@@ -3098,11 +3197,13 @@ Feature: Concept Owns Annotations
     Then attribute(surname) get value type: long
     When entity(person) get owns(name) set annotation: @range(1..3)
     When entity(customer) get owns(surname) unset annotation: @range
-    Then entity(customer) get owns(surname) get constraints contain: @range(1..3)
+    Then entity(customer) get owns(surname) get constraints do not contain: @range(1..3)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @range(1..3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(customer) get owns(surname) get constraints contain: @range(1..3)
+    Then entity(customer) get owns(surname) get constraints do not contain: @range(1..3)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @range(1..3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -3144,53 +3245,75 @@ Feature: Concept Owns Annotations
   Scenario Outline: Owns can set @card annotation for <value-type> value type with arguments in correct order and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
-    When create attribute type: custom-attribute-2
-    When attribute(custom-attribute-2) set value type: <value-type>
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
-    When entity(person) set owns: custom-attribute-2
-    When entity(person) get owns(custom-attribute-2) set ordering: ordered
-    Then entity(person) get owns(custom-attribute-2) get constraints do not contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
-    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get constraints contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get constraints contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) get owns(custom-attribute) unset annotation: @card
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
-    When entity(person) get owns(custom-attribute-2) unset annotation: @card
-    Then entity(person) get owns(custom-attribute-2) get constraints do not contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(0..1)
-    Then entity(person) get owns(custom-attribute-2) get constraints do not contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
-    When entity(person) get owns(custom-attribute-2) set annotation: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get constraints contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
     Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get constraints contain: @card(<arg0>..<arg1>)
-    Then entity(person) get owns(custom-attribute-2) get cardinality: @card(<arg0>..<arg1>)
     When entity(person) unset owns: custom-attribute
-    When entity(person) unset owns: custom-attribute-2
+    Then entity(person) get owns is empty
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then entity(person) get owns is empty
+    Examples:
+      | value-type    | arg0                | arg1                |
+      | string        | 0                   | 10                  |
+      | boolean       | 0                   | 9223372036854775807 |
+      | double        | 1                   | 10                  |
+      | decimal       | 0                   |                     |
+      | date          | 1                   |                     |
+      | datetime-tz   | 1                   | 1                   |
+      | duration      | 9223372036854775807 | 9223372036854775807 |
+      | custom-struct | 9223372036854775807 |                     |
+
+  Scenario Outline: Ordered owns can set @card annotation for <value-type> value type with arguments in correct order and unset it
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value type: <value-type>
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set ordering: ordered
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    When entity(person) get owns(custom-attribute) unset annotation: @card
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(0..)
+    When entity(person) get owns(custom-attribute) set annotation: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg0>..<arg1>)
+    Then entity(person) get owns(custom-attribute) get cardinality: @card(<arg0>..<arg1>)
+    When entity(person) unset owns: custom-attribute
     Then entity(person) get owns is empty
     When transaction commits
     When connection open read transaction for database: typedb
@@ -3201,7 +3324,6 @@ Feature: Concept Owns Annotations
       | string        | 0                   | 10                  |
       | boolean       | 0                   | 9223372036854775807 |
       | double        | 1                   | 10                  |
-      | decimal       | 0                   |                     |
       | date          | 1                   |                     |
       | datetime-tz   | 1                   | 1                   |
       | duration      | 9223372036854775807 | 9223372036854775807 |
@@ -3237,10 +3359,10 @@ Feature: Concept Owns Annotations
     When entity(person) set owns: custom-attribute
     Then entity(person) get owns(custom-attribute) set annotation: @card(2..1); fails
     Then entity(person) get owns(custom-attribute) set annotation: @card(0..0); fails
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @card
+    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @card
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @card
+    Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @card
     Examples:
       | value-type |
       | long       |
@@ -3365,78 +3487,104 @@ Feature: Concept Owns Annotations
       | custom-attribute |
     Then relation(marriage) get owns contain:
       | custom-attribute |
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @card(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @card(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @card(<args>)
-    Then entity(player) get owns do not contain:
+    Then entity(player) get owns contain:
       | second-custom-attribute |
-    Then relation(marriage) get owns do not contain:
+    Then relation(marriage) get owns contain:
       | second-custom-attribute |
     Then entity(player) get owns contain:
       | specialised-custom-attribute |
     Then relation(marriage) get owns contain:
       | specialised-custom-attribute |
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @card(<args>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @card(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @card(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @card(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) do not contain: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) do not contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
     When entity(player) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>)
     When relation(marriage) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
     Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Then entity(person) get owns(second-custom-attribute) get constraints contain: @card(<args>)
     Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @card(<args-specialise>)
     Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @card(<args>)
     Then entity(person) get owns(second-custom-attribute) get declared annotations do not contain: @card(<args-specialise>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Then relation(description) get owns(second-custom-attribute) get constraints contain: @card(<args>)
     Then relation(description) get owns(second-custom-attribute) get constraints do not contain: @card(<args-specialise>)
     Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @card(<args>)
     Then relation(description) get owns(second-custom-attribute) get declared annotations do not contain: @card(<args-specialise>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get owns(custom-attribute) get declared annotations contain: @card(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
-    Then relation(marriage) get owns(custom-attribute) get declared annotations contain: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
     Then entity(player) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
+    Then entity(player) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
     Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations do not contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get declared annotations contain: @card(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Then entity(person) get owns(second-custom-attribute) get constraints contain: @card(<args>)
     Then entity(person) get owns(second-custom-attribute) get constraints do not contain: @card(<args-specialise>)
     Then entity(person) get owns(second-custom-attribute) get declared annotations contain: @card(<args>)
     Then entity(person) get owns(second-custom-attribute) get declared annotations do not contain: @card(<args-specialise>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Then relation(description) get owns(second-custom-attribute) get constraints contain: @card(<args>)
     Then relation(description) get owns(second-custom-attribute) get constraints do not contain: @card(<args-specialise>)
     Then relation(description) get owns(second-custom-attribute) get declared annotations contain: @card(<args>)
@@ -3444,7 +3592,7 @@ Feature: Concept Owns Annotations
     Examples:
       | value-type  | args       | args-specialise |
       | long        | 0..        | 0..10000        |
-      | double      | 0..10      | 0..1            |
+      | double      | 0..10      | 0..2            |
       | decimal     | 0..2       | 1..2            |
       | string      | 1..        | 1..1            |
       | date        | 1..5       | 3..5            |
@@ -3452,7 +3600,7 @@ Feature: Concept Owns Annotations
       | datetime-tz | 38..111    | 39..111         |
       | duration    | 1000..1100 | 1000..1099      |
 
-  Scenario Outline: Inherited @card annotation on owns for <value-type> value type cannot be reset or specialised by the @card of not a subset of arguments
+  Scenario Outline: Inherited @card annotation on owns for <value-type> value type can be reset or specialised by the @card of not a subset of arguments
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
     When create attribute type: second-custom-attribute
@@ -3480,33 +3628,52 @@ Feature: Concept Owns Annotations
     When relation(marriage) set owns: specialised-custom-attribute
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
     When entity(player) get owns(custom-attribute) set annotation: @card(<args-specialise>)
     When relation(marriage) get owns(custom-attribute) set annotation: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>); fails
-    Then relation(marriage) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>); fails
+    When entity(player) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>)
+    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @card(<args-specialise>)
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(description) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) do not contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     When transaction commits
-    When connection open schema transaction for database: typedb
+    When connection open read transaction for database: typedb
     Then entity(player) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(marriage) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
     Then relation(description) get owns(custom-attribute) get constraints contain: @card(<args-specialise>)
-    Then entity(player) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
-    Then relation(marriage) get owns(specialised-custom-attribute) get constraints contain: @card(<args>)
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When entity(player) get owns(specialised-custom-attribute) set annotation: @card(<args>)
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    When relation(marriage) get owns(specialised-custom-attribute) set annotation: @card(<args>)
-    Then transaction commits; fails
+    Then entity(player) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then relation(marriage) get owns(specialised-custom-attribute) get constraints do not contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(specialised-custom-attribute) contain: @card(<args-specialise>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) do not contain: @card(<args>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) do not contain: @card(<args>)
+    Then entity(player) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
+    Then relation(marriage) get constraints for owned attribute(custom-attribute) contain: @card(<args-specialise>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) contain: @card(<args>)
+    Then entity(person) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
+    Then relation(description) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Examples:
       | value-type  | args       | args-specialise |
       | long        | 0..10000   | 0..10001        |
@@ -3527,11 +3694,14 @@ Feature: Concept Owns Annotations
     When <root-type>(<subtype-name-2>) set supertype: <subtype-name>
     When <root-type>(<subtype-name>) set owns: name
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @card(0..)
-    Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(0..)
-    Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @card(0..)
+    Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @card(0..)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(0..)
     When <root-type>(<subtype-name>) get owns(name) set annotation: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(0..)
@@ -3539,12 +3709,18 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(0..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get declared owns do not contain:
       | name |
     When transaction commits
@@ -3555,19 +3731,22 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(0..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..)
     When <root-type>(<subtype-name-2>) set owns: name
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(2..); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(1..); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..6); fails
-    Then <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(0..2); fails
+    Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..)
     When <root-type>(<subtype-name-2>) get owns(name) set annotation: @card(3..6)
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(0..)
@@ -3575,18 +3754,27 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(0..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..6)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(3..6)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @card(3..6)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..6)
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<supertype-name>) get owns(name) get constraints contain: @card(0..)
@@ -3595,18 +3783,27 @@ Feature: Concept Owns Annotations
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations contain: @card(0..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(0..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(0..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(0..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get constraints contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints do not contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations contain: @card(3..)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations do not contain: @card(3..)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(3..)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..)
     Then <root-type>(<supertype-name>) get owns(name) get constraints do not contain: @card(3..6)
     Then <root-type>(<subtype-name>) get owns(name) get constraints do not contain: @card(3..6)
     Then <root-type>(<subtype-name-2>) get owns(name) get constraints contain: @card(3..6)
     Then <root-type>(<supertype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
     Then <root-type>(<subtype-name>) get owns(name) get declared annotations do not contain: @card(3..6)
     Then <root-type>(<subtype-name-2>) get owns(name) get declared annotations contain: @card(3..6)
+    Then <root-type>(<supertype-name>) get constraints for owned attribute(name) do not contain: @card(3..6)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @card(3..6)
+    Then <root-type>(<subtype-name-2>) get constraints for owned attribute(name) contain: @card(3..6)
     Examples:
       | root-type | supertype-name | subtype-name | subtype-name-2 | value-type |
       | entity    | person         | customer     | subscriber     | decimal    |
@@ -4314,16 +4511,19 @@ Feature: Concept Owns Annotations
     When attribute(letter) set annotation: @abstract
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
     When <root-type>(<subtype-name>) set owns: name
-    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(1..1)
+    Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(1..1)
-    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @card(0..1)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..1)
     When <root-type>(<subtype-name>) set owns: letter
     Then <root-type>(<supertype-name>) get owns(literal) set annotation: @card(1..2)
     Then <root-type>(<subtype-name>) get owns(name) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(1..2)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(name) contain: @card(0..1)
     Then <root-type>(<subtype-name>) get constraints for owned attribute(name) do not contain: @card(1..1)
+    Then <root-type>(<supertype-name>) get owns(literal) get cardinality: @card(1..2)
     Then <root-type>(<subtype-name>) get owns(letter) get cardinality: @card(0..1)
     Then <root-type>(<subtype-name>) get constraints for owned attribute(letter) contain: @card(1..2)
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(letter) contain: @card(0..1)
     Then <root-type>(<subtype-name>) get constraints for owned attribute(letter) do not contain: @card(1..1)
     When create attribute type: surname
     When attribute(surname) set supertype: name
@@ -4381,6 +4581,44 @@ Feature: Concept Owns Annotations
 # @distinct
 ########################
 
+  Scenario Outline: Unordered owns for have @distinct constraint by default and cannot change it
+    When create attribute type: custom-attribute
+    When attribute(custom-attribute) set value type: <value-type>
+    When create attribute type: custom-attribute-ordered
+    When attribute(custom-attribute-ordered) set value type: <value-type>
+    When <root-type>(<type-name>) set owns: custom-attribute
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute) contain: @distinct
+    When <root-type>(<type-name>) get owns(custom-attribute) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute) contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct; fails
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute) contain: @distinct
+    When <root-type>(<type-name>) set owns: custom-attribute-ordered[]
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute-ordered) do not contain: @distinct
+    When <root-type>(<type-name>) get owns(custom-attribute-ordered) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute-ordered) do not contain: @distinct
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then <root-type>(<type-name>) get owns(custom-attribute) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute) contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get declared annotations do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(custom-attribute-ordered) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute-ordered) do not contain: @distinct
+    Examples:
+      | root-type | type-name   | value-type |
+      | entity    | person      | long       |
+      | relation  | description | string     |
+
   Scenario Outline: Ordered owns for <root-type> can set @distinct annotation for <value-type> value type and unset it
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: <value-type>
@@ -4428,20 +4666,6 @@ Feature: Concept Owns Annotations
       | relation  | description | datetime-tz   |
       | relation  | description | duration      |
       | relation  | description | custom-struct |
-
-  Scenario Outline: Unordered ownership for <root-type> cannot have @distinct annotation for <value-type> value type
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: <value-type>
-    When <root-type>(<type-name>) set owns: custom-attribute
-    Then <root-type>(<type-name>) get owns(custom-attribute) set annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints do not contain: @distinct
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<type-name>) get owns(custom-attribute) get constraints do not contain: @distinct
-    Examples:
-      | root-type | type-name   | value-type |
-      | entity    | person      | long       |
-      | relation  | description | double     |
 
   Scenario: Owns can have @distinct annotation for none value type
     When create attribute type: custom-attribute
@@ -4491,17 +4715,21 @@ Feature: Concept Owns Annotations
     When <root-type>(<type-name>) set owns: name
     Then <root-type>(<type-name>) get owns(name) get ordering: unordered
     Then <root-type>(<type-name>) get owns(name) set annotation: @distinct; fails
-    Then <root-type>(<type-name>) get owns(name) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(name) get constraints contain: @distinct
     When <root-type>(<type-name>) get owns(name) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(name) get constraints do not contain: @distinct
     When <root-type>(<type-name>) get owns(name) set annotation: @distinct
     Then <root-type>(<type-name>) get owns(name) get constraints contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<type-name>) set owns: email
+    Then <root-type>(<type-name>) set owns: email; fails
+    When <root-type>(<type-name>) unset owns: email
+    When <root-type>(<type-name>) set owns: email
     Then <root-type>(<type-name>) get owns(email) get ordering: unordered
-    Then <root-type>(<type-name>) get owns(email) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(email) get constraints contain: @distinct
     Then <root-type>(<type-name>) get owns(email) set annotation: @distinct; fails
     When <root-type>(<type-name>) get owns(email) set ordering: ordered
+    Then <root-type>(<type-name>) get owns(email) get constraints do not contain: @distinct
     When <root-type>(<type-name>) get owns(email) set annotation: @distinct
     Then <root-type>(<type-name>) get owns(email) get constraints contain: @distinct
     Then <root-type>(<type-name>) get owns(address) get constraints do not contain: @distinct
@@ -4538,19 +4766,19 @@ Feature: Concept Owns Annotations
     Then <root-type>(<type-name>) get owns(reference) get constraints do not contain: @distinct
     When <root-type>(<type-name>) get owns(reference) set ordering: unordered
     When <root-type>(<type-name>) get owns(reference) unset annotation: @distinct
+    Then <root-type>(<type-name>) get owns(reference) get constraints contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
     Then <root-type>(<type-name>) get owns(username) get constraints contain: @distinct
-    Then <root-type>(<type-name>) get owns(reference) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(reference) get constraints contain: @distinct
     Then <root-type>(<type-name>) get owns(username) unset annotation: @distinct
     Then <root-type>(<type-name>) get owns(reference) unset annotation: @distinct
-    Then <root-type>(<type-name>) get owns(username) unset annotation: @distinct
     Then <root-type>(<type-name>) get owns(username) get constraints do not contain: @distinct
-    Then <root-type>(<type-name>) get owns(reference) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(reference) get constraints contain: @distinct
     When transaction commits
     When connection open read transaction for database: typedb
     Then <root-type>(<type-name>) get owns(username) get constraints do not contain: @distinct
-    Then <root-type>(<type-name>) get owns(reference) get constraints do not contain: @distinct
+    Then <root-type>(<type-name>) get owns(reference) get constraints contain: @distinct
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
@@ -4587,23 +4815,19 @@ Feature: Concept Owns Annotations
     When <root-type>(<supertype-name>) get owns(username) set ordering: ordered
     When <root-type>(<supertype-name>) get owns(username) set annotation: @distinct
     Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @distinct
-    When <root-type>(<subtype-name>) set owns: subusername
-    When <root-type>(<subtype-name>) get owns(subusername) set ordering: ordered
-    Then <root-type>(<subtype-name>) get owns(subusername) get constraints contain: @distinct
+    When <root-type>(<subtype-name>) set owns: subusername[]
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(subusername) contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(subusername) get constraints do not contain: @distinct
     Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
-    Then <root-type>(<subtype-name>) get owns(subusername) unset annotation: @distinct; fails
+    When <root-type>(<subtype-name>) get owns(subusername) unset annotation: @distinct
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(subusername) contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(subusername) get constraints do not contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(subusername) get constraints contain: @distinct
-    Then <root-type>(<subtype-name>) get owns(subusername) unset annotation: @distinct; fails
-    Then <root-type>(<subtype-name>) get owns(subusername) get constraints contain: @distinct
+    Then <root-type>(<subtype-name>) get constraints for owned attribute(subusername) contain: @distinct
+    Then <root-type>(<subtype-name>) get owns(subusername) get constraints do not contain: @distinct
     Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @distinct
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then <root-type>(<subtype-name>) get owns(subusername) get constraints contain: @distinct
-    Then <root-type>(<subtype-name>) get owns(subusername) get declared annotations do not contain: @distinct
-    Then <root-type>(<supertype-name>) get owns(username) get constraints contain: @distinct
     Examples:
       | root-type | supertype-name | subtype-name |
       | entity    | person         | customer     |
@@ -4695,52 +4919,51 @@ Feature: Concept Owns Annotations
       | duration      |
       | custom-struct |
 
-  Scenario Outline: Owns cannot have @regex annotation if attribute type has @regex annotation
+  Scenario: Owns can set @regex annotation if there is a different @regex annotation on the attribute
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
-    When attribute(custom-attribute) set annotation: @regex(<attribute-regex>)
-    When entity(person) set owns: custom-attribute
-    Then entity(person) get owns(custom-attribute) set annotation: @regex(<owns-regex>); fails
-    Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
+    When attribute(custom-attribute) set annotation: @regex("\S+")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
-    Then entity(person) get owns(custom-attribute) set annotation: @regex(<owns-regex>); fails
-    Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
-    When attribute(custom-attribute) unset annotation: @regex
-    When entity(person) get owns(custom-attribute) set annotation: @regex(<owns-regex>)
-    Then entity(person) get owns(custom-attribute) get constraints contain: @regex(<owns-regex>)
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When entity(person) set owns: custom-attribute
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints do not contain: @regex("\S*")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get constraints contain: @regex(<owns-regex>)
-    Examples:
-      | attribute-regex | owns-regex |
-      | "\S+"           | "\S+"      |
-      | "\S+"           | "another"  |
+    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints do not contain: @regex("\S*")
 
-  Scenario Outline: Attribute type cannot have @regex annotation if owns has @regex annotation
+  Scenario: Attribute type can have @regex annotation if owns has a different @regex annotation
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
     When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @regex(<owns-regex>)
-    Then entity(person) get owns(custom-attribute) get constraints contain: @regex(<owns-regex>)
-    Then attribute(custom-attribute) set annotation: @regex(<attribute-regex>); fails
-    Then attribute(custom-attribute) get constraint categories do not contain: @regex
+    When entity(person) get owns(custom-attribute) set annotation: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S*")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(custom-attribute) get constraint categories do not contain: @regex
-    Then attribute(custom-attribute) set annotation: @regex(<attribute-regex>); fails
-    Then attribute(custom-attribute) get constraint categories do not contain: @regex
-    When entity(person) get owns(custom-attribute) unset annotation: @regex
-    When attribute(custom-attribute) set annotation: @regex(<attribute-regex>)
-    Then attribute(custom-attribute) get constraints contain: @regex(<attribute-regex>)
+    When attribute(custom-attribute) set annotation: @regex("\S*")
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When attribute(custom-attribute) set annotation: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints do not contain: @regex("\S*")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(custom-attribute) get constraints contain: @regex(<attribute-regex>)
-    Examples:
-      | attribute-regex | owns-regex |
-      | "\S+"           | "\S+"      |
-      | "\S+"           | "another"  |
+    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S*")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints do not contain: @regex("\S*")
 
   Scenario Outline: Owns cannot have @regex annotation of invalid arguments
     When create attribute type: custom-attribute
@@ -4802,19 +5025,7 @@ Feature: Concept Owns Annotations
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
-  Scenario: Owns cannot set @regex annotation if there is a @regex annotation on the attribute
-    When create attribute type: custom-attribute
-    When attribute(custom-attribute) set value type: string
-    When attribute(custom-attribute) set annotation: @regex("\S+")
-    When entity(person) set owns: custom-attribute
-    When entity(person) get owns(custom-attribute) set annotation: @regex("\S+"); fails
-    Then entity(person) get owns(custom-attribute) set annotation: @regex("s"); fails
-    Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
-
-  Scenario: Owns cannot specialise inherited @regex annotation
+  Scenario: Owns can specialise inherited @regex annotation with any value
     When create attribute type: custom-attribute
     When attribute(custom-attribute) set value type: string
     When attribute(custom-attribute) set annotation: @abstract
@@ -4831,42 +5042,33 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute) get constraints contain: @regex("\S+")
     Then entity(customer) get owns(custom-attribute-2) get constraint categories do not contain: @regex
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("test"); fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
+    When entity(customer) get owns(custom-attribute-2) set annotation: @regex("test")
+    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @regex("test")
+    Then entity(person) get owns(custom-attribute) get declared annotations contain: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("test")
     Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute-2) get constraint categories do not contain: @regex
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("S+"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("S"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("\"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex(".*"); fails
-    When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute-2) get constraint categories do not contain: @regex
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("S+"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex("S"); fails
-    Then entity(customer) get owns(custom-attribute-2) set annotation: @regex(".*"); fails
-    When entity(customer) get owns(custom-attribute-2) set annotation: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute-2) get constraints contain: @regex("\S+")
-    Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute-2) get constraint categories do not contain: @regex
-    When entity(customer) get owns(custom-attribute-2) set annotation: @regex(".*"); fails
-    When entity(customer) get owns(custom-attribute-2) unset annotation: @regex
-    Then entity(customer) get owns(custom-attribute-2) get constraints contain: @regex("\S+")
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @regex("test")
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get declared annotations contain: @regex("test")
+    Then entity(customer) get owns(custom-attribute-2) get declared annotations do not contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get constraints contain: @regex("test")
+    Then entity(customer) get owns(custom-attribute-2) get constraints do not contain: @regex("\S+")
+    Then entity(customer) get constraints for owned attribute(custom-attribute-2) contain: @regex("test")
+    Then entity(customer) get constraints for owned attribute(custom-attribute-2) contain: @regex("\S+")
     When transaction commits
     When connection open read transaction for database: typedb
+    Then entity(person) get owns(custom-attribute) get declared annotations do not contain: @regex("test")
+    Then entity(person) get owns(custom-attribute) get declared annotations contain: @regex("\S+")
+    Then entity(person) get owns(custom-attribute) get constraints do not contain: @regex("test")
     Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
-    Then entity(customer) get owns(custom-attribute-2) get constraints contain: @regex("\S+")
+    Then entity(person) get constraints for owned attribute(custom-attribute) do not contain: @regex("test")
+    Then entity(person) get constraints for owned attribute(custom-attribute) contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get declared annotations contain: @regex("test")
     Then entity(customer) get owns(custom-attribute-2) get declared annotations do not contain: @regex("\S+")
+    Then entity(customer) get owns(custom-attribute-2) get constraints contain: @regex("test")
+    Then entity(customer) get owns(custom-attribute-2) get constraints do not contain: @regex("\S+")
+    Then entity(customer) get constraints for owned attribute(custom-attribute-2) contain: @regex("test")
+    Then entity(customer) get constraints for owned attribute(custom-attribute-2) contain: @regex("\S+")
 
   Scenario: Attribute type cannot unset value type if it has owns with @regex annotation
     When create attribute type: custom-attribute
@@ -4939,7 +5141,7 @@ Feature: Concept Owns Annotations
     When connection open schema transaction for database: typedb
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-2>
     Then relation(description) get owns(custom-attribute) get declared annotations contain: @<annotation-1>
-    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-1>
+    When relation(description) get owns(custom-attribute) unset annotation: @<annotation-category-1>
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-1>
     When transaction commits
     When connection open read transaction for database: typedb
@@ -5101,31 +5303,41 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(name) get declared annotations contain: @card(<card-args>)
     Then entity(person) get owns(name) get cardinality: @card(<card-args>)
     Then entity(person) get owns(name) is key: false
-    Then entity(customer) get owns(surname) get constraints contain: @card(<card-args>)
     Then entity(customer) get owns(surname) get declared annotations do not contain: @card(<card-args>)
-    Then entity(customer) get owns(surname) get cardinality: @card(<card-args>)
+    Then entity(customer) get owns(surname) get constraints do not contain: @card(<card-args>)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @card(<card-args>)
+    Then entity(customer) get owns(surname) get cardinality: @card(0..1)
     Then entity(customer) get owns(surname) is key: false
-    Then entity(subscriber) get owns(surname) get constraints do not contain: @card(<card-args>)
     Then entity(subscriber) get owns(surname) is key: true
+    Then entity(subscriber) get constraints for owned attribute(surname) contain: @card(1..1)
     Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
     Then entity(person) get owns(name) set annotation: @key; fails
     When entity(customer) get owns(surname) set annotation: @key
     Then entity(customer) get owns(surname) is key: true
     Then entity(customer) get owns(surname) get cardinality: @card(1..1)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @card(1..1)
     When entity(subscriber) get owns(third-name) set annotation: @key
     Then entity(subscriber) get owns(third-name) is key: true
     Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
+    Then entity(subscriber) get constraints for owned attribute(third-name) contain: @card(1..1)
     When transaction commits
     When connection open read transaction for database: typedb
     Then entity(person) get owns(name) is key: false
     Then entity(person) get owns(name) get constraints contain: @card(<card-args>)
+    Then entity(person) get constraints for owned attribute(name) contain: @card(<card-args>)
     Then entity(person) get owns(name) get cardinality: @card(<card-args>)
     Then entity(customer) get owns(surname) is key: true
     Then entity(customer) get owns(surname) get cardinality: @card(1..1)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @card(1..1)
+    Then entity(customer) get constraints for owned attribute(surname) contain: @card(<card-args>)
     Then entity(subscriber) get owns(surname) is key: true
     Then entity(subscriber) get owns(surname) get cardinality: @card(1..1)
+    Then entity(subscriber) get constraints for owned attribute(surname) contain: @card(1..1)
+    Then entity(subscriber) get constraints for owned attribute(surname) contain: @card(<card-args>)
     Then entity(subscriber) get owns(third-name) is key: true
     Then entity(subscriber) get owns(third-name) get cardinality: @card(1..1)
+    Then entity(subscriber) get constraints for owned attribute(third-name) contain: @card(1..1)
+    Then entity(subscriber) get constraints for owned attribute(third-name) contain: @card(<card-args>)
     Examples:
       | card-args |
       | 0..2      |
