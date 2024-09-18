@@ -2033,6 +2033,8 @@ Feature: Data validation
 
 
   Scenario: Owns data is revalidated when new cardinality constraints appear
+    # Setup
+
     When create attribute type: ref
     When attribute(ref) set value type: string
     When create attribute type: attr00
@@ -2056,6 +2058,8 @@ Feature: Data validation
     When entity(ent1) set owns: attr1
     Then entity(ent2) get constraints for owned attribute(attr1) contain: @card(0..1)
     When transaction commits
+
+    # Direct cardinality changes validation
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) create new instance with key(ref): ent2
@@ -2137,6 +2141,8 @@ Feature: Data validation
     When $attr1_3 = attribute(attr1) put instance with value: "attr1_3"
     When entity $ent2 set has: $attr1_3
     Then transaction commits; fails
+
+    # Default cardinality effect validation
 
     When connection open schema transaction for database: typedb
     Then entity(ent1) get owns(attr1) unset annotation: @card; fails
@@ -2309,6 +2315,8 @@ Feature: Data validation
     When entity $ent2 unset has: $attr1_1
     Then transaction commits; fails
 
+    # Interface type supertype changes validation
+
     When connection open schema transaction for database: typedb
     When attribute(attr1) set value type: string
     When attribute(attr1) set annotation: @independent
@@ -2404,4 +2412,64 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr00
     When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr2) set supertype: attr00; fails
+    Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
+    When entity(ent0) get owns(attr0) set annotation: @card(0..2)
+    Then attribute(attr2) set supertype: attr00
+    Then entity(ent2) set owns: attr00; fails
+    When attribute(attr2) set supertype: attr0
+    Then entity(ent2) set owns: attr00
+    Then attribute(attr2) set supertype: attr00; fails
+    When entity(ent2) get owns(attr00) set annotation: @card(0..2)
+    Then attribute(attr2) set supertype: attr00
+    When entity(ent2) get owns(attr00) set annotation: @card(2..2)
+    Then attribute(attr2) set supertype: attr0; fails
+    When entity(ent2) get owns(attr00) set annotation: @card(1..2)
+    Then attribute(attr2) set supertype: attr0; fails
+    When entity(ent2) get owns(attr00) set annotation: @card(0..2)
+    Then attribute(attr2) set supertype: attr0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent2 set has: $attr1_1
+    When entity $ent2 set has: $attr1_2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get owns(attr1) set annotation: @card(2..2); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(1..2); fails
+    Then entity(ent1) get owns(attr1) set annotation: @card(1..); fails
+    When entity(ent1) get owns(attr1) set annotation: @card(0..2)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent2 set has: $attr1_1
+    When entity $ent2 set has: $attr1_2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(0..2)
+    Then attribute(attr1) set supertype: attr2; fails
+    Then attribute(attr1) set supertype: attr0; fails
+    When entity(ent0) get owns(attr0) set annotation: @card(2..3)
+    Then attribute(attr1) set supertype: attr2; fails
+    Then attribute(attr1) set supertype: attr0; fails
+    Then entity(ent0) get owns(attr0) set annotation: @card(3..4); fails
+    When entity(ent0) get owns(attr0) set annotation: @card(2..4)
+    # TODO: Cannot set attr2 as supertype as it needs to be abstract.
+    # Cover this case when attribute supertypes will be allowed to supertype (check similar tests for relates/plays)
+    Then attribute(attr1) set supertype: attr2; fails
+    Then attribute(attr1) set supertype: attr0
+    Then transaction commits
+
+    # Object type supertype changes validation
+
 
