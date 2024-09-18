@@ -418,3 +418,80 @@ Feature: Concept Ownership
     When $attr2_val1 = attribute(attr2) put instance with value: "val1"
     When entity $ent1 set has(attr0[]): [$attr1_val, $attr2_val1]
     Then transaction commits
+
+  Scenario: Owned unique siblings of the same value can be owned by the same object
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent0
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @card(0..)
+    When entity(ent0) get owns(attr0) set annotation: @unique
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When entity(ent1) set owns: attr1
+    When entity(ent1) set owns: attr2
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1 = attribute(attr1) put instance with value: "val"
+    When $attr2 = attribute(attr2) put instance with value: "val"
+    When entity $ent1 set has: $attr1
+    When entity $ent1 set has: $attr2
+    Then transaction commits
+
+  Scenario: Owned lists are correctly validated against @unique constraint
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent1
+    When entity(ent1) set owns: ref
+    When entity(ent1) set owns: attr0[]
+    When entity(ent1) get owns(attr0) set annotation: @unique
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $val1 = attribute(attr0) put instance with value: "val1"
+    When $val2 = attribute(attr0) put instance with value: "val2"
+    When entity $ent1 set has(attr0[]): [$val1, $val2]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $val1 = attribute(attr0) get instance with value: "val1"
+    Then entity $ent1 set has(attr0[]): [$val1, $val1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $val2 = attribute(attr0) get instance with value: "val2"
+    Then entity $ent1 set has(attr0[]): [$val2, $val2]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When entity $ent1 unset has: attr0[]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $val1 = attribute(attr0) get instance with value: "val1"
+    Then entity $ent1 set has(attr0[]): [$val1, $val1]
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) get instance with key(ref): ent1
+    When $val2 = attribute(attr0) get instance with value: "val2"
+    Then entity $ent1 set has(attr0[]): [$val2, $val2]
+    Then transaction commits
+
+    # TODO: Add steps to check what @unique means for lists when it's in the spec
