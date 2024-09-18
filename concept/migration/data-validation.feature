@@ -2547,7 +2547,7 @@ Feature: Data validation
     Then entity(ent0) get owns(attr0) set annotation: @card(3..4); fails
     When entity(ent0) get owns(attr0) set annotation: @card(2..4)
     # TODO: Cannot set attr2 as supertype as it needs to be abstract.
-    # Cover this case when attribute supertypes will be allowed to supertype (check similar tests for plays)
+    # Cover this case when attribute supertypes will be allowed to supertype!
     Then attribute(attr1) set supertype: attr2; fails
     Then attribute(attr1) set supertype: attr0
     Then transaction commits
@@ -3198,537 +3198,656 @@ Feature: Data validation
     # Object type supertype changes cannot affect relates as role types' supertypes are set through specialisation
 
 
+  Scenario: Plays data is revalidated when new cardinality constraints appear
+    # Setup
 
-#  Scenario: Plays data is revalidated when new cardinality constraints appear
-#    # Setup
-#
-#    When create attribute type: ref
-#    When attribute(ref) set value type: string
-#    When create relation type: rel0
-#    When relation(rel0) create role: role00
-#    When relation(rel0) get role(role00) set annotation: @abstract
-#    When relation(rel0) create role: role0
-#    When relation(rel0) get role(role0) set annotation: @abstract
-#    When create relation type: rel1
-#    When relation(rel1) set supertype: rel0
-#    When relation(rel1) create role: role1
-#    When create entity type: ent0
-#    When entity(ent0) set owns: ref
-#    When entity(ent0) get owns(ref) set annotation: @key
-#    When create entity type: ent1
-#    When create entity type: ent2
-#    When entity(ent1) set supertype: ent0
-#    When entity(ent2) set supertype: ent1
-#    When entity(ent0) set plays: rel0:role0
-#    When entity(ent1) set plays: rel1:role1
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    When transaction commits
-#
-#    # Direct cardinality changes validation
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) create new instance with key(ref): ent2
-#    When transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
-#    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..1); fails
-#    Then entity(ent0) get owns(attr0) set annotation: @card(1..); fails
-#    Then entity(ent0) get owns(attr0) set annotation: @card(1..1); fails
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..1)
-#    When transaction closes
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) put instance with value: "attr1_1"
-#    When $attr1_2 = attribute(attr1) put instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_1
-#    When entity $ent2 set has: $attr1_2
-#    Then transaction commits; fails
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) put instance with value: "attr1_1"
-#    When entity $ent2 set has: $attr1_1
-#    When transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..)
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..1)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..1)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..1)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..)
-#    When entity(ent1) get plays(rel1:role1) unset annotation: @card
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..1)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..)
-#    Then entity(ent0) get owns(attr0) set annotation: @card(2..3); fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..3)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_2 = attribute(attr1) put instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_2
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_3 = attribute(attr1) put instance with value: "attr1_3"
-#    When entity $ent2 set has: $attr1_3
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..2)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_3 = attribute(attr1) put instance with value: "attr1_3"
-#    When entity $ent2 set has: $attr1_3
-#    Then transaction commits; fails
-#
-#    # Default cardinality effect validation
-#    # Set sibling capability effect validation
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent1) get plays(rel1:role1) unset annotation: @card; fails
-#    When create attribute type: attr2
-#    When entity(ent2) set owns: attr2
-#    Then entity(ent2) get owns(attr2) set annotation: @card(1..); fails
-#    When attribute(attr2) set supertype: attr0
-#    Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_1 = attribute(attr2) put instance with value: "attr2_1"
-#    When entity $ent2 set has: $attr2_1
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(2..3)
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..3)
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..3)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(2..2)
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_1 = attribute(attr2) put instance with value: "attr2_1"
-#    When entity $ent2 set has: $attr2_1
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(2..3)
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_2 = attribute(attr2) put instance with value: "attr2_2"
-#    When entity $ent2 set has: $attr2_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent2) get owns(attr2) set annotation: @card(1..10)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..10)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..10)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..3)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..10)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_2 = attribute(attr2) put instance with value: "attr2_2"
-#    When entity $ent2 set has: $attr2_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(2..4)
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..10)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..10)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..10)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_2 = attribute(attr2) put instance with value: "attr2_2"
-#    When entity $ent2 set has: $attr2_2
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 unset has: $attr1_2
-#    When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
-#    When entity $ent2 unset has: $attr2_1
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When relation $rel2 remove player for role(role1): $player1_1
-#    Then transaction commits; fails
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
-#    When entity $ent2 unset has: $attr2_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent2) get owns(attr2) set annotation: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
-#    When entity $ent2 unset has: $attr2_2
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent1) get plays(rel1:role1) unset annotation: @card
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(1..4)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(1..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When relation $rel2 remove player for role(role1): $player1_1
-#    Then transaction commits; fails
-#
-#    # Interface type supertype changes validation
-#
-#    When connection open schema transaction for database: typedb
-#    When attribute(attr1) set value type: string
-#    When attribute(attr1) set annotation: @independent
-#    Then attribute(attr1) unset supertype; fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..3)
-#    Then attribute(attr1) unset supertype
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..3)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When entity $ent2 unset has: $attr1_1
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
-#    When entity $ent2 set has: $attr1_1
-#    When entity $ent2 set has: $attr2_1
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..1)
-#    Then attribute(attr1) set supertype: attr0; fails
-#    Then entity(ent0) get owns(attr0) set annotation: @card(2..2); fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(1..2)
-#    When attribute(attr1) set supertype: attr0
-#    When attribute(attr1) unset value type
-#    When attribute(attr1) unset annotation: @independent
-#    Then entity(ent0) get owns(attr0) set annotation: @card(2..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(2..2)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(2..2)
-#    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(2..2)
-#    Then entity(ent2) get constraints for played role(rel2:role2) contain: @card(0..)
-#    Then entity(ent2) get constraints for played role(rel2:role2) do not contain: @card(0..1)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
-#    When entity $ent2 unset has: $attr1_1
-#    When entity $ent2 unset has: $attr2_1
-#    Then transaction commits; fails
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
-#    When entity $ent2 unset has: $attr2_1
-#    Then transaction commits; fails
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When entity $ent2 unset has: $attr1_1
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When attribute(attr1) set value type: string
-#    When attribute(attr1) set annotation: @independent
-#    When attribute(attr2) set value type: string
-#    When attribute(attr2) set annotation: @independent
-#    Then attribute(attr1) unset supertype; fails
-#    Then attribute(attr2) unset supertype; fails
-#    When transaction closes
-#
-#    When connection open schema transaction for database: typedb
-#    Then attribute(attr1) set supertype: attr00; fails
-#    When transaction closes
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
-#    When entity $ent2 unset has: $attr1_1
-#    When entity $ent2 set has: $attr2_2
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then attribute(attr1) set supertype: attr00
-#    When transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then attribute(attr2) set supertype: attr00; fails
-#    Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..2)
-#    Then attribute(attr2) set supertype: attr00
-#    Then entity(ent2) set owns: attr00; fails
-#    When attribute(attr2) set supertype: attr0
-#    Then entity(ent2) set owns: attr00
-#    Then attribute(attr2) set supertype: attr00; fails
-#    When entity(ent2) get owns(attr00) set annotation: @card(0..2)
-#    Then attribute(attr2) set supertype: attr00
-#    When entity(ent2) get owns(attr00) set annotation: @card(2..2)
-#    Then attribute(attr2) set supertype: attr0; fails
-#    When entity(ent2) get owns(attr00) set annotation: @card(1..2)
-#    Then attribute(attr2) set supertype: attr0; fails
-#    When entity(ent2) get owns(attr00) set annotation: @card(0..2)
-#    Then attribute(attr2) set supertype: attr0
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_1
-#    When entity $ent2 set has: $attr1_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent1) get plays(rel1:role1) set annotation: @card(2..2); fails
-#    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..2); fails
-#    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
-#    When entity(ent1) get plays(rel1:role1) set annotation: @card(0..2)
-#    When transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_1
-#    When entity $ent2 set has: $attr1_2
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..2)
-#    Then attribute(attr1) set supertype: attr2; fails
-#    Then attribute(attr1) set supertype: attr0; fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(2..3)
-#    Then attribute(attr1) set supertype: attr2; fails
-#    Then attribute(attr1) set supertype: attr0; fails
-#    Then entity(ent0) get owns(attr0) set annotation: @card(3..4); fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(2..4)
-#    # TODO: Cannot set attr2 as supertype as it needs to be abstract.
-#    # Cover this case when attribute supertypes will be allowed to supertype (check similar tests for relates/plays)
-#    Then attribute(attr1) set supertype: attr2; fails
-#    Then attribute(attr1) set supertype: attr0
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_3 = attribute(attr2) put instance with value: "attr2_3"
-#    When entity $ent2 set has: $attr2_3
-#    Then transaction commits; fails
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr2_3 = attribute(attr2) put instance with value: "attr2_3"
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr2_3
-#    When entity $ent2 unset has: $attr1_2
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then attribute(attr2) set supertype: attr00; fails
-#    Then attribute(attr1) set supertype: attr00
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then attribute(attr2) set supertype: attr00; fails
-#    Then attribute(attr1) set supertype: attr0
-#    Then transaction commits
-#
-#    # Object type supertype changes validation
-#
-#    When connection open schema transaction for database: typedb
-#    When create entity type: ent00
-#    When entity(ent00) set owns: attr0
-#    When entity(ent00) set owns: ref
-#    When entity(ent00) get owns(ref) set annotation: @key
-#    When create entity type: ent11
-#    When entity(ent11) set owns: ref
-#    When entity(ent11) get owns(ref) set annotation: @key
-#    When entity(ent11) set owns: attr1
-#    Then entity(ent00) get owns(attr0) get cardinality: @card(0..1)
-#    Then entity(ent11) get plays(rel1:role1) get cardinality: @card(0..1)
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent2) set supertype: ent11
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent2) set supertype: ent00; fails
-#    When entity(ent2) set supertype: ent1
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent11) get plays(rel1:role1) set annotation: @key
-#    Then entity(ent11) get plays(rel1:role1) get cardinality: @card(1..1)
-#    When entity(ent2) set supertype: ent11
-#    Then transaction commits
-#
-#    When connection open write transaction for database: typedb
-#    When $ent2 = entity(ent2) get instance with key(ref): ent2
-#    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
-#    When entity $ent2 set has: $attr1_2
-#    Then transaction commits; fails
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent2) set supertype: ent1
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent1) set supertype: ent00; fails
-#    When entity(ent00) get owns(attr0) set annotation: @card(0..3)
-#    Then entity(ent1) set supertype: ent00; fails
-#    When entity(ent00) get owns(attr0) set annotation: @card(3..4)
-#    Then entity(ent1) set supertype: ent00
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then entity(ent1) set supertype: ent0
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent00) get owns(attr0) set annotation: @card(0..3)
-#    Then entity(ent1) set supertype: ent00; fails
-#    When entity(ent00) unset owns: attr0
-#    Then entity(ent1) set supertype: ent00
-#    Then entity(ent00) set owns: attr0; fails
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..1)
-#    Then entity(ent1) set supertype: ent0; fails
-#    When entity(ent0) get owns(attr0) set annotation: @card(0..)
-#    Then entity(ent1) set supertype: ent0
-#    Then transaction commits
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create relation type: rel0
+    When relation(rel0) create role: role00
+    When relation(rel0) get role(role00) set annotation: @abstract
+    When relation(rel0) get role(role00) set annotation: @card(0..)
+    When relation(rel0) create role: role0
+    When relation(rel0) get role(role0) set annotation: @abstract
+    When relation(rel0) get role(role0) set annotation: @card(0..)
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: role1
+    When relation(rel1) get role(role1) set specialise: role0
+    When relation(rel1) get role(role1) set annotation: @card(0..)
+    When create relation type: rel2
+    When relation(rel2) set supertype: rel1
+    When relation(rel2) set owns: ref
+    When relation(rel2) get owns(ref) set annotation: @key
+    When relation(rel2) create role: anchor
+    When create entity type: anchor
+    When entity(anchor) set plays: rel2:anchor
+    When create entity type: ent0
+    When entity(ent0) set owns: ref
+    When entity(ent0) get owns(ref) set annotation: @key
+    When create entity type: ent1
+    When create entity type: ent2
+    When entity(ent1) set supertype: ent0
+    When entity(ent2) set supertype: ent1
+    When entity(ent0) set plays: rel0:role0
+    When entity(ent1) set plays: rel1:role1
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $anchor = entity(anchor) create new instance
+    When $rel1 = relation(rel2) create new instance with key(ref): rel1
+    When relation $rel1 add player for role(anchor): $anchor
+    When $rel2 = relation(rel2) create new instance with key(ref): rel2
+    When relation $rel2 add player for role(anchor): $anchor
+    When $rel3 = relation(rel2) create new instance with key(ref): rel3
+    When relation $rel3 add player for role(anchor): $anchor
+    When transaction commits
+
+    # Direct cardinality changes validation
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..1); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..); fails
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..1); fails
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 add player for role(role1): $ent2
+    When relation $rel2 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent2
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..1)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..1)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..)
+    When entity(ent1) get plays(rel1:role1) unset annotation: @card
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..1)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..)
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..3); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role1): $ent2
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    # Default cardinality effect validation (no validation as it creates @card(0..)!
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get plays(rel1:role1) unset annotation: @card
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..3)
+    Then transaction commits
+
+    # Set sibling capability effect validation
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) create role: role2
+    When relation(rel1) get role(role2) set specialise: role0
+    When relation(rel1) get role(role2) set annotation: @card(0..)
+    When entity(ent2) set plays: rel1:role2
+    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..); fails
+    When relation(rel1) get role(role2) set specialise: role0
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
+    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..1); fails
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(2..2)
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(1..10)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..10)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..10)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..3)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..10)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..10)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..10)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..10)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 remove player for role(role1): $ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 remove player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(0..)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 remove player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) unset annotation: @card
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(1..4)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(1..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits; fails
+
+    # Interface type supertype changes validation
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) unset specialise; fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
+    Then relation(rel1) get role(role1) unset specialise
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..3)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent2
+    When relation $rel1 add player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
+    Then relation(rel1) get role(role1) set specialise: role0; fails
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
+    When relation(rel1) get role(role1) set specialise: role0
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(2..2)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(2..2)
+    Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
+    Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(2..2)
+    Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
+    Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    When relation $rel1 remove player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) unset specialise; fails
+    Then relation(rel1) get role(role2) unset specialise; fails
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) set specialise: role00; fails
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 remove player for role(role1): $ent2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role1) set specialise: role00
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
+    When entity(ent2) set plays: rel0:role00
+    When entity(ent2) get plays(rel0:role00) set annotation: @card(0..1)
+    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When relation(rel1) get role(role2) set specialise: role0
+    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
+    Then relation(rel1) get role(role2) set specialise: role00
+    When entity(ent2) get plays(rel0:role00) set annotation: @card(2..2)
+    Then relation(rel1) get role(role2) set specialise: role0; fails
+    When entity(ent2) get plays(rel0:role00) set annotation: @card(1..2)
+    Then relation(rel1) get role(role2) set specialise: role0; fails
+    When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
+    Then relation(rel1) get role(role2) set specialise: role0
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 add player for role(role1): $ent2
+    When relation $rel2 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(2..2); fails
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..2); fails
+    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(0..2)
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel1 add player for role(role1): $ent2
+    When relation $rel2 add player for role(role1): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
+    Then relation(rel1) get role(role1) set specialise: role0; fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
+    Then relation(rel1) get role(role1) set specialise: role0; fails
+    Then entity(ent0) get plays(rel0:role0) set annotation: @card(3..4); fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
+    Then relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel3 add player for role(role2): $ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 remove player for role(role1): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then relation(rel1) get role(role1) set specialise: role00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits
+
+    # Object type supertype changes validation
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent00
+    When entity(ent00) set plays: rel0:role0
+    When entity(ent00) set owns: ref
+    When entity(ent00) get owns(ref) set annotation: @key
+    When create entity type: ent11
+    When entity(ent11) set owns: ref
+    When entity(ent11) get owns(ref) set annotation: @key
+    When entity(ent11) set plays: rel1:role1
+    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1)
+    Then entity(ent11) get plays(rel1:role1) set annotation: @card(0..1)
+    Then entity(ent00) get plays(rel0:role0) get cardinality: @card(0..1)
+    Then entity(ent11) get plays(rel1:role1) get cardinality: @card(0..1)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set supertype: ent11
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) set supertype: ent00; fails
+    When entity(ent2) set supertype: ent1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent11) get plays(rel1:role1) set annotation: @card(1..1)
+    Then entity(ent11) get plays(rel1:role1) get cardinality: @card(1..1)
+    When entity(ent2) set supertype: ent11
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set supertype: ent1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) get plays(rel0:role0) set annotation: @card(3..4)
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) unset plays: rel0:role0
+    Then entity(ent1) set supertype: ent00
+    When entity(ent00) set plays: rel0:role0
+    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1); fails
+    When entity(ent00) unset plays: rel0:role0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then entity(ent1) set supertype: ent0; fails
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..)
+    Then entity(ent1) set supertype: ent0
+    Then transaction commits
+
+    # Redeclaration with specialisation validation
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set plays: rel0:role0
+    When entity(ent2) set plays: rel0:role0
+    When entity(ent1) unset plays: rel0:role0
+    When entity(ent2) unset plays: rel0:role0
+    When entity(ent2) set plays: rel1:role1
+    Then entity(ent2) get plays(rel1:role1) set annotation: @card(2..); fails
+    When entity(ent2) get plays(rel1:role1) set annotation: @card(1..)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role1) set annotation: @card(0..1)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 remove player for role(role1): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(3..)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel2 remove player for role(role2): $ent2
+    When relation $rel3 remove player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When $rel3 = relation(rel2) get instance with key(ref): rel3
+    When relation $rel2 remove player for role(role2): $ent2
+    When relation $rel3 remove player for role(role2): $ent2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set plays: rel0:role0
+    Then entity(ent2) get plays(rel0:role0) set annotation: @card(2..); fails
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(1..)
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(1..1)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel1 = relation(rel2) get instance with key(ref): rel1
+    When relation $rel1 add player for role(role1): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(0..5)
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $rel2 = relation(rel2) get instance with key(ref): rel2
+    When relation $rel2 add player for role(role2): $ent2
+    Then transaction commits
