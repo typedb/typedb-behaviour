@@ -548,7 +548,7 @@ Feature: Data validation
 
 
     # TODO: Uncomment this test when abstract plays are introduced!
-#  Scenario: Instances of role-playing hidden by abstract okats must not exist
+#  Scenario: Instances of role-playing hidden by abstract roles must not exist
 #    Given create relation type: rel0
 #    Given relation(rel0) create role: role0
 #    Given create relation type: rel1
@@ -612,6 +612,7 @@ Feature: Data validation
     Given entity(ent2) set supertype: ent1
     Given create entity type: ent10
     Given transaction commits
+
     Given connection open write transaction for database: typedb
     Given $ent2 = entity(ent2) create new instance
     Given $attr0 = attribute(attr0) put instance with value: "attr0"
@@ -620,6 +621,86 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     Then entity(ent2) set supertype: ent10; fails
+    When entity(ent2) set owns: attr0
+    Then entity(ent2) set supertype: ent10
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) unset owns: attr0; fails
+    When entity(ent10) set owns: attr0
+    Then entity(ent2) unset owns: attr0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent11
+    Then entity(ent2) set supertype: ent11; fails
+    When entity(ent11) set owns: attr0
+    Then entity(ent2) set supertype: ent11
+    Then transaction commits
+
+
+  Scenario: A type may not be moved if it has role playing instances which would be lost as a result of that move
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given create relation type: rel1
+    Given relation(rel1) create role: role1
+    Given create relation type: rel2
+    Given relation(rel2) set supertype: rel0
+    Given relation(rel2) create role: role2
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel0:role0
+    Given create entity type: ent1
+    Given create entity type: ent2
+    Given entity(ent2) set supertype: ent0
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent2 = entity(ent2) create new instance
+    Given $rel2 = relation(rel2) create new instance
+    Given relation $rel2 add player for role(role0): $ent2
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) set supertype: ent1; fails
+    When entity(ent2) set plays: rel0:role0
+    Then entity(ent2) set supertype: ent1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) unset plays: rel0:role0; fails
+    When entity(ent1) set plays: rel0:role0
+    Then entity(ent2) unset plays: rel0:role0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When create entity type: ent11
+    Then entity(ent2) set supertype: ent11; fails
+    When entity(ent11) set plays: rel0:role0
+    Then entity(ent2) set supertype: ent11
+    Then transaction commits
+
+
+  Scenario: A relation type may not be moved if it has instances of roleplayers which would be lost as a result of that move
+    Given create relation type: rel0
+    Given relation(rel0) create role: role0
+    Given create relation type: rel1
+    Given relation(rel1) create role: role1
+    Given create relation type: rel2
+    Given relation(rel2) set supertype: rel0
+    Given relation(rel2) create role: role2
+    Given create entity type: ent0
+    Given entity(ent0) set plays: rel0:role0
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent0 = entity(ent0) create new instance
+    Given $rel2 = relation(rel2) create new instance
+    Given relation $rel2 add player for role(role0): $ent0
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) set supertype: rel1; fails
+    Then transaction commits
 
 
     # TODO: Uncomment this test when abstract plays are introduced!
@@ -2143,6 +2224,7 @@ Feature: Data validation
     Then transaction commits; fails
 
     # Default cardinality effect validation
+    # Set sibling capability effect validation
 
     When connection open schema transaction for database: typedb
     Then entity(ent1) get owns(attr1) unset annotation: @card; fails
@@ -2470,6 +2552,100 @@ Feature: Data validation
     Then attribute(attr1) set supertype: attr0
     Then transaction commits
 
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr2_3 = attribute(attr2) put instance with value: "attr2_3"
+    When entity $ent2 set has: $attr2_3
+    Then transaction commits; fails
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr2_3 = attribute(attr2) put instance with value: "attr2_3"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent2 set has: $attr2_3
+    When entity $ent2 unset has: $attr1_2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr2) set supertype: attr00; fails
+    Then attribute(attr1) set supertype: attr00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then attribute(attr2) set supertype: attr00; fails
+    Then attribute(attr1) set supertype: attr0
+    Then transaction commits
+
     # Object type supertype changes validation
 
+    When connection open schema transaction for database: typedb
+    When create entity type: ent00
+    When entity(ent00) set owns: attr0
+    When entity(ent00) set owns: ref
+    When entity(ent00) get owns(ref) set annotation: @key
+    When create entity type: ent11
+    When entity(ent11) set owns: ref
+    When entity(ent11) get owns(ref) set annotation: @key
+    When entity(ent11) set owns: attr1
+    Then entity(ent00) get owns(attr0) get cardinality: @card(0..1)
+    Then entity(ent11) get owns(attr1) get cardinality: @card(0..1)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set supertype: ent11
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent2 set has: $attr1_2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent2) set supertype: ent00; fails
+    When entity(ent2) set supertype: ent1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent11) get owns(attr1) set annotation: @key
+    Then entity(ent11) get owns(attr1) get cardinality: @card(1..1)
+    When entity(ent2) set supertype: ent11
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent2 = entity(ent2) get instance with key(ref): ent2
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent2 set has: $attr1_2
+    Then transaction commits; fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set supertype: ent1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) get owns(attr0) set annotation: @card(0..3)
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) get owns(attr0) set annotation: @card(3..4)
+    Then entity(ent1) set supertype: ent00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then entity(ent1) set supertype: ent0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) get owns(attr0) set annotation: @card(0..3)
+    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent00) unset owns: attr0
+    Then entity(ent1) set supertype: ent00
+    Then entity(ent00) set owns: attr0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(0..1)
+    Then entity(ent1) set supertype: ent0; fails
+    When entity(ent0) get owns(attr0) set annotation: @card(0..)
+    Then entity(ent1) set supertype: ent0
+    Then transaction commits
 
