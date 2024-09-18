@@ -725,6 +725,70 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get supertype does not exist
     Then relation(subfathership) get role(subfather) get supertype does not exist
 
+  Scenario: Relation types cannot specialise already specialised inherited role types
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set specialise: parent
+    When create relation type: subfathership
+    When relation(subfathership) set supertype: fathership
+    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    When relation(subfathership) create role: subfather
+    Then relation(subfathership) get role(subfather) set specialise: parent; fails
+    When relation(fathership) get role(father) unset specialise
+    Then relation(fathership) get relates(parentship:parent) is specialising: false
+    Then relation(subfathership) get relates(parentship:parent) is specialising: false
+    Then relation(subfathership) get role(subfather) set specialise: parent
+    Then relation(fathership) get relates(parentship:parent) is specialising: false
+    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get relates(parentship:parent) is specialising: false
+    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get role(father) get supertype does not exist
+    Then relation(subfathership) get role(subfather) get supertype: parentship:parent
+
+  Scenario: Relation types can specialise already specialised role types on the same relation type
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: family
+    When relation(family) set supertype: parentship
+    When relation(family) create role: father
+    When relation(family) create role: mother
+    When relation(family) get role(father) set specialise: parent
+    When relation(family) get role(mother) set specialise: parent
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(family) get role(father) get supertype: parentship:parent
+    Then relation(family) get role(mother) get supertype: parentship:parent
+    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
+    When relation(family) get role(mother) unset specialise
+    Then relation(family) get role(father) get supertype: parentship:parent
+    Then relation(family) get role(mother) get supertype does not exist
+    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(family) get role(father) get supertype: parentship:parent
+    Then relation(family) get role(mother) get supertype does not exist
+    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
+    When relation(family) get role(father) unset specialise
+    Then relation(family) get role(father) get supertype does not exist
+    Then relation(family) get role(mother) get supertype does not exist
+    Then relation(family) get relates(parentship:parent) is specialising: false
+    Then relation(family) get constraints for related role(parentship:parent) do not contain: @abstract
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(family) get role(father) get supertype does not exist
+    Then relation(family) get role(mother) get supertype does not exist
+    Then relation(family) get relates(parentship:parent) is specialising: false
+    Then relation(family) get constraints for related role(parentship:parent) do not contain: @abstract
+
 ########################
 # @annotations common
 ########################
