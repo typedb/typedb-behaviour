@@ -31,35 +31,12 @@ Feature: Schema migration
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @unique
-    Then transaction commits; fails
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set override: attr0
-    Then entity(ent1) get owns(attr0) set annotation: @unique; fails
-    Given transaction closes
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @unique
-    Then entity(ent1) get owns(attr0) set override: attr0; fails
-    Given transaction closes
-
-    Given connection open schema transaction for database: typedb
     Then entity(ent0) unset owns: attr0; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @key
-    # Can't commit yet, because of the redundant declarations
-    Then transaction commits; fails
-
-    Given connection open schema transaction for database: typedb
-    When entity(ent1) set owns: attr0
-    When entity(ent1) get owns(attr0) set annotation: @key
+    When entity(ent1) get owns(attr0) set annotation: @unique
     When entity(ent0) unset owns: attr0
     Then transaction commits
 
@@ -79,13 +56,6 @@ Feature: Schema migration
     Given $attr0 = attribute(attr0) put instance with value: "attr0"
     Given entity $ent1 set has: $attr0
     Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-
-    When entity(ent0) set owns: attr0
-    When entity(ent0) get owns(attr0) set annotation: @key
-    # Can't commit yet, because of the redundant declarations
-    Then transaction commits; fails
 
     Given connection open schema transaction for database: typedb
     When entity(ent0) set owns: attr0
@@ -203,7 +173,7 @@ Feature: Schema migration
     Given create relation type: player1
     Given relation(player1) create role: to-exist2
     Given relation(player1) set supertype: player0
-    Given relation(player1) get role(to-exist2) set override: to-exist
+    Given relation(player1) get role(to-exist2) set specialise: to-exist
     Given relation(rel0) set plays: player1:to-exist2
     Given transaction commits
 
@@ -215,13 +185,13 @@ Feature: Schema migration
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When relation(player1) get role(to-exist2) unset override
+    When relation(player1) get role(to-exist2) unset specialise
     Then relation(player1) unset supertype; fails
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When relation(player1) set plays: rel0:role0
-    When relation(player1) get role(to-exist2) unset override
+    When relation(player1) get role(to-exist2) unset specialise
     When relation(player1) unset supertype
     Then transaction commits
 
@@ -331,11 +301,6 @@ Feature: Schema migration
     When attribute(dog-name) set supertype: name
     When attribute(dog-name) unset value type
     When attribute(person-name) unset value type
-    When entity(person) set owns: person-name
-    When entity(person) get owns(person-name) set annotation: @key
-    When entity(person) get owns(person-name) set override: name
-    When entity(dog) set owns: dog-name
-    When entity(dog) get owns(dog-name) set override: name
     Then transaction commits
 
 
@@ -428,7 +393,7 @@ Feature: Schema migration
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: word
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When $name = attribute(name) get instance with value: "stopper"
     Then attribute $name does not exist
 
@@ -461,7 +426,7 @@ Feature: Schema migration
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: word
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When $surname = attribute(surname) get instance with value: "stopper"
     Then attribute $surname does not exist
 
@@ -489,7 +454,7 @@ Feature: Schema migration
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype does not exist
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When $name = attribute(name) get instance with value: "stopper"
     Then attribute $name does not exist
 
@@ -521,7 +486,7 @@ Feature: Schema migration
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype does not exist
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When $surname = attribute(surname) get instance with value: "stopper"
     Then attribute $surname does not exist
 
@@ -553,14 +518,14 @@ Feature: Schema migration
 ##    When relation(fathership) set annotation: @cascade
 #    When relation(fathership) set supertype: parentship
 ##    When relation(fathership) unset annotation @cascade
-#    Then relation(fathership) get annotations contain: @cascade
+#    Then relation(fathership) get constraints contain: @cascade
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then relation(fathership) get instances is empty
 #    Then transaction closes
 #    When connection open schema transaction for database: typedb
 #    When relation(fathership) set supertype: connection
-#    Then relation(fathership) get annotations do not contain: @cascade
+#    Then relation(fathership) get constraints do not contain: @cascade
 #    When transaction commits
 #    When connection open write transaction for database: typedb
 #    When $deletable = entity(person) create new instance
@@ -573,7 +538,7 @@ Feature: Schema migration
 #    When relation(fathership) set annotation: @cascade
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) unset annotation @cascade
-#    Then relation(fathership) get annotations contain: @cascade
+#    Then relation(fathership) get constraints contain: @cascade
 #    When transaction commits
 #    When connection open write transaction for database: typedb
 #    Then relation(fathership) get instances is not empty
@@ -581,7 +546,7 @@ Feature: Schema migration
 #    Then relation(fathership) get instances is not empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then relation(fathership) get annotations contain: @cascade
+#    Then relation(fathership) get constraints contain: @cascade
 #    Then relation(fathership) get instances is empty
 #
 #  Scenario: Relation type cannot change supertype while implicitly acquiring @cascade annotation with subtype data
@@ -613,14 +578,14 @@ Feature: Schema migration
 ##    When relation(fathership) set annotation: @cascade
 #    When relation(fathership) set supertype: parentship
 ##    When relation(fathership) unset annotation @cascade
-#    Then relation(single-fathership) get annotations contain: @cascade
+#    Then relation(single-fathership) get constraints contain: @cascade
 #    When transaction commits
 #    When connection open read transaction for database: typedb
 #    Then relation(single-fathership) get instances is empty
 #    Then transaction closes
 #    When connection open schema transaction for database: typedb
 #    When relation(fathership) set supertype: connection
-#    Then relation(single-fathership) get annotations do not contain: @cascade
+#    Then relation(single-fathership) get constraints do not contain: @cascade
 #    When transaction commits
 #    When connection open write transaction for database: typedb
 #    When $deletable = entity(person) create new instance
@@ -633,7 +598,7 @@ Feature: Schema migration
 #    When relation(fathership) set annotation: @cascade
 #    When relation(fathership) set supertype: parentship
 #    When relation(fathership) unset annotation @cascade
-#    Then relation(single-fathership) get annotations contain: @cascade
+#    Then relation(single-fathership) get constraints contain: @cascade
 #    When transaction commits
 #    When connection open write transaction for database: typedb
 #    Then relation(single-fathership) get instances is not empty
@@ -641,7 +606,7 @@ Feature: Schema migration
 #    Then relation(single-fathership) get instances is not empty
 #    When transaction commits
 #    When connection open read transaction for database: typedb
-#    Then relation(single-fathership) get annotations contain: @cascade
+#    Then relation(single-fathership) get constraints contain: @cascade
 #    Then relation(single-fathership) get instances is empty
 
 

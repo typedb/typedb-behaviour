@@ -142,7 +142,8 @@ Feature: Concept Relation
   Scenario: Relation chain with no other role players gets deleted on commit
     Then transaction commits
     Given connection open schema transaction for database: typedb
-    Given relation(marriage) create role: dependent-marriage, with @card(0..)
+    Given relation(marriage) create role: dependent-marriage
+    Given relation(marriage) get role(dependent-marriage) set annotation: @card(0..)
     Given relation(marriage) set plays: marriage:dependent-marriage
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -221,10 +222,16 @@ Feature: Concept Relation
     Then relation(parentship) create new instance; fails
     When transaction closes
     When connection open schema transaction for database: typedb
-    Then relation(parentship) unset annotation: @abstract; fails
-    When relation(parentship) get role(parent) unset annotation: @abstract
     When relation(parentship) unset annotation: @abstract
     When entity(parentship-player) unset annotation: @abstract
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then $r = relation(parentship) create new instance
+    Then $p = entity(parentship-player) create new instance
+    Then relation $r add player for role(parent): $p; fails
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When relation(parentship) get role(parent) unset annotation: @abstract
     When transaction commits
     When connection open write transaction for database: typedb
     Then $r = relation(parentship) create new instance
@@ -238,9 +245,11 @@ Feature: Concept Relation
     Given transaction closes
     Given connection open schema transaction for database: typedb
     When create relation type: parentship
-    When relation(parentship) create role: parent, with @card(0..1)
+    When relation(parentship) create role: parent
+    When relation(parentship) get role(parent) set annotation: @card(0..1)
     When create relation type: parentship-player
-    When relation(parentship-player) create role: unplayed-role-leading-to-cleanup, with @card(0..1)
+    When relation(parentship-player) create role: unplayed-role-leading-to-cleanup
+    When relation(parentship-player) get role(unplayed-role-leading-to-cleanup) set annotation: @card(0..1)
     Then relation(parentship-player) get role(unplayed-role-leading-to-cleanup) get cardinality: @card(0..1)
     When relation(parentship-player) set plays: parentship:parent
     When transaction commits

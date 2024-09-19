@@ -69,7 +69,7 @@ Feature: Relation Inference Resolution
       match
         $x isa person;
         ($x) isa employment;
-      get;
+
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -98,7 +98,7 @@ Feature: Relation Inference Resolution
       match
         $x has name "Haikal";
         ($x) isa employment;
-      get;
+
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -108,7 +108,7 @@ Feature: Relation Inference Resolution
       match
         $x has name "Michael";
         ($x) isa employment;
-      get;
+
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -143,7 +143,7 @@ Feature: Relation Inference Resolution
         $i isa item, has name $n;
         $n "3kg jar of Nutella" isa name;
         $p 14.99 isa price;
-      get;
+
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -178,7 +178,7 @@ Feature: Relation Inference Resolution
       match
         $x 1664 isa year;
         ($x, employee: $p, employer: $y) isa employment;
-      get;
+
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -213,7 +213,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $r isa friendship; get;
+      match $r isa friendship;
       """
     # When there is 1 concept we have {aa}.
     # Adding a 2nd concept gives us 2 new relations - where each relation contains b, and one other concept (a or b).
@@ -247,7 +247,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match ($x, $y) isa friendship; get;
+      match ($x, $y) isa friendship;
       """
     # Here there are n choices for x, and n choices for y, so the total answer size is n^2
     Then verify answer size is: 25
@@ -276,7 +276,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x, employer: $x) isa employment; get;
+      match (employee: $x, employer: $x) isa employment;
       """
     Then verify answer size is: 3
     Then verify answers are sound
@@ -302,7 +302,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x, employer: $y) isa employment; get;
+      match (employee: $x, employer: $y) isa employment;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -330,7 +330,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x, employer: $x) isa employment; get;
+      match (employee: $x, employer: $x) isa employment;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -389,7 +389,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (coworker: $x, coworker: $x) isa coworkers; get;
+      match (coworker: $x, coworker: $x) isa coworkers;
       """
     # (p,p) is a coworkers since people work with themselves.
     # Applying the robot work rule we see that (r1,p) is a pet ownership, and (p,p) and (p,r2) are coworker relations,
@@ -402,7 +402,7 @@ Feature: Relation Inference Resolution
     Then verify answers are complete
     Given reasoning query
       """
-      match (coworker: $x, coworker: $y) isa coworkers; get;
+      match (coworker: $x, coworker: $y) isa coworkers;
       """
     # $x | $y |
     # p  | p  |
@@ -445,7 +445,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa location-hierarchy; get;
+      match $x isa location-hierarchy;
       """
     Then verify answer size is: 3
     Then verify answers are sound
@@ -478,7 +478,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (subordinate: $x1, superior: $x2) isa location-hierarchy; get;
+      match (subordinate: $x1, superior: $x2) isa location-hierarchy;
       """
     Then verify answer size is: 6
     Then verify answers are consistent across 5 executions
@@ -539,7 +539,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (subordinate: $x, superior: $y) isa location-hierarchy; get;
+      match (subordinate: $x, superior: $y) isa location-hierarchy;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -570,7 +570,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x, employee: $y) isa employment; get;
+      match (employee: $x, employee: $y) isa employment;
       """
     Then verify answer size is: 0
     Then verify answers are sound
@@ -597,7 +597,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (employee: $x) isa employment; get;
+      match (employee: $x) isa employment;
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -626,7 +626,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (friend: $a, friend: $b, friend: $c) isa friendship; get;
+      match (friend: $a, friend: $b, friend: $c) isa friendship;
       """
     Then verify answer size is: 6
     Then verify answers are sound
@@ -674,7 +674,7 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $y) isa selection;
         $x has name $n;
         $y has name $n;
-      get;
+
       """
     # (a,a), (b,b), (c,c)
     Then verify answer size is: 3
@@ -698,7 +698,7 @@ Feature: Relation Inference Resolution
         (choice1: $x, choice2: $y) isa selection;
         $x has name 'a';
         $y has name 'a';
-      get;
+
       """
 
 
@@ -735,7 +735,7 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
         ($b, $c);
-      get;
+
       """
     # $c in {'Turku Airport', 'Finland'}
     Then verify answer size is: 2
@@ -771,7 +771,7 @@ Feature: Relation Inference Resolution
         $a isa place, has name "Turku Airport";
         ($a, $b);
         $b isa place, has name "Turku";
-      get;
+
       """
     Then verify answer size is: 1
     Then verify answers are sound
@@ -783,7 +783,7 @@ Feature: Relation Inference Resolution
         ($a, $b);
         $b isa place, has name "Turku";
         ($c, $d);
-      get;
+
       """
     # (2 db relations + 1 inferred) x 2 for variable swap
     Then verify answer size is: 6
@@ -826,7 +826,7 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match ($a, $b) isa relation; get;
+      match ($a, $b) isa relation;
       """
     Then verify answers are sound
     Then verify answers are complete
@@ -835,7 +835,7 @@ Feature: Relation Inference Resolution
     Then verify answer size is: 6
     Then verify answer set is equivalent for query
       """
-      match ($a, $b); get;
+      match ($a, $b);
       """
 
   Scenario: conjunctions of untyped reasoned relations are correctly resolved
@@ -865,7 +865,7 @@ Feature: Relation Inference Resolution
       match
         ($a, $b);
         ($b, $c);
-      get;
+
       """
     # a   | b   | c   |
     # AIR | TUR | FIN |
@@ -929,21 +929,21 @@ Feature: Relation Inference Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match ($x) isa derivedRelation; get;
+      match ($x) isa derivedRelation;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match ($x) isa! derivedRelation; get;
+      match ($x) isa! derivedRelation;
       """
     Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match ($x) isa directDerivedRelation; get;
+      match ($x) isa directDerivedRelation;
       """
     Then verify answer size is: 1
     Then verify answers are sound

@@ -126,14 +126,14 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role1: $a, role2: $b) isa binary-base; get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match (role1: $a, $r1: $b) isa binary-base; get;
+      match (role1: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role2} (2 options => double answer size)
     Then verify answer size is: 18
@@ -145,7 +145,7 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role1: $a, $r1: $b) isa binary-base; get;
+      match (role1: $a, $r1: $b) isa binary-base;
       """
     Then verify answer size is: 18
     Then verify answers are sound
@@ -167,14 +167,14 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role1: $a, role2: $b) isa binary-base; get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match (role: $a, $r1: $b) isa binary-base; get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role1, role2} (3 options => triple answer size)
     Then verify answer size is: 27
@@ -186,7 +186,7 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role: $a, $r1: $b) isa binary-base; get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
     Then verify answer size is: 27
     Then verify answers are sound
@@ -208,7 +208,7 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role: $a, $r1: $b) isa binary-base; get;
+      match (role: $a, $r1: $b) isa binary-base;
       """
     Then verify answer size is: 27
     Then verify answers are sound
@@ -234,7 +234,7 @@ Feature: Variable Role Resolution
         ($r1: $a, $r2: $b) isa binary-base;
         $r1 type relation:role;
         $r2 type binary-base:role2;
-      get;
+
       """
     # $r1 must be 'role' and $r2 must be 'role2'
     Then verify answer size is: 9
@@ -246,7 +246,7 @@ Feature: Variable Role Resolution
       match
         (role: $a, $r2: $b) isa binary-base;
         $r2 type binary-base:role2;
-      get;
+
       """
     Then verify answer size is: 9
     Then verify answers are sound
@@ -257,14 +257,14 @@ Feature: Variable Role Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match (role1: $a, role2: $b) isa binary-base; get;
+      match (role1: $a, role2: $b) isa binary-base;
       """
     Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
-      match ($r1: $a, $r2: $b) isa binary-base; get;
+      match ($r1: $a, $r2: $b) isa binary-base;
       """
     # r1    | r2    |
     # role  | role  |
@@ -331,19 +331,19 @@ Feature: Variable Role Resolution
       match
         (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
         $a1 has name 'a';
-      get;
+
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
     Then verify answer size is: 63
     Given reasoning query
       """
-      match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base; get;
+      match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then verify answer size is: 189
     Given reasoning query
       """
-      match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base; get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
     # r1    | r2    | r3    |
     # role  | role  | role  | 1 pattern
@@ -368,19 +368,19 @@ Feature: Variable Role Resolution
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
         $a1 has name 'a';
-      get;
+
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
     Then verify answer size is: 918
     Given reasoning query
       """
-      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base; get;
+      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
     Then verify answer size is: 2754
     Given reasoning query
       """
-      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base; get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
     # {r1,r2,r3,r4}
     # 4 occurrences of 'role' | 1 pattern
@@ -404,19 +404,19 @@ Feature: Variable Role Resolution
       match
         (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
         $a1 has name 'a';
-      get;
+
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
     Then verify answer size is: 272
     Given reasoning query
       """
-      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary; get;
+      match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
     Then verify answer size is: 544
     Given reasoning query
       """
-      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary; get;
+      match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
     # {r1,r2,r3,r4} | 209 patterns (see 'quaternary-base' scenario for details)
     # For each pattern, we have one possible match per quaternary relation

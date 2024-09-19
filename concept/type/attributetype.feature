@@ -206,26 +206,6 @@ Feature: Concept Attribute Type
     Then attribute(name) set supertype: name; fails
     Then attribute(timestamp) set supertype: timestamp; fails
 
-  Scenario: The schema may not be modified in a way that an overridden owns attribute is no longer inherited by the overriding type
-    When create attribute type: attr0
-    When attribute(attr0) set annotation: @abstract
-    When create attribute type: attr1
-    When attribute(attr1) set supertype: attr0
-    When attribute(attr1) set value type: string
-    When create entity type: ent00
-    When entity(ent00) set annotation: @abstract
-    When entity(ent00) set owns: attr0
-    When create entity type: ent1
-    When entity(ent1) set supertype: ent00
-    When entity(ent1) set owns: attr1
-    When entity(ent1) get owns(attr1) set override: attr0
-    When create entity type: ent01
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(attr1) unset supertype; fails
-    Then entity(ent00) unset owns: attr0; fails
-    Then entity(ent1) set supertype: ent01; fails
-
 ########################
 # @annotations common
 ########################
@@ -234,26 +214,26 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @<annotation>
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get constraints contain: @<annotation>
+    Then attribute(name) get constraint categories contain: @<annotation-category>
     Then attribute(name) get declared annotations contain: @<annotation>
     When attribute(name) unset annotation: @<annotation-category>
-    Then attribute(name) get annotations do not contain: @<annotation>
-    Then attribute(name) get annotation categories do not contain: @<annotation-category>
+    Then attribute(name) get constraints do not contain: @<annotation>
+    Then attribute(name) get constraint categories do not contain: @<annotation-category>
     Then attribute(name) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation>
-    Then attribute(name) get annotation categories do not contain: @<annotation-category>
+    Then attribute(name) get constraints do not contain: @<annotation>
+    Then attribute(name) get constraint categories do not contain: @<annotation-category>
     Then attribute(name) get declared annotations do not contain: @<annotation>
     When attribute(name) set annotation: @<annotation>
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get constraints contain: @<annotation>
+    Then attribute(name) get constraint categories contain: @<annotation-category>
     Then attribute(name) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
-    Then attribute(name) get annotation categories contain: @<annotation-category>
+    Then attribute(name) get constraints contain: @<annotation>
+    Then attribute(name) get constraint categories contain: @<annotation-category>
     Then attribute(name) get declared annotations contain: @<annotation>
     Examples:
       | value-type  | annotation                              | annotation-category |
@@ -295,14 +275,14 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute type can unset not set @<annotation>
     When create attribute type: name
     When attribute(name) set value type: string
-    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get constraints do not contain: @<annotation>
     When attribute(name) unset annotation: @<annotation-category>
-    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get constraints do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get constraints do not contain: @<annotation>
     When attribute(name) unset annotation: @<annotation-category>
-    Then attribute(name) get annotations do not contain: @<annotation>
+    Then attribute(name) get constraints do not contain: @<annotation>
     Examples:
       | annotation      | annotation-category |
       | abstract        | abstract            |
@@ -318,29 +298,33 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @<annotation>
     When create attribute type: surname
     When attribute(surname) set supertype: name
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When attribute(surname) set annotation: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
-    Then attribute(surname) unset annotation: @<annotation-category>; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    When attribute(surname) unset annotation: @<annotation-category>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
+    Then attribute(surname) get declared annotations do not contain: @<annotation>
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then attribute(name) get constraints contain: @<annotation>
+    Then attribute(name) get declared annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     Examples:
       | value-type | annotation   | annotation-category |
@@ -355,40 +339,40 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @<annotation>
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
     When create attribute type: surname
     When attribute(surname) set value type: <value-type>
     When attribute(surname) set annotation: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations contain: @<annotation>
     When attribute(surname) set supertype: name
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations contain: @<annotation>
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations contain: @<annotation>
     When attribute(surname) set supertype: name
     When attribute(surname) unset annotation: @<annotation-category>
     When attribute(surname) unset value type
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     Examples:
       | value-type | annotation   | annotation-category |
@@ -405,41 +389,41 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @<annotation>
     When create attribute type: surname
     When attribute(surname) set supertype: name
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     Then attribute(surname) unset supertype; fails
     When attribute(surname) set annotation: @abstract
     When attribute(surname) unset supertype
     When attribute(surname) set value type: <value-type>
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get constraints do not contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When attribute(surname) set supertype: name
     When attribute(surname) unset value type
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When attribute(surname) unset supertype
     When attribute(surname) set value type: <value-type>
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get constraints do not contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @<annotation>
+    Then attribute(name) get constraints contain: @<annotation>
     Then attribute(name) get declared annotations contain: @<annotation>
-    Then attribute(surname) get annotations do not contain: @<annotation>
+    Then attribute(surname) get constraints do not contain: @<annotation>
     Then attribute(surname) get declared annotations do not contain: @<annotation>
     Examples:
       | value-type | annotation   |
@@ -465,8 +449,8 @@ Feature: Concept Attribute Type
     When attribute(name) unset annotation: @<annotation-category>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation>
-    Then attribute(surname) get annotations contain: @<annotation>
+    Then attribute(name) get constraints do not contain: @<annotation>
+    Then attribute(surname) get constraints contain: @<annotation>
     When attribute(name) set annotation: @<annotation>
     Then transaction commits; fails
     Examples:
@@ -485,29 +469,29 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: email
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
     Then attribute(email) get declared annotations do not contain: @abstract
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create attribute type: email
     When attribute(email) set value type: string
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
     Then attribute(email) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
     When transaction closes
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
     Then attribute(email) get declared annotations do not contain: @abstract
     When attribute(email) set annotation: @abstract
-    Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) get constraints contain: @abstract
     Then attribute(email) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -529,20 +513,20 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @abstract
     Then attribute(name) exists
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) exists
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
 
   Scenario: Attribute types cannot unset value type without @abstract annotation if value type is not inherited
     When create attribute type: email
     When attribute(email) set value type: string
     Then attribute(email) get value type: string
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get value type: string
@@ -598,7 +582,7 @@ Feature: Concept Attribute Type
     Then attribute(surname) get value type is none
     When attribute(surname) set supertype: name
     Then attribute(surname) get value type: string
-    Then attribute(surname) get annotations do not contain: @abstract
+    Then attribute(surname) get constraints do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(name) unset value type; fails
@@ -622,8 +606,8 @@ Feature: Concept Attribute Type
     When attribute(name) unset value type
     Then attribute(name) get value type is none
     Then attribute(surname) get value type is none
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     Then attribute(surname) get supertype: name
     When transaction commits
     When connection open read transaction for database: typedb
@@ -634,22 +618,22 @@ Feature: Concept Attribute Type
     When create attribute type: email
     Then attribute(email) get value type is none
     When attribute(email) set annotation: @abstract
-    Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get value type is none
-    Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) get constraints contain: @abstract
     Then attribute(email) unset annotation: @abstract; fails
     Then attribute(email) get value type is none
-    Then attribute(email) get annotations contain: @abstract
+    Then attribute(email) get constraints contain: @abstract
     When attribute(email) set value type: string
     When attribute(email) unset annotation: @abstract
     Then attribute(email) get value type: string
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(email) get value type: string
-    Then attribute(email) get annotations do not contain: @abstract
+    Then attribute(email) get constraints do not contain: @abstract
 
   Scenario: Attribute types can unset value type (even not set) if it has @abstract annotation
     When create attribute type: name
@@ -662,9 +646,9 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type is none
     Then attribute(email) get value type: string
     Then attribute(birthday) get value type: datetime
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(email) get annotations contain: @abstract
-    Then attribute(birthday) get annotations do not contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(email) get constraints contain: @abstract
+    Then attribute(birthday) get constraints do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type is none
@@ -688,7 +672,7 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: surname
@@ -714,7 +698,7 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: surname
@@ -737,7 +721,7 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: surname
@@ -776,17 +760,17 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
 
   Scenario Outline: Attribute type with value type <value-type-2> cannot subtype an attribute type with different value type <value-type-1>
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When attribute(name) set value type: <value-type-1>
     When create attribute type: first-name
     When attribute(first-name) set value type: <value-type-2>
@@ -830,7 +814,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute type subtyping an attribute type with value type <value-type-1> cannot set value type <value-type-2>
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When attribute(name) set value type: <value-type-1>
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
@@ -887,7 +871,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Supertype attribute type cannot set <value-type-2> conflicting with <value-type-1> set for one of subtypes
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When create attribute type: first-name
     When attribute(first-name) set annotation: @abstract
     When attribute(first-name) set supertype: name
@@ -993,7 +977,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Supertype attribute type can set <value-type> set for subtype, but subtype needs to explicitly unset it before commit
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
     When attribute(first-name) set value type: <value-type>
@@ -1112,27 +1096,27 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute type of <value-type> value type cannot inherit @abstract annotation, but can set it being a subtype
     When create attribute type: name
     When attribute(name) set annotation: @abstract
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
     When attribute(name) set value type: <value-type>
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
-    Then attribute(first-name) get annotations do not contain: @abstract
+    Then attribute(first-name) get constraints do not contain: @abstract
     Then attribute(first-name) get declared annotations do not contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
     Then attribute(name) get declared annotations contain: @abstract
-    Then attribute(first-name) get annotations do not contain: @abstract
+    Then attribute(first-name) get constraints do not contain: @abstract
     Then attribute(first-name) get declared annotations do not contain: @abstract
     When attribute(first-name) set annotation: @abstract
-    Then attribute(first-name) get annotations contain: @abstract
+    Then attribute(first-name) get constraints contain: @abstract
     Then attribute(first-name) get declared annotations contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @abstract
+    Then attribute(first-name) get constraints contain: @abstract
     Then attribute(first-name) get declared annotations contain: @abstract
     Examples:
       | value-type    |
@@ -1162,11 +1146,11 @@ Feature: Concept Attribute Type
     Then attribute(name) unset annotation: @abstract; fails
     When attribute(name) set value type: string
     When attribute(name) unset annotation: @abstract
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(name) get value type: string
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
 
   Scenario: Attribute types can be subtypes of other attribute types
     When create attribute type: first-name
@@ -1260,51 +1244,39 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(last-name) set supertype: name; fails
 
-#  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @abstract annotation with arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @abstract(); fails
-#    Then attribute(name) set annotation: @abstract(1); fails
-#    Then attribute(name) set annotation: @abstract(1, 2); fails
-#    Then attribute(name) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
-
   Scenario: Abstract attribute type cannot set non-abstract supertype
     When create attribute type: name
-    Then attribute(name) get annotations do not contain: @abstract
+    Then attribute(name) get constraints do not contain: @abstract
     When attribute(name) set value type: string
     When create attribute type: surname
     When attribute(surname) set annotation: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     Then attribute(surname) set supertype: name; fails
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(name) get constraints do not contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(name) get constraints do not contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     Then attribute(surname) get supertypes do not contain:
       | name |
     Then attribute(surname) set supertype: name; fails
     When attribute(name) set annotation: @abstract
     When attribute(surname) set supertype: name
     Then attribute(name) unset annotation: @abstract; fails
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     Then attribute(surname) get supertype: name
     When transaction commits
     When connection open schema transaction for database: typedb
     When create attribute type: non-abstract-name
-    Then attribute(non-abstract-name) get annotations do not contain: @abstract
+    Then attribute(non-abstract-name) get constraints do not contain: @abstract
     When attribute(non-abstract-name) set value type: string
     Then attribute(surname) set supertype: non-abstract-name; fails
     When transaction closes
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @abstract
-    Then attribute(surname) get annotations contain: @abstract
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(surname) get constraints contain: @abstract
     Then attribute(surname) get supertype: name
 
 ########################
@@ -1315,21 +1287,21 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @regex(<arg>)
-    Then attribute(email) get annotations contain: @regex(<arg>)
+    Then attribute(email) get constraints contain: @regex(<arg>)
     Then attribute(email) get declared annotations contain: @regex(<arg>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @regex(<arg>)
-    Then attribute(email) get annotation categories contain: @regex
+    Then attribute(email) get constraints contain: @regex(<arg>)
+    Then attribute(email) get constraint categories contain: @regex
     Then attribute(email) get declared annotations contain: @regex(<arg>)
     Then attribute(email) unset annotation: @regex
-    Then attribute(email) get annotations do not contain: @regex(<arg>)
-    Then attribute(email) get annotation categories do not contain: @regex
+    Then attribute(email) get constraints do not contain: @regex(<arg>)
+    Then attribute(email) get constraint categories do not contain: @regex
     Then attribute(email) get declared annotations do not contain: @regex(<arg>)
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @regex(<arg>)
-    Then attribute(email) get annotation categories do not contain: @regex
+    Then attribute(email) get constraints do not contain: @regex(<arg>)
+    Then attribute(email) get constraint categories do not contain: @regex
     Then attribute(email) get declared annotations do not contain: @regex(<arg>)
     Examples:
       | value-type | arg                 |
@@ -1348,25 +1320,25 @@ Feature: Concept Attribute Type
     When attribute(email) set annotation: @abstract
     Then attribute(email) get value type is none
     Then attribute(email) set annotation: @regex("TEST"); fails
-    Then attribute(email) get annotations do not contain: @regex("TEST")
+    Then attribute(email) get constraints do not contain: @regex("TEST")
     Then attribute(email) get declared annotations do not contain: @regex("TEST")
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) get value type is none
     Then attribute(email) set annotation: @regex("TEST"); fails
-    Then attribute(email) get annotations do not contain: @regex("TEST")
+    Then attribute(email) get constraints do not contain: @regex("TEST")
     Then attribute(email) get declared annotations do not contain: @regex("TEST")
 
   Scenario Outline: Attribute types with incompatible value types can't have @regex annotation
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     Then attribute(email) set annotation: @regex(<arg>); fails
-    Then attribute(email) get annotations is empty
+    Then attribute(email) get constraints is empty
     Then attribute(email) get declared annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(email) set annotation: @regex(<arg>); fails
-    Then attribute(email) get annotations is empty
+    Then attribute(email) get constraints is empty
     Then attribute(email) get declared annotations is empty
     Examples:
       | value-type    | arg     |
@@ -1389,16 +1361,16 @@ Feature: Concept Attribute Type
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type: string
-    Then attribute(name) get annotations contain: @regex("value")
+    Then attribute(name) get constraints contain: @regex("value")
     Then attribute(name) unset value type; fails
     Then attribute(name) unset annotation: @regex
     When attribute(name) unset value type
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations do not contain: @regex("value")
+    Then attribute(name) get constraints do not contain: @regex("value")
     When transaction commits
     When connection open schema transaction for database: typedb
     Then attribute(name) get value type is none
-    Then attribute(name) get annotations do not contain: @regex("value")
+    Then attribute(name) get constraints do not contain: @regex("value")
     Then attribute(name) set annotation: @regex("value"); fails
 
   Scenario: Attribute types' @regex annotation can be inherited
@@ -1408,65 +1380,51 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-
-  #  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @regex annotation with wrong arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @regex; fails
-#    Then attribute(name) set annotation: @regex(); fails
-#    Then attribute(name) set annotation: @regex(1); fails
-#    Then attribute(name) set annotation: @regex(1, 2); fails
-#    Then attribute(name) set annotation: @regex("val1", "val2"); fails
-#    Then attribute(name) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
 
   Scenario: Attribute type cannot set @regex annotation with invalid value
     When create attribute type: name
     When attribute(name) set value type: string
     Then attribute(name) set annotation: @regex(""); fails
     Then attribute(name) set annotation: @regex("*"); fails
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
 
   Scenario Outline: Attribute type can reset @regex annotation
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @regex(<init-args>)
-    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get constraints contain: @regex(<init-args>)
     Then attribute(name) get declared annotations contain: @regex(<init-args>)
-    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get constraints do not contain: @regex(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     When attribute(name) set annotation: @regex(<init-args>)
-    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get constraints contain: @regex(<init-args>)
     Then attribute(name) get declared annotations contain: @regex(<init-args>)
-    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get constraints do not contain: @regex(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     When attribute(name) set annotation: @regex(<reset-args>)
-    Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get constraints contain: @regex(<reset-args>)
     Then attribute(name) get declared annotations contain: @regex(<reset-args>)
-    Then attribute(name) get annotations do not contain: @regex(<init-args>)
+    Then attribute(name) get constraints do not contain: @regex(<init-args>)
     Then attribute(name) get declared annotations do not contain: @regex(<init-args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @regex(<reset-args>)
+    Then attribute(name) get constraints contain: @regex(<reset-args>)
     Then attribute(name) get declared annotations contain: @regex(<reset-args>)
-    Then attribute(name) get annotations do not contain: @regex(<init-args>)
+    Then attribute(name) get constraints do not contain: @regex(<init-args>)
     Then attribute(name) get declared annotations do not contain: @regex(<init-args>)
     When attribute(name) set annotation: @regex(<init-args>)
-    Then attribute(name) get annotations contain: @regex(<init-args>)
+    Then attribute(name) get constraints contain: @regex(<init-args>)
     Then attribute(name) get declared annotations contain: @regex(<init-args>)
-    Then attribute(name) get annotations do not contain: @regex(<reset-args>)
+    Then attribute(name) get constraints do not contain: @regex(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @regex(<reset-args>)
     Examples:
       | init-args | reset-args      |
@@ -1476,56 +1434,42 @@ Feature: Concept Attribute Type
       | "\S+"     | "s"             |
       | "\S+"     | " some string " |
 
-  Scenario: Attribute type cannot override inherited @regex annotation
+  Scenario: Attribute type can specialise inherited @regex annotation
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(first-name) set value type: string
     When attribute(name) set annotation: @abstract
     When attribute(name) set annotation: @regex("\S+")
-    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get constraints contain: @regex("\S+")
     Then attribute(name) get declared annotations contain: @regex("\S+")
-    Then attribute(first-name) get annotations is empty
+    Then attribute(first-name) get constraints is empty
     Then attribute(first-name) get declared annotations is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @regex("\S+")
+    Then attribute(name) get constraints contain: @regex("\S+")
     Then attribute(name) get declared annotations contain: @regex("\S+")
-    Then attribute(first-name) get annotations is empty
+    Then attribute(first-name) get constraints is empty
     Then attribute(first-name) get declared annotations is empty
     When attribute(first-name) set supertype: name
     When attribute(first-name) unset value type
-    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get constraints contain: @regex("\S+")
     Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
-    Then attribute(first-name) set annotation: @regex("test"); fails
+    Then attribute(first-name) set annotation: @regex("test")
+    Then attribute(first-name) get constraints contain: @regex("\S+")
+    Then attribute(first-name) get constraints contain: @regex("test")
+    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
+    Then attribute(first-name) get declared annotations contain: @regex("test")
+    When transaction commits
+    When connection open schema transaction for database: typedb
     When attribute(first-name) set annotation: @regex("\S+")
-    Then attribute(first-name) get annotations contain: @regex("\S+")
+    Then attribute(first-name) get constraints contain: @regex("\S+")
     Then attribute(first-name) get declared annotations contain: @regex("\S+")
+    Then attribute(first-name) get constraints do not contain: @regex("test")
+    Then attribute(first-name) get declared annotations do not contain: @regex("test")
     Then transaction commits; fails
-    When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @regex("\S+")
-    Then attribute(name) get declared annotations contain: @regex("\S+")
-    Then attribute(first-name) get annotations is empty
-    Then attribute(first-name) get declared annotations is empty
-    When attribute(first-name) set annotation: @regex("\S++")
-    Then attribute(first-name) get annotations contain: @regex("\S++")
-    Then attribute(first-name) get declared annotations contain: @regex("\S++")
-    Then attribute(first-name) set supertype: name; fails
-    When attribute(first-name) unset annotation: @regex
-    Then attribute(first-name) unset value type; fails
-    When attribute(first-name) set annotation: @abstract
-    When attribute(first-name) unset value type
-    When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @regex("\S+")
-    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
-    When transaction commits
-    When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @regex("\S+")
-    Then attribute(name) get declared annotations contain: @regex("\S+")
-    Then attribute(first-name) get annotations contain: @regex("\S+")
-    Then attribute(first-name) get declared annotations do not contain: @regex("\S+")
 
-  Scenario: Attribute type cannot reset inherited @regex annotation
+  Scenario: Attribute type can set another @regex while having inherited @regex
     When create attribute type: name
     When attribute(name) set annotation: @abstract
     When attribute(name) set value type: string
@@ -1534,15 +1478,28 @@ Feature: Concept Attribute Type
     When attribute(first-name) set supertype: name
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-    Then attribute(first-name) set annotation: @regex("another value"); fails
-    Then attribute(first-name) get annotations contain: @regex("value")
+    When attribute(first-name) set annotation: @regex("another value")
+    Then attribute(first-name) get constraints contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("another value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-    When attribute(first-name) set annotation: @regex("value")
-    Then transaction commits; fails
+    Then attribute(first-name) get declared annotations contain: @regex("another value")
+    Then attribute(name) get constraints contain: @regex("value")
+    Then attribute(name) get constraints do not contain: @regex("another value")
+    When transaction commits
     When connection open schema transaction for database: typedb
+    Then attribute(first-name) get constraints contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("another value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
+    Then attribute(first-name) get declared annotations contain: @regex("another value")
+    Then attribute(name) get constraints contain: @regex("value")
+    Then attribute(name) get constraints do not contain: @regex("another value")
     When attribute(first-name) set annotation: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
+    Then attribute(first-name) get constraints do not contain: @regex("another value")
+    Then attribute(first-name) get declared annotations contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("another value")
     Then transaction commits; fails
 
   Scenario: Attribute type cannot unset inherited @regex annotation
@@ -1552,21 +1509,23 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @regex("value")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-    Then attribute(first-name) unset annotation: @regex; fails
+    When attribute(first-name) unset annotation: @regex
+    Then attribute(first-name) get constraints contain: @regex("value")
+    Then attribute(first-name) get declared annotations do not contain: @regex("value")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @regex("value")
+    Then attribute(first-name) get constraints contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
-    Then attribute(first-name) unset annotation: @regex; fails
+    When attribute(first-name) unset annotation: @regex
     When attribute(first-name) set annotation: @abstract
     When attribute(first-name) unset supertype
-    Then attribute(first-name) get annotations do not contain: @regex("value")
+    Then attribute(first-name) get constraints do not contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations do not contain: @regex("value")
+    Then attribute(first-name) get constraints do not contain: @regex("value")
     Then attribute(first-name) get declared annotations do not contain: @regex("value")
 
   Scenario: Attribute type cannot unset value type if it has owns with @regex annotation
@@ -1594,7 +1553,7 @@ Feature: Concept Attribute Type
     When attribute(custom-attribute) set annotation: @regex("\S+")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(custom-attribute) get annotations contain: @regex("\S+")
+    Then attribute(custom-attribute) get constraints contain: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
     Then attribute(custom-attribute) set value type: long; fails
     Then attribute(custom-attribute) set value type: boolean; fails
@@ -1615,18 +1574,18 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @independent
-    Then attribute(email) get annotations contain: @independent
+    Then attribute(email) get constraints contain: @independent
     Then attribute(email) get declared annotations contain: @independent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @independent
+    Then attribute(email) get constraints contain: @independent
     Then attribute(email) get declared annotations contain: @independent
     Then attribute(email) unset annotation: @independent
-    Then attribute(email) get annotations do not contain: @independent
+    Then attribute(email) get constraints do not contain: @independent
     Then attribute(email) get declared annotations do not contain: @independent
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @independent
+    Then attribute(email) get constraints do not contain: @independent
     Then attribute(email) get declared annotations do not contain: @independent
     Examples:
       | value-type    |
@@ -1645,14 +1604,14 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @independent
-    Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get constraints contain: @independent
     Then attribute(name) get declared annotations contain: @independent
     When attribute(name) set annotation: @independent
-    Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get constraints contain: @independent
     Then attribute(name) get declared annotations contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @independent
+    Then attribute(name) get constraints contain: @independent
     Then attribute(name) get declared annotations contain: @independent
 
   Scenario: Attribute types' @independent annotation can be inherited
@@ -1662,11 +1621,11 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @independent
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get constraints contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get constraints contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
 
   Scenario: Attribute type cannot reset inherited @independent annotation
@@ -1676,7 +1635,7 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get constraints contain: @independent
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(first-name) set annotation: @independent
@@ -1684,7 +1643,7 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
     When attribute(second-name) set supertype: name
-    Then attribute(second-name) get annotations contain: @independent
+    Then attribute(second-name) get constraints contain: @independent
     When attribute(second-name) set annotation: @independent
     Then transaction commits; fails
 
@@ -1695,24 +1654,26 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get constraints contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
-    Then attribute(first-name) unset annotation: @independent; fails
+    When attribute(first-name) unset annotation: @independent
+    Then attribute(first-name) get constraints contain: @independent
+    Then attribute(first-name) get declared annotations do not contain: @independent
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @independent
+    Then attribute(first-name) get constraints contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
-    Then attribute(first-name) unset annotation: @independent; fails
+    When attribute(first-name) unset annotation: @independent
     When attribute(first-name) set annotation: @abstract
     # Can't change supertype while losing independence
     When attribute(first-name) set annotation: @independent
     When attribute(first-name) unset supertype
     When attribute(first-name) unset annotation: @independent
-    Then attribute(first-name) get annotations do not contain: @independent
+    Then attribute(first-name) get constraints do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations do not contain: @independent
+    Then attribute(first-name) get constraints do not contain: @independent
     Then attribute(first-name) get declared annotations do not contain: @independent
 
   Scenario: Attribute type can change supertype while implicitly losing @independent annotation if it doesn't have data
@@ -1732,11 +1693,11 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     When attribute(name) set supertype: word
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype: word
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
 
   Scenario: Attribute type can unset supertype while implicitly losing @independent annotation if it doesn't have data
     When create attribute type: literal
@@ -1753,24 +1714,11 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     Then attribute(name) get supertype: literal
     When attribute(name) unset supertype
-    Then attribute(name) get annotations do not contain: @independent
+    Then attribute(name) get constraints do not contain: @independent
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(name) get supertype does not exist
-    Then attribute(name) get annotations do not contain: @independent
-
-#  TODO: Make it only for typeql
-#  Scenario: Attribute type cannot set @independent annotation with arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: string
-#    Then attribute(name) set annotation: @independent(); fails
-#    Then attribute(name) set annotation: @independent(1); fails
-#    Then attribute(name) set annotation: @independent(1, 2); fails
-#    Then attribute(name) set annotation: @independent("val1"); fails
-#    Then attribute(name) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints do not contain: @independent
 
 ########################
 # @values
@@ -1779,18 +1727,18 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @values(<args>)
-    Then attribute(email) get annotations contain: @values(<args>)
+    Then attribute(email) get constraints contain: @values(<args>)
     Then attribute(email) get declared annotations contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @values(<args>)
+    Then attribute(email) get constraints contain: @values(<args>)
     Then attribute(email) get declared annotations contain: @values(<args>)
     Then attribute(email) unset annotation: @values
-    Then attribute(email) get annotations do not contain: @values(<args>)
+    Then attribute(email) get constraints do not contain: @values(<args>)
     Then attribute(email) get declared annotations do not contain: @values(<args>)
     Then transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @values(<args>)
+    Then attribute(email) get constraints do not contain: @values(<args>)
     Then attribute(email) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -1854,65 +1802,6 @@ Feature: Concept Attribute Type
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
       | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
 
-    # TODO: Struct parsing is not supported now
-#  Scenario: Attribute type cannot set @values annotation for struct value type
-#    When create attribute type: email
-#    When attribute(email) set value type: custom-struct
-#    When attribute(email) set annotation: @values(custom-struct); fails
-#    When attribute(email) set annotation: @values({"string"}); fails
-#    When attribute(email) set annotation: @values({custom-field: "string"}); fails
-#    When attribute(email) set annotation: @values(custom-struct{custom-field: "string"}); fails
-#    When attribute(email) set annotation: @values(custom-struct("string")); fails
-#    When attribute(email) set annotation: @values(custom-struct(custom-field: "string")); fails
-
-  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Attribute types without a value type cannot set @values annotation
-#    When create attribute type: email
-#    Then attribute(email) set annotation: @values(<args>); fails
-#    Then attribute(email) get annotations do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(email) get annotations do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    Then attribute(email) set annotation: @values(<args>); fails
-#    Then attribute(email) get annotations do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get annotations do not contain: @values(<args>)
-#    Then attribute(email) get declared annotations do not contain: @values(<args>)
-#    Examples:
-#      | args                                                                  |
-#      | 0                                                                     |
-#      | 1                                                                     |
-#      | -1                                                                    |
-#      | 1, 2                                                                  |
-#      | -9223372036854775808, 9223372036854775807                             |
-#      | ""                                                                    |
-#      | "1"                                                                   |
-#      | "福"                                                                   |
-#      | "s", "S"                                                              |
-#      | "Scout", "Stone Guard", "High Warlord"                 |
-#      | true                                                                  |
-#      | false                                                                 |
-#      | false, true                                                           |
-#      | 0.0                                                                   |
-#      | -3.444, 3.445                                                         |
-#      | 0.00001, 0.0001, 0.001, 0.01                                          |
-#      | 2024-06-04                                                            |
-#      | 1970-01-01                                                            |
-#      | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02            |
-#      | 2024-06-04T16:35:02                                                   |
-#      | 2024-06-04T16:35:02.103                                               |
-#      | 2024-06-04+0000                                                       |
-#      | 2024-06-04 Asia/Kathmandu                                             |
-#      | 2024-06-04T16:35:02+0100                                              |
-#      | 2024-06-04T16:35:02.1+0100                                            |
-#      | 2024-06-04T16:35:02.10+0100                                           |
-#      | P2M                                                                   |
-#      | P1Y2M3DT4H5M6.789S                                                    |
-
   Scenario Outline: Attribute type @values annotation correctly validates nanoseconds
     When create attribute type: today
     When attribute(today) set value type: <value-type>
@@ -1921,9 +1810,9 @@ Feature: Concept Attribute Type
     Then attribute(today) set annotation: @values(<second>, <second>); fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(today) get annotations contain: @values(<first>, <second>)
-    Then attribute(today) get annotations do not contain: @values(<first>, <first>)
-    Then attribute(today) get annotations do not contain: @values(<second>, <second>)
+    Then attribute(today) get constraints contain: @values(<first>, <second>)
+    Then attribute(today) get constraints do not contain: @values(<first>, <first>)
+    Then attribute(today) get constraints do not contain: @values(<second>, <second>)
     Then attribute(today) set annotation: @values(<first>, <first>); fails
     Then attribute(today) set annotation: @values(<second>, <second>); fails
     Examples:
@@ -1954,113 +1843,32 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @values("value", "value2")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @values("value", "value2")
+    Then attribute(first-name) get constraints contain: @values("value", "value2")
     Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @values("value", "value2")
+    Then attribute(first-name) get constraints contain: @values("value", "value2")
     Then attribute(first-name) get declared annotations do not contain: @values("value", "value2")
-
-#   TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with empty arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @values; fails
-#    Then attribute(name) set annotation: @values(); fails
-#    Then attribute(name) get annotations is empty
-#    Then attribute(name) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
-#    Then attribute(name) get declared annotations is empty
-#    Examples:
-#      | value-type |
-#      | long       |
-#      | double     |
-#      | decimal    |
-#      | string     |
-#      | boolean    |
-#      | date       |
-#      | datetime   |
-#      | datetime-tz |
-#      | duration   |
-
-  # TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @values with incorrect arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @values(<args>); fails
-#    Then attribute(name) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
-#    Examples:
-#      | value-type  | args                            |
-#      | long        | 0.1                             |
-#      | long        | "string"                        |
-#      | long        | true                            |
-#      | long        | 2024-06-04                      |
-#      | long        | 2024-06-04+0010                 |
-#      | double      | "string"                        |
-#      | double      | true                            |
-#      | double      | 2024-06-04                      |
-#      | double      | 2024-06-04+0010                 |
-#      | decimal     | "string"                        |
-#      | decimal     | true                            |
-#      | decimal     | 2024-06-04                      |
-#      | decimal     | 2024-06-04+0010                 |
-#      | string      | 123                             |
-#      | string      | true                            |
-#      | string      | 2024-06-04                      |
-#      | string      | 2024-06-04+0010                 |
-#      | string      | 'notstring'                     |
-#      | string      | ""                              |
-#      | boolean     | 123                             |
-#      | boolean     | "string"                        |
-#      | boolean     | 2024-06-04                      |
-#      | boolean     | 2024-06-04+0010                 |
-#      | boolean     | truefalse                       |
-#      | date        | 123                             |
-#      | date        | "string"                        |
-#      | date        | true                            |
-#      | date        | 2024-06-04+0010                 |
-#      | date        | 2024-06-04T16:35:02             |
-#      | datetime    | 123                             |
-#      | datetime    | "string"                        |
-#      | datetime    | true                            |
-#      | datetime    | 2024-06-04+0010                 |
-#      | datetime-tz | 123                             |
-#      | datetime-tz | "string"                        |
-#      | datetime-tz | true                            |
-#      | datetime-tz | 2024-06-04                      |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone |
-#      | duration    | 123                             |
-#      | duration    | "string"                        |
-#      | duration    | true                            |
-#      | duration    | 2024-06-04                      |
-#      | duration    | 2024-06-04+0100                 |
-#      | duration    | 1Y                              |
-#      | duration    | year                            |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @values annotation
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @values(<init-args>)
-    Then attribute(name) get annotations contain: @values(<init-args>)
-    Then attribute(name) get annotations do not contain: @values(<reset-args>)
+    Then attribute(name) get constraints contain: @values(<init-args>)
+    Then attribute(name) get constraints do not contain: @values(<reset-args>)
     When attribute(name) set annotation: @values(<init-args>)
-    Then attribute(name) get annotations contain: @values(<init-args>)
-    Then attribute(name) get annotations do not contain: @values(<reset-args>)
+    Then attribute(name) get constraints contain: @values(<init-args>)
+    Then attribute(name) get constraints do not contain: @values(<reset-args>)
     When attribute(name) set annotation: @values(<reset-args>)
-    Then attribute(name) get annotations contain: @values(<reset-args>)
-    Then attribute(name) get annotations do not contain: @values(<init-args>)
+    Then attribute(name) get constraints contain: @values(<reset-args>)
+    Then attribute(name) get constraints do not contain: @values(<init-args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @values(<reset-args>)
-    Then attribute(name) get annotations do not contain: @values(<init-args>)
+    Then attribute(name) get constraints contain: @values(<reset-args>)
+    Then attribute(name) get constraints do not contain: @values(<init-args>)
     When attribute(name) set annotation: @values(<init-args>)
-    Then attribute(name) get annotations contain: @values(<init-args>)
-    Then attribute(name) get annotations do not contain: @values(<reset-args>)
+    Then attribute(name) get constraints contain: @values(<init-args>)
+    Then attribute(name) get constraints do not contain: @values(<reset-args>)
     Examples:
       | value-type  | init-args       | reset-args      |
       | long        | 1, 5            | 7, 9            |
@@ -2077,10 +1885,10 @@ Feature: Concept Attribute Type
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @values(<arg0>, <arg1>, <arg2>); fails
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     Examples:
       | value-type  | arg0                        | arg1                         | arg2                         |
       | long        | 1                           | 1                            | 1                            |
@@ -2105,7 +1913,7 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @values("value")
+    Then attribute(first-name) get constraints contain: @values("value")
     When transaction commits
     When connection open schema transaction for database: typedb
     When attribute(first-name) set annotation: @values("value")
@@ -2113,7 +1921,7 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
     When attribute(second-name) set supertype: name
-    Then attribute(second-name) get annotations contain: @values("value")
+    Then attribute(second-name) get constraints contain: @values("value")
     When attribute(second-name) set annotation: @values("value")
     Then transaction commits; fails
 
@@ -2124,56 +1932,58 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @values("value")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @values("value")
+    Then attribute(first-name) get constraints contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
-    Then attribute(first-name) unset annotation: @values; fails
+    When attribute(first-name) unset annotation: @values
+    Then attribute(first-name) get constraints contain: @values("value")
+    Then attribute(first-name) get declared annotations do not contain: @values("value")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @values("value")
+    Then attribute(first-name) get constraints contain: @values("value")
     Then attribute(first-name) get declared annotations do not contain: @values("value")
-    Then attribute(first-name) unset annotation: @values; fails
+    When attribute(first-name) unset annotation: @values
     Then attribute(first-name) unset supertype; fails
     When attribute(first-name) set annotation: @abstract
     When attribute(first-name) unset supertype
-    Then attribute(first-name) get annotation categories do not contain: @values
+    Then attribute(first-name) get constraint categories do not contain: @values
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotation categories do not contain: @values
+    Then attribute(first-name) get constraint categories do not contain: @values
 
-  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and overridden by a subset of arguments
+  Scenario Outline: Attribute types' @values annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: overridden-name
-    When attribute(overridden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(overridden-name) get annotations contain: @values(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(overridden-name) get annotations contain: @values(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
-    When attribute(overridden-name) set annotation: @values(<args-override>)
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
+    When attribute(specialised-name) set annotation: @values(<args-specialise>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(name) get annotations do not contain: @values(<args-override>)
-    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
-    Then attribute(overridden-name) get declared annotations contain: @values(<args-override>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(name) get constraints do not contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(name) get annotations do not contain: @values(<args-override>)
-    Then attribute(overridden-name) get annotations contain: @values(<args-override>)
-    Then attribute(overridden-name) get declared annotations contain: @values(<args-override>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(name) get constraints do not contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations contain: @values(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-override                              |
+      | value-type  | args                                                                         | args-specialise                            |
       | long        | 1, 10, 20, 30                                                                | 10, 30                                     |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
       | decimal     | 0.0, 1.0                                                                     | 0.0                                        |
@@ -2184,30 +1994,30 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
       | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
 
-  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be overridden by the @values of not a subset of arguments
+  Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be specialised by the @values of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: overridden-name
-    When attribute(overridden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @values(<args>)
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(overridden-name) get annotations contain: @values(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(overridden-name) get annotations contain: @values(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
-    Then attribute(overridden-name) set annotation: @values(<args-override>); fails
-    Then attribute(name) get annotations contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) set annotation: @values(<args-specialise>); fails
+    Then attribute(name) get constraints contain: @values(<args>)
     Then attribute(name) get declared annotations contain: @values(<args>)
-    Then attribute(overridden-name) get annotations contain: @values(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @values(<args>)
+    Then attribute(specialised-name) get constraints contain: @values(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-override            |
+      | value-type  | args                                                                         | args-specialise          |
       | long        | 1, 10, 20, 30                                                                | 10, 31                   |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
       | decimal     | 0.0, 1.0                                                                     | 0.01                     |
@@ -2237,15 +2047,15 @@ Feature: Concept Attribute Type
     When attribute(surname) set annotation: @values(1, 2, 3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get constraints contain: @values(1, 2, 3)
     Then attribute(surname) get value type: long
     When attribute(name) set annotation: @values(1, 2, 3)
     When attribute(surname) unset annotation: @values
-    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get constraints contain: @values(1, 2, 3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(surname) get annotations contain: @values(1, 2, 3)
+    Then attribute(surname) get constraints contain: @values(1, 2, 3)
     Then attribute(surname) get value type: long
 
 ########################
@@ -2256,56 +2066,56 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     When attribute(email) set annotation: @range(<arg0>..<arg1>)
-    Then attribute(email) get annotations contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations contain: @range(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations contain: @range(<arg0>..<arg1>)
     Then attribute(email) unset annotation: @range
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     When attribute(email) set annotation: @range(..<arg1>)
-    Then attribute(email) get annotations contain: @range(..<arg1>)
+    Then attribute(email) get constraints contain: @range(..<arg1>)
     Then attribute(email) get declared annotations contain: @range(..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @range(..<arg1>)
+    Then attribute(email) get constraints contain: @range(..<arg1>)
     Then attribute(email) get declared annotations contain: @range(..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) unset annotation: @range
-    Then attribute(email) get annotations do not contain: @range(..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(..<arg1>)
     When attribute(email) set annotation: @range(<arg0>..)
-    Then attribute(email) get annotations contain: @range(<arg0>..)
+    Then attribute(email) get constraints contain: @range(<arg0>..)
     Then attribute(email) get declared annotations contain: @range(<arg0>..)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations contain: @range(<arg0>..)
+    Then attribute(email) get constraints contain: @range(<arg0>..)
     Then attribute(email) get declared annotations contain: @range(<arg0>..)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(..<arg1>)
     Then attribute(email) unset annotation: @range
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(..<arg1>)
-    Then attribute(email) get annotations do not contain: @range(<arg0>..)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..)
     Examples:
       | value-type  | arg0                         | arg1                                                  |
@@ -2346,18 +2156,18 @@ Feature: Concept Attribute Type
     When create attribute type: email
     When attribute(email) set value type: <value-type>
     Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     When transaction closes
     When connection open read transaction for database: typedb
-    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
+    Then attribute(email) get constraints do not contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
     Examples:
       | value-type | arg0               | arg1               |
@@ -2373,8 +2183,8 @@ Feature: Concept Attribute Type
     Then attribute(today) set annotation: @range(<to>..<from>); fails
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(today) get annotations contain: @range(<from>..<to>)
-    Then attribute(today) get annotations do not contain: @range(<to>..<from>)
+    Then attribute(today) get constraints contain: @range(<from>..<to>)
+    Then attribute(today) get constraints do not contain: @range(<to>..<from>)
     Then attribute(today) set annotation: @range(<to>..<from>); fails
     Examples:
       | value-type  | from                               | to                                 |
@@ -2397,73 +2207,6 @@ Feature: Concept Attribute Type
       | datetime-tz | 2024-05-05T16:15:18.12345678+0010  | 2024-05-05T16:15:18.12345679+0010  |
       | datetime-tz | 2024-05-05T16:15:18.112345678+0010 | 2024-05-05T16:15:18.112345679+0010 |
 
-    # TODO: Struct parsing is not supported now
-#  Scenario: Attribute type cannot set @range annotation for struct value type
-#    When create attribute type: name
-#    When attribute(name) set value type: custom-struct
-#    When attribute(name) set annotation: @range(custom-struct, custom-struct); fails
-#    When attribute(name) set annotation: @range({"string"}, {"string+1"}); fails
-#    When attribute(name) set annotation: @range({custom-field: "string"}, {custom-field: "string+1"}); fails
-#    When attribute(name) set annotation: @range(custom-struct{custom-field: "string"}, custom-struct{custom-field: "string+1"}); fails
-#    When attribute(name) set annotation: @range(custom-struct("string"), custom-struct("string+1")); fails
-#    When attribute(name) set annotation: @range(custom-struct(custom-field: "string"), custom-struct(custom-field: "string+1")); fails
-
-  # TODO: Make it only for typeql (as we can't parse values without value type in concept api tests)
-#  Scenario Outline: Attribute types without a value type cannot set @range annotation
-#    When create attribute type: email
-#    Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-#    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction commits
-#    When connection open schema transaction for database: typedb
-#    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) set annotation: @range(<arg0>..<arg1>); fails
-#    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    When transaction closes
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get annotations do not contain: @range(<arg0>..<arg1>)
-#    Then attribute(email) get declared annotations do not contain: @range(<arg0>..<arg1>)
-#    Examples:
-#      | arg0                         | arg1                                                  |
-#      | 0                            | 1                                                     |
-#      | 1                            | 2                                                     |
-#      | 0                            | 2                                                     |
-#      | -1                           | 1                                                     |
-#      | -9223372036854775808         | 9223372036854775807                                   |
-#      | "A"                          | "a"                                                   |
-#      | "a"                          | "z"                                                   |
-#      | "A"                          | "福"                                                   |
-#      | "AA"                         | "AAA"                                                 |
-#      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-#      | false                        | true                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 0.0                          | 0.0001                                                |
-#      | 0.01                         | 1.0                                                   |
-#      | 123.123                      | 123123123123.122                                      |
-#      | -2.45                        | 2.45                                                  |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04                   | 2024-06-05                                            |
-#      | 2024-06-04                   | 2024-07-03                                            |
-#      | 2024-06-04                   | 2025-01-01                                            |
-#      | 1970-01-01                   | 9999-12-12                                            |
-#      | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-#      | 2024-06-04+0000              | 2024-06-05+0000                                       |
-#      | 2024-06-04+0100              | 2048-06-04+0100                                       |
-#      | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-#      | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
-#      | P1Y                          | P2Y                                                   |
-#      | P2M                          | P1Y2M                                                 |
-#      | P1Y2M                        | P1Y2M3DT4H5M6.789S                                    |
-#      | P1Y2M3DT4H5M6.788S           | P1Y2M3DT4H5M6.789S                                    |
-
   Scenario: Attribute types' @range annotation can be inherited
     When create attribute type: name
     When attribute(name) set value type: string
@@ -2471,141 +2214,62 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @range(3..5)
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @range(3..5)
+    Then attribute(first-name) get constraints contain: @range(3..5)
     Then attribute(first-name) get declared annotations do not contain: @range(3..5)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @range(3..5)
+    Then attribute(first-name) get constraints contain: @range(3..5)
     Then attribute(first-name) get declared annotations do not contain: @range(3..5)
 
-    # TODO: Make it only for typeql
-#  Scenario Outline: Attribute type with <value-type> value type cannot set @range with empty arguments
-#    When create attribute type: name
-#    When attribute(name) set value type: <value-type>
-#    Then attribute(name) set annotation: @range; fails
-#    Then attribute(name) set annotation: @range(); fails
-#    Then attribute(name) get annotations is empty
-#    Then attribute(name) get declared annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(name) get annotations is empty
-#    Then attribute(name) get declared annotations is empty
-#    Examples:
-#      | value-type  |
-#      | long        |
-#      | double      |
-#      | decimal     |
-#      | string      |
-#      | boolean     |
-#      | date        |
-#      | datetime    |
-#      | datetime-tz |
-#      | duration    |
-
-  Scenario Outline: Attribute type with <value-type> value type cannot set @range with incorrect arguments
+  Scenario Outline: Attribute type with <value-type> value type cannot set @range with duplicated arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     Then attribute(name) set annotation: @range(<arg0>..<args>); fails
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
-    # TODO: Most of these cases are only for typeql!
       | value-type  | arg0                     | args                     |
       | long        | 1                        | 1                        |
-#      | long        | 1                               | 2..3                                               |
-#      | long        | 1                               | "string"                                           |
-#      | long        | 1                               | 2.."string"                                        |
-#      | long        | 1                               | 2.."string"..true..2024-06-04..55                  |
-#      | long        | "string"                        | 1                                                  |
-#      | long        | true                            | 1                                                  |
-#      | long        | 2024-06-04                      | 1                                                  |
-#      | long        | 2024-06-04+0010                 | 1                                                  |
       | double      | 1.0                      | 1.0                      |
-#      | double      | 1.0                             | 2.0..3.0                                           |
-#      | double      | 1.0                             | "string"                                           |
-#      | double      | "string"                        | 1.0                                                |
-#      | double      | true                            | 1.0                                                |
-#      | double      | 2024-06-04                      | 1.0                                                |
-#      | double      | 2024-06-04+0010                 | 1.0                                                |
       | decimal     | 1.0                      | 1.0                      |
-#      | decimal     | 1.0                             | 2.0..3.0                                           |
-#      | decimal     | 1.0                             | "string"                                           |
-#      | decimal     | "string"                        | 1.0                                                |
-#      | decimal     | true                            | 1.0                                                |
-#      | decimal     | 2024-06-04                      | 1.0                                                |
-#      | decimal     | 2024-06-04+0010                 | 1.0                                                |
       | string      | "123"                    | "123"                    |
-#      | string      | "123"                           | "1234".."12345"                                    |
-#      | string      | "123"                           | 123                                                |
-#      | string      | 123                             | "123"                                              |
-#      | string      | true                            | "str"                                              |
-#      | string      | 2024-06-04                      | "str"                                              |
-#      | string      | 2024-06-04+0010                 | "str"                                              |
-#      | string      | 'notstring'                     | "str"                                              |
-#      | string      | ""                              | "str"                                              |
       | boolean     | false                    | false                    |
-#      | boolean     | true                            | true                                               |
-#      | boolean     | true                            | 123                                                |
-#      | boolean     | 123                             | true                                               |
-#      | boolean     | "string"                        | true                                               |
-#      | boolean     | 2024-06-04                      | true                                               |
-#      | boolean     | 2024-06-04+0010                 | true                                               |
-#      | boolean     | truefalse                       | true                                               |
       | date        | 2030-06-04               | 2030-06-04               |
-#      | date        | 2030-06-04                      | 2030-06-05..2030-06-06                             |
-#      | date        | 2030-06-04                      | 123                                                |
-#      | date        | 123                             | 2030-06-04                                         |
-#      | date        | "string"                        | 2030-06-04                                         |
-#      | date        | true                            | 2030-06-04                                         |
-#      | date        | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime    | 2030-06-04               | 2030-06-04               |
-#      | datetime    | 2030-06-04                      | 2030-06-05..2030-06-06                             |
-#      | datetime    | 2030-06-04                      | 123                                                |
-#      | datetime    | 123                             | 2030-06-04                                         |
-#      | datetime    | "string"                        | 2030-06-04                                         |
-#      | datetime    | true                            | 2030-06-04                                         |
-#      | datetime    | 2024-06-04+0010                 | 2030-06-04                                         |
       | datetime-tz | 2030-06-04 Europe/London | 2030-06-04 Europe/London |
-#      | datetime-tz | 2030-06-04 Europe/London        | 2030-06-05 Europe/London..2030-06-06 Europe/London |
-#      | datetime-tz | 2030-06-05 Europe/London        | 123                                                |
-#      | datetime-tz | 123                             | 2030-06-05 Europe/London                           |
-#      | datetime-tz | "string"                        | 2030-06-05 Europe/London                           |
-#      | datetime-tz | true                            | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04                      | 2030-06-05 Europe/London                           |
-#      | datetime-tz | 2024-06-04 NotRealTimeZone/Zone | 2030-06-05 Europe/London                           |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @range(<init-args>)
-    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get constraints contain: @range(<init-args>)
     Then attribute(name) get declared annotations contain: @range(<init-args>)
-    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+    Then attribute(name) get constraints do not contain: @range(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
     When attribute(name) set annotation: @range(<init-args>)
-    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get constraints contain: @range(<init-args>)
     Then attribute(name) get declared annotations contain: @range(<init-args>)
-    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+    Then attribute(name) get constraints do not contain: @range(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
     When attribute(name) set annotation: @range(<reset-args>)
-    Then attribute(name) get annotations contain: @range(<reset-args>)
+    Then attribute(name) get constraints contain: @range(<reset-args>)
     Then attribute(name) get declared annotations contain: @range(<reset-args>)
-    Then attribute(name) get annotations do not contain: @range(<init-args>)
+    Then attribute(name) get constraints do not contain: @range(<init-args>)
     Then attribute(name) get declared annotations do not contain: @range(<init-args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @range(<reset-args>)
+    Then attribute(name) get constraints contain: @range(<reset-args>)
     Then attribute(name) get declared annotations contain: @range(<reset-args>)
-    Then attribute(name) get annotations do not contain: @range(<init-args>)
+    Then attribute(name) get constraints do not contain: @range(<init-args>)
     Then attribute(name) get declared annotations do not contain: @range(<init-args>)
     When attribute(name) set annotation: @range(<init-args>)
-    Then attribute(name) get annotations contain: @range(<init-args>)
+    Then attribute(name) get constraints contain: @range(<init-args>)
     Then attribute(name) get declared annotations contain: @range(<init-args>)
-    Then attribute(name) get annotations do not contain: @range(<reset-args>)
+    Then attribute(name) get constraints do not contain: @range(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
     Examples:
       | value-type  | init-args                        | reset-args                       |
@@ -2624,7 +2288,7 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @range("value".."value+1")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @range("value".."value+1")
+    Then attribute(first-name) get constraints contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -2633,7 +2297,7 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When create attribute type: second-name
     When attribute(second-name) set supertype: name
-    Then attribute(second-name) get annotations contain: @range("value".."value+1")
+    Then attribute(second-name) get constraints contain: @range("value".."value+1")
     Then attribute(second-name) get declared annotations do not contain: @range("value".."value+1")
     When attribute(second-name) set annotation: @range("value".."value+1")
     Then transaction commits; fails
@@ -2645,59 +2309,63 @@ Feature: Concept Attribute Type
     When attribute(name) set annotation: @range("value".."value+1")
     When create attribute type: first-name
     When attribute(first-name) set supertype: name
-    Then attribute(first-name) get annotations contain: @range("value".."value+1")
+    Then attribute(first-name) get constraints contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
-    Then attribute(first-name) unset annotation: @range; fails
+    When attribute(first-name) unset annotation: @range
+    Then attribute(first-name) get constraints contain: @range("value".."value+1")
+    Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(first-name) get annotations contain: @range("value".."value+1")
+    Then attribute(first-name) get constraints contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
-    Then attribute(first-name) unset annotation: @range; fails
+    When attribute(first-name) unset annotation: @range
     When attribute(first-name) set value type: string
     When attribute(first-name) unset supertype
-    Then attribute(first-name) get annotations do not contain: @range("value".."value+1")
+    Then attribute(first-name) get constraints do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(first-name) get annotations do not contain: @range("value".."value+1")
+    Then attribute(first-name) get constraints do not contain: @range("value".."value+1")
     Then attribute(first-name) get declared annotations do not contain: @range("value".."value+1")
 
-  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and overridden by a subset of arguments
+  Scenario Outline: Attribute types' @range annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: overridden-name
-    When attribute(overridden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
-    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
-    When attribute(overridden-name) set annotation: @range(<args-override>)
-    Then attribute(name) get annotations contain: @range(<args>)
-    Then attribute(name) get annotations do not contain: @range(<args-override>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
+    When attribute(specialised-name) set annotation: @range(<args-specialise>)
+    Then attribute(name) get constraints contain: @range(<args>)
+    Then attribute(name) get constraints do not contain: @range(<args-specialise>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
-    Then attribute(overridden-name) get annotations do not contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations contain: @range(<args-override>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(name) get declared annotations do not contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations contain: @range(<args>)
-    Then attribute(name) get annotations do not contain: @range(<args-override>)
+    Then attribute(name) get constraints contain: @range(<args>)
+    Then attribute(name) get constraints do not contain: @range(<args-specialise>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args-override>)
-    Then attribute(overridden-name) get annotations do not contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations contain: @range(<args-override>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(name) get declared annotations do not contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations contain: @range(<args-specialise>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-override                             |
+      | value-type  | args                             | args-specialise                           |
       | long        | 1..10                            | 1..5                                      |
       | double      | 1.0..10.0                        | 2.0..10.0                                 |
       | decimal     | 0.0..1.0                         | 0.0..0.999999                             |
@@ -2706,30 +2374,30 @@ Feature: Concept Attribute Type
       | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
       | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
 
-  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be overridden by the @range of not a subset of arguments
+  Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be specialised by the @range of not a subset of arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @abstract
-    When create attribute type: overridden-name
-    When attribute(overridden-name) set supertype: name
+    When create attribute type: specialised-name
+    When attribute(specialised-name) set supertype: name
     When attribute(name) set annotation: @range(<args>)
-    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
-    Then attribute(overridden-name) set annotation: @range(<args-override>); fails
-    Then attribute(name) get annotations contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) set annotation: @range(<args-specialise>); fails
+    Then attribute(name) get constraints contain: @range(<args>)
     Then attribute(name) get declared annotations contain: @range(<args>)
-    Then attribute(overridden-name) get annotations contain: @range(<args>)
-    Then attribute(overridden-name) get declared annotations do not contain: @range(<args>)
+    Then attribute(specialised-name) get constraints contain: @range(<args>)
+    Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-override                             |
+      | value-type  | args                             | args-specialise                           |
       | long        | 1..10                            | -1..5                                     |
       | double      | 1.0..10.0                        | 0.0..150.0                                |
       | decimal     | 0.0..1.0                         | -0.0001..0.999999                         |
@@ -2757,48 +2425,16 @@ Feature: Concept Attribute Type
     When attribute(surname) set annotation: @range(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get constraints contain: @range(1..3)
     Then attribute(surname) get value type: long
     When attribute(name) set annotation: @range(1..3)
     When attribute(surname) unset annotation: @range
-    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get constraints contain: @range(1..3)
     Then attribute(surname) set value type: string; fails
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(surname) get annotations contain: @range(1..3)
+    Then attribute(surname) get constraints contain: @range(1..3)
     Then attribute(surname) get value type: long
-
-########################
-# not compatible @annotations: @distinct, @key, @unique, @subkey, @card, @cascade, @replace
-########################
-
-  #  TODO: Make it only for typeql
-#  Scenario Outline: Attribute type of <value-type> value type cannot have @distinct, @key, @unique, @subkey, @card, @cascade, and @replace annotations
-#    When create attribute type: email
-#    When attribute(email) set value type: <value-type>
-#    Then attribute(email) set annotation: @distinct; fails
-#    Then attribute(email) set annotation: @key; fails
-#    Then attribute(email) set annotation: @unique; fails
-#    Then attribute(email) set annotation: @subkey(LABEL); fails
-#    Then attribute(email) set annotation: @card(1..2); fails
-#    Then attribute(email) set annotation: @cascade; fails
-#    Then attribute(email) set annotation: @replace; fails
-#    Then attribute(email) get annotations is empty
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    Then attribute(email) get annotations is empty
-#    Examples:
-#      | value-type    |
-#      | long          |
-#      | double        |
-#      | decimal       |
-#      | string        |
-#      | boolean       |
-#      | date          |
-#      | datetime      |
-#      | datetime-tz    |
-#      | duration      |
-#      | custom-struct |
 
 ########################
 # @annotations combinations:
@@ -2810,45 +2446,45 @@ Feature: Concept Attribute Type
     When attribute(name) set value type: <value-type>
     When attribute(name) set annotation: @<annotation-1>
     When attribute(name) set annotation: @<annotation-2>
-    When attribute(name) get annotations contain: @<annotation-1>
-    When attribute(name) get annotations contain: @<annotation-2>
+    When attribute(name) get constraints contain: @<annotation-1>
+    When attribute(name) get constraints contain: @<annotation-2>
     When attribute(name) get declared annotations contain: @<annotation-1>
     When attribute(name) get declared annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) get annotations contain: @<annotation-1>
-    When attribute(name) get annotations contain: @<annotation-2>
+    When attribute(name) get constraints contain: @<annotation-1>
+    When attribute(name) get constraints contain: @<annotation-2>
     When attribute(name) get declared annotations contain: @<annotation-1>
     When attribute(name) get declared annotations contain: @<annotation-2>
     When attribute(name) unset annotation: @<annotation-category-1>
-    Then attribute(name) get annotations do not contain: @<annotation-1>
-    Then attribute(name) get annotations contain: @<annotation-2>
+    Then attribute(name) get constraints do not contain: @<annotation-1>
+    Then attribute(name) get constraints contain: @<annotation-2>
     Then attribute(name) get declared annotations do not contain: @<annotation-1>
     Then attribute(name) get declared annotations contain: @<annotation-2>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation-1>
-    Then attribute(name) get annotations contain: @<annotation-2>
+    Then attribute(name) get constraints do not contain: @<annotation-1>
+    Then attribute(name) get constraints contain: @<annotation-2>
     Then attribute(name) get declared annotations do not contain: @<annotation-1>
     Then attribute(name) get declared annotations contain: @<annotation-2>
     When attribute(name) set annotation: @<annotation-1>
     When attribute(name) unset annotation: @<annotation-category-2>
-    Then attribute(name) get annotations do not contain: @<annotation-2>
-    Then attribute(name) get annotations contain: @<annotation-1>
+    Then attribute(name) get constraints do not contain: @<annotation-2>
+    Then attribute(name) get constraints contain: @<annotation-1>
     Then attribute(name) get declared annotations do not contain: @<annotation-2>
     Then attribute(name) get declared annotations contain: @<annotation-1>
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) get annotations do not contain: @<annotation-2>
-    Then attribute(name) get annotations contain: @<annotation-1>
+    Then attribute(name) get constraints do not contain: @<annotation-2>
+    Then attribute(name) get constraints contain: @<annotation-1>
     Then attribute(name) get declared annotations do not contain: @<annotation-2>
     Then attribute(name) get declared annotations contain: @<annotation-1>
     When attribute(name) unset annotation: @<annotation-category-1>
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     When transaction commits
     When connection open read transaction for database: typedb
-    Then attribute(name) get annotations is empty
+    Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
       | annotation-1     | annotation-2       | annotation-category-1 | annotation-category-2 | value-type  |
@@ -2877,8 +2513,8 @@ Feature: Concept Attribute Type
 #    Then attribute(name) set annotation: @<annotation-1>; fails
 #    When transaction commits
 #    When connection open schema transaction for database: typedb
-#    Then attribute(name) get annotations contain: @<annotation-2>
-#    Then attribute(name) get annotations do not contain: @<annotation-1>
+#    Then attribute(name) get constraints contain: @<annotation-2>
+#    Then attribute(name) get constraints do not contain: @<annotation-1>
 #    Then attribute(name) get declared annotations contain: @<annotation-2>
 #    Then attribute(name) get declared annotation do not contain: @<annotation-1>
 #    Examples:

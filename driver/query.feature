@@ -66,7 +66,7 @@ Feature: TypeDB Driver Queries
 
   # A define query should already successfully run as part of Background and multiple other tests
 
-  Scenario: when overriding a role that doesn't exist on the parent relation, an error is thrown
+  Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
@@ -84,9 +84,9 @@ Feature: TypeDB Driver Queries
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given get answers of typeql get
+    Given get answers of typeql read query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Given uniquely identify answer concepts
       | x                   |
@@ -100,9 +100,9 @@ Feature: TypeDB Driver Queries
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x sub entity; get;
+      match $x sub entity;
       """
     Then uniquely identify answer concepts
       | x                   |
@@ -149,9 +149,9 @@ Feature: TypeDB Driver Queries
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then uniquely identify answer concepts
       | x         |
@@ -198,9 +198,9 @@ Feature: TypeDB Driver Queries
     Then transaction commits
 
     When session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
     Then answer size is: 0
 
@@ -297,9 +297,9 @@ Feature: TypeDB Driver Queries
   Scenario: when a 'get' has unbound variables, an error is thrown
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
-    Then typeql get; throws exception
+    Then typeql throws exception
       """
-      match $x isa person; get $y; get;
+      match $x isa person; get $y;
       """
 
   Scenario: Value variables can be specified in a 'get'
@@ -315,7 +315,7 @@ Feature: TypeDB Driver Queries
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $z isa person, has name $x, has age $y;
@@ -340,41 +340,41 @@ Feature: TypeDB Driver Queries
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
+
       """
     Then answer size is: 9
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match
         $x isa person;
         $y isa name;
         $f isa friendship;
-      get;
+
       count;
       """
     Then aggregate value is: 9
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
+
       """
     Then answer size is: 6
-    When get answer of typeql get aggregate
+    When get answer of typeql read query aggregate
       """
       match
         $x isa person;
         $y isa name;
         $f (friend: $x) isa friendship;
-      get;
+
       count;
       """
     Then aggregate value is: 6
@@ -393,7 +393,7 @@ Feature: TypeDB Driver Queries
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get group
+    When get answers of typeql read query group
       """
       match
        $x isa person, has ref $r;
@@ -423,14 +423,14 @@ Feature: TypeDB Driver Queries
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
-      match $x isa person; get;
+      match $x isa person;
       """
-    When get answers of typeql get group aggregate
+    When get answers of typeql read query group aggregate
       """
       match ($x, $y) isa friendship;
-      get;
+
       group $x;
       count;
       """
@@ -449,7 +449,7 @@ Feature: TypeDB Driver Queries
     Given connection open data session for database: typedb
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception containing "value variable '?v' is never assigned to"
+    Then typeql throws exception containing "value variable '?v' is never assigned to"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -460,7 +460,7 @@ Feature: TypeDB Driver Queries
       """
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    Then typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -474,7 +474,7 @@ Feature: TypeDB Driver Queries
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6.0 + 3.0;
@@ -488,7 +488,7 @@ Feature: TypeDB Driver Queries
       | a                 | b                 | c                  | d                  |
       | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6 + 3;
@@ -502,7 +502,7 @@ Feature: TypeDB Driver Queries
       | a             | b            | c             | d                  |
       | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6.0 + 3;
@@ -516,7 +516,7 @@ Feature: TypeDB Driver Queries
       | a                 | b                 | c                  | d                  |
       | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6 + 3.0;

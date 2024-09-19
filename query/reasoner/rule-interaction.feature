@@ -90,7 +90,7 @@ Feature: Rule Interaction Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person, has name $n, has tag "P"; get;
+      match $x isa person, has name $n, has tag "P";
       """
     Then verify answer size is: 2
     Then verify answers are sound
@@ -143,7 +143,7 @@ Feature: Rule Interaction Resolution
     Given verifier is initialised
     Given reasoning query
       """
-      match $x isa person, has name 'tracey'; get;
+      match $x isa person, has name 'tracey';
       """
     Then verify answer size is: 2
     Then verify answers are sound

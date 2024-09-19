@@ -33,7 +33,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: A value variable must have exactly one assignment constraint in the same scope
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "value variable '?v' is never assigned to"
+    When typeql throws exception containing "value variable '?v' is never assigned to"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -44,7 +44,7 @@ Feature: TypeQL Get Query with Expressions
       """
 
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -57,7 +57,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -70,7 +70,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: A value variable's assignment must be in the highest scope
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -83,7 +83,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "cyclic assignment between value variables was detected"
+    When typeql throws exception containing "cyclic assignment between value variables was detected"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -93,7 +93,7 @@ Feature: TypeQL Get Query with Expressions
       """
 
     Given connection open read transaction for database: typedb
-    When typeql get; throws exception containing "cyclic assignment between value variables was detected"
+    When typeql throws exception containing "cyclic assignment between value variables was detected"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -116,7 +116,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $z isa person, has name $x, has age $y;
@@ -141,7 +141,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql get; throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
+    Then typeql throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
       """
       match
         $z isa person, has age $y;
@@ -160,14 +160,14 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql get
+    Then get answers of typeql read query
       """
       match
         $x isa age;
         ?const = -10;
         ?plus-negative = $x + -10;
         ?minus-negative = $x - -10;
-      get;
+
       """
     Then uniquely identify answer concepts
       | x            | const           | plus-negative  | minus-negative  |
@@ -176,7 +176,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: Test operator definitions
     Given connection open read transaction for database: typedb
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6.0 + 3.0;
@@ -190,7 +190,7 @@ Feature: TypeQL Get Query with Expressions
       | a                 | b                 | c                  | d                  |
       | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6 + 3;
@@ -204,7 +204,7 @@ Feature: TypeQL Get Query with Expressions
       | a             | b            | c             | d                  |
       | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6.0 + 3;
@@ -218,7 +218,7 @@ Feature: TypeQL Get Query with Expressions
       | a                 | b                 | c                  | d                  |
       | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = 6 + 3.0;
@@ -237,7 +237,7 @@ Feature: TypeQL Get Query with Expressions
     Given connection open data session for database: typedb
     Given session opens transaction of type: read
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = floor(3/2);
@@ -249,7 +249,7 @@ Feature: TypeQL Get Query with Expressions
       | a             | b             |
       | value:long: 1 | value:long: 2 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = round(2/3);
@@ -261,7 +261,7 @@ Feature: TypeQL Get Query with Expressions
       | a             | b                 |
       | value:long: 1 | value:double: 0.5 |
 
-    When get answers of typeql get
+    When get answers of typeql read query
     """
       match
         ?a = max(2, -3);
@@ -289,7 +289,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name,
@@ -323,7 +323,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -338,7 +338,7 @@ Feature: TypeQL Get Query with Expressions
       | attr:name:b22.2 |
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -368,7 +368,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -384,7 +384,7 @@ Feature: TypeQL Get Query with Expressions
       | attr:name:b22.2 |
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -415,7 +415,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -431,7 +431,7 @@ Feature: TypeQL Get Query with Expressions
       | attr:name:b22.2 |
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -462,7 +462,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -478,7 +478,7 @@ Feature: TypeQL Get Query with Expressions
       | attr:name:b22.2 |
 
     Given session opens transaction of type: read
-    When get answers of typeql get
+    When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
@@ -508,7 +508,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given session opens transaction of type: read
-    Then typeql get; throws exception containing "division by zero"
+    Then typeql throws exception containing "division by zero"
       """
       match
         $p isa person, has age $a;

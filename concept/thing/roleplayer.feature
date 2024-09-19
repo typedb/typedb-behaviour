@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Ordered Role Players
+Feature: Concept Role Players
 
   Background:
     Given typedb starts
@@ -26,7 +26,7 @@ Feature: Concept Ordered Role Players
 
     Given create relation type: vacation
     Given relation(vacation) set owns: date
-    Given relation(vacation) create role: employee, with @card(0..1)
+    Given relation(vacation) create role: employee
 
     Given relation(employment) create role: employer
     Given relation(employment) create role: employee
@@ -147,15 +147,17 @@ Feature: Concept Ordered Role Players
     # TODO: Cascade (when we understand it)
 
   Scenario: Relation can be a player of relation of the same type
-    When create relation type: parentship
-    When relation(parentship) create role: info
-    When relation(parentship) set plays: parentship:info
-    Then relation(parentship) get plays contain:
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given create relation type: parentship
+    Given relation(parentship) create role: info
+    Given relation(parentship) set plays: parentship:info
+    Given relation(parentship) get plays contain:
       | parentship:info |
     Given relation(parentship) set owns: name
     Given relation(parentship) get owns(name) set annotation: @key
-    When transaction commits
-    When connection open write transaction for database: typedb
+    Given transaction commits
+    Given connection open write transaction for database: typedb
     When $p1 = relation(parentship) create new instance with key(name): p1
     When $p2 = relation(parentship) create new instance with key(name): p2
     When $p3 = relation(parentship) create new instance with key(name): p3
@@ -170,3 +172,37 @@ Feature: Concept Ordered Role Players
     Then relation $p1 get players for role(info) contain: $p2
     Then relation $p2 get players for role(info) contain: $p1
     Then relation $p3 get players for role(info) contain: $p3
+
+
+  Scenario: Role players of subtypes of a role type cannot be inserted to a related supertype list
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create relation type: rel0
+    When relation(rel0) create role: rol0[]
+    When relation(rel0) set owns: ref
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: rol1[]
+    When relation(rel1) get role(rol1) set specialise: rol0
+    When relation(rel1) create role: rol2[]
+    When relation(rel1) get role(rol2) set specialise: rol0
+    When create entity type: ent1
+    When entity(ent1) set owns: ref
+    When entity(ent1) set plays: rel1:rol1
+    When create entity type: ent2
+    When entity(ent2) set owns: ref
+    When entity(ent2) set plays: rel1:rol2
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $ent2 = entity(ent2) create new instance with key(ref): ent2
+    When $rel1 = relation(rel1) create new instance with key(ref): rel1
+    Then relation $rel1 set players for role(rol1[]): [$ent1, $ent2]; fails
+    Then relation $rel1 set players for role(rol2[]): [$ent1, $ent2]; fails
+    Then relation $rel1 set players for role(rol0[]): [$ent1, $ent2]; fails
+    When $rel0 = relation(rel0) create new instance with key(ref): rel0
+    Then relation $rel0 set players for role(rol0[]): [$ent1, $ent2]; fails
+
