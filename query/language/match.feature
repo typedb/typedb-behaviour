@@ -607,7 +607,7 @@ Feature: TypeQL Match Clause
       | label:close-friendship |
 
 
-  Scenario: 'relates' without 'as' does not match relation types that specialise the specified roleplayer
+  Scenario: 'relates' without 'as' matches relation types that specialise the specified roleplayer
     Given typeql define
       """
       define
@@ -622,8 +622,9 @@ Feature: TypeQL Match Clause
       match $x relates friend;
       """
     Then uniquely identify answer concepts
-      | x                |
-      | label:friendship |
+      | x                      |
+      | label:friendship       |
+      | label:close-friendship |
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
@@ -826,7 +827,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa ganesh;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
@@ -834,7 +835,7 @@ Feature: TypeQL Match Clause
       """
       match ($x, $y) isa $type; $type label jakas-relacja;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a non-existent type label to a variable from a generic 'isa' query, an error is thrown
@@ -842,7 +843,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa $type; $type label polok;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when one entity exists, and we match two variables both of that entity type, the entity is returned
@@ -1215,7 +1216,7 @@ Feature: TypeQL Match Clause
       """
       match (person: $x);
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: an error is thrown when matching an entity type as if it were a relation type
@@ -1223,7 +1224,7 @@ Feature: TypeQL Match Clause
       """
       match ($x) isa person;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
@@ -1231,7 +1232,7 @@ Feature: TypeQL Match Clause
       """
       match ($x) isa bottle-of-rum;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a role type that doesn't exist, an error is thrown
@@ -1239,7 +1240,7 @@ Feature: TypeQL Match Clause
       """
       match (rolein-rolein-rolein: $rolein);
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
@@ -1247,7 +1248,7 @@ Feature: TypeQL Match Clause
       """
       match (friend: $x) isa employment;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
@@ -1266,7 +1267,7 @@ Feature: TypeQL Match Clause
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
       relation marriage relates spouse @card(0..);
-      relation hetero-marriage sub marriage, relates husband as spouse @card(0..), relates wife as spouse @card(0..);
+      relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
       relation civil-marriage sub marriage;
       """
     Given transaction commits
@@ -1387,7 +1388,7 @@ Feature: TypeQL Match Clause
   Scenario Outline: '<type>' attributes can be matched by value
     Given typeql define
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
@@ -1401,19 +1402,24 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a <value>;
+      match $a <value> isa <attr>;
       """
     Then uniquely identify answer concepts
-      | a             |
-      | attr:<attr>:0 |
+      | a                   |
+      | attr:<attr>:<value> |
 
     Examples:
-      | attr        | type     | value               |
-      | colour      | string   | "Green"             |
-      | calories    | long     | 1761                |
-      | grams       | double   | 9.6                 |
-      | gluten-free | boolean  | false               |
-      | use-by-date | datetime | 2020-06-16T00:00:00 |
+      | attr              | type        | value                              |
+      | is-alive          | boolean     | true                               |
+      | age               | long        | 21                                 |
+      | score             | double      | 123.456                            |
+      | balance           | decimal     | 123.456                            |
+      | name              | string      | "alice"                            |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
@@ -1426,7 +1432,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a == <value>;
+      match $a <value> is <attr>;
       """
     Then answer size is: 0
 
@@ -1697,8 +1703,8 @@ Feature: TypeQL Match Clause
     Given typeql define
       """
       define
-      attribute start-date value datetime;
-      attribute graduation-date value datetime;
+      attribute start-date value date;
+      attribute graduation-date value date;
       person owns graduation-date;
       employment owns start-date;
       """
@@ -2024,7 +2030,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa $t; { $t label person; } or {$t label company;};
+      match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2032,7 +2038,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
     When get answers of typeql read query
       """
-      match $x isa $_; {$x has name "Jeff";} or {$x has name "Amazon";};
+      match $x isa $_; [ $x has name "Jeff"; ] or { $x has name "Amazon"; };
       """
     Then uniquely identify answer concepts
       | x         |
