@@ -607,7 +607,7 @@ Feature: TypeQL Match Clause
       | label:close-friendship |
 
 
-  Scenario: 'relates' without 'as' does not match relation types that specialise the specified roleplayer
+  Scenario: 'relates' without 'as' matches relation types that specialise the specified roleplayer
     Given typeql define
       """
       define
@@ -622,8 +622,9 @@ Feature: TypeQL Match Clause
       match $x relates friend;
       """
     Then uniquely identify answer concepts
-      | x                |
-      | label:friendship |
+      | x                      |
+      | label:friendship       |
+      | label:close-friendship |
 
 
   Scenario: 'relates' can be used to retrieve all the roles of a relation type
@@ -1387,7 +1388,7 @@ Feature: TypeQL Match Clause
   Scenario Outline: '<type>' attributes can be matched by value
     Given typeql define
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
@@ -1401,19 +1402,24 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a <value>;
+      match $a <value> isa <attr>;
       """
     Then uniquely identify answer concepts
-      | a             |
-      | attr:<attr>:0 |
+      | a                   |
+      | attr:<attr>:<value> |
 
     Examples:
-      | attr        | type     | value               |
-      | colour      | string   | "Green"             |
-      | calories    | long     | 1761                |
-      | grams       | double   | 9.6                 |
-      | gluten-free | boolean  | false               |
-      | use-by-date | datetime | 2020-06-16T00:00:00 |
+      | attr              | type        | value                              |
+      | is-alive          | boolean     | true                               |
+      | age               | long        | 21                                 |
+      | score             | double      | 123.456                            |
+      | balance           | decimal     | 123.456                            |
+      | name              | string      | "alice"                            |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
@@ -1426,7 +1432,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a == <value>;
+      match $a <value> is <attr>;
       """
     Then answer size is: 0
 
