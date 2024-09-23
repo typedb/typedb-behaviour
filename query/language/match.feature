@@ -1432,7 +1432,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a <value> is <attr>;
+      match $a <value> isa <attr>;
       """
     Then answer size is: 0
 
