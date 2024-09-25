@@ -1258,7 +1258,7 @@ Feature: TypeQL Match Clause
       $x isa company;
       ($x) isa friendship;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
@@ -1420,6 +1420,7 @@ Feature: TypeQL Match Clause
       | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6S                     |
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
@@ -1437,12 +1438,14 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
     Examples:
-      | attr        | type     | value      |
-      | colour      | string   | "Green"    |
-      | calories    | long     | 1761       |
-      | grams       | double   | 9.6        |
-      | gluten-free | boolean  | false      |
-      | use-by-date | datetime | 2020-06-16 |
+      | attr        | type        | value                              |
+      | colour      | string      | "Green"                            |
+      | calories    | long        | 1761                               |
+      | grams       | double      | 9.6                                |
+      | gluten-free | boolean     | false                              |
+      | use-by-date | datetime    | 2020-06-16                         |
+      | global-date | datetime-tz | 1990-01-01T11:22:33-0100           |
+      | interval    | duration    | P1Y2M3DT4H5M6.789S                 |
 
 
   Scenario: 'contains' matches strings that contain the specified substring
@@ -1675,7 +1678,7 @@ Feature: TypeQL Match Clause
       """
       match $x has person "Luke";
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: exception is thrown when matching by an attribute ownership, if the owner can't actually own it
@@ -1683,7 +1686,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa company, has age $n;
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
   Scenario: an error is thrown when matching by attribute ownership, when the owned type label doesn't exist
