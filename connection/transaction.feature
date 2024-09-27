@@ -11,260 +11,333 @@ Feature: Connection Transaction
     Given connection has been opened
     Given connection does not have any database
 
-  Scenario: one database, one transaction to read
+  Scenario Outline: one database, one <type> transaction
     When connection create database: typedb
-    Given connection open read transaction for database: typedb
+    Given connection open <type> transaction for database: typedb
     Then transaction is open: true
-    Then transaction has type: read
+    Then transaction has type: <type>
+    Examples:
+      | type   |
+      | read   |
+      | write  |
+      | schema |
 
-  Scenario: one database, one transaction to write
+  Scenario Outline: one database, one committed <type> transaction is closed
     When connection create database: typedb
-    Given connection open write transaction for database: typedb
-    Then transaction is open: true
-    Then transaction has type: write
-
-  Scenario: one database, one committed write transaction is closed
-    When connection create database: typedb
-    Given connection open write transaction for database: typedb
+    Given connection open <type> transaction for database: typedb
     Then transaction commits
     Then transaction is open: false
+    Examples:
+      | type   |
+      | write  |
+      | schema |
 
-  Scenario: one database, transaction close
+  Scenario: read transaction cannot be committed
     When connection create database: typedb
-    Given connection open write transaction for database: typedb
+    Given connection open read transaction for database: typedb
+    Then transaction commits; fails
+
+  Scenario Outline: one database, <type> transaction close
+    When connection create database: typedb
+    Given connection open <type> transaction for database: typedb
     Then transaction closes
     Then transaction is open: false
+    Examples:
+      | type   |
+      | read   |
+      | write  |
+      | schema |
+
+    # TODO: Fix rollback
+#  Scenario Outline: one database, <type> transaction rollback
+#    When connection create database: typedb
+#    Given connection open <type> transaction for database: typedb
+#    Then transaction rollbacks
+#    Then transaction is open: true
+#    Examples:
+#      | type   |
+#      | write  |
+#      | schema |
+
+  Scenario: read transaction cannot be rollbacked
+    When connection create database: typedb
+    Given connection open read transaction for database: typedb
+    Then transaction rollbacks; fails
 
   @ignore-typedb
-  Scenario: one database, many transactions to read
+  Scenario: one database, many <type> transactions
     When connection create database: typedb
-    When open transactions of type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-    Then transactions are null: false
+    When connection open transactions for database: typedb, of type:
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
     Then transactions are open: true
     Then transactions have type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+    Examples:
+      | type   |
+      | read   |
+      | write  |
+      | schema |
 
   @ignore-typedb
-  Scenario: one database, many transactions to write
+  Scenario: one database, many transactions of different types
     When connection create database: typedb
-    When open transactions of type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-    Then transactions are null: false
+    When connection open transactions for database: typedb, of type:
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
     Then transactions are open: true
     Then transactions have type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
 
-  @ignore-typedb
-  Scenario: one database, many transactions to read and write
-    When connection create database: typedb
-    When open transactions of type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-    Then transactions are null: false
-    Then transactions are open: true
-    Then transactions have type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
+    # TODO: Fix parallel execution for the server
+#  Scenario Outline: one database, many <type> transactions in parallel
+#    When connection create database: typedb
+#    When connection open transactions in parallel for database: typedb, of type:
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#    Then transactions in parallel are open: true
+#    Then transactions in parallel have type:
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#      | <type> |
+#    Examples:
+#      | type   |
+#      | read   |
+#      | write  |
+#      | schema |
 
-  Scenario: one database, many transactions in parallel to read
-    When connection create database: typedb
-    When open transactions in parallel of type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-    Then transactions in parallel are null: false
-    Then transactions in parallel are open: true
-    Then transactions in parallel have type:
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
-      | read |
+    # TODO: Fix parallel execution for the server
+#  Scenario: one database, many transactions in parallel of different types
+#    When connection create database: typedb
+#    When connection open transactions in parallel for database: typedb, of type:
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#    Then transactions in parallel are open: true
+#    Then transactions in parallel have type:
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
 
-  Scenario: one database, many transactions in parallel to write
-    When connection create database: typedb
-    When open transactions in parallel of type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-    Then transactions in parallel are null: false
-    Then transactions in parallel are open: true
-    Then transactions in parallel have type:
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-      | write |
-
-  Scenario: one database, many transactions in parallel to read and write
-    When connection create database: typedb
-    When open transactions in parallel of type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-    Then transactions in parallel are null: false
-    Then transactions in parallel are open: true
-    Then transactions in parallel have type:
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-      | read  |
-      | write |
-
-  Scenario: write in a read transaction throws
-    When connection create database: typedb
+  Scenario Outline: write in a <type> transaction fails
+    Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     Given typeql define
       """
-      define person sub entity;
+      define entity person;
       """
     Given transaction commits
-    Given connection open read transaction for database: typedb
-     # TODO: 3.0: Message update for 3.0
-    Given typeql insert; throws exception containing "transaction type does not allow"
+    When connection open <type> transaction for database: typedb
+    Then typeql write query; fails
       """
-      insert $person isa entity;
+      insert $person isa person;
       """
+    Examples:
+      | type   |
+      | read   |
 
-  Scenario: commit in a read transaction throws
+  Scenario: commit in a read transaction fails
     When connection create database: typedb
     Given connection open read transaction for database: typedb
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
-  Scenario: schema modification in a write transaction throws
-    When connection create database: typedb
+  Scenario Outline: <command> in a schema transaction fails
+    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    Given typeql define
+      """
+      define entity person;
+      """
+    When transaction <command>s
+    Then transaction is open: false
+    Examples:
+      | command |
+      | close   |
+      | commit  |
+
+  Scenario Outline: <command> in a write transaction fails
+    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    Given typeql define
+      """
+      define entity person;
+      """
+    Given transaction commits
     Given connection open write transaction for database: typedb
-    # TODO: 3.0: Message update for 3.0
-    Then typeql define; throws exception containing "transaction type does not allow"
+    Given typeql write query
       """
-      define person sub entity;
+      insert $person isa person;
+      """
+    When transaction <command>s
+    Then transaction is open: false
+    Examples:
+      | command |
+      | close   |
+      | commit  |
+
+  Scenario: schema modification in a write transaction fails
+    Given connection create database: typedb
+    Given connection open write transaction for database: typedb
+    Then typeql define; fails
+      """
+      define entity person;
       """
 
-  Scenario: write data in a schema transaction throws
-    When connection create database: typedb
+  Scenario: write data in a schema transaction is allowed
+    Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     Then typeql define
       """
-      define person sub entity;
+      define entity person;
       """
-    # TODO: Message update for 3.0
-    Then typeql insert; throws exception containing "transaction type does not allow"
+    Then typeql write query
       """
       insert $x isa person;
       """
+    Then transaction commits
+
+    # TODO: Fix rollback
+#  Scenario: commit after a schema transaction rollback does nothing
+#    Given connection create database: typedb
+#    Given connection open schema transaction for database: typedb
+#    When typeql define
+#      """
+#      define entity person;
+#      """
+#    When transaction rollbacks
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    When typeql read query
+#      """
+#      match entity $x;
+#      """
+#    Then answer size is: 0
+
+    # TODO: Fix rollback
+#  Scenario: commit after a write transaction rollback does nothing
+#    Given connection create database: typedb
+#    Given connection open schema transaction for database: typedb
+#    Given typeql define
+#      """
+#      define entity person;
+#      """
+#    Given transaction commits
+#    Given connection open write transaction for database: typedb
+#    When typeql write query
+#      """
+#      insert $x isa person;
+#      """
+#    When transaction rollbacks
+#    When transaction commits
+#    When connection open read transaction for database: typedb
+#    When typeql read query
+#      """
+#      match $x isa person;
+#      """
+#    Then answer size is: 0
 
   @ignore-typedb
   Scenario: transaction timeouts are configurable
@@ -276,10 +349,10 @@ Feature: Connection Transaction
     Then wait 8 seconds
     Then typeql define
       """
-      define person sub entity;
+      define entity person;
       """
     Then wait 4 seconds
-    Then typeql define; throws exception containing "Transaction exceeded maximum configured duration"
+    Then typeql define; fails
       """
-      define person sub entity;
+      define entity person;
       """

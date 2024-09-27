@@ -24,7 +24,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection has databases:
+    Then connection has databases:
       | alice   |
       | bob     |
       | charlie |
@@ -33,7 +33,7 @@ Feature: Connection Database
       | frank   |
 
   Scenario: create many databases in parallel
-    When  connection create databases in parallel:
+    When connection create databases in parallel:
       | alice   |
       | bob     |
       | charlie |
@@ -41,7 +41,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection has databases:
+    Then connection has databases:
       | alice   |
       | bob     |
       | charlie |
@@ -65,7 +65,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    When  connection delete databases:
+    When connection delete databases:
       | alice   |
       | bob     |
       | charlie |
@@ -73,7 +73,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then  connection does not have databases:
+    Then connection does not have databases:
       | alice   |
       | bob     |
       | charlie |
@@ -92,7 +92,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    When  connection delete databases in parallel:
+    When connection delete databases in parallel:
       | alice   |
       | bob     |
       | charlie |
@@ -119,18 +119,19 @@ Feature: Connection Database
     Then connection has database: alice
 
   Scenario: delete a nonexistent database throws an error
-    When connection delete database; throws exception: typedb
+    When connection delete database: typedb; fails
 
-  # TODO: 3.0: Verify the TODO is still relevant
-  # # TODO: currently throws in @After; re-enable when we are able to check if sessions are alive (see driver-java#225)
-  @ignore
-  Scenario: delete a database causes open transactions to fail
+  Scenario: database cannot be deleted if it has open transactions
     When connection create database: typedb
-    When connection open write transaction for database: typedb
-    When connection delete database: typedb
+    Then connection has database: typedb
+    When connection open schema transaction for database: typedb
+    Then transaction is open: true
+    Then connection delete database: typedb; fails
+    Then typeql define
+      """
+      define entity person;
+      """
+    Then transaction commits
+    Then connection delete database: typedb
     Then connection does not have database: typedb
-    Then typeql define; throws exception containing "transaction has been closed"
-      """
-      define person sub entity;
-      """
 
