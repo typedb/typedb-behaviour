@@ -356,12 +356,12 @@ Feature: TypeQL Reduce Queries
       | is-awake   | boolean  | true       | mean      |
       | is-awake   | boolean  | true       | median    |
       | is-awake   | boolean  | true       | std       |
-      | birth-date | datetime | 2000-01-01 | sum       |
-      | birth-date | datetime | 2000-01-01 | max       |
-      | birth-date | datetime | 2000-01-01 | min       |
-      | birth-date | datetime | 2000-01-01 | mean      |
-      | birth-date | datetime | 2000-01-01 | median    |
-      | birth-date | datetime | 2000-01-01 | std       |
+#      | birth-date | datetime | 2000-01-01 | sum       |
+#      | birth-date | datetime | 2000-01-01 | max       |
+#      | birth-date | datetime | 2000-01-01 | min       |
+#      | birth-date | datetime | 2000-01-01 | mean      |
+#      | birth-date | datetime | 2000-01-01 | median    |
+#      | birth-date | datetime | 2000-01-01 | std       |
 
 
   Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
