@@ -92,6 +92,15 @@ Feature: TypeQL Reduce Queries
       reduce $count = count($x);
       """
     Then result is a single row with variable 'count': value:long:6
+    When get answers of typeql read query
+      """
+      match
+        $x isa person;
+        $y isa name;
+        $f isa friendship, links (friend: $x);
+      reduce $count = count;
+      """
+    Then result is a single row with variable 'count': value:long:6
 
 
   Scenario: the 'count' of an empty answer set is zero
@@ -475,6 +484,18 @@ Feature: TypeQL Reduce Queries
       """
       match ($x, $y) isa friendship;
       reduce $count = count($y) within $x;
+      """
+    Then uniquely identify answer concepts
+      | x         | count        |
+      | key:ref:0 | value:long:3 |
+      | key:ref:1 | value:long:3 |
+      | key:ref:2 | value:long:3 |
+      | key:ref:3 | value:long:3 |
+
+    When get answers of typeql read query
+      """
+      match ($x, $y) isa friendship;
+      reduce $count = count within $x;
       """
     Then uniquely identify answer concepts
       | x         | count        |
