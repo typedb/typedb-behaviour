@@ -135,11 +135,43 @@ Feature: TypeQL Reduce Queries
     Examples:
       | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
       | age    | long   | 6    | 30   | 14   | sum       | long     | 50      |
+      | weight | double | 61.8 | 86.5 | 24.8 | sum       | double   | 173.1   |
+
+
+  Scenario Outline: the <reduction> of an answer set of '<type>' must be assigned to an optional variable
+    Given connection open schema transaction for database: typedb
+    Given typeql define
+      """
+      define
+      attribute <attr>, value <type>;
+      person owns <attr>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has <attr> <val1>, has ref 0;
+      $p2 isa person, has <attr> <val2>, has ref 1;
+      $p3 isa person, has <attr> <val3>, has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has <attr> $y;
+      reduce $red_var? = <reduction>($y);
+      """
+    Then result is a single row with variable 'red_var': value:<val_type>:<red_val>
+
+    Examples:
+      | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
       | age    | long   | 6    | 30   | 14   | max       | long     | 30      |
       | age    | long   | 6    | 30   | 14   | min       | long     | 6       |
       | age    | long   | 6    | 30   | 14   | mean      | double   | 16.6667 |
       | age    | long   | 6    | 30   | 14   | median    | double   | 14      |
-      | weight | double | 61.8 | 86.5 | 24.8 | sum       | double   | 173.1   |
       | weight | double | 61.8 | 86.5 | 24.8 | max       | double   | 86.5    |
       | weight | double | 61.8 | 86.5 | 24.8 | min       | double   | 24.8    |
       | weight | double | 61.8 | 86.5 | 24.8 | mean      | double   | 57.7    |
@@ -170,7 +202,7 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match $x isa person, has weight $y;
-      reduce $std = std($y);
+      reduce $std? = std($y);
       """
       # Note: This is the sample standard deviation, NOT the population standard deviation
     Then result is a single row with variable 'std': value:double:31.0537
@@ -223,13 +255,12 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match $x isa person, has age $y;
-      reduce $red_var = <reduction>($y);
+      reduce $red_var? = <reduction>($y);
       """
     Then result is a single row with variable 'red_var': value:<val_type>:<red_val>
 
     Examples:
       | val1and2 | val3 | reduction | val_type | red_val |
-      | 30       | 75   | sum       | long     | 135     |
       | 30       | 60   | mean      | double   | 40      |
       | 17       | 14   | median    | double   | 17      |
 
@@ -250,7 +281,7 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match $x isa person, has age $y;
-      reduce $median = median($y);
+      reduce $median? = median($y);
       """
     Then result is a single row with variable 'median': value:double:36.5
 
@@ -269,7 +300,7 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match $x isa person, has income $y;
-      reduce $red_var = <reduction>($y);
+      reduce $red_var? = <reduction>($y);
       """
     Then result is a single row with variable 'red_var': empty
 
@@ -289,10 +320,21 @@ Feature: TypeQL Reduce Queries
       match $x isa person;
       reduce $red_var = <reduction>($y);
       """
-
     Examples:
       | reduction |
+      | count     |
       | sum       |
+
+
+  Scenario Outline: an error is thrown when getting the '<reduction>' of an undefined variable in a fallible reduce query
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match $x isa person;
+      reduce $red_var? = <reduction>($y);
+      """
+    Examples:
+      | reduction |
       | max       |
       | min       |
       | mean      |
@@ -314,7 +356,6 @@ Feature: TypeQL Reduce Queries
       match $x isa person;
       reduce $min = min($x);
       """
-
 
   Scenario Outline: an error is thrown when getting the '<reduction>' of attributes that have the inapplicable type, '<type>'
     Given connection open schema transaction for database: typedb
@@ -340,23 +381,49 @@ Feature: TypeQL Reduce Queries
       match $x isa person, has <attr> $y;
       reduce $red_var = <reduction>($y);
       """
-
-
     Examples:
       | attr       | type     | value      | reduction |
       | name       | string   | "Talia"    | sum       |
+      | is-awake   | boolean  | true       | sum       |
+#      | birth-date | datetime | 2000-01-01 | sum       |
+
+
+  Scenario Outline: an error is thrown when getting the fallible '<reduction>' of attributes that have the inapplicable type, '<type>'
+    Given connection open schema transaction for database: typedb
+    Given typeql define
+      """
+      define
+      attribute <attr> value <type>;
+      person owns <attr>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has ref 0, has <attr> <value>;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match $x isa person, has <attr> $y;
+      reduce $red_var? = <reduction>($y);
+      """
+    Examples:
+      | attr       | type     | value      | reduction |
       | name       | string   | "Talia"    | max       |
       | name       | string   | "Talia"    | min       |
       | name       | string   | "Talia"    | mean      |
       | name       | string   | "Talia"    | median    |
       | name       | string   | "Talia"    | std       |
-      | is-awake   | boolean  | true       | sum       |
       | is-awake   | boolean  | true       | max       |
       | is-awake   | boolean  | true       | min       |
       | is-awake   | boolean  | true       | mean      |
       | is-awake   | boolean  | true       | median    |
       | is-awake   | boolean  | true       | std       |
-#      | birth-date | datetime | 2000-01-01 | sum       |
 #      | birth-date | datetime | 2000-01-01 | max       |
 #      | birth-date | datetime | 2000-01-01 | min       |
 #      | birth-date | datetime | 2000-01-01 | mean      |
@@ -491,7 +558,7 @@ Feature: TypeQL Reduce Queries
         $x isa company;
         $y isa person, has age $z;
         $r isa employment, links ($x, $y);
-      reduce $max = max($z) within $x;
+      reduce $max? = max($z) within $x;
       """
     Then uniquely identify answer concepts
       | x         | max           |
@@ -548,7 +615,7 @@ Feature: TypeQL Reduce Queries
       """
       match $x isa person, has income $y;
       select $x, $y;
-      reduce $std = std($y) within $x;
+      reduce $std? = std($y) within $x;
       """
     Then uniquely identify answer concepts
       | x         | std   |
