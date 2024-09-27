@@ -194,3 +194,28 @@ Feature: TypeQL pipelines
       | attr:name:Alice  | attr:age:1      |
       | attr:name:Bob    | attr:age:2      |
 
+
+  Scenario: Reduce can be performed within groups
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $p0 isa person, has ref 0, has name "Alice", has age 11;
+      $p1 isa person, has ref 1, has name "Alice", has age 12;
+      $p2 isa person, has ref 2, has name "Bob", has age 23;
+      $p3 isa person, has ref 3, has name "Bob", has age 24;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match
+      $p isa person, has name $name, has age $age;
+    reduce $sum_age = sum($age) within ($name);
+    """
+    Then uniquely identify answer concepts
+      | name             | sum_age        |
+      | attr:name:Alice  | value:long:23  |
+      | attr:name:Bob    | value:long:47  |
+
