@@ -499,7 +499,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x > <pivot>;
-      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -509,7 +508,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x >= <pivot>;
-      get;
       sort $x asc;
       """
     Then order of answer concepts is
@@ -521,7 +519,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x < <pivot>;
-      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -531,7 +528,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x <= <pivot>;
-      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -542,7 +538,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x > <pivot>;
-      get;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -552,7 +547,7 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x >= <pivot>;
-      get;
+      select;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -908,7 +903,7 @@ Feature: TypeQL Query Modifiers
       | key:ref:0 | attr:name:Lisa  |
 
 
-  Scenario: when a 'get' has unbound variables, an error is thrown
+  Scenario: when a 'select' has unbound variables, an error is thrown
     Given connection open read transaction for database: typedb
     Then typeql read query; fails
       """
@@ -916,7 +911,7 @@ Feature: TypeQL Query Modifiers
       """
 
 
-  Scenario: Value variables can be specified in a 'get'
+  Scenario: Value variables can be specified in a 'select'
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
