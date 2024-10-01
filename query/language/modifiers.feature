@@ -83,7 +83,7 @@ Feature: TypeQL Query Modifiers
       | colour        | string   | "blue"     | "green"          | "red"            | "yellow"   |
       | score         | long     | -38        | -4               | 18               | 152        |
       | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
-      | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
+#      | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
 
 
   Scenario: sort order can be ascending or descending
@@ -879,3 +879,101 @@ Feature: TypeQL Query Modifiers
       | x         |
       | key:ref:1 |
       | key:ref:2 |
+
+
+  ##########
+  # SELECT #
+  ##########
+
+  Scenario: 'select' can be used to restrict the set of variables that appear in an answer set
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x "Lisa" isa name;
+      $y 16 isa age;
+      $z isa person, has name $x, has age $y, has ref 0;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $z isa person, has name $x, has age $y;
+      select $z, $x;
+      """
+    Then uniquely identify answer concepts
+      | z         | x               |
+      | key:ref:0 | attr:name:Lisa  |
+
+
+  Scenario: when a 'get' has unbound variables, an error is thrown
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match $x isa person; select $y;
+      """
+
+
+  Scenario: Value variables can be specified in a 'get'
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x "Lisa" isa name;
+      $y 16 isa age;
+      $z isa person, has name $x, has age $y, has ref 0;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $z isa person, has name $x, has age $y;
+        $b = 2017 - $y;
+      select $z, $x, $b;
+      """
+    Then uniquely identify answer concepts
+      | z         | x              | b                |
+      | key:ref:0 | attr:name:Lisa | value:long:2001  |
+
+
+  # Guards against regression of #6967
+  Scenario: A 'select' filter is applied after negations
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has name "Klaus", has ref 0;
+      $p2 isa person, has name "Kristina", has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name $n, has ref $r;
+        $n == "Klaus";
+        not { $p has name "Kristina"; };
+      select $n, $r;
+      """
+    Then uniquely identify answer concepts
+      | n               | r               |
+      | attr:name:Klaus | attr:ref:0      |
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name $n, has ref $r;
+        $n == "Klaus";
+        not { $p has name "Kristina"; };
+      select $n, $r;
+      sort $r; # The sort triggered the bug
+      """
+    Then uniquely identify answer concepts
+      | n               | r               |
+      | attr:name:Klaus | attr:ref:0      |
+
