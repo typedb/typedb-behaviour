@@ -13,75 +13,28 @@ Feature: TypeDB Driver Queries
     Given typedb starts
     Given connection opens with default authentication
     Given connection has been opened
-    Given connection does not have any database
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection reset database: typedb
 
-    Given typeql define
+  ###############
+  # OK RESPONSE #
+  ###############
+
+  Scenario: Ok response is processed correctly
+    Given connection open schema transaction for database: typedb
+
+    When typeql query
       """
-      define
-
-      person sub entity,
-        plays employment:employee,
-        plays friendship:friend,
-        owns name,
-        owns age,
-        owns ref @key,
-        owns email @unique;
-
-      company sub entity,
-        plays employment:employer,
-        owns name,
-        owns ref @key;
-
-      employment sub relation,
-        relates employee,
-        relates employer,
-        owns ref @key;
-
-      friendship sub relation,
-        relates friend,
-        owns ref @key;
-
-      name sub attribute,
-        value string;
-
-      age sub attribute,
-        value long;
-
-      ref sub attribute,
-        value long;
-
-      email sub attribute,
-        value string;
+      define entity person;
       """
-    Given transaction commits
+    Then query answer type: ok
 
-    Given connection close all sessions
-
-  ##########
-  # DEFINE #
-  ##########
-
-  # A define query should already successfully run as part of Background and multiple other tests
-
-  Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-
-    Then typeql define; throws exception
-      """
-      define
-      close-friendship sub relation, relates close-friend as friend;
-      """
 
   ############
   # UNDEFINE #
   ############
 
   Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
-    Given connection open schema session for database: typedb
+    Given connection open schema transaction for database: typedb
     Given session opens transaction of type: write
 
     Given get answers of typeql read query
@@ -110,7 +63,7 @@ Feature: TypeDB Driver Queries
       | label:company       |
 
   Scenario: undefining a relation type throws on commit if it has existing instances
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -121,7 +74,7 @@ Feature: TypeDB Driver Queries
     Given transaction commits
     Given connection close all sessions
 
-    Given connection open schema session for database: typedb
+    Given connection open schema transaction for database: typedb
     Given session opens transaction of type: write
     Then typeql undefine; throws exception
       """
@@ -137,7 +90,7 @@ Feature: TypeDB Driver Queries
   ##########
 
   Scenario: one query can insert multiple things
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
 
     When typeql insert
@@ -159,7 +112,7 @@ Feature: TypeDB Driver Queries
       | key:ref:1 |
 
   Scenario: when inserting a roleplayer that can't play the role, an error is thrown
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Then typeql insert; throws exception
       """
@@ -173,7 +126,7 @@ Feature: TypeDB Driver Queries
   ##########
 
   Scenario: one delete statement can delete multiple things
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
 
     Given get answers of typeql insert
@@ -205,7 +158,7 @@ Feature: TypeDB Driver Queries
     Then answer size is: 0
 
   Scenario: deleting an instance using an unrelated type label throws
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
 
     Given typeql insert
@@ -231,7 +184,7 @@ Feature: TypeDB Driver Queries
   ##########
 
   Scenario: Roleplayer exchange
-    Given connection open schema session for database: typedb
+    Given connection open schema transaction for database: typedb
     Given session opens transaction of type: write
 
     Given typeql define
@@ -247,7 +200,7 @@ Feature: TypeDB Driver Queries
     Given transaction commits
     Given connection close all sessions
 
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
 
     Given get answers of typeql insert
@@ -259,7 +212,7 @@ Feature: TypeDB Driver Queries
       """
     Given transaction commits
 
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     When typeql update
       """
@@ -269,7 +222,7 @@ Feature: TypeDB Driver Queries
       """
 
   Scenario: Deleting anonymous variables throws an exception
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
 
     Given get answers of typeql insert
@@ -295,7 +248,7 @@ Feature: TypeDB Driver Queries
   #########
 
   Scenario: when a 'get' has unbound variables, an error is thrown
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: read
     Then typeql throws exception
       """
@@ -303,7 +256,7 @@ Feature: TypeDB Driver Queries
       """
 
   Scenario: Value variables can be specified in a 'get'
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -327,7 +280,7 @@ Feature: TypeDB Driver Queries
       | key:ref:0 | attr:name:Lisa | value:long:2001  |
 
   Scenario: 'count' returns the total number of answers
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -380,7 +333,7 @@ Feature: TypeDB Driver Queries
     Then aggregate value is: 6
 
   Scenario: answers can be grouped by a value variable contained in the answer set
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -409,7 +362,7 @@ Feature: TypeDB Driver Queries
       | value:long:3000 | key:ref:3000 |
 
   Scenario: the size of each answer group can be retrieved using a group 'count'
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -446,7 +399,7 @@ Feature: TypeDB Driver Queries
   ###############
 
   Scenario: A value variable must have exactly one assignment constraint in the same scope
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
 
     Given session opens transaction of type: read
     Then typeql throws exception containing "value variable '?v' is never assigned to"
@@ -471,7 +424,7 @@ Feature: TypeDB Driver Queries
       """
 
   Scenario: Test operator definitions
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: read
 
     When get answers of typeql read query
@@ -535,7 +488,7 @@ Feature: TypeDB Driver Queries
   #########
 
   Scenario: an attribute projection can be relabeled
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: write
     Given typeql insert
       """
@@ -582,7 +535,7 @@ Feature: TypeDB Driver Queries
 
 
   Scenario: a fetch with zero projections throws
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: read
 
     When typeql fetch; throws exception
@@ -593,7 +546,7 @@ Feature: TypeDB Driver Queries
       """
 
   Scenario: a subquery that is not connected to the match throws
-    Given connection open data session for database: typedb
+    Given connection open data transaction for database: typedb
     Given session opens transaction of type: read
 
     When typeql fetch; throws exception
