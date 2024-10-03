@@ -8,8 +8,8 @@ Feature: Connection Database
   Background:
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
 
   Scenario: create one database
     When connection create database: alice
@@ -54,7 +54,7 @@ Feature: Connection Database
     Given connection create database: alice
     When connection delete database: alice
     Then connection does not have database: alice
-    Then connection does not have any database
+    Then connection has 0 databases
 
   Scenario: connection can delete many databases
       Given connection create databases:
@@ -81,7 +81,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then connection does not have any database
+    Then connection has 0 databases
 
   Scenario: delete many databases in parallel
       Given connection create databases in parallel:
@@ -108,7 +108,7 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
-    Then connection does not have any database
+    Then connection has 0 databases
 
   Scenario: create delete and recreate a database
     When connection create database: alice
@@ -127,7 +127,7 @@ Feature: Connection Database
     When connection open schema transaction for database: typedb
     Then transaction is open: true
     Then connection delete database: typedb; fails
-    Then typeql define
+    Then typeql schema query
       """
       define entity person;
       """

@@ -8,13 +8,13 @@ Feature: TypeQL Delete Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       person sub entity,
@@ -328,7 +328,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       special-friendship sub friendship;
@@ -821,7 +821,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       special-friendship sub friendship,
@@ -870,7 +870,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef;
@@ -922,7 +922,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       ship-crew sub relation, relates captain, relates navigator, relates chef, owns ref @key;
@@ -975,7 +975,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       age sub attribute, value long;
@@ -1022,7 +1022,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       lastname sub attribute, value string;
@@ -1081,7 +1081,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       address sub attribute, value string, abstract;
@@ -1160,7 +1160,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       duration sub attribute, value long;
@@ -1209,7 +1209,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       duration sub attribute, value long;
@@ -1276,7 +1276,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       lastname sub attribute, value string;
@@ -1348,7 +1348,7 @@ Feature: TypeQL Delete Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       lastname sub attribute, value string;

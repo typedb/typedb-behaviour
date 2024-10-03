@@ -2,18 +2,322 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# Driver smoke test: since the full query test suite is quite large, and we have four drivers in the same repo,
-# Factory begins to struggle when those tests run on every commit. We set aside a representative sample of driver
-# tests that should signal to us if something goes wrong, without overloading Factory.
+# These tests are dedicated to test the required functionality of TypeDB drivers. Can be used to test any client
+# application which aims to support all the operations presented in this file for the complete user experience.
+# The following steps are suitable for both CORE and CLOUD drivers. It is recommended to test both of them.
+# NOTE: for complete guarantees, all the drivers are also expected to cover the `connection` package.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeDB Driver Queries
+Feature: TypeDB Driver
 
-  Background: Open connection and create a simple extensible schema
+  Background: Open connection / create driver, create database
     Given typedb starts
+    Given connection is open: false
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection reset database: typedb
+    Given connection is open: true
+    Given connection has 0 databases
+    Given connection create database: typedb
+    Given connection has database: typedb
+
+  ##############
+  # CONNECTION #
+  ##############
+
+  Scenario: Driver can connect after an unsuccessful connection attempt
+    When connection opens with a wrong port; fails
+    Then connection is open: false
+    When connection opens with a wrong address; fails
+    Then connection is open: false
+    When connection opens with default authentication
+    Then connection is open: true
+
+
+  Scenario: Driver can reconnect multiple times
+    Given connection is open: true
+    Given connection has database: typedb
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has database: typedb
+
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has database: typedb
+
+    When connection closes
+    Then connection is open: false
+
+    When connection closes
+    Then connection is open: false
+
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has database: typedb
+
+
+    # TODO: Test credentials (should be available for CORE as well)
+
+  #############
+  # DATABASES #
+  #############
+
+  Scenario: Driver can delete non-existing database
+    Given connection does not have database: does-not-exist
+    When connection delete database: does-not-exist
+    Then connection does not have database: does-not-exist
+
+  Scenario: Driver can create and delete databases
+    Given connection does not have database: An0ther-database_with-1onG-Name
+    When connection create database: An0ther-database_with-1onG-Name
+    Then connection has 2 databases
+    Then connection has databases:
+      | typedb                          |
+      | An0ther-database_with-1onG-Name |
+    Then connection does not have databases:
+      | typedB                          |
+      | Typedb                          |
+      | TYPEDB                          |
+      | An0ther_database_with-1onG-Name |
+      | An0ther-database-with-1onG-Name |
+      | an0ther-database_with-1onG-Name |
+    When connection closes
+    Then connection is open: false
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has 2 databases
+    Then connection has databases:
+      | typedb                          |
+      | An0ther-database_with-1onG-Name |
+    Then connection does not have databases:
+      | typedB                          |
+      | Typedb                          |
+      | TYPEDB                          |
+      | An0ther_database_with-1onG-Name |
+      | An0ther-database-with-1onG-Name |
+      | an0ther-database_with-1onG-Name |
+
+    When connection delete database: typedb
+    Then connection has 1 database
+    Then connection does not have database: typedb
+    Then connection has database: An0ther-database_with-1onG-Name
+    When connection closes
+    Then connection is open: false
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has 1 database
+    Then connection does not have database: typedb
+    Then connection has database: An0ther-database_with-1onG-Name
+
+    When connection delete database: An0ther-database_with-1onG-Name
+    Then connection has 0 databases
+    Then connection does not have database: An0ther-database_with-1onG-Name
+    Then connection does not have database: typedb
+    Then connection has 0 databases
+    When connection closes
+    Then connection is open: false
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has 0 databases
+    When connection create database: typedb
+    Then connection has database: typedb
+
+
+  Scenario: Driver can acquire database schema
+    Given connection has database: typedb
+    Then connection get database(typedb) has schema:
+    """
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    """
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    entity person @abstract, owns age @card(1..1);
+    attribute age, value long @range(0..150);
+    """
+    Then connection get database(typedb) has schema:
+    """
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    """
+    When transaction commits
+    Then connection get database(typedb) has schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1);
+    attribute age, value long @range(0..150);
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1);
+    attribute age, value long @range(0..150);
+    """
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    redefine
+    attribute age, value long @range(0..);
+    """
+    When typeql schema query
+    """
+    define
+    entity person owns age @range(0..150);
+    entity fictional-character owns age;
+    """
+    Then connection get database(typedb) has schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1);
+    attribute age, value long @range(0..150);
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1);
+    attribute age, value long @range(0..150);
+    """
+    When transaction commits
+    Then connection get database(typedb) has schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1) @range(0..150);
+    entity fictional-character owns age;
+    attribute age, value long @range(0..);
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+    entity person @abstract, owns age @card(1..1) @range(0..150);
+    entity fictional-character owns age;
+    attribute age, value long @range(0..);
+    """
+
+  ###############
+  # TRANSACTION #
+  ###############
+
+  Scenario: Driver cannot open transaction to non-existing database
+    Given connection does not have database: does-not-exist
+    Then transaction is open: false
+    Then connection open schema transaction for database: does-not-exist; fails
+    Then transaction is open: false
+    Then connection open write transaction for database: does-not-exist; fails
+    Then transaction is open: false
+    Then connection open read transaction for database: does-not-exist; fails
+    Then transaction is open: false
+
+
+  Scenario: Driver can open and close transactions of different types
+    Then transaction is open: false
+    When connection open schema transaction for database: typedb
+    Then transaction has type: schema
+    Then transaction is open: true
+    When transaction closes
+    Then transaction is open: false
+
+    When connection open write transaction for database: typedb
+    Then transaction has type: write
+    Then transaction is open: true
+    When transaction closes
+    Then transaction is open: false
+
+    When connection open read transaction for database: typedb
+    Then transaction has type: read
+    Then transaction is open: true
+    When transaction closes
+    Then transaction is open: false
+
+
+  Scenario: Driver can commit transactions of schema and write types, cannot commit transaction of type read
+    When connection open schema transaction for database: typedb
+    Then transaction has type: schema
+    Then transaction is open: true
+    When transaction commits
+    Then transaction is open: false
+
+    When connection open write transaction for database: typedb
+    Then transaction has type: write
+    Then transaction is open: true
+    When transaction commits
+    Then transaction is open: false
+
+    When connection open read transaction for database: typedb
+    Then transaction has type: read
+    Then transaction is open: true
+    Then transaction commits; fails
+    Then transaction is open: false
+
+
+  Scenario: Driver can rollback transactions of schema and write types, cannot rollback transaction of type read
+    When connection open schema transaction for database: typedb
+    Then transaction has type: schema
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: false
+
+    When connection open write transaction for database: typedb
+    Then transaction has type: write
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: false
+
+    When connection open read transaction for database: typedb
+    Then transaction has type: read
+    Then transaction is open: true
+    Then transaction rollbacks; fails
+    Then transaction is open: false
+
+
+  # TODO: Check options setting and retrieval
+
+
+  Scenario: Driver can schedule "transaction on close" jobs
+    Given connection does not have database: created-after-schema
+    Given connection does not have database: created-after-write
+    Given connection does not have database: created-after-read
+    When connection open schema transaction for database: typedb
+    When schedule database creation on transaction close: created-after-schema
+    Then connection does not have database: created-after-schema
+    Then connection does not have database: created-after-write
+    Then connection does not have database: created-after-read
+    When transaction closes
+    Then connection has database: created-after-schema
+    Then connection does not have database: created-after-write
+    Then connection does not have database: created-after-read
+
+    When connection open write transaction for database: typedb
+    Then connection has database: created-after-schema
+    Then connection does not have database: created-after-write
+    Then connection does not have database: created-after-read
+    When transaction closes
+    Then connection has database: created-after-schema
+    Then connection does not have database: created-after-write
+    Then connection does not have database: created-after-read
+
+    When connection open write transaction for database: typedb
+    When schedule database creation on transaction close: created-after-write
+    Then connection has database: created-after-schema
+    Then connection does not have database: created-after-write
+    Then connection does not have database: created-after-read
+    When transaction closes
+    Then connection has database: created-after-schema
+    Then connection has database: created-after-write
+    Then connection does not have database: created-after-read
+
+    When connection open read transaction for database: typedb
+    When schedule database creation on transaction close: created-after-read
+    Then connection has database: created-after-schema
+    Then connection has database: created-after-write
+    Then connection does not have database: created-after-read
+    When transaction closes
+    Then connection has database: created-after-schema
+    Then connection has database: created-after-write
+    Then connection has database: created-after-read
 
   ###############
   # OK RESPONSE #
@@ -29,6 +333,8 @@ Feature: TypeDB Driver Queries
     Then query answer type: ok
 
 
+
+
   ############
   # UNDEFINE #
   ############
@@ -42,11 +348,11 @@ Feature: TypeDB Driver Queries
       match $x sub entity;
       """
     Given uniquely identify answer concepts
-      | x                   |
-      | label:person        |
-      | label:entity        |
-      | label:company       |
-    When typeql undefine
+      | x             |
+      | label:person  |
+      | label:entity  |
+      | label:company |
+    When typeql schema query
       """
       undefine person sub entity;
       """
@@ -58,9 +364,9 @@ Feature: TypeDB Driver Queries
       match $x sub entity;
       """
     Then uniquely identify answer concepts
-      | x                   |
-      | label:entity        |
-      | label:company       |
+      | x             |
+      | label:entity  |
+      | label:company |
 
   Scenario: undefining a relation type throws on commit if it has existing instances
     Given connection open data transaction for database: typedb
@@ -76,7 +382,7 @@ Feature: TypeDB Driver Queries
 
     Given connection open schema transaction for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine
       employment relates employee;
@@ -187,7 +493,7 @@ Feature: TypeDB Driver Queries
     Given connection open schema transaction for database: typedb
     Given session opens transaction of type: write
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       person
@@ -276,8 +582,8 @@ Feature: TypeDB Driver Queries
       get $z, $x, ?b;
       """
     Then uniquely identify answer concepts
-      | z         | x              | b                |
-      | key:ref:0 | attr:name:Lisa | value:long:2001  |
+      | z         | x              | b               |
+      | key:ref:0 | attr:name:Lisa | value:long:2001 |
 
   Scenario: 'count' returns the total number of answers
     Given connection open data transaction for database: typedb
@@ -438,8 +744,8 @@ Feature: TypeDB Driver Queries
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                 | b                 | c                  | d                 |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
 
     When get answers of typeql read query
     """
@@ -452,8 +758,8 @@ Feature: TypeDB Driver Queries
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a             | b            | c             | d                  |
-      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
+      | a             | b            | c             | d                 |
+      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0 |
 
     When get answers of typeql read query
     """
@@ -466,8 +772,8 @@ Feature: TypeDB Driver Queries
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                 | b                 | c                  | d                 |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
 
     When get answers of typeql read query
     """
@@ -480,8 +786,8 @@ Feature: TypeDB Driver Queries
         ?a, ?b, ?c, ?d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                 | b                 | c                  | d                 |
+      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
 
   #########
   # FETCH #

@@ -8,11 +8,11 @@ Feature: TypeQL Redefine Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person plays employment:employee, plays income:earner, owns name @card(0..) @regex("^.*$"), owns email @key, owns phone-nr @unique;
@@ -45,61 +45,61 @@ Feature: TypeQL Redefine Query
   ################
 
   Scenario: entity types cannot be redefined
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine entity person;
       """
 
 
   Scenario: redefine parsing fails if multiple statements for entity type
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine entity person plays employment:employee, plays income:earner, owns name @card(0..) @regex("^.*$"), owns email @key, owns phone-nr @unique;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine entity person owns phone-nr @unique, owns name @regex("^.*$") @card(0..), plays income:earner, owns email @key, plays employment:employee;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine entity person owns phone-nr @unique, owns name @regex("^.*$");
       """
 
 
   Scenario: redefine fails if nothing is redefined for entity type
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity person plays employment:employee;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity person owns name @regex("^.*$") @card(0..);
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity person plays income:earner;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity child sub empty-entity;
       """
 
 
   Scenario: can redefine entity type's sub
-    When typeql redefine
+    When typeql schema query
       """
       redefine entity child sub person;
       """
@@ -125,7 +125,7 @@ Feature: TypeQL Redefine Query
       | x            |
       | label:person |
 
-    When typeql redefine
+    When typeql schema query
       """
       redefine entity child sub person;
       """
@@ -143,7 +143,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined entity subtype inherits attribute ownerships from its parent type
-    Given typeql redefine
+    Given typeql schema query
       """
       redefine entity child sub person;
       """
@@ -161,28 +161,28 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine entity types' relates
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity child relates employee;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity child relates employee[];
       """
 
 
   Scenario: can redefine entity type's owns ordering
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity person owns name[];
       """
     Given transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine entity person owns name[];
       """
@@ -199,7 +199,7 @@ Feature: TypeQL Redefine Query
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine entity person owns name;
       """
@@ -216,18 +216,18 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine entity type's owns both ordering and annotation
-    When typeql redefine; fails
+    When typeql schema query; fails
       """
       redefine entity person owns name[] @card(0..1);
       """
 
 
   Scenario: redefining an entity type without a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define entity flying-spaghetti-monster owns name @regex("Spaghett.*");
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine flying-spaghetti-monster owns name @regex("Mr. Spaghett.*");
       """
@@ -235,11 +235,11 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: defining an entity type with a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define entity flying-spaghetti-monster owns name @regex("Spaghett.*");
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine entity flying-spaghetti-monster owns name @regex("Mr. Spaghett.*");
       """
@@ -247,28 +247,28 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: an entity type can not have a value type redefined
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity person value double;
       """
 
 
   Scenario: redefining a thing with 'isa' is not possible in a 'redefine' query
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine $p isa person;
       """
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'redefine' query
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine $p has name "Loch Ness Monster";
       """
 
 
   Scenario: writing an entity variable in a 'redefine' is not allowed
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine entity $x;
       """
@@ -279,67 +279,67 @@ Feature: TypeQL Redefine Query
   ##################
 
   Scenario: relation types cannot be redefined
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation employment;
       """
 
 
   Scenario: redefine parsing fails if multiple statements for relation type
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation employment relates employee @card(1..), plays income:source, owns start-date @card(0..), owns employment-reference-code @key;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation employment plays income:source, relates employee @card(1..), owns employment-reference-code @key, owns start-date @card(0..);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation part-time-employment sub empty-relation, relates part-time-role;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation part-time-employment relates part-time-role, sub empty-relation;
       """
 
 
   Scenario: redefine fails if nothing is redefined for relation type
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine relation employment relates employee @card(1..);
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine relation employment plays income:source;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine relation part-time-employment sub empty-relation;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine relation part-time-employment relates part-time-role;
       """
 
 
   Scenario: can redefine relation type's sub
-    When typeql redefine
+    When typeql schema query
       """
       redefine relation part-time-employment sub employment;
       """
@@ -365,7 +365,7 @@ Feature: TypeQL Redefine Query
       | x                |
       | label:employment |
 
-    When typeql define
+    When typeql schema query
       """
       redefine relation part-time-employment sub employment;
       """
@@ -383,7 +383,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined relation subtype inherits attribute ownerships from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       redefine relation part-time-employment sub employment;
       """
@@ -401,14 +401,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: can redefine relation type's relates ordering
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define relation employment relates employee[];
       """
     Given transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine relation employment relates employee[];
       """
@@ -425,7 +425,7 @@ Feature: TypeQL Redefine Query
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine relation employment relates employee;
       """
@@ -442,21 +442,21 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine relation type's relates both ordering and annotation
-    When typeql redefine; fails
+    When typeql schema query; fails
       """
       redefine employment relates employee[] @card(1..5);
       """
 
 
   Scenario: can redefine relation type's owns ordering
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define relation employment owns start-date[];
       """
     Given transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine relation employment owns start-date[];
       """
@@ -473,7 +473,7 @@ Feature: TypeQL Redefine Query
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine relation employment owns start-date;
       """
@@ -490,18 +490,18 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine relation type's owns both ordering and annotation
-    When typeql redefine; fails
+    When typeql schema query; fails
       """
       redefine employment owns start-date[] @card(0..1);
       """
 
 
   Scenario: redefining a relation type without a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define relation family relates children @card(0..5);
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine family relates children @card(0..);
       """
@@ -509,11 +509,11 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: defining a relation type with a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define relation family relates children @card(0..5);
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine relation family relates children @card(0..);
       """
@@ -521,7 +521,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: writing a relation variable in a 'redefine' is not allowed
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine relation $x;
       """
@@ -532,20 +532,20 @@ Feature: TypeQL Redefine Query
   ###################
 
   Scenario: attribute types cannot be redefined
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine attribute name;
       """
 
 
   Scenario: redefine parsing fails if multiple statements for attribute type
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine attribute email @independent, value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine
       attribute email @independent, value string @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz") @regex("^.*@.*$");
@@ -553,14 +553,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: redefine fails if nothing is redefined for attribute type
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine attribute email @independent;
       """
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine
       attribute email value string @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz") @regex("^.*@.*$");
@@ -568,7 +568,7 @@ Feature: TypeQL Redefine Query
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine
       attribute email value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
@@ -576,14 +576,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: attribute types' value type can be redefined from '<value-type-1>' to '<value-type-2>'
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <label> value <value-type-1>;
       """
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Given typeql redefine
+    Given typeql schema query
       """
       redefine attribute <label> value <value-type-2>;
       """
@@ -613,11 +613,11 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: an attribute type can be redefined as a subtype of an abstract attribute type
-    When typeql define
+    When typeql schema query
       """
         define attribute data @abstract;
       """
-    When typeql redefine
+    When typeql schema query
       """
       redefine attribute long-data sub data;
       """
@@ -635,7 +635,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: a redefined attribute subtype inherits the value type of its parent
-    When typeql redefine
+    When typeql schema query
       """
       redefine empty-sub-data sub abstract-decimal-data;
       """
@@ -652,18 +652,18 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: redefining an attribute subtype throws if it is given a different value type to what its parent has
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine attribute long-data sub abstract-decimal-data;
       """
 
 
   Scenario: redefining an attribute type without a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define attribute id value string;
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine attribute id value long;
       """
@@ -671,11 +671,11 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: defining an attribute type with a kind is acceptable
-    When typeql define
+    When typeql schema query
       """
       define attribute id value string;
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine id value long;
       """
@@ -683,20 +683,20 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: writing an attribute variable in a 'redefine' is not allowed
-    Then typeql redefine; parsing fails
+    Then typeql schema query; parsing fails
       """
       redefine attribute $x;
       """
 
 
   Scenario: the value type of an existing attribute type is modifiable through redefine
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine phone-nr value long;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine attribute phone-nr value string;
       """
@@ -708,14 +708,14 @@ Feature: TypeQL Redefine Query
   ###############
 
   Scenario Outline: cannot redefine annotation @<annotation> for entity types
-    When typeql define
+    When typeql schema query
       """
       define entity player;
       """
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       entity player @<annotation>;
@@ -723,7 +723,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       entity player @<annotation-2>;
@@ -747,7 +747,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for relation types
-    When typeql define
+    When typeql schema query
       """
       define
       relation parentship relates parent;
@@ -755,7 +755,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define<define-fail>
+    When typeql schema query<define-fail>
       """
       define
       relation parentship @<annotation>;
@@ -763,7 +763,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       relation parentship @<annotation-2>;
@@ -787,7 +787,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for attribute types
-    When typeql define
+    When typeql schema query
       """
       define
       attribute description value string;
@@ -795,7 +795,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       attribute description @<annotation>;
@@ -803,7 +803,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       attribute description @<annotation-2>;
@@ -828,7 +828,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for relates/role types
-    When typeql define
+    When typeql schema query
       """
       define
       relation parentship @abstract, relates parent;
@@ -836,7 +836,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
@@ -844,7 +844,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       relation parentship relates parent @<annotation-2>;
@@ -868,7 +868,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for relates/role types
-    Then typeql define
+    Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
@@ -876,7 +876,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       relation parentship relates parent @<annotation-2>;
@@ -888,7 +888,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> to relates/role types lists
-    When typeql define
+    When typeql schema query
       """
       define
       relation parentship @abstract, relates parent[];
@@ -896,7 +896,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
@@ -904,7 +904,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       relation parentship relates parent[] @<annotation-2>;
@@ -928,7 +928,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for relates/role types lists
-    Then typeql define
+    Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
@@ -936,7 +936,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       relation parentship relates parent[] @<annotation-2>;
@@ -948,7 +948,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for owns
-    When typeql define
+    When typeql schema query
       """
       define
       entity player owns name;
@@ -956,7 +956,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       entity player owns name @<annotation>;
@@ -964,7 +964,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       entity player owns name @<annotation-2>;
@@ -985,7 +985,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player owns name @<annotation>;
@@ -993,7 +993,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       entity player owns name @<annotation-2>;
@@ -1008,7 +1008,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for owns lists
-    When typeql define
+    When typeql schema query
       """
       define
       entity player owns name[];
@@ -1016,7 +1016,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       entity player owns name[] @<annotation>;
@@ -1024,7 +1024,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       entity player owns name[] @<annotation-2>;
@@ -1045,7 +1045,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns lists
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player owns name[] @<annotation>;
@@ -1053,7 +1053,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       entity player owns name[] @<annotation-2>;
@@ -1068,7 +1068,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for plays
-    When typeql define
+    When typeql schema query
       """
       define
       entity player plays employment:employee;
@@ -1076,7 +1076,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       entity player plays employment:employee @<annotation>;
@@ -1084,7 +1084,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       entity player plays employment:employee @<annotation-2>;
@@ -1108,7 +1108,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for plays
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player plays employment:employee @<annotation>;
@@ -1116,7 +1116,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       entity player plays employment:employee @<annotation-2>;
@@ -1128,7 +1128,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for value types
-    When typeql define
+    When typeql schema query
       """
       define
       attribute description value string;
@@ -1136,7 +1136,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define<define-fail>
+    Then typeql schema query<define-fail>
       """
       define
       attribute description value string @<annotation>;
@@ -1144,7 +1144,7 @@ Feature: TypeQL Redefine Query
     When transaction <define-tx-action>
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine<redefine-fail>
+    Then typeql schema query<redefine-fail>
       """
       redefine
       attribute description value string @<annotation-2>;
@@ -1166,7 +1166,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: can redefine annotation @<annotation> for value types
-    Then typeql define
+    Then typeql schema query
       """
       define
       attribute description value string @<annotation>;
@@ -1174,7 +1174,7 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine
       attribute description value string @<annotation-2>;
@@ -1188,18 +1188,18 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine multiple annotations in one query
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       redefine entity person owns name @card(0..1) @regex("^[a-zA-Z]+$");
       """
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine entity person owns name @regex("^[a-zA-Z]+$");
       """
-    Then typeql redefine
+    Then typeql schema query
       """
       redefine entity person owns name @card(0..1);
       """
@@ -1211,7 +1211,7 @@ Feature: TypeQL Redefine Query
   ######################
 
   Scenario: an existing entity type can be switched to a new supertype
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity apple-product;
@@ -1220,7 +1220,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine
       entity genius sub apple-product;
@@ -1239,7 +1239,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: an existing relation type can be switched to a new supertype
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation sabbatical sub employment;
@@ -1248,7 +1248,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine
       relation sabbatical sub vacation;
@@ -1267,7 +1267,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: assigning a supertype while having another supertype succeeds even if they have different attributes + roles, if there are no instances
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity creature sub species;
@@ -1280,7 +1280,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       redefine
       entity creature sub organism;
@@ -1300,7 +1300,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: assigning a new supertype when having other sub succeeds even with existing data if the supertypes have no properties
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity bird;
@@ -1316,12 +1316,12 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       entity animal;
       """
-    When typeql redefine
+    When typeql schema query
       """
       redefine
       entity pigeon sub animal;
@@ -1339,7 +1339,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: assigning a new supertype when having other sub succeeds with existing data if the supertypes play the same roles
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity bird plays flying:flier;
@@ -1356,12 +1356,12 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       entity animal plays flying:flier;
       """
-    When typeql redefine
+    When typeql schema query
       """
       redefine
       entity pigeon sub animal;
@@ -1379,7 +1379,7 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: assigning a new supertype when having other sub succeeds with existing data if the supertypes have the same attributes
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute name value string;
@@ -1396,7 +1396,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       entity animal owns name;
@@ -1404,7 +1404,7 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql redefine
+    When typeql schema query
       """
       redefine
       entity pigeon sub animal;

@@ -7,11 +7,11 @@ Feature: TypeQL Query Modifiers
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person,
@@ -47,7 +47,7 @@ Feature: TypeQL Query Modifiers
 
   Scenario Outline: the answers of a match can be sorted by an attribute of type '<type>'
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr> @independent, value <type>;
@@ -457,7 +457,7 @@ Feature: TypeQL Query Modifiers
 
   Scenario Outline: sorting and query predicates agree for type '<type>'
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr> @independent, value <type>;
@@ -565,7 +565,7 @@ Feature: TypeQL Query Modifiers
 
   Scenario Outline: sorting and query predicates produce order ignoring types
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <firstAttr>, value <firstType>;

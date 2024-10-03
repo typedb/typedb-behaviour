@@ -8,13 +8,13 @@ Feature: TypeQL Fetch Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       person sub entity,
@@ -261,7 +261,7 @@ Feature: TypeQL Fetch Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule alice-as-alicia:
@@ -323,7 +323,7 @@ Feature: TypeQL Fetch Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule alice-as-alicia:
@@ -599,7 +599,7 @@ Feature: TypeQL Fetch Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule alice-as-alicia:

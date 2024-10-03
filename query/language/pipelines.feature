@@ -8,10 +8,10 @@ Feature: TypeQL pipelines
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person owns ref @key,

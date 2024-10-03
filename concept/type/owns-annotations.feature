@@ -10,7 +10,7 @@ Feature: Concept Owns Annotations
   Background:
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 

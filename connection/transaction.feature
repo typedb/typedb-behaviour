@@ -8,8 +8,8 @@ Feature: Connection Transaction
   Background:
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
 
   Scenario Outline: one database, one <type> transaction
     When connection create database: typedb
@@ -225,7 +225,7 @@ Feature: Connection Transaction
   Scenario Outline: write in a <type> transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -247,7 +247,7 @@ Feature: Connection Transaction
   Scenario Outline: <command> in a schema transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -261,7 +261,7 @@ Feature: Connection Transaction
   Scenario Outline: <command> in a write transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -281,7 +281,7 @@ Feature: Connection Transaction
   Scenario: schema modification in a write transaction fails
     Given connection create database: typedb
     Given connection open write transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity person;
       """
@@ -289,7 +289,7 @@ Feature: Connection Transaction
   Scenario: write data in a schema transaction is allowed
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Then typeql define
+    Then typeql schema query
       """
       define entity person;
       """
@@ -303,7 +303,7 @@ Feature: Connection Transaction
 #  Scenario: commit after a schema transaction rollback does nothing
 #    Given connection create database: typedb
 #    Given connection open schema transaction for database: typedb
-#    When typeql define
+#    When typeql schema query
 #      """
 #      define entity person;
 #      """
@@ -320,7 +320,7 @@ Feature: Connection Transaction
 #  Scenario: commit after a write transaction rollback does nothing
 #    Given connection create database: typedb
 #    Given connection open schema transaction for database: typedb
-#    Given typeql define
+#    Given typeql schema query
 #      """
 #      define entity person;
 #      """
@@ -347,12 +347,12 @@ Feature: Connection Transaction
     Given set transaction option transaction-timeout-millis to: 10000
     When session opens transaction of type: write
     Then wait 8 seconds
-    Then typeql define
+    Then typeql schema query
       """
       define entity person;
       """
     Then wait 4 seconds
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity person;
       """

@@ -8,13 +8,13 @@ Feature: TypeQL Undefine Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       person sub entity, plays employment:employee, owns name, owns email @key;
@@ -42,7 +42,7 @@ Feature: TypeQL Undefine Query
       | label:abstract-type |
       | label:person        |
       | label:entity        |
-    When typeql undefine
+    When typeql schema query
       """
       undefine person sub entity;
       """
@@ -60,14 +60,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype throws
-    When typeql undefine; throws exception
+    When typeql schema query; throws exception
       """
       undefine person sub relation;
       """
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
@@ -82,7 +82,7 @@ Feature: TypeQL Undefine Query
       | x            |
       | label:person |
       | label:child  |
-    When typeql undefine
+    When typeql schema query
       """
       undefine child sub person;
       """
@@ -99,7 +99,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a type 'sub' an indirect supertype should still remove that type
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
@@ -115,7 +115,7 @@ Feature: TypeQL Undefine Query
       | label:person |
       | label:child  |
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine child sub entity;
       """
@@ -132,28 +132,28 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a supertype throws an error if subtypes exist
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person sub entity;
       """
 
 
   Scenario: removing a playable role from a super entity type also removes it from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person plays employment:employee;
       """
@@ -168,14 +168,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person owns name;
       """
@@ -190,14 +190,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person owns email;
       """
@@ -234,7 +234,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     When session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person sub entity;
       """
@@ -254,7 +254,7 @@ Feature: TypeQL Undefine Query
     When connection close all sessions
     When connection open schema session for database: typedb
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person sub entity;
       """
@@ -284,7 +284,7 @@ Feature: TypeQL Undefine Query
       | x                |
       | label:employment |
       | label:relation   |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment sub relation;
       """
@@ -301,7 +301,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing playable roles from a super relation type also removes them from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       employment-terms sub relation, relates employment;
@@ -318,7 +318,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x                                 |
       | label:employment-terms:employment |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment plays employment-terms:employment;
       """
@@ -333,7 +333,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       start-date sub attribute, value datetime;
@@ -351,7 +351,7 @@ Feature: TypeQL Undefine Query
       | x                         |
       | label:employment          |
       | label:contract-employment |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment owns start-date;
       """
@@ -366,7 +366,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing key ownerships from a super relation type also removes them from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       employment-reference sub attribute, value string;
@@ -384,7 +384,7 @@ Feature: TypeQL Undefine Query
       | x                         |
       | label:employment          |
       | label:contract-employment |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment owns employment-reference;
       """
@@ -413,7 +413,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine
       employment relates employee;
@@ -446,7 +446,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine employment sub relation;
       """
@@ -466,7 +466,7 @@ Feature: TypeQL Undefine Query
     When connection close all sessions
     When connection open schema session for database: typedb
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment sub relation;
       """
@@ -493,7 +493,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x            | y                         |
       | label:person | label:employment:employee |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment sub relation;
       """
@@ -523,7 +523,7 @@ Feature: TypeQL Undefine Query
       | x                         |
       | label:employment:employee |
       | label:employment:employer |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment relates employee;
       """
@@ -540,7 +540,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining all players of a role produces a valid schema
-    When typeql undefine
+    When typeql schema query
       """
       undefine person plays employment:employee;
       """
@@ -580,7 +580,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       person plays employment:employee;
@@ -606,7 +606,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing all roles from a relation type without undefining the relation type throws on commit
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       employment relates employee;
@@ -626,7 +626,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x            | y                         |
       | label:person | label:employment:employee |
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment relates employee;
       """
@@ -644,7 +644,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing a role throws an error if it is played by existing roleplayers in relations
-    Given typeql define
+    Given typeql schema query
       """
       define
       company sub entity, owns name, plays employment:employer;
@@ -666,7 +666,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine employment relates employer;
       """
@@ -687,7 +687,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment relates employer;
       """
@@ -704,14 +704,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing a role from a super relation type also removes it from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define part-time sub employment;
       """
     Given transaction commits
 
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine employment relates employer;
       """
@@ -762,7 +762,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person plays employment:employee;
       """
@@ -793,14 +793,14 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x                         |
       | label:employment:employee |
-    When typeql undefine; throws exception
+    When typeql schema query; throws exception
       """
       undefine person plays employment:employer;
       """
 
 
   Scenario: undefining played inherited role types using alias role types throws
-    Given typeql define
+    Given typeql schema query
     """
     define
     part-time-employment sub employment;
@@ -808,7 +808,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    Given typeql undefine; throws exception
+    Given typeql schema query; throws exception
     """
     undefine
     person plays part-time-employment:employee;
@@ -830,7 +830,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person plays employment:employee;
       """
@@ -841,7 +841,7 @@ Feature: TypeQL Undefine Query
   ###################
 
   Scenario Outline: undefining 'sub attribute' on an attribute type with value type '<value_type>' removes it
-    Given typeql define
+    Given typeql schema query
       """
       define <attr> sub attribute, value <value_type>;
       """
@@ -853,7 +853,7 @@ Feature: TypeQL Undefine Query
       match $x type <attr>;
       """
     Given answer size is: 1
-    When typeql undefine
+    When typeql schema query
       """
       undefine <attr> sub attribute;
       """
@@ -875,7 +875,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
-    When typeql undefine
+    When typeql schema query
       """
       undefine email regex ".+@\w+\..+";
       """
@@ -899,7 +899,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       employment relates manager-name;
@@ -916,7 +916,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x                             |
       | label:employment:manager-name |
-    When typeql undefine
+    When typeql schema query
       """
       undefine abstract-name plays employment:manager-name;
       """
@@ -931,7 +931,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing attribute ownerships from a super attribute type also removes them from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       locale sub attribute, value string;
@@ -949,7 +949,7 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-name |
       | label:first-name    |
-    When typeql undefine
+    When typeql schema query
       """
       undefine abstract-name owns locale;
       """
@@ -964,7 +964,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: removing a key ownership from a super attribute type also removes it from its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       name-id sub attribute, value long;
@@ -982,7 +982,7 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-name |
       | label:first-name    |
-    When typeql undefine
+    When typeql schema query
       """
       undefine abstract-name owns name-id;
       """
@@ -997,7 +997,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: an attribute and its self-ownership can be removed simultaneously
-    Given typeql define
+    Given typeql schema query
       """
       define
       name owns name;
@@ -1005,7 +1005,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       name owns name;
@@ -1021,7 +1021,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining the value type of an attribute throws an error
-    When typeql undefine; throws exception
+    When typeql schema query; throws exception
       """
       undefine name value string;
       """
@@ -1049,7 +1049,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine name sub attribute;
       """
@@ -1069,7 +1069,7 @@ Feature: TypeQL Undefine Query
     When connection close all sessions
     When connection open schema session for database: typedb
     When session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine name sub attribute;
       """
@@ -1101,7 +1101,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | x            |
       | label:person |
-    When typeql undefine
+    When typeql schema query
       """
       undefine person owns name;
       """
@@ -1119,28 +1119,28 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: attempting to undefine an attribute ownership that was not actually owned to begin throws
-    When typeql undefine; throws exception
+    When typeql schema query; throws exception
       """
       undefine employment owns name;
       """
 
 
   Scenario: attempting to undefine an attribute ownership inherited from a parent throws
-    Given typeql define
+    Given typeql schema query
       """
       define child sub person;
       """
     Then transaction commits
 
     When session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine child owns name;
       """
 
 
   Scenario: undefining a key ownership removes it
-    When typeql undefine
+    When typeql schema query
       """
       undefine person owns email;
       """
@@ -1155,14 +1155,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: writing '@key' when undefining a key ownership is not allowed
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person owns email @key;
       """
 
 
   Scenario: writing '@key' when undefining an attribute ownership is not allowed
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person owns name @key;
       """
@@ -1190,7 +1190,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine person owns name;
       """
@@ -1217,7 +1217,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person owns name;
       """
@@ -1236,7 +1236,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Then typeql undefine; throws exception
+    Then typeql schema query; throws exception
       """
       undefine person owns email;
       """
@@ -1247,7 +1247,7 @@ Feature: TypeQL Undefine Query
   #########
 
   Scenario: undefining a rule removes it
-    Given typeql define
+    Given typeql schema query
       """
       define
       company sub entity, plays employment:employer;
@@ -1262,7 +1262,7 @@ Feature: TypeQL Undefine Query
 
     When session opens transaction of type: write
     Then rules contain: a-rule
-    When typeql undefine
+    When typeql schema query
       """
       undefine rule a-rule;
       """
@@ -1272,7 +1272,7 @@ Feature: TypeQL Undefine Query
     Then rules do not contain: a-rule
 
   Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule samuel-email-rule:
@@ -1306,7 +1306,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine rule samuel-email-rule;
       """
@@ -1325,7 +1325,7 @@ Feature: TypeQL Undefine Query
   # TODO enable when we can do reasoning in a schema write transaction
   @ignore
   Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule samuel-email-rule:
@@ -1358,7 +1358,7 @@ Feature: TypeQL Undefine Query
     Given uniquely identify answer concepts
       | n                 |
       | attr:name:Samuel  |
-    When typeql undefine
+    When typeql schema query
       """
       undefine rule samuel-email-rule;
       """
@@ -1374,7 +1374,7 @@ Feature: TypeQL Undefine Query
       | attr:name:Samuel  |
 
   Scenario: You cannot undefine a type if it is used in a rule
-    Given typeql define
+    Given typeql schema query
     """
     define
 
@@ -1391,14 +1391,14 @@ Feature: TypeQL Undefine Query
 
     Given session opens transaction of type: write
 
-    Given typeql undefine; throws exception
+    Given typeql schema query; throws exception
     """
     undefine
       type-to-undefine sub entity;
     """
 
   Scenario: You cannot undefine a type if it is used in a negation in a rule
-    Given typeql define
+    Given typeql schema query
     """
     define
     rel sub relation, relates rol;
@@ -1417,14 +1417,14 @@ Feature: TypeQL Undefine Query
 
     Given session opens transaction of type: write
 
-    Given typeql undefine; throws exception
+    Given typeql schema query; throws exception
     """
     undefine
       type-to-undefine sub entity;
     """
 
   Scenario: You cannot undefine a type if it is used in any disjunction in a rule
-    Given typeql define
+    Given typeql schema query
     """
     define
 
@@ -1442,14 +1442,14 @@ Feature: TypeQL Undefine Query
 
     Given session opens transaction of type: write
 
-    Given typeql undefine; throws exception
+    Given typeql schema query; throws exception
     """
     undefine
       type-to-undefine sub entity;
     """
 
   Scenario: You cannot undefine a type if it is used in the then of a rule
-    Given typeql define
+    Given typeql schema query
     """
     define
     name-to-undefine sub attribute, value string;
@@ -1466,7 +1466,7 @@ Feature: TypeQL Undefine Query
 
     Given session opens transaction of type: write
 
-    Given typeql undefine; throws exception
+    Given typeql schema query; throws exception
     """
     undefine
       name-to-undefine sub entity;
@@ -1496,7 +1496,7 @@ Feature: TypeQL Undefine Query
     Given connection close all sessions
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql undefine
+    Given typeql schema query
       """
       undefine abstract-type abstract;
       """
@@ -1530,7 +1530,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining abstract on a type that is already non-abstract does nothing
-    When typeql undefine
+    When typeql schema query
       """
       undefine person abstract;
       """
@@ -1550,14 +1550,14 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: an abstract type can be changed into a concrete type even if has an abstract child type
-    Given typeql define
+    Given typeql schema query
       """
       define sub-abstract-type sub abstract-type, abstract;
       """
     Given transaction commits
 
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine abstract-type abstract;
       """
@@ -1577,7 +1577,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining abstract on an attribute type is allowed, even if that attribute type has an owner
-    Given typeql define
+    Given typeql schema query
       """
       define
       person abstract;
@@ -1587,7 +1587,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given session opens transaction of type: write
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       vehicle-registration abstract;
@@ -1628,7 +1628,7 @@ Feature: TypeQL Undefine Query
       | label:name      |
       | label:email     |
       | label:attribute |
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       person sub entity, owns name;
@@ -1690,7 +1690,7 @@ Feature: TypeQL Undefine Query
       | label:employment:employee |
       | label:employment:employer |
       | label:relation:role       |
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       person sub entity, owns name, owns email, plays employment:employee;

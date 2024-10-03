@@ -10,13 +10,13 @@ Feature: TypeQL Reasoning Explanation
   Background: Initialise a session and transaction for each scenario
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection open schema session for database: test_explanation
     Given transaction is initialised
 
   @ignore-typedb-driver
   Scenario: a rule explanation is given when a rule is applied
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -65,7 +65,7 @@ Feature: TypeQL Reasoning Explanation
 
   @ignore-typedb-driver
   Scenario: nested rule explanations are given when multiple rules are applied
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -130,7 +130,7 @@ Feature: TypeQL Reasoning Explanation
 
   @ignore-typedb-driver
   Scenario: a join explanation can be given directly and inside a rule explanation
-    Given typeql define
+    Given typeql schema query
       """
       define
       name sub attribute,
@@ -209,7 +209,7 @@ Feature: TypeQL Reasoning Explanation
 
   @ignore-typedb-driver
   Scenario: an answer with a more specific type can be retrieved from the cache with correct explanations
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -303,7 +303,7 @@ Feature: TypeQL Reasoning Explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -366,7 +366,7 @@ Feature: TypeQL Reasoning Explanation
 
   @ignore-typedb-driver
   Scenario: a rule containing a negation gives a rule explanation with a negation explanation inside
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -432,7 +432,7 @@ Feature: TypeQL Reasoning Explanation
 
   A rule explanation is not be given since the rule was only used to infer facts that were later negated
 
-    Given typeql define
+    Given typeql schema query
       """
       define
 

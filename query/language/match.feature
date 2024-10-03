@@ -8,12 +8,12 @@ Feature: TypeQL Match Clause
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person
@@ -49,7 +49,7 @@ Feature: TypeQL Match Clause
   ##################
 
   Scenario: 'label' matches only the specified type, and does not match subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -68,7 +68,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'sub' can be used to match the specified type and all its subtypes, including indirect subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -89,7 +89,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'sub' can be used to match the specified type and all its supertypes, including indirect supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -109,7 +109,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'sub' can be used to retrieve all instances of types that are subtypes of a given type
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -166,7 +166,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'sub!' matches the type's direct subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -188,7 +188,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'sub!' can be used to match a type's direct supertype
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -209,7 +209,7 @@ Feature: TypeQL Match Clause
   @ignore
   # TODO this does not work on types anymore - types cannot be specified by IID
   Scenario: subtype hierarchy satisfies transitive sub assertions
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity sub1;
@@ -246,7 +246,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute general-name @abstract, value string;
@@ -267,7 +267,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' does not match types that own only a supertype of the specified attribute type
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute general-name @abstract, value string;
@@ -338,7 +338,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: inherited 'owns' annotations are queryable
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -386,7 +386,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' can be used to retrieve all instances of types that can own a given attribute type
-    Given typeql define
+    Given typeql schema query
       """
       define
       employment owns name;
@@ -430,7 +430,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' does not match types that only play a subrole of the specified role
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation close-friendship sub friendship, relates close-friend as friend;
@@ -449,7 +449,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: inherited role types cannot be be matched via role type alias
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation close-friendship sub friendship;
@@ -464,7 +464,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' does not match types that only play a super-role of the specified role
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation close-friendship sub friendship, relates close-friend as friend;
@@ -494,7 +494,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'plays' can be used to retrieve all instances of types that can play a specific role
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity dog
@@ -527,7 +527,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns @key' matches types that own the specified attribute type as a key
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute breed value string;
@@ -557,7 +557,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'owns' without '@key' matches all types that own the specified attribute type, even if they use it as a key
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute breed value string;
@@ -589,7 +589,7 @@ Feature: TypeQL Match Clause
   # TODO cannot currently query for schema with 'as'
   @ignore
   Scenario: 'relates' with 'as' matches relation types that specialise the specified roleplayer
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation close-friendship sub friendship, relates close-friend as friend;
@@ -608,7 +608,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'relates' without 'as' matches relation types that specialise the specified roleplayer
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation close-friendship sub friendship, relates close-friend as friend;
@@ -679,7 +679,7 @@ Feature: TypeQL Match Clause
       | attr:ref:1 | label:ref       |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -712,7 +712,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'isa!' only matches things of the specified type, and does not match subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity writer sub person;
@@ -743,7 +743,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'isa' matches no answers if the type tree is fully abstract
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person @abstract;
@@ -784,7 +784,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'iid' for a variable of a different type finds no answers
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity shop owns address;
@@ -964,7 +964,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: repeated role players are retrieved singly when queried doubly
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity some-entity plays symmetric:player, owns ref @key;
@@ -990,7 +990,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: repeated role players are retrieved singly when queried singly
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity some-entity plays symmetric:player, owns ref @key;
@@ -1038,7 +1038,7 @@ Feature: TypeQL Match Clause
 
   @ignore
   Scenario: A relation can play a role in itself
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation comparator
@@ -1064,7 +1064,7 @@ Feature: TypeQL Match Clause
 
   @ignore
   Scenario: A relation can play a role in itself and have additional roleplayers
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation comparator
@@ -1114,7 +1114,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: matching a chain of relations only returns answers if there is a chain of the required length
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -1164,7 +1164,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation residency
@@ -1262,7 +1262,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
-    Given typeql define
+    Given typeql schema query
       """
       define
       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
@@ -1348,7 +1348,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity car plays ownership:owned, owns ref @key;
@@ -1386,7 +1386,7 @@ Feature: TypeQL Match Clause
   ##############
 
   Scenario Outline: '<type>' attributes can be matched by value
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> @independent, value <type>;
       """
@@ -1423,7 +1423,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> value <type>;
       """
@@ -1584,7 +1584,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute shoe-size value long;
@@ -1614,7 +1614,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when an attribute instance is fully specified, 'has' matches its owners
-    Given typeql define
+    Given typeql schema query
       """
       define
       friendship owns age;
@@ -1644,7 +1644,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'has' matches an attribute's owner even if it owns more attributes of the same type
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute lucky-number value long;
@@ -1700,7 +1700,7 @@ Feature: TypeQL Match Clause
   ##############################
 
   Scenario: when things own attributes of different types but the same value, they match by equality
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute start-date value date;
@@ -1826,7 +1826,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: value comparisons can be performed between a 'double' and a 'long'
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute house-number value long;
@@ -1898,7 +1898,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute lucky-number value long;
@@ -1952,7 +1952,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute length value double;
@@ -2184,7 +2184,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: variable role types with relations playing roles
-    Given typeql define
+    Given typeql schema query
       """
       define
         relation parent relates nested, owns id;
@@ -2305,7 +2305,7 @@ Feature: TypeQL Match Clause
   #######################
 
   Scenario: string attribute values can be non-ascii
-    Given typeql define
+    Given typeql schema query
       """
       define
       person owns favorite-phrase;
@@ -2357,7 +2357,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: type labels can be non-ascii
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity 人 owns name, owns ref @key; entity אדם owns name, owns ref @key;
@@ -2430,7 +2430,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: labels and variables have different identifier formats
-    Given typeql define; parsing fails
+    Given typeql schema query; parsing fails
       """
       define
       entity 0_leading_digit_fails;
@@ -2445,7 +2445,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Given typeql define; parsing fails
+    Given typeql schema query; parsing fails
       """
       define
       entity _leading_connector_disallowed;
@@ -2459,7 +2459,7 @@ Feature: TypeQL Match Clause
       """
 
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity following_connectors-and-digits-1-2-3-allowed;

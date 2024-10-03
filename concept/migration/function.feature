@@ -8,8 +8,8 @@ Feature: Schema validation
   Background:
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
 
@@ -17,7 +17,7 @@ Feature: Schema validation
 
 #  TODO: Refactor to functions
 #  Scenario: Types which are referenced in rules may not be renamed
-#    Given typeql define
+#    Given typeql schema query
 #    """
 #    define
 #      rel00 sub relation, relates role00;
@@ -39,7 +39,7 @@ Feature: Schema validation
 
 #  TODO: Refactor to functions
 #  Scenario: Types which are referenced in rules may not be deleted
-#    Given typeql define
+#    Given typeql schema query
 #    """
 #    define
 #      rel00 sub relation, relates role00, relates extra_role;
@@ -75,7 +75,7 @@ Feature: Schema validation
 
 #  TODO: Refactor to functions
 #  Scenario: Rules made unsatisfiable by schema modifications are flagged at commit time
-#    Given typeql define
+#    Given typeql schema query
 #    """
 #    define
 #      rel00 sub relation, relates role00, relates extra_role;
