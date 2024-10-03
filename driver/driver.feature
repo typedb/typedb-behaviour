@@ -804,14 +804,17 @@ Feature: TypeDB Driver
       | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
       | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
       | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
       | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
       | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
       | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
       | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-      | datetime-tz | 2024-09-20T16:40:05 Europe/London           | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
       | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      # TODO: Add datetime-tz with offsets
       | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-  # TODO: Implement structs
+      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+      # TODO: Implement structs
 #      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
 
 
@@ -865,12 +868,17 @@ Feature: TypeDB Driver
       | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
       | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
       | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
       | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
       | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
       | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
       | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-      | datetime-tz | 2024-09-20T16:40:05 Europe/London           | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
       | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      # TODO: Add datetime-tz with offsets
       | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-  # TODO: Implement structs
+      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+      # TODO: Implement structs
 #      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
+
+  # TODO: Add tests with time-zones for datetime, datetime-tz
