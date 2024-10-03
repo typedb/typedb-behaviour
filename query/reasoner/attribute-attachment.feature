@@ -62,14 +62,14 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa person, has string-attribute $y;
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x isa string-attribute;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -104,7 +104,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x has string-attribute $y;
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Then verify answers are sound
     Then verify answers are complete
 
@@ -139,21 +139,21 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer 'Ocado';
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x has retailer $r;
       """
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x has retailer 'Tesco';
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -182,7 +182,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x isa soft-drink, has retailer 'Ocado';
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -212,7 +212,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer 'Tesco';
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -249,7 +249,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x has retailer 'Tesco';
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -281,21 +281,21 @@ Feature: Attribute Attachment Resolution
       """
       match $x has age > 20;
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x has age > 5;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x has age > 5; $x has age < 8;
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are sound
     Then verify answers are complete
 
@@ -326,7 +326,7 @@ Feature: Attribute Attachment Resolution
       """
       match $x has age-in-days $days;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -338,7 +338,7 @@ Feature: Attribute Attachment Resolution
       get
         ?days;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answer set is equivalent for query
       """
       match

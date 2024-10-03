@@ -67,6 +67,6 @@ Feature: Compound Query Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then verify answer size is: 9
+    Then verify answer size: 9
     Then verify answers are sound
     Then verify answers are complete

@@ -84,7 +84,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
     When get answers of typeql read query
       """
       match $x isa name;
@@ -192,7 +192,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: an attribute can be deleted using the 'attribute' meta label
@@ -220,7 +220,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa name;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: an instance can be deleted using its own type label
@@ -283,7 +283,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa person;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: deleting an instance using an unrelated type label throws
@@ -403,7 +403,7 @@ Feature: TypeQL Delete Query
       $r ($x) isa friendship;
 
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   ###############
@@ -679,7 +679,7 @@ Feature: TypeQL Delete Query
       """
       match $r (friend: $x, friend: $y) isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
     Then typeql delete
       """
@@ -694,7 +694,7 @@ Feature: TypeQL Delete Query
       """
       match $r has email $a, has email $b;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
     Then typeql delete
       """
@@ -711,7 +711,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa person; $y isa person;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: when deleting incompatible ownerships or role players, an error is thrown
@@ -782,7 +782,7 @@ Feature: TypeQL Delete Query
       """
       match $r isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: when the last role player is disassociated from a relation instance, the relation instance gets cleaned up
@@ -814,7 +814,7 @@ Feature: TypeQL Delete Query
       """
       match $r isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: deleting a role player with a too-specific (downcasting) role throws
@@ -964,7 +964,7 @@ Feature: TypeQL Delete Query
       """
       match $rel (chef: $p) isa ship-crew;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   ########################
@@ -1015,7 +1015,7 @@ Feature: TypeQL Delete Query
       """
       match $x has age 18;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: attempting to delete an attribute ownership with a redeclared isa throws
@@ -1135,7 +1135,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa person;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: deleting an attribute ownership throws an error when the incorrect direct type is specified
@@ -1202,7 +1202,7 @@ Feature: TypeQL Delete Query
       """
       match $x has duration $d;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: deleting the last roleplayer in a relation deletes both the relation and its attribute ownerships
@@ -1250,12 +1250,12 @@ Feature: TypeQL Delete Query
       """
       match $x has duration $d;
       """
-    Then answer size is: 0
+    Then answer size: 0
     When get answers of typeql read query
       """
       match $r isa friendship;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: an error is thrown when deleting the ownership of a non-existent attribute
@@ -1395,7 +1395,7 @@ Feature: TypeQL Delete Query
       """
       match $x isa person, has lastname $n;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   ##############

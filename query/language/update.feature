@@ -203,7 +203,7 @@ Feature: TypeQL Update Query
       $p has name $n;
 
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
 

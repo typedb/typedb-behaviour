@@ -71,18 +71,18 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa entity;
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Given reasoning query
       """
       match $x isa relation;
       """
     # (xx, yy, zz, xy, xz, yz)
-    Then verify answer size is: 6
+    Then verify answer size: 6
     Given reasoning query
       """
       match $x isa attribute;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Given reasoning query
       """
       match $x isa $type;
@@ -91,7 +91,7 @@ Feature: Schema Query Resolution (Variable Types)
     # 6 friendships x 3 types of friendship {friendship, relation, thing}
     # 1 name x 3 types of name {name,attribute,thing}
     # = 9 + 18 + 3 = 30
-    Then verify answer size is: 30
+    Then verify answer size: 30
     Then verify answers are sound
     Then verify answers are complete
 
@@ -121,13 +121,13 @@ Feature: Schema Query Resolution (Variable Types)
       match ($u, $v) isa relation;
       """
     # (xx, yy, zz, xy, xz, yz, yx, zx, zy)
-    Then verify answer size is: 9
+    Then verify answer size: 9
     Given reasoning query
       """
       match ($u, $v) isa $type;
       """
     # 3 possible $u x 3 possible $v x 3 possible $type {friendship,relation,thing}
-    Then verify answer size is: 27
+    Then verify answer size: 27
     Then verify answers are sound
     Then verify answers are complete
 
@@ -178,7 +178,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
-    Then verify answer size is: 6
+    Then verify answer size: 6
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -190,7 +190,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # friendship can't have a contract... at least, not in this pristine test world
     # note: enforcing 'has contract' also eliminates 'relation' and 'thing' as possible types
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Then verify answers are sound
     Then verify answers are complete
 
@@ -225,7 +225,7 @@ Feature: Schema Query Resolution (Variable Types)
       match $x isa relation;
       """
     # 3 friendships, 3 employments
-    Then verify answer size is: 6
+    Then verify answer size: 6
     Given reasoning query
       """
       match
@@ -234,7 +234,7 @@ Feature: Schema Query Resolution (Variable Types)
 
       """
     # 3 friendships, 3 employments, 6 relations
-    Then verify answer size is: 12
+    Then verify answer size: 12
     Then verify answers are sound
     Then verify answers are complete
 
@@ -285,7 +285,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match $x isa relation;
       """
-    Then verify answer size is: 6
+    Then verify answer size: 6
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -297,7 +297,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # friendship can't be a documented-thing
     # note: enforcing 'plays legal-documentation:subject' also eliminates 'relation' and 'thing' as possible types
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Then verify answers are sound
     Then verify answers are complete
 
@@ -334,7 +334,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
       match (employee: $x, employer: $y) isa employment;
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -345,7 +345,7 @@ Feature: Schema Query Resolution (Variable Types)
 
       """
     # 3 colonels * 5 supertypes of colonel (colonel, military-person, person, entity, thing)
-    Then verify answer size is: 15
+    Then verify answer size: 15
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -357,7 +357,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # (3 colonels * 5 supertypes of colonel * 1 company)
     # + (1 company * 3 supertypes of company * 3 colonels)
-    Then verify answer size is: 24
+    Then verify answer size: 24
     Then verify answers are sound
     Then verify answers are complete
 
@@ -404,7 +404,7 @@ Feature: Schema Query Resolution (Variable Types)
       """
     # All companies match when $type is company (or entity)
     # Query returns {ab,ac,ad,bc,bd,cd} and each of them with the variables flipped
-    Then verify answer size is: 12
+    Then verify answer size: 12
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -425,7 +425,7 @@ Feature: Schema Query Resolution (Variable Types)
     # $type is forced to be either finance-company or retail-company, restricting the answer space
     # Query returns {ab,cd} and each of them with the variables flipped
     # Note: the two Captain Obvious rules should not affect the answer, as the concepts retain their original types
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Then verify answers are sound
     Then verify answers are complete
 
@@ -452,7 +452,7 @@ Feature: Schema Query Resolution (Variable Types)
         $f type relation;
 
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
 
   Scenario: an inferred relation is correctly matched with a variable role type bound to the base role type
     Given reasoning schema
@@ -477,4 +477,4 @@ Feature: Schema Query Resolution (Variable Types)
         $role type relation:role;
 
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1

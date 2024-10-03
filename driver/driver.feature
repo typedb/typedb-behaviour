@@ -23,7 +23,13 @@ Feature: TypeDB Driver
   # CONNECTION #
   ##############
 
+  Scenario: Driver can close connection
+    When connection closes
+    Then connection is open: false
+
+
   Scenario: Driver can connect after an unsuccessful connection attempt
+    When connection closes
     When connection opens with a wrong port; fails
     Then connection is open: false
     When connection opens with a wrong address; fails
@@ -319,551 +325,465 @@ Feature: TypeDB Driver
     Then connection has database: created-after-write
     Then connection has database: created-after-read
 
-  ###############
-  # OK RESPONSE #
-  ###############
 
-  Scenario: Ok response is processed correctly
+  Scenario: Driver processes transaction commit errors correctly
     Given connection open schema transaction for database: typedb
+    When get answers of typeql schema query; fails
+      """
+      define attribute name;
+      """
+    Then transaction commits; fails
 
-    When typeql query
+  ###########
+  # QUERIES #
+  ###########
+
+  Scenario: Driver processes ok query answers correctly
+    Given connection open schema transaction for database: typedb
+    When get answers of typeql schema query
       """
       define entity person;
       """
-    Then query answer type: ok
-
-
-
-
-  ############
-  # UNDEFINE #
-  ############
-
-  Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
-    Given connection open schema transaction for database: typedb
-    Given session opens transaction of type: write
-
-    Given get answers of typeql read query
-      """
-      match $x sub entity;
-      """
-    Given uniquely identify answer concepts
-      | x             |
-      | label:person  |
-      | label:entity  |
-      | label:company |
-    When typeql schema query
-      """
-      undefine person sub entity;
-      """
+    Then answer type: ok
+    Then answer size: 1
+    Then result is a successful ok
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x sub entity;
-      """
-    Then uniquely identify answer concepts
-      | x             |
-      | label:entity  |
-      | label:company |
 
-  Scenario: undefining a relation type throws on commit if it has existing instances
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert
-      $p isa person, has name "Harald", has ref 0, has email "harald@vaticle.com";
-      $r (employee: $p) isa employment, has ref 1;
-      """
-    Given transaction commits
-    Given connection close all sessions
-
+  Scenario: Driver processes concept row query answers correctly
     Given connection open schema transaction for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
-      """
-      undefine
-      employment relates employee;
-      employment relates employer;
-      person plays employment:employee;
-      employment sub relation;
-      """
-
-  ##########
-  # INSERT #
-  ##########
-
-  Scenario: one query can insert multiple things
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-
-    When typeql insert
-      """
-      insert
-      $x isa person, has ref 0;
-      $y isa person, has ref 1;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
-
-  Scenario: when inserting a roleplayer that can't play the role, an error is thrown
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Then typeql insert; throws exception
-      """
-      insert
-      $r (employer: $p) isa employment, has ref 0;
-      $p isa person, has ref 1;
-      """
-
-  ##########
-  # DELETE #
-  ##########
-
-  Scenario: one delete statement can delete multiple things
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-
-    Given get answers of typeql insert
-      """
-      insert
-      $a isa person, has ref 0;
-      $b isa person, has ref 1;
-      """
-    Then uniquely identify answer concepts
-      | a         | b         |
-      | key:ref:0 | key:ref:1 |
-
-    Given transaction commits
-    Given session opens transaction of type: write
-    When typeql delete
-      """
-      match
-      $p isa person;
-      delete
-      $p isa person;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then answer size is: 0
-
-  Scenario: deleting an instance using an unrelated type label throws
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-
-    Given typeql insert
-      """
-      insert
-      $x isa person, has name "Alex", has ref 0;
-      $n "John" isa name;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Then typeql delete; throws exception
-      """
-      match
-        $x isa person;
-        $r isa name; $r "John";
-      delete
-        $r isa person;
-      """
-
-  ##########
-  # UPDATE #
-  ##########
-
-  Scenario: Roleplayer exchange
-    Given connection open schema transaction for database: typedb
-    Given session opens transaction of type: write
-
     Given typeql schema query
       """
-      define
-      person
-        plays parenthood:parent,
-        plays parenthood:child;
-      parenthood sub relation,
-        relates parent,
-        relates child;
+      define entity person owns name @key; attribute name, value string;
       """
-    Given transaction commits
-    Given connection close all sessions
-
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-
-    Given get answers of typeql insert
-      """
-      insert
-      $x isa person, has name "Alex", has ref 0;
-      $y isa person, has name "Bob", has ref 1;
-      $r (parent: $x, child:$y) isa parenthood;
-      """
-    Given transaction commits
-
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    When typeql update
-      """
-      match $r (parent: $x, child: $y) isa parenthood;
-      delete $r isa parenthood;
-      insert (parent: $y, child: $x) isa parenthood;
-      """
-
-  Scenario: Deleting anonymous variables throws an exception
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-
-    Given get answers of typeql insert
-      """
-      insert
-        $x isa person, has name "Alex", has ref 0;
-        $y isa person, has name "Alex", has ref 1;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Then typeql update; throws exception
-      """
-      match
-      $x isa person, has ref 1;
-      delete $x has name "Alex";
-      insert $x has name "Bob";
-      """
-    Given session transaction closes
-
-  #########
-  #  GET  #
-  #########
-
-  Scenario: when a 'get' has unbound variables, an error is thrown
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: read
-    Then typeql throws exception
-      """
-      match $x isa person; get $y;
-      """
-
-  Scenario: Value variables can be specified in a 'get'
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert
-      $x "Lisa" isa name;
-      $y 16 isa age;
-      $z isa person, has name $x, has age $y, has ref 0;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: read
     When get answers of typeql read query
       """
-      match
-        $z isa person, has name $x, has age $y;
-        ?b = 2017 - $y;
-      get $z, $x, ?b;
+      match entity $p;
       """
+    Then answer type: concept rows
+    Then answer size: 1
+    Then result is a single row with variable 'p': person
+
+    When get answers of typeql read query
+      """
+      match entity $p; attribute $n;
+      """
+    Then answer type: concept rows
     Then uniquely identify answer concepts
-      | z         | x              | b               |
-      | key:ref:0 | attr:name:Lisa | value:long:2001 |
+      | p      | n    |
+      | person | name |
 
-  Scenario: 'count' returns the total number of answers
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    When typeql schema query
       """
-      insert
-      $p1 isa person, has name "Klaus", has ref 0;
-      $p2 isa person, has name "Kristina", has ref 1;
-      $p3 isa person, has name "Karen", has ref 2;
-      $f (friend: $p1, friend: $p2) isa friendship, has ref 3;
+      define attribute age, value long;
+      """
+    When get answers of typeql read query
+      """
+      match entity $p; attribute $n;
+      """
+    Then answer type: concept rows
+    Then answer size: 2
+    Then uniquely identify answer concepts
+      | p      | n    |
+      | person | name |
+      | person | age  |
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match entity $p; attribute $n;
+      """
+    Then answer type: concept rows
+    Then answer size: 2
+    Then uniquely identify answer concepts
+      | p      | n    |
+      | person | name |
+      | person | age  |
+    Then transaction commits
+
+    When get answers of typeql read query
+      """
+      match relation $r;
+      """
+    Then answer type: concept rows
+    Then answer size: 0
+
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert person $p, has name "John";
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+    Then uniquely identify answer concepts
+      | p      |
+      | person |
+
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+    Then uniquely identify answer concepts
+      | p      | n      |
+      | person | "John" |
+    Then transaction commits
+
+
+  # TODO: Implement value groups checks
+  #Scenario: Driver processes concept row query answers with value groups correctly
+
+
+  # TODO: Implement concept trees checks
+  #Scenario: Driver processes concept tree query answers correctly
+
+
+  Scenario: Driver processes query errors correctly
+    Given connection open schema transaction for database: typedb
+    Then get answers of typeql schema query; fails
+      """
+      """
+    Then get answers of typeql schema query; fails
+      """
+
+      """
+    Then get answers of typeql schema query; fails
+      """
+
+      """
+    Then get answers of typeql schema query; fails
+      """
+      define entity entity;
+      """
+    Then get answers of typeql schema query; fails
+      """
+      define attribute name owns name;
+      """
+
+
+  ############
+  # CONCEPTS #
+  ############
+
+  Scenario: Driver processes entity types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    When get answers of typeql read query
+      """
+      match entity $p;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: true
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: true
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: person
+    Then answer get row(0) get thing type(p) get label: person
+    Then answer get row(0) get entity type(p) get label: person
+    Then answer get row(0) get entity type(p) get name: person
+    Then answer get row(0) get entity type(p) get scope is none
+
+
+  Scenario: Driver processes relation types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation parentship, relates parent;
+      """
+    When get answers of typeql read query
+      """
+      match relation $p;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: true
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: true
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: parentship
+    Then answer get row(0) get thing type(p) get label: parentship
+    Then answer get row(0) get relation type(p) get label: parentship
+    Then answer get row(0) get relation type(p) get name: parentship
+    Then answer get row(0) get relation type(p) get scope is none
+
+
+  Scenario: Driver processes role types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation parentship, relates parent;
+      """
+    When get answers of typeql read query
+      """
+      match relation parentship, relates $p;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: true
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: parentship:parent
+    Then answer get row(0) get role type(p) get label: parentship:parent
+    Then answer get row(0) get role type(p) get name: parent
+    Then answer get row(0) get role type(p) get scope: parentship
+
+
+  Scenario: Driver processes attribute types without value type correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute untyped @abstract;
+      """
+    When get answers of typeql read query
+      """
+      match attribute $a;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: true
+    Then answer get row(0) get variable(a) is thing type: true
+    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: true
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: false
+
+    Then answer get row(0) get type(a) get label: untyped
+    Then answer get row(0) get thing type(a) get label: untyped
+    Then answer get row(0) get attribute type(a) get label: untyped
+    Then answer get row(0) get attribute type(a) get name: untyped
+    Then answer get row(0) get attribute type(a) get scope is none
+
+    Then answer get row(0) get attribute type(a) get value type: none
+    Then answer get row(0) get attribute type(a) is untyped: true
+    Then answer get row(0) get attribute type(a) is boolean: false
+    Then answer get row(0) get attribute type(a) is long: false
+    Then answer get row(0) get attribute type(a) is double: false
+    Then answer get row(0) get attribute type(a) is decimal: false
+    Then answer get row(0) get attribute type(a) is string: false
+    Then answer get row(0) get attribute type(a) is date: false
+    Then answer get row(0) get attribute type(a) is datetime: false
+    Then answer get row(0) get attribute type(a) is datetime-tz: false
+    Then answer get row(0) get attribute type(a) is duration: false
+    Then answer get row(0) get attribute type(a) is struct: false
+
+
+  Scenario Outline: Driver processes attribute types with value type <value-type> correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute typed, value <value-type>;
+      """
+    When get answers of typeql read query
+      """
+      match attribute $a;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: true
+    Then answer get row(0) get variable(a) is thing type: true
+    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: true
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: false
+
+    Then answer get row(0) get type(a) get label: typed
+    Then answer get row(0) get thing type(a) get label: typed
+    Then answer get row(0) get attribute type(a) get label: typed
+    Then answer get row(0) get attribute type(a) get name: typed
+    Then answer get row(0) get attribute type(a) get scope is none
+
+    Then answer get row(0) get attribute type(a) get value type: <value-type>
+    Then answer get row(0) get attribute type(a) is untyped: false
+    Then answer get row(0) get attribute type(a) is boolean: <is-boolean>
+    Then answer get row(0) get attribute type(a) is long: <is-long>
+    Then answer get row(0) get attribute type(a) is double: <is-double>
+    Then answer get row(0) get attribute type(a) is decimal: <is-decimal>
+    Then answer get row(0) get attribute type(a) is string: <is-string>
+    Then answer get row(0) get attribute type(a) is date: <is-date>
+    Then answer get row(0) get attribute type(a) is datetime: <is-datetime>
+    Then answer get row(0) get attribute type(a) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get attribute type(a) is duration: <is-duration>
+    Then answer get row(0) get attribute type(a) is struct: <is-struct>
+    Examples:
+      | value-type  | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
+      | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
+      | long        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
+      | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
+      | date        | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
+      | datetime    | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime-tz | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | duration    | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+      | struct      | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
+
+
+  Scenario: Driver processes entities correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
       """
     Given transaction commits
-
-    Given session opens transaction of type: read
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
     When get answers of typeql read query
       """
-      match
-        $x isa person;
-        $y isa name;
-        $f isa friendship;
+      match $p isa person;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
 
-      """
-    Then answer size is: 9
-    When get answer of typeql read query aggregate
-      """
-      match
-        $x isa person;
-        $y isa name;
-        $f isa friendship;
+    Then answer get row(0) get variable(p) is type: false
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: true
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
 
-      count;
-      """
-    Then aggregate value is: 9
-    When get answers of typeql read query
-      """
-      match
-        $x isa person;
-        $y isa name;
-        $f (friend: $x) isa friendship;
+    Then answer get row(0) get thing(p) get type get label: person
+    Then answer get row(0) get entity(p) get iid exists
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get entity(p) get type is entity: false
+    Then answer get row(0) get entity(p) get type is entity type: true
+    Then answer get row(0) get entity(p) get type is relation type: false
+    Then answer get row(0) get entity(p) get type is attribute type: false
+    Then answer get row(0) get entity(p) get type is role type: false
 
-      """
-    Then answer size is: 6
-    When get answer of typeql read query aggregate
-      """
-      match
-        $x isa person;
-        $y isa name;
-        $f (friend: $x) isa friendship;
 
-      count;
+  Scenario: Driver processes relations correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
-    Then aggregate value is: 6
-
-  Scenario: answers can be grouped by a value variable contained in the answer set
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert
-      $p1 isa person, has name "Violet", has ref 1250;
-      $p2 isa person, has name "Rupert", has ref 1750;
-      $p3 isa person, has name "Bernard", has ref 2050;
-      $p4 isa person, has name "Colin", has ref 3000;
+      define relation parentship, relates parent;
       """
     Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa parentship;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa parentship;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
 
-    Given session opens transaction of type: read
-    When get answers of typeql read query group
-      """
-      match
-       $x isa person, has ref $r;
-       ?bracket = floor($r/1000) * 1000;
-       get $x, ?bracket;
-       group ?bracket;
-      """
-    Then answer groups are
-      | owner           | x            |
-      | value:long:1000 | key:ref:1250 |
-      | value:long:1000 | key:ref:1750 |
-      | value:long:2000 | key:ref:2050 |
-      | value:long:3000 | key:ref:3000 |
+    Then answer get row(0) get variable(p) is type: false
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: true
+    Then answer get row(0) get variable(p) is attribute: false
 
-  Scenario: the size of each answer group can be retrieved using a group 'count'
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Then answer get row(0) get thing(p) get type get label: parentship
+    Then answer get row(0) get relation(p) get iid exists
+    Then answer get row(0) get relation(p) get type get label: parentship
+    Then answer get row(0) get relation(p) get type is relation: false
+    Then answer get row(0) get relation(p) get type is entity type: false
+    Then answer get row(0) get relation(p) get type is relation type: true
+    Then answer get row(0) get relation(p) get type is attribute type: false
+    Then answer get row(0) get relation(p) get type is role type: false
+
+
+  Scenario: Driver processes attributes correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
-      insert
-      $p1 isa person, has name "Violet", has ref 0;
-      $p2 isa person, has name "Rupert", has ref 1;
-      $p3 isa person, has name "Bernard", has ref 2;
-      $p4 isa person, has name "Colin", has ref 3;
-      $f (friend: $p1, friend: $p2, friend: $p3, friend: $p4) isa friendship, has ref 4;
+      define entity person, owns typed; attribute typed, value <value-type>;
       """
     Given transaction commits
-
-    Given session opens transaction of type: read
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
     When get answers of typeql read query
       """
-      match $x isa person;
+      match $_ isa person, has $a;
       """
-    When get answers of typeql read query group aggregate
-      """
-      match ($x, $y) isa friendship;
+    Then answer type: concept rows
+    Then answer size: 1
 
-      group $x;
-      count;
-      """
-    Then group aggregate values are
-      | owner     | value |
-      | key:ref:0 | 3     |
-      | key:ref:1 | 3     |
-      | key:ref:2 | 3     |
-      | key:ref:3 | 3     |
+    Then answer get row(0) get variable(a) is type: false
+    Then answer get row(0) get variable(a) is thing type: false
+    Then answer get row(0) get variable(a) is thing: true
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: false
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: true
 
-  ###############
-  # EXPRESSIONS #
-  ###############
+    Then answer get row(0) get thing(a) get type get label: typed
+    Then answer get row(0) get attribute(a) get type get label: typed
+    Then answer get row(0) get attribute(a) get type is attribute: false
+    Then answer get row(0) get attribute(a) get type is entity type: false
+    Then answer get row(0) get attribute(a) get type is relation type: true
+    Then answer get row(0) get attribute(a) get type is attribute type: true
+    Then answer get row(0) get attribute(a) get type is role type: false
 
-  Scenario: A value variable must have exactly one assignment constraint in the same scope
-    Given connection open data transaction for database: typedb
-
-    Given session opens transaction of type: read
-    Then typeql throws exception containing "value variable '?v' is never assigned to"
-    """
-      match
-        $x isa person, has age $a, has age $h;
-        ?v == $a;
-        ?v > $h;
-      get
-        $x, ?v;
-      """
-
-    Given session opens transaction of type: read
-    Then typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
-    """
-      match
-        $x isa person, has age $a, has age $h;
-        ?v = $a * 2;
-        ?v = $h / 2;
-      get
-        $x, ?v;
-      """
-
-  Scenario: Test operator definitions
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: read
-
-    When get answers of typeql read query
-    """
-      match
-        ?a = 6.0 + 3.0;
-        ?b = 6.0 - 3.0;
-        ?c = 6.0 * 3.0;
-        ?d = 6.0 / 3.0;
-      get
-        ?a, ?b, ?c, ?d;
-      """
-    Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
-
-    When get answers of typeql read query
-    """
-      match
-        ?a = 6 + 3;
-        ?b = 6 - 3;
-        ?c = 6 * 3;
-        ?d = 6 / 3;
-      get
-        ?a, ?b, ?c, ?d;
-      """
-    Then uniquely identify answer concepts
-      | a             | b            | c             | d                 |
-      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0 |
-
-    When get answers of typeql read query
-    """
-      match
-        ?a = 6.0 + 3;
-        ?b = 6.0 - 3;
-        ?c = 6.0 * 3;
-        ?d = 6.0 / 3;
-      get
-        ?a, ?b, ?c, ?d;
-      """
-    Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
-
-    When get answers of typeql read query
-    """
-      match
-        ?a = 6 + 3.0;
-        ?b = 6 - 3.0;
-        ?c = 6 * 3.0;
-        ?d = 6 / 3.0;
-      get
-        ?a, ?b, ?c, ?d;
-      """
-    Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0 |
-
-  #########
-  # FETCH #
-  #########
-
-  Scenario: an attribute projection can be relabeled
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert
-      $p1 isa person, has name "Alice", has name "Allie", has age 10, has ref 0;
-      $p2 isa person, has name "Bob", has ref 1;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: read
-
-    When get answers of typeql fetch
-      """
-      match
-      $p isa person, has name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: name as name, age;
-      sort $n;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "name": [
-            { "value": "Alice", "type": { "root": "attribute", "label": "name", "value_type": "string" } },
-            { "value": "Allie", "type": { "root": "attribute", "label": "name", "value_type": "string" } }
-          ],
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        }
-      },
-      {
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "name": [
-            { "value": "Bob", "type": { "root": "attribute", "label": "name", "value_type": "string" } }
-          ],
-          "age": [ ]
-        }
-      }]
-      """
-
-
-  Scenario: a fetch with zero projections throws
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: read
-
-    When typeql fetch; throws exception
-      """
-      match
-      $p isa person, has name $n;
-      fetch;
-      """
-
-  Scenario: a subquery that is not connected to the match throws
-    Given connection open data transaction for database: typedb
-    Given session opens transaction of type: read
-
-    When typeql fetch; throws exception
-      """
-      match
-      $p isa person, has name $n;
-      fetch
-      all-employments-count: {
-        match
-        $r isa employment;
-        get $r;
-        count;
-      };
-      """
+    # TODO: Check value

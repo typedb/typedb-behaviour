@@ -65,7 +65,7 @@ Feature: TypeQL Reduce Queries
         $y isa name;
         $f isa friendship;
       """
-    Then answer size is: 9
+    Then answer size: 9
     When get answers of typeql read query
       """
       match
@@ -82,7 +82,7 @@ Feature: TypeQL Reduce Queries
         $y isa name;
         $f isa friendship, links (friend: $x);
       """
-    Then answer size is: 6
+    Then answer size: 6
     When get answers of typeql read query
       """
       match
@@ -260,7 +260,7 @@ Feature: TypeQL Reduce Queries
       """
       match $x isa person, has age $y;
       """
-    Then answer size is: 3
+    Then answer size: 3
     When get answers of typeql read query
       """
       match $x isa person, has age $y;

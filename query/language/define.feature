@@ -773,7 +773,7 @@ Feature: TypeQL Define Query
         attribute $x;
      
       """
-    Then answer size is: 1
+    Then answer size: 1
 
     Examples:
       | value-type  | label              |
@@ -2058,7 +2058,7 @@ Feature: TypeQL Define Query
       """
       match $x label person, owns name;
       """
-    Then answer size is: 1
+    Then answer size: 1
 
 
   Scenario: an entity type cannot be changed into a relation type
@@ -2363,7 +2363,7 @@ Feature: TypeQL Define Query
       """
       match $x owns email @key;
       """
-    Then answer size is: 0
+    Then answer size: 0
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
@@ -2460,7 +2460,7 @@ Feature: TypeQL Define Query
       """
       match person owns $y @key;
       """
-    Then answer size is: 0
+    Then answer size: 0
     Given typeql insert; fails
       """
       insert $x isa person, has email "jane@gmail.com";

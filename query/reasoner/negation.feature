@@ -67,7 +67,7 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 5
+    Then verify answer size: 5
     Given reasoning query
       """
       match
@@ -77,7 +77,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
 
 
   Scenario: negation can check that an entity does not play any role in any relation
@@ -98,7 +98,7 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 5
+    Then verify answer size: 5
     Given reasoning query
       """
       match
@@ -108,7 +108,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
 
 
   Scenario: negation can check that an entity does not own any instance of a specific attribute type
@@ -126,7 +126,7 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 5
+    Then verify answer size: 5
     Given reasoning query
       """
       match
@@ -136,7 +136,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
 
 
   Scenario: negation can check that an entity does not own a particular attribute
@@ -154,7 +154,7 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 5
+    Then verify answer size: 5
     Given reasoning query
       """
       match
@@ -164,7 +164,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 4
+    Then verify answer size: 4
 
 
   Scenario: negation can check that an entity owns an attribute which is not equal to a specific value
@@ -183,7 +183,7 @@ Feature: Negation Resolution
         not {$y 20;};
 
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answer set is equivalent for query
       """
       match
@@ -210,7 +210,7 @@ Feature: Negation Resolution
         not {$y isa name;};
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answer set is equivalent for query
       """
       match $x has age $y;
@@ -251,7 +251,7 @@ Feature: Negation Resolution
     # cbab, cbcb, cbcd, cdcb, cdcd, cdzd,
     # dcba, dcbc, dcdc, dcdz, dzdc, dzdz,
     # zdcb, zdcd, zdzd
-    Then verify answer size is: 24
+    Then verify answer size: 24
     Given reasoning query
       """
       match
@@ -262,7 +262,7 @@ Feature: Negation Resolution
 
       """
     # Eliminates (cdzd, zdzd)
-    Then verify answer size is: 22
+    Then verify answer size: 22
     Then verify answer set is equivalent for query
       """
       match
@@ -307,7 +307,7 @@ Feature: Negation Resolution
     # cba, cbc, cdc, cdz
     # dcb, dcd, dzd
     # zdc, zdz
-    Then verify answer size is: 14
+    Then verify answer size: 14
     Given reasoning query
       """
       match
@@ -318,7 +318,7 @@ Feature: Negation Resolution
 
       """
     # (d,z) is a friendship so we eliminate results where $b is 'd': these are (cdc, cdz, zdc, zdz)
-    Then verify answer size is: 10
+    Then verify answer size: 10
     Then verify answer set is equivalent for query
       """
       match
@@ -349,7 +349,7 @@ Feature: Negation Resolution
     # employee | PER |
     # role     | COM |
     # employer | COM |
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Given reasoning query
       """
       match
@@ -357,7 +357,7 @@ Feature: Negation Resolution
         not {$r1 type relation:role;};
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
 
 
   Scenario: a negated statement with multiple properties can be re-written as a negation of multiple statements
@@ -376,7 +376,7 @@ Feature: Negation Resolution
       """
       match $x has attribute $r;
       """
-    Then verify answer size is: 8
+    Then verify answer size: 8
     Given reasoning query
       """
       match
@@ -386,7 +386,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 6
+    Then verify answer size: 6
     Then verify answer set is equivalent for query
       """
       match
@@ -416,7 +416,7 @@ Feature: Negation Resolution
       """
       match $x has attribute $r;
       """
-    Then verify answer size is: 8
+    Then verify answer size: 8
     Given reasoning query
       """
       match
@@ -424,7 +424,7 @@ Feature: Negation Resolution
         not { $x isa company; };
 
       """
-    Then verify answer size is: 7
+    Then verify answer size: 7
     Given reasoning query
       """
       match
@@ -433,7 +433,7 @@ Feature: Negation Resolution
         not { $x has name "Tim"; };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Given reasoning query
       """
       match
@@ -443,7 +443,7 @@ Feature: Negation Resolution
         not { $r 55; };
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
 
 
   Scenario: negation can exclude entities of specific types that play roles in a specific relation
@@ -471,7 +471,7 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Given reasoning query
       """
       match
@@ -482,7 +482,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
 
 
   Scenario: when using negation to exclude entities of specific types, their subtypes are also excluded
@@ -516,7 +516,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
 
 
   Scenario: answers can be returned even if a statement in a conjunction in a negation is identical to a non-negated one
@@ -551,7 +551,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
 
 
   ##############################
@@ -594,7 +594,7 @@ Feature: Negation Resolution
         $area isa area;
 
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Given reasoning query
       """
       match
@@ -603,7 +603,7 @@ Feature: Negation Resolution
         not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
 
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are sound
     Then verify answers are complete
 
@@ -675,7 +675,7 @@ Feature: Negation Resolution
         $x has index "aa";
 
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answer set is equivalent for query
       """
       match
@@ -715,14 +715,14 @@ Feature: Negation Resolution
       """
       match $x has name "Not Ten", has age 20;
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x has name "Not Ten", has age 10;
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are sound
     Then verify answers are complete
 
@@ -752,14 +752,14 @@ Feature: Negation Resolution
       """
       match $x isa person;
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
       """
       match $x isa person, has name "No Age";
       """
-    Then verify answer size is: 1
+    Then verify answer size: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -805,7 +805,7 @@ Feature: Negation Resolution
       """
       match $x isa company;
       """
-    Then verify answer size is: 4
+    Then verify answer size: 4
     Given reasoning query
       """
       match
@@ -814,7 +814,7 @@ Feature: Negation Resolution
 
       """
     # Should exclude both the company in France and the company with no country
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -883,7 +883,7 @@ Feature: Negation Resolution
         };
 
       """
-    Then verify answer size is: 3
+    Then verify answer size: 3
     Then verify answer set is equivalent for query
       """
       match
@@ -990,7 +990,7 @@ Feature: Negation Resolution
       """
       match (diagnosed-fault: $flt, parent-session: $ts) isa diagnosis;
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are consistent across 5 executions
     Then verify answers are sound
     Then verify answers are complete
@@ -1065,7 +1065,7 @@ Feature: Negation Resolution
       """
       match (role-3: $x, role-4: $y) isa relation-4;
       """
-    Then verify answer size is: 11
+    Then verify answer size: 11
     Then verify answers are consistent across 5 executions
     Then verify answers are sound
     Then verify answers are complete
@@ -1147,7 +1147,7 @@ Feature: Negation Resolution
 
       """
     # aa is not linked to itself. ee, ff, gg are linked to each other, but not to aa. hh is not linked to anything
-    Then verify answer size is: 5
+    Then verify answer size: 5
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1189,7 +1189,7 @@ Feature: Negation Resolution
         not { $r == "Ocado"; };
 
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
     Then verify answers are sound
     Then verify answers are complete
 
@@ -1220,7 +1220,7 @@ Feature: Negation Resolution
       """
       match $p isa person; not { ($p, $f) isa enemies; };
       """
-    Then verify answer size is: 0
+    Then verify answer size: 0
 #    TODO: Add a case with non-zero answers
 
 
@@ -1285,6 +1285,6 @@ Feature: Negation Resolution
       (from: $from, to: $to) isa reachable;
       get $from-name, $to-name;
       """
-    Then verify answer size is: 2
+    Then verify answer size: 2
     Then verify answers are sound
     Then verify answers are complete
