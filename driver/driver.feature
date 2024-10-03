@@ -747,7 +747,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get relation(p) get type is role type: false
 
 
-  Scenario: Driver processes attributes correctly
+  Scenario Outline: Driver processes attributes of type <value-type> correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -786,4 +786,91 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get type is attribute type: true
     Then answer get row(0) get attribute(a) get type is role type: false
 
-    # TODO: Check value
+    Then answer get row(0) get attribute(a) get type get value type: <value-type>
+    Then answer get row(0) get attribute(a) is boolean: <is-boolean>
+    Then answer get row(0) get attribute(a) is long: <is-long>
+    Then answer get row(0) get attribute(a) is double: <is-double>
+    Then answer get row(0) get attribute(a) is decimal: <is-decimal>
+    Then answer get row(0) get attribute(a) is string: <is-string>
+    Then answer get row(0) get attribute(a) is date: <is-date>
+    Then answer get row(0) get attribute(a) is datetime: <is-datetime>
+    Then answer get row(0) get attribute(a) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get attribute(a) is duration: <is-duration>
+    Then answer get row(0) get attribute(a) is struct: <is-struct>
+    Then answer get row(0) get attribute(a) get <value-type> value: <value>
+    Examples:
+      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
+      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
+      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
+      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
+      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
+      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05 Europe/London           | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+  # TODO: Implement structs
+#      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
+
+
+  Scenario Outline: Driver processes values of type <value-type> correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person, owns typed; attribute typed, value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has typed $v;
+      """
+    Then answer type: concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(v) is type: false
+    Then answer get row(0) get variable(v) is thing type: false
+    Then answer get row(0) get variable(v) is thing: false
+    Then answer get row(0) get variable(v) is value: true
+    Then answer get row(0) get variable(v) is entity type: false
+    Then answer get row(0) get variable(v) is relation type: false
+    Then answer get row(0) get variable(v) is attribute type: false
+    Then answer get row(0) get variable(v) is role type: false
+    Then answer get row(0) get variable(v) is entity: false
+    Then answer get row(0) get variable(v) is relation: false
+    Then answer get row(0) get variable(v) is attribute: false
+
+    Then answer get row(0) get value(v) get value type: <value-type>
+    Then answer get row(0) get value(v) is boolean: <is-boolean>
+    Then answer get row(0) get value(v) is long: <is-long>
+    Then answer get row(0) get value(v) is double: <is-double>
+    Then answer get row(0) get value(v) is decimal: <is-decimal>
+    Then answer get row(0) get value(v) is string: <is-string>
+    Then answer get row(0) get value(v) is date: <is-date>
+    Then answer get row(0) get value(v) is datetime: <is-datetime>
+    Then answer get row(0) get value(v) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get value(v) is duration: <is-duration>
+    Then answer get row(0) get value(v) is struct: <is-struct>
+    Then answer get row(0) get value(v) get: <value>
+    Then answer get row(0) get value(v) as <value-type>: <value>
+    Examples:
+      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
+      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
+      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
+      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
+      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
+      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05 Europe/London           | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+  # TODO: Implement structs
+#      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
