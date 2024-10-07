@@ -375,7 +375,8 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not write
     Then answer size: 1
-    Then answer header is: (p)
+    Then answer column names are:
+      | p |
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get entity type by index of variable(p) get label: person
 
@@ -390,7 +391,9 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not write
     Then answer size: 1
-    Then answer header is: (p, n)
+    Then answer column names are:
+      | p |
+      | n |
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -411,7 +414,9 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not write
     Then answer size: 2
-    Then answer header is: (p, n)
+    Then answer column names are:
+      | p |
+      | n |
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -434,7 +439,9 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not write
     Then answer size: 2
-    Then answer header is: (p, n)
+    Then answer column names are:
+      | p |
+      | n |
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -443,25 +450,21 @@ Feature: TypeDB Driver
     Then answer get row(1) get attribute type(n) get label: age
     Then answer get row(1) get entity type by index of variable(p) get label: person
     Then answer get row(1) get attribute type by index of variable(n) get label: age
-    Then transaction commits
 
     When get answers of typeql read query
       """
-      match relation $r;
+      match $p isa person;
       """
     Then answer type is concept rows
     Then answer type is not ok
     Then answer type is not concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
     Then answer size: 0
 
     When transaction closes
     When connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert person $p, has name "John";
+      insert $p isa person, has name "John";
       """
     Then answer type is concept rows
     Then answer type is not ok
@@ -470,9 +473,10 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not read
     Then answer size: 1
-    Then answer header is: (p)
-    Then answer get row(0) get entity type(p) get label: person
-    Then answer get row(0) get entity type by index of variable(p) get label: person
+    Then answer column names are:
+      | p |
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get entity by index of variable(p) get type get label: person
 
     When get answers of typeql read query
       """
@@ -485,408 +489,548 @@ Feature: TypeDB Driver
     Then answer query type is not schema
     Then answer query type is not write
     Then answer size: 1
-    Then answer header is: (p, a)
+    Then answer column names are:
+      | p |
+      | a |
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
     Then answer get row(0) get attribute(a) get type get label: name
     Then answer get row(0) get attribute(a) get string value: "John"
-    Then answer get row(0) get attribute by index of variable(n) get type get label: name
-    Then answer get row(0) get attribute by index of variable(n) get string value: "John"
+    Then answer get row(0) get attribute by index of variable(a) get type get label: name
+    Then answer get row(0) get attribute by index of variable(a) get string value: "John"
     Then transaction commits
 
 
-#  # TODO: Implement value groups checks
-#  #Scenario: Driver processes concept row query answers with value groups correctly
-#
-#
-#  # TODO: Implement concept trees checks
-#  #Scenario: Driver processes concept tree query answers correctly
-#
-#
-#  Scenario: Driver processes query errors correctly
-#    Given connection open schema transaction for database: typedb
-#    Then get answers of typeql schema query; fails
-#      """
-#      """
-#    Then get answers of typeql schema query; fails
-#      """
-#
-#      """
-#    Then get answers of typeql schema query; fails
-#      """
-#
-#      """
-#    Then get answers of typeql schema query; fails
-#      """
-#      define entity entity;
-#      """
-#    Then get answers of typeql schema query; fails
-#      """
-#      define attribute name owns name;
-#      """
-#
-#
-#  ############
-#  # CONCEPTS #
-#  ############
-#
-#  Scenario: Driver processes entity types correctly
+  # TODO: Implement value groups checks
+  #Scenario: Driver processes concept row query answers with value groups correctly
+
+
+  # TODO: Implement concept trees checks
+  #Scenario: Driver processes concept tree query answers correctly
+
+
+  Scenario: Driver processes query errors correctly
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      """
+    Then typeql schema query; fails
+      """
+
+      """
+    Then typeql schema query; fails
+      """
+
+      """
+    Then typeql read query; fails
+      """
+      match relation $r;
+      """
+    Then typeql schema query; fails
+      """
+      define entity entity;
+      """
+    Then typeql schema query; fails
+      """
+      define attribute name owns name;
+      """
+
+
+  ############
+  # CONCEPTS #
+  ############
+
+  Scenario: Driver processes entity types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    When get answers of typeql read query
+      """
+      match entity $p;
+      """
+    Then answer type is concept rows
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: true
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: true
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: person
+    Then answer get row(0) get thing type(p) get label: person
+    Then answer get row(0) get entity type(p) get label: person
+
+
+  Scenario: Driver processes relation types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation parentship, relates parent;
+      """
+    When get answers of typeql read query
+      """
+      match relation $p;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: true
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: true
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: parentship
+    Then answer get row(0) get thing type(p) get label: parentship
+    Then answer get row(0) get relation type(p) get label: parentship
+
+
+  Scenario: Driver processes role types correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation parentship, relates parent;
+      """
+    When get answers of typeql read query
+      """
+      match $_ sub parentship, relates $p;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: true
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: true
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get type(p) get label: parentship:parent
+    Then answer get row(0) get role type(p) get label: parentship:parent
+
+
+  Scenario: Driver processes attribute types without value type correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute untyped @abstract;
+      """
+    When get answers of typeql read query
+      """
+      match attribute $a;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: true
+    Then answer get row(0) get variable(a) is thing type: true
+    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: true
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: false
+
+    Then answer get row(0) get type(a) get label: untyped
+    Then answer get row(0) get thing type(a) get label: untyped
+    Then answer get row(0) get attribute type(a) get label: untyped
+
+    Then answer get row(0) get attribute type(a) get value type: none
+    Then answer get row(0) get attribute type(a) is untyped: true
+    Then answer get row(0) get attribute type(a) is boolean: false
+    Then answer get row(0) get attribute type(a) is long: false
+    Then answer get row(0) get attribute type(a) is double: false
+    Then answer get row(0) get attribute type(a) is decimal: false
+    Then answer get row(0) get attribute type(a) is string: false
+    Then answer get row(0) get attribute type(a) is date: false
+    Then answer get row(0) get attribute type(a) is datetime: false
+    Then answer get row(0) get attribute type(a) is datetime-tz: false
+    Then answer get row(0) get attribute type(a) is duration: false
+    Then answer get row(0) get attribute type(a) is struct: false
+
+
+  Scenario Outline: Driver processes attribute types with value type <value-type> correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute typed, value <value-type>;
+      """
+    When get answers of typeql read query
+      """
+      match attribute $a;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: true
+    Then answer get row(0) get variable(a) is thing type: true
+    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: true
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: false
+
+    Then answer get row(0) get type(a) get label: typed
+    Then answer get row(0) get thing type(a) get label: typed
+    Then answer get row(0) get attribute type(a) get label: typed
+
+    Then answer get row(0) get attribute type(a) get value type: <value-type>
+    Then answer get row(0) get attribute type(a) is untyped: false
+    Then answer get row(0) get attribute type(a) is boolean: <is-boolean>
+    Then answer get row(0) get attribute type(a) is long: <is-long>
+    Then answer get row(0) get attribute type(a) is double: <is-double>
+    Then answer get row(0) get attribute type(a) is decimal: <is-decimal>
+    Then answer get row(0) get attribute type(a) is string: <is-string>
+    Then answer get row(0) get attribute type(a) is date: <is-date>
+    Then answer get row(0) get attribute type(a) is datetime: <is-datetime>
+    Then answer get row(0) get attribute type(a) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get attribute type(a) is duration: <is-duration>
+    Then answer get row(0) get attribute type(a) is struct: <is-struct>
+    Examples:
+      | value-type  | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
+      | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
+      | long        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
+      | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
+      | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
+      | date        | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
+      | datetime    | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime-tz | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
+      | duration    | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+
+
+  Scenario: Driver processes attribute types with value type struct correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute film, value film-properties;
+      struct film-genre:
+        name value string,
+        description value string,
+        invented value date;
+      struct film-properties:
+        name value string,
+        genre value film-genre,
+        duration value duration,
+        reviews value long,
+        score value double,
+        revenue value decimal,
+        premier value datetime,
+        local-premier value datetime-tz,
+        is-verified value boolean;
+      """
+    When get answers of typeql read query
+      """
+      match attribute $a;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: true
+    Then answer get row(0) get variable(a) is thing type: true
+    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: true
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: false
+
+    Then answer get row(0) get type(a) get label: film
+    Then answer get row(0) get thing type(a) get label: film
+    Then answer get row(0) get attribute type(a) get label: film
+
+    Then answer get row(0) get attribute type(a) get value type: film-properties
+    Then answer get row(0) get attribute type(a) is untyped: false
+    Then answer get row(0) get attribute type(a) is boolean: false
+    Then answer get row(0) get attribute type(a) is long: false
+    Then answer get row(0) get attribute type(a) is double: false
+    Then answer get row(0) get attribute type(a) is decimal: false
+    Then answer get row(0) get attribute type(a) is string: false
+    Then answer get row(0) get attribute type(a) is date: false
+    Then answer get row(0) get attribute type(a) is datetime: false
+    Then answer get row(0) get attribute type(a) is datetime-tz: false
+    Then answer get row(0) get attribute type(a) is duration: false
+    Then answer get row(0) get attribute type(a) is struct: true
+
+
+  Scenario: Driver processes entities correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: false
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: true
+    Then answer get row(0) get variable(p) is relation: false
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get thing(p) get type get label: person
+    Then answer get row(0) get entity(p) get iid exists
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get entity(p) get type is entity: false
+    Then answer get row(0) get entity(p) get type is entity type: true
+    Then answer get row(0) get entity(p) get type is relation type: false
+    Then answer get row(0) get entity(p) get type is attribute type: false
+    Then answer get row(0) get entity(p) get type is role type: false
+
+
+  Scenario: Driver processes relations correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation parentship, relates parent;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa parentship;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa parentship;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(p) is type: false
+    Then answer get row(0) get variable(p) is thing type: false
+    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is value: false
+    Then answer get row(0) get variable(p) is entity type: false
+    Then answer get row(0) get variable(p) is relation type: false
+    Then answer get row(0) get variable(p) is attribute type: false
+    Then answer get row(0) get variable(p) is role type: false
+    Then answer get row(0) get variable(p) is entity: false
+    Then answer get row(0) get variable(p) is relation: true
+    Then answer get row(0) get variable(p) is attribute: false
+
+    Then answer get row(0) get thing(p) get type get label: parentship
+    Then answer get row(0) get relation(p) get iid exists
+    Then answer get row(0) get relation(p) get type get label: parentship
+    Then answer get row(0) get relation(p) get type is relation: false
+    Then answer get row(0) get relation(p) get type is entity type: false
+    Then answer get row(0) get relation(p) get type is relation type: true
+    Then answer get row(0) get relation(p) get type is attribute type: false
+    Then answer get row(0) get relation(p) get type is role type: false
+
+
+  Scenario Outline: Driver processes attributes of type <value-type> correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person, owns typed; attribute typed, value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has $a;
+      """
+    Then answer type is concept rows
+    Then answer query type is read
+    Then answer size: 1
+
+    Then answer get row(0) get variable(a) is type: false
+    Then answer get row(0) get variable(a) is thing type: false
+    Then answer get row(0) get variable(a) is thing: true
+    Then answer get row(0) get variable(a) is value: false
+    Then answer get row(0) get variable(a) is entity type: false
+    Then answer get row(0) get variable(a) is relation type: false
+    Then answer get row(0) get variable(a) is attribute type: false
+    Then answer get row(0) get variable(a) is role type: false
+    Then answer get row(0) get variable(a) is entity: false
+    Then answer get row(0) get variable(a) is relation: false
+    Then answer get row(0) get variable(a) is attribute: true
+
+    Then answer get row(0) get thing(a) get type get label: typed
+    Then answer get row(0) get attribute(a) get type get label: typed
+    Then answer get row(0) get attribute(a) get type is attribute: false
+    Then answer get row(0) get attribute(a) get type is entity type: false
+    Then answer get row(0) get attribute(a) get type is relation type: false
+    Then answer get row(0) get attribute(a) get type is attribute type: true
+    Then answer get row(0) get attribute(a) get type is role type: false
+
+    Then answer get row(0) get attribute(a) get type get value type: <value-type>
+    Then answer get row(0) get attribute(a) is boolean: <is-boolean>
+    Then answer get row(0) get attribute(a) is long: <is-long>
+    Then answer get row(0) get attribute(a) is double: <is-double>
+    Then answer get row(0) get attribute(a) is decimal: <is-decimal>
+    Then answer get row(0) get attribute(a) is string: <is-string>
+    Then answer get row(0) get attribute(a) is date: <is-date>
+    Then answer get row(0) get attribute(a) is datetime: <is-datetime>
+    Then answer get row(0) get attribute(a) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get attribute(a) is duration: <is-duration>
+    Then answer get row(0) get attribute(a) is struct: false
+    Then answer get row(0) get attribute(a) get <value-type> value: <value>
+#    Then answer get row(0) get attribute(a) as <value-type>: <value>
+    Examples:
+      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      # TODO: Add datetime-tz with offsets
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+
+
+  # TODO: Implement structs
+#  Scenario: Driver processes attributes of type struct correctly
 #    Given connection open schema transaction for database: typedb
 #    Given typeql schema query
 #      """
-#      define entity person;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match entity $p;
-#      """
-#    Then answer type is concept rows
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(p) is type: true
-#    Then answer get row(0) get variable(p) is thing type: true
-#    Then answer get row(0) get variable(p) is thing: false
-#    Then answer get row(0) get variable(p) is value: false
-#    Then answer get row(0) get variable(p) is entity type: true
-#    Then answer get row(0) get variable(p) is relation type: false
-#    Then answer get row(0) get variable(p) is attribute type: false
-#    Then answer get row(0) get variable(p) is role type: false
-#    Then answer get row(0) get variable(p) is entity: false
-#    Then answer get row(0) get variable(p) is relation: false
-#    Then answer get row(0) get variable(p) is attribute: false
-#
-#    Then answer get row(0) get type(p) get label: person
-#    Then answer get row(0) get thing type(p) get label: person
-#    Then answer get row(0) get entity type(p) get label: person
-#    Then answer get row(0) get entity type(p) get name: person
-#    Then answer get row(0) get entity type(p) get scope is none
-#
-#
-#  Scenario: Driver processes relation types correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define relation parentship, relates parent;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match relation $p;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(p) is type: true
-#    Then answer get row(0) get variable(p) is thing type: true
-#    Then answer get row(0) get variable(p) is thing: false
-#    Then answer get row(0) get variable(p) is value: false
-#    Then answer get row(0) get variable(p) is entity type: false
-#    Then answer get row(0) get variable(p) is relation type: true
-#    Then answer get row(0) get variable(p) is attribute type: false
-#    Then answer get row(0) get variable(p) is role type: false
-#    Then answer get row(0) get variable(p) is entity: false
-#    Then answer get row(0) get variable(p) is relation: false
-#    Then answer get row(0) get variable(p) is attribute: false
-#
-#    Then answer get row(0) get type(p) get label: parentship
-#    Then answer get row(0) get thing type(p) get label: parentship
-#    Then answer get row(0) get relation type(p) get label: parentship
-#    Then answer get row(0) get relation type(p) get name: parentship
-#    Then answer get row(0) get relation type(p) get scope is none
-#
-#
-#  Scenario: Driver processes role types correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define relation parentship, relates parent;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match relation parentship, relates $p;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(p) is type: true
-#    Then answer get row(0) get variable(p) is thing type: false
-#    Then answer get row(0) get variable(p) is thing: false
-#    Then answer get row(0) get variable(p) is value: false
-#    Then answer get row(0) get variable(p) is entity type: false
-#    Then answer get row(0) get variable(p) is relation type: false
-#    Then answer get row(0) get variable(p) is attribute type: false
-#    Then answer get row(0) get variable(p) is role type: true
-#    Then answer get row(0) get variable(p) is entity: false
-#    Then answer get row(0) get variable(p) is relation: false
-#    Then answer get row(0) get variable(p) is attribute: false
-#
-#    Then answer get row(0) get type(p) get label: parentship:parent
-#    Then answer get row(0) get role type(p) get label: parentship:parent
-#    Then answer get row(0) get role type(p) get name: parent
-#    Then answer get row(0) get role type(p) get scope: parentship
-#
-#
-#  Scenario: Driver processes attribute types without value type correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define attribute untyped @abstract;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match attribute $a;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(a) is type: true
-#    Then answer get row(0) get variable(a) is thing type: true
-#    Then answer get row(0) get variable(a) is thing: false
-#    Then answer get row(0) get variable(a) is value: false
-#    Then answer get row(0) get variable(a) is entity type: false
-#    Then answer get row(0) get variable(a) is relation type: false
-#    Then answer get row(0) get variable(a) is attribute type: true
-#    Then answer get row(0) get variable(a) is role type: false
-#    Then answer get row(0) get variable(a) is entity: false
-#    Then answer get row(0) get variable(a) is relation: false
-#    Then answer get row(0) get variable(a) is attribute: false
-#
-#    Then answer get row(0) get type(a) get label: untyped
-#    Then answer get row(0) get thing type(a) get label: untyped
-#    Then answer get row(0) get attribute type(a) get label: untyped
-#    Then answer get row(0) get attribute type(a) get name: untyped
-#    Then answer get row(0) get attribute type(a) get scope is none
-#
-#    Then answer get row(0) get attribute type(a) get value type: none
-#    Then answer get row(0) get attribute type(a) is untyped: true
-#    Then answer get row(0) get attribute type(a) is boolean: false
-#    Then answer get row(0) get attribute type(a) is long: false
-#    Then answer get row(0) get attribute type(a) is double: false
-#    Then answer get row(0) get attribute type(a) is decimal: false
-#    Then answer get row(0) get attribute type(a) is string: false
-#    Then answer get row(0) get attribute type(a) is date: false
-#    Then answer get row(0) get attribute type(a) is datetime: false
-#    Then answer get row(0) get attribute type(a) is datetime-tz: false
-#    Then answer get row(0) get attribute type(a) is duration: false
-#    Then answer get row(0) get attribute type(a) is struct: false
-#
-#
-#  Scenario Outline: Driver processes attribute types with value type <value-type> correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define attribute typed, value <value-type>;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match attribute $a;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(a) is type: true
-#    Then answer get row(0) get variable(a) is thing type: true
-#    Then answer get row(0) get variable(a) is thing: false
-#    Then answer get row(0) get variable(a) is value: false
-#    Then answer get row(0) get variable(a) is entity type: false
-#    Then answer get row(0) get variable(a) is relation type: false
-#    Then answer get row(0) get variable(a) is attribute type: true
-#    Then answer get row(0) get variable(a) is role type: false
-#    Then answer get row(0) get variable(a) is entity: false
-#    Then answer get row(0) get variable(a) is relation: false
-#    Then answer get row(0) get variable(a) is attribute: false
-#
-#    Then answer get row(0) get type(a) get label: typed
-#    Then answer get row(0) get thing type(a) get label: typed
-#    Then answer get row(0) get attribute type(a) get label: typed
-#    Then answer get row(0) get attribute type(a) get name: typed
-#    Then answer get row(0) get attribute type(a) get scope is none
-#
-#    Then answer get row(0) get attribute type(a) get value type: <value-type>
-#    Then answer get row(0) get attribute type(a) is untyped: false
-#    Then answer get row(0) get attribute type(a) is boolean: <is-boolean>
-#    Then answer get row(0) get attribute type(a) is long: <is-long>
-#    Then answer get row(0) get attribute type(a) is double: <is-double>
-#    Then answer get row(0) get attribute type(a) is decimal: <is-decimal>
-#    Then answer get row(0) get attribute type(a) is string: <is-string>
-#    Then answer get row(0) get attribute type(a) is date: <is-date>
-#    Then answer get row(0) get attribute type(a) is datetime: <is-datetime>
-#    Then answer get row(0) get attribute type(a) is datetime-tz: <is-datetime-tz>
-#    Then answer get row(0) get attribute type(a) is duration: <is-duration>
-#    Then answer get row(0) get attribute type(a) is struct: <is-struct>
-#    Examples:
-#      | value-type  | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
-#      | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | long        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
-#      | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-#      | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
-#      | date        | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
-#      | datetime    | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-#      | datetime-tz | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-#      | duration    | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-#      | struct      | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
-#
-#
-#  Scenario: Driver processes entities correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define entity person;
+#      define
+#      entity director, owns film;
+#      attribute film, value film-properties;
+#      struct film-genre:
+#        name value string,
+#        description value string,
+#        invented value date;
+#      struct film-properties:
+#        name value string,
+#        genre value film-genre,
+#        duration value duration,
+#        reviews value long,
+#        score value double,
+#        revenue value decimal,
+#        premier value datetime,
+#        local-premier value datetime-tz,
+#        is-verified value boolean;
 #      """
 #    Given transaction commits
 #    Given connection open write transaction for database: typedb
 #    Given typeql write query
 #      """
-#      insert $p isa person;
+#      insert $d isa director, has film {
+#        name: "Twin Peaks: Fire Walk with Me",
+#        genre: film-genre {
+#          name: surrealism,
+#          description: "Surrealism is an art and cultural movement that developed in Europe in the aftermath of World War I in which artists aimed to allow the unconscious mind to express itself, often resulting in the depiction of illogical or dreamlike scenes and ideas. Its intention was, according to leader André Breton, to \"resolve the previously contradictory conditions of dream and reality into an absolute reality, a super-reality\", or surreality. It produced works of painting, writing, theatre, filmmaking, photography, and other media as well.",
+#          invented: 1917-01-01,
+#        },
+#        duration: PT2H14M,
+#        reviews: 130,
+#        score: 45.13,
+#        revenue: 4200000.123456789087654321,
+#        premier: 1992-05-16T01:02:34,
+#        local-premier: 1992-07-03T01:02:34 Europe/Paris,
+#        is-verified: true,
+#      };
 #      """
 #    When get answers of typeql read query
 #      """
-#      match $p isa person;
+#      match $_ isa director, has $f;
 #      """
 #    Then answer type is concept rows
 #    Then answer query type is read
 #    Then answer size: 1
 #
-#    Then answer get row(0) get variable(p) is type: false
-#    Then answer get row(0) get variable(p) is thing type: false
-#    Then answer get row(0) get variable(p) is thing: true
-#    Then answer get row(0) get variable(p) is value: false
-#    Then answer get row(0) get variable(p) is entity type: false
-#    Then answer get row(0) get variable(p) is relation type: false
-#    Then answer get row(0) get variable(p) is attribute type: false
-#    Then answer get row(0) get variable(p) is role type: false
-#    Then answer get row(0) get variable(p) is entity: true
-#    Then answer get row(0) get variable(p) is relation: false
-#    Then answer get row(0) get variable(p) is attribute: false
+#    Then answer get row(0) get variable(f) is type: false
+#    Then answer get row(0) get variable(f) is thing type: false
+#    Then answer get row(0) get variable(f) is thing: true
+#    Then answer get row(0) get variable(f) is value: false
+#    Then answer get row(0) get variable(f) is entity type: false
+#    Then answer get row(0) get variable(f) is relation type: false
+#    Then answer get row(0) get variable(f) is attribute type: false
+#    Then answer get row(0) get variable(f) is role type: false
+#    Then answer get row(0) get variable(f) is entity: false
+#    Then answer get row(0) get variable(f) is relation: false
+#    Then answer get row(0) get variable(f) is attribute: true
 #
-#    Then answer get row(0) get thing(p) get type get label: person
-#    Then answer get row(0) get entity(p) get iid exists
-#    Then answer get row(0) get entity(p) get type get label: person
-#    Then answer get row(0) get entity(p) get type is entity: false
-#    Then answer get row(0) get entity(p) get type is entity type: true
-#    Then answer get row(0) get entity(p) get type is relation type: false
-#    Then answer get row(0) get entity(p) get type is attribute type: false
-#    Then answer get row(0) get entity(p) get type is role type: false
+#    Then answer get row(0) get thing(f) get type get label: typed
+#    Then answer get row(0) get attribute(f) get type get label: typed
+#    Then answer get row(0) get attribute(f) get type is attribute: false
+#    Then answer get row(0) get attribute(f) get type is entity type: false
+#    Then answer get row(0) get attribute(f) get type is relation type: true
+#    Then answer get row(0) get attribute(f) get type is attribute type: true
+#    Then answer get row(0) get attribute(f) get type is role type: false
 #
-#
-#  Scenario: Driver processes relations correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define relation parentship, relates parent;
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query
-#      """
-#      insert $p isa parentship;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match $p isa parentship;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(p) is type: false
-#    Then answer get row(0) get variable(p) is thing type: false
-#    Then answer get row(0) get variable(p) is thing: true
-#    Then answer get row(0) get variable(p) is value: false
-#    Then answer get row(0) get variable(p) is entity type: false
-#    Then answer get row(0) get variable(p) is relation type: false
-#    Then answer get row(0) get variable(p) is attribute type: false
-#    Then answer get row(0) get variable(p) is role type: false
-#    Then answer get row(0) get variable(p) is entity: false
-#    Then answer get row(0) get variable(p) is relation: true
-#    Then answer get row(0) get variable(p) is attribute: false
-#
-#    Then answer get row(0) get thing(p) get type get label: parentship
-#    Then answer get row(0) get relation(p) get iid exists
-#    Then answer get row(0) get relation(p) get type get label: parentship
-#    Then answer get row(0) get relation(p) get type is relation: false
-#    Then answer get row(0) get relation(p) get type is entity type: false
-#    Then answer get row(0) get relation(p) get type is relation type: true
-#    Then answer get row(0) get relation(p) get type is attribute type: false
-#    Then answer get row(0) get relation(p) get type is role type: false
-#
-#
-#  Scenario Outline: Driver processes attributes of type <value-type> correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define entity person, owns typed; attribute typed, value <value-type>;
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query
-#      """
-#      insert $p isa person, has typed <value>;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match $_ isa person, has $a;
-#      """
-#    Then answer type is concept rows
-#    Then answer query type is read
-#    Then answer size: 1
-#
-#    Then answer get row(0) get variable(a) is type: false
-#    Then answer get row(0) get variable(a) is thing type: false
-#    Then answer get row(0) get variable(a) is thing: true
-#    Then answer get row(0) get variable(a) is value: false
-#    Then answer get row(0) get variable(a) is entity type: false
-#    Then answer get row(0) get variable(a) is relation type: false
-#    Then answer get row(0) get variable(a) is attribute type: false
-#    Then answer get row(0) get variable(a) is role type: false
-#    Then answer get row(0) get variable(a) is entity: false
-#    Then answer get row(0) get variable(a) is relation: false
-#    Then answer get row(0) get variable(a) is attribute: true
-#
-#    Then answer get row(0) get thing(a) get type get label: typed
-#    Then answer get row(0) get attribute(a) get type get label: typed
-#    Then answer get row(0) get attribute(a) get type is attribute: false
-#    Then answer get row(0) get attribute(a) get type is entity type: false
-#    Then answer get row(0) get attribute(a) get type is relation type: true
-#    Then answer get row(0) get attribute(a) get type is attribute type: true
-#    Then answer get row(0) get attribute(a) get type is role type: false
-#
-#    Then answer get row(0) get attribute(a) get type get value type: <value-type>
-#    Then answer get row(0) get attribute(a) is boolean: <is-boolean>
-#    Then answer get row(0) get attribute(a) is long: <is-long>
-#    Then answer get row(0) get attribute(a) is double: <is-double>
-#    Then answer get row(0) get attribute(a) is decimal: <is-decimal>
-#    Then answer get row(0) get attribute(a) is string: <is-string>
-#    Then answer get row(0) get attribute(a) is date: <is-date>
-#    Then answer get row(0) get attribute(a) is datetime: <is-datetime>
-#    Then answer get row(0) get attribute(a) is datetime-tz: <is-datetime-tz>
-#    Then answer get row(0) get attribute(a) is duration: <is-duration>
-#    Then answer get row(0) get attribute(a) is struct: <is-struct>
-#    Then answer get row(0) get attribute(a) get <value-type> value: <value>
-#    Examples:
-#      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
-#      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
-#      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-#      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-#      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
-#      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
-#      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-#      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-#      # TODO: Add datetime-tz with offsets
-#      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-#      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-#      # TODO: Implement structs
-##      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
-#
-#
+#    Then answer get row(0) get attribute(f) get type get value type: film-properties
+#    Then answer get row(0) get attribute(f) is boolean: false
+#    Then answer get row(0) get attribute(f) is long: false
+#    Then answer get row(0) get attribute(f) is double: false
+#    Then answer get row(0) get attribute(f) is decimal: false
+#    Then answer get row(0) get attribute(f) is string: false
+#    Then answer get row(0) get attribute(f) is date: false
+#    Then answer get row(0) get attribute(f) is datetime: false
+#    Then answer get row(0) get attribute(f) is datetime-tz: false
+#    Then answer get row(0) get attribute(f) is duration: false
+#    Then answer get row(0) get attribute(f) is struct: true
+#    Then answer get row(0) get attribute(f) get <value-type> value: <value>
+#    Then answer get row(0) get attribute(a) as <value-type>: <value>
+
+
+  # TODO: Implement value variables
 #  Scenario Outline: Driver processes values of type <value-type> correctly
 #    Given connection open schema transaction for database: typedb
 #    Given typeql schema query
@@ -902,6 +1046,101 @@ Feature: TypeDB Driver
 #    When get answers of typeql read query
 #      """
 #      match $_ isa person, has typed $v;
+#      $value = $v;
+#      """
+#    Then answer type is concept rows
+#    Then answer query type is read
+#    Then answer size: 1
+#
+#    Then answer get row(0) get variable(value) is type: false
+#    Then answer get row(0) get variable(value) is thing type: false
+#    Then answer get row(0) get variable(value) is thing: false
+#    Then answer get row(0) get variable(value) is value: true
+#    Then answer get row(0) get variable(value) is entity type: false
+#    Then answer get row(0) get variable(value) is relation type: false
+#    Then answer get row(0) get variable(value) is attribute type: false
+#    Then answer get row(0) get variable(value) is role type: false
+#    Then answer get row(0) get variable(value) is entity: false
+#    Then answer get row(0) get variable(value) is relation: false
+#    Then answer get row(0) get variable(value) is attribute: false
+#
+#    Then answer get row(0) get value(value) get value type: <value-type>
+#    Then answer get row(0) get value(value) is boolean: <is-boolean>
+#    Then answer get row(0) get value(value) is long: <is-long>
+#    Then answer get row(0) get value(value) is double: <is-double>
+#    Then answer get row(0) get value(value) is decimal: <is-decimal>
+#    Then answer get row(0) get value(value) is string: <is-string>
+#    Then answer get row(0) get value(value) is date: <is-date>
+#    Then answer get row(0) get value(value) is datetime: <is-datetime>
+#    Then answer get row(0) get value(value) is datetime-tz: <is-datetime-tz>
+#    Then answer get row(0) get value(value) is duration: <is-duration>
+#    Then answer get row(0) get value(value) is struct: true
+#    Then answer get row(0) get value(value) get: <value>
+#    Then answer get row(0) get value(value) as <value-type>: <value>
+#    Examples:
+#      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+#      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+#      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+#      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+#      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+#      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      # TODO: Add datetime-tz with offsets
+#      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+#      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+
+
+  # TODO: Implement structs
+#  Scenario: Driver processes values of type struct correctly
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity director, owns film;
+#      attribute film, value film-properties;
+#      struct film-genre:
+#        name value string,
+#        description value string,
+#        invented value date;
+#      struct film-properties:
+#        name value string,
+#        genre value film-genre,
+#        duration value duration,
+#        reviews value long,
+#        score value double,
+#        revenue value decimal,
+#        premier value datetime,
+#        local-premier value datetime-tz,
+#        is-verified value boolean;
+#      """
+#    Given transaction commits
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert $d isa director, has film {
+#        name: "Twin Peaks: Fire Walk with Me",
+#        genre: film-genre {
+#          name: surrealism,
+#          description: "Surrealism is an art and cultural movement that developed in Europe in the aftermath of World War I in which artists aimed to allow the unconscious mind to express itself, often resulting in the depiction of illogical or dreamlike scenes and ideas. Its intention was, according to leader André Breton, to \"resolve the previously contradictory conditions of dream and reality into an absolute reality, a super-reality\", or surreality. It produced works of painting, writing, theatre, filmmaking, photography, and other media as well.",
+#          invented: 1917-01-01,
+#        },
+#        duration: PT2H14M,
+#        reviews: 130,
+#        score: 45.13,
+#        revenue: 4200000.123456789087654321,
+#        premier: 1992-05-16T01:02:34,
+#        local-premier: 1992-07-03T01:02:34 Europe/Paris,
+#        is-verified: true,
+#      };
+#      """
+#    When get answers of typeql read query
+#      """
+#      match $_ isa director, has film $v;
 #      """
 #    Then answer type is concept rows
 #    Then answer query type is read
@@ -932,23 +1171,6 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(v) is struct: <is-struct>
 #    Then answer get row(0) get value(v) get: <value>
 #    Then answer get row(0) get value(v) as <value-type>: <value>
-#    Examples:
-#      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
-#      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
-#      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
-#      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-#      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-#      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
-#      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
-#      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-#      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-#      # TODO: Add datetime-tz with offsets
-#      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-#      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
-#      # TODO: Implement structs
-##      | struct      |                                             | false      | false   | false     | false      | false     | false   | false       | false          | false       | true      |
-#
-#  # TODO: Add tests with time-zones for datetime, datetime-tz
+
+
+  # TODO: Add tests with time-zones set through "set time-zone" steps for datetime and datetime-tz
