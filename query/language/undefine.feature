@@ -164,7 +164,7 @@ Feature: TypeQL Undefine Query
       """
       match $x type child; $x plays employment:employee;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
@@ -186,7 +186,7 @@ Feature: TypeQL Undefine Query
       """
       match $x type child; $x owns name;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
@@ -208,7 +208,7 @@ Feature: TypeQL Undefine Query
       """
       match $x type child; $x owns email @key;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of typeql read query
@@ -329,7 +329,7 @@ Feature: TypeQL Undefine Query
       """
       match contract-employment plays $x;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
@@ -362,7 +362,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns start-date;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing key ownerships from a super relation type also removes them from its subtypes
@@ -395,7 +395,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns employment-reference @key;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: undefining a relation type throws on commit if it has existing instances
@@ -507,7 +507,7 @@ Feature: TypeQL Undefine Query
         $x plays $y;
 
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   #############################
@@ -551,7 +551,7 @@ Feature: TypeQL Undefine Query
       """
       match $x plays employment:employee;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
   #TODO: test is not working
   @ignore
@@ -595,7 +595,7 @@ Feature: TypeQL Undefine Query
       """
       match $x relates employee;
       """
-    Then answer size: 0
+    Then answer size is: 0
     Then typeql insert; throws exception
       """
       match
@@ -640,7 +640,7 @@ Feature: TypeQL Undefine Query
         $x plays $y;
 
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing a role throws an error if it is played by existing roleplayers in relations
@@ -775,7 +775,7 @@ Feature: TypeQL Undefine Query
       """
       match $x plays employment:employee;
       """
-    Then answer size: 0
+    Then answer size is: 0
     Then typeql insert; throws exception
       """
       match
@@ -852,7 +852,7 @@ Feature: TypeQL Undefine Query
       """
       match $x type <attr>;
       """
-    Given answer size: 1
+    Given answer size is: 1
     When typeql schema query
       """
       undefine <attr> sub attribute;
@@ -895,7 +895,7 @@ Feature: TypeQL Undefine Query
       """
       match $x isa email;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: removing playable roles from a super attribute type also removes them from its subtypes
@@ -927,7 +927,7 @@ Feature: TypeQL Undefine Query
       """
       match first-name plays $x;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing attribute ownerships from a super attribute type also removes them from its subtypes
@@ -960,7 +960,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns locale;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing a key ownership from a super attribute type also removes it from its subtypes
@@ -993,7 +993,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns name-id @key;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: an attribute and its self-ownership can be removed simultaneously
@@ -1115,7 +1115,7 @@ Feature: TypeQL Undefine Query
         $x type person;
 
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: attempting to undefine an attribute ownership that was not actually owned to begin throws
@@ -1151,7 +1151,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns email;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: writing '@key' when undefining a key ownership is not allowed
@@ -1201,7 +1201,7 @@ Feature: TypeQL Undefine Query
       """
       match $x owns name;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: removing an attribute ownership throws an error if it is owned by existing instances
@@ -1319,7 +1319,7 @@ Feature: TypeQL Undefine Query
         $x has name $n;
       get $n;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   # TODO enable when we can do reasoning in a schema write transaction
@@ -1484,7 +1484,7 @@ Feature: TypeQL Undefine Query
         not { $x abstract; };
 
       """
-    Given answer size: 0
+    Given answer size is: 0
     Given connection close all sessions
     Given connection open data session for database: typedb
     Given session opens transaction of type: write
@@ -1526,7 +1526,7 @@ Feature: TypeQL Undefine Query
       """
       match $x isa abstract-type;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: undefining abstract on a type that is already non-abstract does nothing
@@ -1602,7 +1602,7 @@ Feature: TypeQL Undefine Query
         not { $x abstract; };
 
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   ###################

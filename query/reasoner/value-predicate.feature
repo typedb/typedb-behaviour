@@ -60,7 +60,7 @@ Feature: Value Predicate Resolution
       """
       match $x has is-old $r;
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -90,7 +90,7 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
 
       """
-    Then verify answer size: <answer-size>
+    Then verify answer size is: <answer-size>
     Then verify answers are sound
     Then verify answers are complete
 
@@ -129,7 +129,7 @@ Feature: Value Predicate Resolution
         $m <op> $n;
 
       """
-    Then verify answer size: <answer-size>
+    Then verify answer size is: <answer-size>
     Then verify answers are sound
     Then verify answers are complete
 
@@ -170,7 +170,7 @@ Feature: Value Predicate Resolution
         $n <op> 1667;
 
       """
-    Then verify answer size: <answer-size>
+    Then verify answer size is: <answer-size>
     Then verify answers are sound
     Then verify answers are complete
 
@@ -221,7 +221,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -263,7 +263,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -304,7 +304,7 @@ Feature: Value Predicate Resolution
         $rx contains "land";
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -357,7 +357,7 @@ Feature: Value Predicate Resolution
     # Fanta | Poundland | Fanta | Poundland |
     # Tango | Iceland   | Tango | Iceland   |
     # Tango | Poundland | Tango | Poundland |
-    Then verify answer size: 8
+    Then verify answer size is: 8
     Then verify answers are sound
     Then verify answers are complete
 
@@ -419,7 +419,7 @@ Feature: Value Predicate Resolution
     # Tango | Londis    | Tango | Poundland |
     # Fanta | Londis    | Fanta | Iceland   |
     # Tango | Londis    | Tango | Iceland   |
-    Then verify answer size: 16
+    Then verify answer size is: 16
     Then verify answers are sound
     Then verify answers are complete
 
@@ -460,7 +460,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -470,7 +470,7 @@ Feature: Value Predicate Resolution
         not { $r == "Ocado"; };
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -511,7 +511,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Ocado |
     # Tango | Ocado |
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -521,7 +521,7 @@ Feature: Value Predicate Resolution
         not { $r != "Ocado"; };
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -565,7 +565,7 @@ Feature: Value Predicate Resolution
     # x     | r     |
     # Fanta | Tesco |
     # Tango | Tesco |
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -612,7 +612,7 @@ Feature: Value Predicate Resolution
     # SOF | RET | PER | BSA |
     # SOF | NAM | SOF | RET |
     # SOF | RET | SOF | NAM |
-    Then verify answer size: 6
+    Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
 
@@ -683,7 +683,7 @@ Feature: Value Predicate Resolution
         ($x, item: $y) isa price-classification;
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -693,7 +693,7 @@ Feature: Value Predicate Resolution
         ($x, item: $y) isa price-classification;
 
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -703,7 +703,7 @@ Feature: Value Predicate Resolution
         ($x, item: $y) isa price-classification;
 
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -713,7 +713,7 @@ Feature: Value Predicate Resolution
         ($x, item: $y) isa price-classification;
 
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -724,7 +724,7 @@ Feature: Value Predicate Resolution
 
       """
     # sum of all previous answers
-    Then verify answer size: 5
+    Then verify answer size is: 5
     Then verify answers are sound
     Then verify answers are complete
 
@@ -785,6 +785,6 @@ Feature: Value Predicate Resolution
       match (predecessor:$x1, successor:$x2) isa message-succession;
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
-    Then verify answer size: 10
+    Then verify answer size is: 10
     Then verify answers are sound
     Then verify answers are complete

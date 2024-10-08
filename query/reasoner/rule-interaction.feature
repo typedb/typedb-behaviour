@@ -92,7 +92,7 @@ Feature: Rule Interaction Resolution
       """
       match $x isa person, has name $n, has tag "P";
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -145,7 +145,7 @@ Feature: Rule Interaction Resolution
       """
       match $x isa person, has name 'tracey';
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 

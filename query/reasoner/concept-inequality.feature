@@ -93,7 +93,7 @@ Feature: Concept Inequality Resolution
       """
       match (state: $s) isa holds;
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -110,7 +110,7 @@ Feature: Concept Inequality Resolution
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [aa, ac, bb, ca, cc]
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -122,7 +122,7 @@ Feature: Concept Inequality Resolution
       """
     # materialised: [ab, ba, bc, cb]
     # inferred: [ac, ca]
-    Then verify answer size: 6
+    Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
     # verify that the answer pairs to the previous query have distinct names within each pair
@@ -136,7 +136,7 @@ Feature: Concept Inequality Resolution
         not { $nx is $ny; };
       get $x, $y;
       """
-    Then verify answer size: 6
+    Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
 
@@ -151,7 +151,7 @@ Feature: Concept Inequality Resolution
         $y has name 'c';
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     # verify answers are [ac, bc]
@@ -164,7 +164,7 @@ Feature: Concept Inequality Resolution
         {$x has name 'a';} or {$x has name 'b';};
 
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -192,7 +192,7 @@ Feature: Concept Inequality Resolution
     # [aab, aac, aba, abc, aca, acb,
     #  bab, bac, bba, bbc, bca, bcb,
     #  cab, cac, cba, cbc, cca, ccb]
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y and $z always have distinct names
@@ -207,7 +207,7 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz; };
       get $x, $y, $z;
       """
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
 
@@ -232,7 +232,7 @@ Feature: Concept Inequality Resolution
         not { $x is $z; };
 
       """
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y and $z always have distinct names
@@ -247,7 +247,7 @@ Feature: Concept Inequality Resolution
         not { $nx is $nz; };
       get $x, $y, $z;
       """
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
 
@@ -278,7 +278,7 @@ Feature: Concept Inequality Resolution
 
       """
     # For each of the [3] values of $x, there are 3^4 = 81 choices for {$y1, $z1, $y2, $z2}, for a total of 243
-    Then verify answer size: 243
+    Then verify answer size is: 243
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -293,7 +293,7 @@ Feature: Concept Inequality Resolution
         not { $y2 is $z2; };
 
       """
-    Then verify answer size: 108
+    Then verify answer size is: 108
     # Each neq predicate reduces the answer size by 1/3, cutting it to 162, then 108
     Then verify answers are sound
     Then verify answers are complete
@@ -315,7 +315,7 @@ Feature: Concept Inequality Resolution
         not { $ny2 is $nz2; };
       get $x, $y1, $z1, $y2, $z2;
       """
-    Then verify answer size: 108
+    Then verify answer size is: 108
     Then verify answers are sound
     Then verify answers are complete
 
@@ -341,7 +341,7 @@ Feature: Concept Inequality Resolution
 
       """
     # There are 3^4 possible choices for the set {$x, $y, $z1, $z2}, for a total of 81
-    Then verify answer size: 81
+    Then verify answer size is: 81
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -356,7 +356,7 @@ Feature: Concept Inequality Resolution
 
       """
     # Each neq predicate reduces the answer size by 1/3, cutting it to 54, then 36
-    Then verify answer size: 36
+    Then verify answer size is: 36
     Then verify answers are sound
     Then verify answers are complete
     # verify that $y1 and $z1 - as well as $y2 and $z2 - always have distinct names
@@ -376,7 +376,7 @@ Feature: Concept Inequality Resolution
         not { $ny is $nz2; };
       get $x, $y, $z1, $z2;
       """
-    Then verify answer size: 36
+    Then verify answer size is: 36
     Then verify answers are sound
     Then verify answers are complete
 
@@ -428,7 +428,7 @@ Feature: Concept Inequality Resolution
     # SOF | RET | PER | STA |
     # SOF | NAM | SOF | STA |
     # SOF | STA | SOF | NAM |
-    Then verify answer size: 6
+    Then verify answer size is: 6
     Then verify answers are sound
     Then verify answers are complete
 
@@ -488,6 +488,6 @@ Feature: Concept Inequality Resolution
       """
     # x      | value | type     |
     # Sprite | Tesco | retailer |
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete

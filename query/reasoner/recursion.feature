@@ -87,7 +87,7 @@ Feature: Recursion Resolution
       """
       match (subordinate: $x, superior: $y) isa big-location-hierarchy;
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -156,7 +156,7 @@ Feature: Recursion Resolution
       """
       match (role31: $x, role32: $y) isa relation3;
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
 
@@ -220,7 +220,7 @@ Feature: Recursion Resolution
       match (role31: $x, role32: $y) isa relation3;
       """
     # Each of the two material relation1 instances should infer a single relation3 via 1-to-2 and 2-to-3
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -228,7 +228,7 @@ Feature: Recursion Resolution
       match (role21: $x, role22: $y) isa relation2;
       """
     # Relation-3-to-2 should not make any additional inferences - it should merely assert that the relations exist
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
 
@@ -264,7 +264,7 @@ Feature: Recursion Resolution
       """
       match $x isa dream; limit 10;
       """
-    Then verify answer size: 10
+    Then verify answer size is: 10
 
 
   # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
@@ -354,14 +354,14 @@ Feature: Recursion Resolution
       """
       match $p isa pair, has name 'ff';
       """
-    Then verify answer size: 16
+    Then verify answer size is: 16
     Then verify answers are sound
     # Then verify answers are complete  # Not yet supported
     Given reasoning query
       """
       match $p isa pair;
       """
-    Then verify answer size: 64
+    Then verify answer size is: 64
     Then verify answers are sound
     # Then verify answers are complete  # Not yet supported
 
@@ -455,7 +455,7 @@ Feature: Recursion Resolution
         $x has index 'i';
       get $y;
       """
-    Then verify answer size: 3
+    Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -530,7 +530,7 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y, $name;
       """
-    Then verify answer size: 3
+    Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -547,7 +547,7 @@ Feature: Recursion Resolution
         $X has name 'aa';
       get $Y;
       """
-    Then verify answer size: 4
+    Then verify answer size is: 4
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -561,7 +561,7 @@ Feature: Recursion Resolution
       """
       match (ancestor: $X, descendant: $Y) isa ancestorship;
       """
-    Then verify answer size: 10
+    Then verify answer size is: 10
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -580,7 +580,7 @@ Feature: Recursion Resolution
       """
       match ($X, $Y) isa ancestorship;
       """
-    Then verify answer size: 20
+    Then verify answer size is: 20
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -669,7 +669,7 @@ Feature: Recursion Resolution
         $Y has name $name;
       get $Y;
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -693,7 +693,7 @@ Feature: Recursion Resolution
         $Y has name 'd';
       get $X;
       """
-    Then verify answer size: 3
+    Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -778,7 +778,7 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then verify answer size: 2
+    Then verify answer size is: 2
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -855,7 +855,7 @@ Feature: Recursion Resolution
         $y has index 'a';
       get $x;
       """
-    Then verify answer size: 1
+    Then verify answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -944,7 +944,7 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa reachable;
       """
-    Then verify answer size: 7
+    Then verify answer size is: 7
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1020,7 +1020,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-    Then verify answer size: 4
+    Then verify answer size is: 4
     # Then verify answers are sound     # TODO: Runs out of memory on factory
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1097,7 +1097,7 @@ Feature: Recursion Resolution
         $x has name 'ann';
       get $y;
       """
-    Then verify answer size: 3
+    Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1205,7 +1205,7 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then verify answer size: 3
+    Then verify answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1219,7 +1219,7 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa RevSG;
       """
-    Then verify answer size: 11
+    Then verify answer size is: 11
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1397,7 +1397,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then verify answer size: 5
+    Then verify answer size is: 5
     Then verify answers are sound
     Then verify answers are complete
 
@@ -1602,7 +1602,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then verify answer size: 60
+    Then verify answer size is: 60
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1752,7 +1752,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-    Then verify answer size: 25
+    Then verify answer size is: 25
     Then verify answers are sound
     Then verify answers are complete
 

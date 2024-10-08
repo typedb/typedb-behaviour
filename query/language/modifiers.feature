@@ -326,7 +326,7 @@ Feature: TypeQL Query Modifiers
       sort $y asc;
       limit 0;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: when the offset is outside the bounds of the matched answer set, an empty answer set is returned
@@ -348,7 +348,7 @@ Feature: TypeQL Query Modifiers
       sort $y asc;
       offset 5;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: string sorting is case-sensitive

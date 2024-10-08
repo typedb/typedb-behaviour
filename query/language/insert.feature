@@ -142,7 +142,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa dog;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       insert $x isa dog, has breed "Labrador";
@@ -154,7 +154,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa dog;
       """
-    Then answer size: 1
+    Then answer size is: 1
     Then typeql insert
       """
       insert $x isa dog, has breed "Labrador";
@@ -166,7 +166,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa dog;
       """
-    Then answer size: 2
+    Then answer size is: 2
     Then typeql insert
       """
       insert $x isa dog, has breed "Labrador";
@@ -178,7 +178,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa dog;
       """
-    Then answer size: 3
+    Then answer size is: 3
 
 
   Scenario: an insert can be performed using a direct type specifier, and it functions equivalently to 'isa'
@@ -226,7 +226,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa thing;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       insert $x isa person, has name "Wilhelmina", has age 25, has ref 0;
@@ -250,7 +250,7 @@ Feature: TypeQL Insert Query
       """
       match $x isa thing;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match  ?a = 25;
@@ -283,7 +283,7 @@ Feature: TypeQL Insert Query
       """
       match $x has name "John";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: given an attribute with no owners, inserting a thing that owns it results in it having an owner
@@ -363,7 +363,7 @@ Feature: TypeQL Insert Query
       """
       match $p isa dog;
       """
-    Then answer size: 5
+    Then answer size is: 5
     When typeql insert
       """
       match
@@ -378,7 +378,7 @@ Feature: TypeQL Insert Query
       """
       match $p isa dog;
       """
-    Then answer size: 10
+    Then answer size is: 10
 
 
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
@@ -467,7 +467,7 @@ get;
       """
       match $p has name "Spiderman";
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match
@@ -500,7 +500,7 @@ get;
       """
       match $p has name "Spiderman";
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match
@@ -545,7 +545,7 @@ get;
       """
       match $c has hex-value "#FF0000";
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match
@@ -590,7 +590,7 @@ get;
       """
       match $c has hex-value "#FF0000";
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match
@@ -643,7 +643,7 @@ get;
       """
       match $td isa tenure-days;
       """
-    Then answer size: 0
+    Then answer size is: 0
     When typeql insert
       """
       match
@@ -990,7 +990,7 @@ get;
       match $x isa employment, has ref 0;
 
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: an relation without a role player is deleted on transaction commit
@@ -1007,7 +1007,7 @@ get;
       $x isa employment, has ref 0;
 
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is thrown
@@ -1072,7 +1072,7 @@ get;
       """
       match $r isa gym-membership; get $r;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   #######################
@@ -1094,7 +1094,7 @@ get;
       """
       match $x <value> isa <attr>;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       insert $x <value> isa <attr>, has ref 0;
@@ -1134,7 +1134,7 @@ get;
       """
       match $x <value> isa <attr>;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match ?x = <value>;
@@ -1257,7 +1257,7 @@ get;
       """
       match $x isa length;
       """
-    Then answer size: 1
+    Then answer size is: 1
     Then uniquely identify answer concepts
       | x                |
       | attr:length:2.0  |
@@ -1295,7 +1295,7 @@ get;
       """
       match $x isa length;
       """
-    Then answer size: 1
+    Then answer size is: 1
     Then uniquely identify answer concepts
       | x                |
       | attr:length:2.0  |
@@ -1326,7 +1326,7 @@ get;
       """
       match $x isa length;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
@@ -1858,7 +1858,7 @@ get;
       """
       match $p isa person;
       """
-    Given answer size: 0
+    Given answer size is: 0
     When typeql insert
       """
       match
@@ -1873,7 +1873,7 @@ get;
       """
       match $r isa season-ticket-ownership;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: match-inserting only existing entities is a no-op
@@ -2035,7 +2035,7 @@ get;
       """
       match $x isa person;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: re-inserting a matched instance as an unrelated type throws an error
@@ -2267,7 +2267,7 @@ get;
       match $x isa name;
       """
     # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
-    Then answer size: 0
+    Then answer size is: 0
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
@@ -2332,7 +2332,7 @@ get;
       match $x isa person, has score $score;
       """
     # But Freya's ownership of score 10.0 was never materialised and is now gone
-    Then answer size: 0
+    Then answer size is: 0
 
   #TODO: Reenable when rules actually do something
   @ignore
@@ -2412,7 +2412,7 @@ get;
       """
       match $x isa person;
       """
-    Then answer size: 0
+    Then answer size is: 0
     When get answers of typeql read query
       """
       match $x isa name;
@@ -2480,7 +2480,7 @@ get;
       """
       match $x isa employment;
       """
-    Then answer size: 1
+    Then answer size is: 1
     # At this step we materialise the inferred employment because the material employment-contract depends on it.
     When typeql insert
       """
@@ -2506,13 +2506,13 @@ get;
       match $x isa employment;
       """
     # We deleted the rule that infers the employment, but it still exists because it was materialised on match-insert
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match (contracted: $x, contract: $y) isa employment-contract;
       """
     # And the inserted relation still exists too
-    Then answer size: 1
+    Then answer size is: 1
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
@@ -2619,7 +2619,7 @@ get;
         $d isa vertex, has index "d";
         $reach ($a, $d) isa reachable;
       """
-    Then answer size: 1
+    Then answer size is: 1
     # On the other hand, the fact that 'c' was reachable from 'a' was not -directly- used; although it was needed
     # in order to infer that (a,d) was reachable, it did not, itself, play a role in any relation that we materialised,
     # so it is now gone.
@@ -2630,7 +2630,7 @@ get;
         $c isa vertex, has index "c";
         $reach ($a, $c) isa reachable;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
@@ -2732,13 +2732,13 @@ get;
       """
       match $x isa person;
       """
-    Then answer size: 7
+    Then answer size is: 7
     When get answers of typeql read query
       """
       match $x isa employment;
       """
     # The original person is still unemployed.
-    Then answer size: 6
+    Then answer size is: 6
 
   ####################
   # TRANSACTIONALITY #
@@ -2761,7 +2761,7 @@ get;
       """
       match $x isa person, has name "Derek";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
@@ -2792,7 +2792,7 @@ get;
       """
       match $x isa person, has name "Derek";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: if any insert in a transaction fails with a 'key' violation, none of the inserts are performed
@@ -2812,7 +2812,7 @@ get;
       """
       match $x isa person, has name "Derek";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   ##############

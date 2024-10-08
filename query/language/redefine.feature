@@ -597,7 +597,7 @@ Feature: TypeQL Redefine Query
         attribute $x;
 
       """
-    Then answer size: 1
+    Then answer size is: 1
 
     Examples:
       | value-type-1 | value-type-2 | label              |

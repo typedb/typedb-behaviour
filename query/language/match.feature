@@ -647,7 +647,7 @@ Feature: TypeQL Match Clause
         $x iid 0x83cb2;
         $y iid 0x4ba92;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   ##########
@@ -758,7 +758,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa person;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: 'iid' matches the instance with the specified internal iid
@@ -811,7 +811,7 @@ Feature: TypeQL Match Clause
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: match returns an empty answer if there are no matches
@@ -819,7 +819,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa person, has name "Anonymous Coward";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: when matching by a type whose label doesn't exist, an error is thrown
@@ -1060,7 +1060,7 @@ Feature: TypeQL Match Clause
       """
       match $rlinks (compared:$r), isa comparator;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
   @ignore
   Scenario: A relation can play a role in itself and have additional roleplayers
@@ -1089,7 +1089,7 @@ Feature: TypeQL Match Clause
       """
       match $rlinks (compared: $v, compared:$r), isa comparator;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
@@ -1110,7 +1110,7 @@ Feature: TypeQL Match Clause
       """
       match (friend: $x, friend: $x) isa friendship;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: matching a chain of relations only returns answers if there is a chain of the required length
@@ -1160,7 +1160,7 @@ Feature: TypeQL Match Clause
         (sender: $b, recipient: $c) isa gift-delivery;
         (sender: $c, recipient: $d) isa gift-delivery;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
@@ -1288,7 +1288,7 @@ Feature: TypeQL Match Clause
       """
       match $m links (wife: $x, husband: $y), isa hetero-marriage;
       """
-    Then answer size: 1
+    Then answer size is: 1
     Then typeql read query; fails
       """
       match $m links (wife: $x, husband: $y), isa civil-marriage;
@@ -1299,52 +1299,52 @@ Feature: TypeQL Match Clause
       """
       match $m links (wife: $x, husband: $y), isa marriage;
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match $m links (wife: $x, husband: $y);
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match $m links (spouse: $x, spouse: $y), isa hetero-marriage;
       """
-    Then answer size: 2
+    Then answer size is: 2
     When get answers of typeql read query
       """
       match $m links (spouse: $x, spouse: $y), isa civil-marriage;
       """
-    Then answer size: 2
+    Then answer size is: 2
     When get answers of typeql read query
       """
       match $m links (spouse: $x, spouse: $y), isa marriage;
       """
-    Then answer size: 4
+    Then answer size is: 4
     When get answers of typeql read query
       """
       match $m links (spouse: $x, spouse: $y);
       """
-    Then answer size: 4
+    Then answer size is: 4
     When get answers of typeql read query
       """
       match $m links (role: $x, role: $y), isa hetero-marriage;
       """
-    Then answer size: 2
+    Then answer size is: 2
     When get answers of typeql read query
       """
       match $m links (role: $x, role: $y), isa civil-marriage;
       """
-    Then answer size: 2
+    Then answer size is: 2
     When get answers of typeql read query
       """
       match $m links (role: $x, role: $y), isa marriage;
       """
-    Then answer size: 4
+    Then answer size is: 4
     When get answers of typeql read query
       """
       match $m links (role: $x, role: $y);
       """
-    Then answer size: 4
+    Then answer size is: 4
 
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
@@ -1379,7 +1379,7 @@ Feature: TypeQL Match Clause
     """
     match $r links (owner: $x), isa ownership, has is-insured true; $x isa person;
     """
-    Then answer size: 1
+    Then answer size is: 1
 
   ##############
   # ATTRIBUTES #
@@ -1434,7 +1434,7 @@ Feature: TypeQL Match Clause
       """
       match $a <value> isa <attr>;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
     Examples:
       | attr        | type     | value      |
@@ -1524,12 +1524,12 @@ Feature: TypeQL Match Clause
       """
       match $x has name $y; $x iid 0x83cb2;
       """
-    Then answer size: 0
+    Then answer size is: 0
     When get answers of typeql read query
       """
       match $x has name $y; $y iid 0x83cb2;
       """
-    Then answer size: 0
+    Then answer size is: 0
 
   # TODO: this test uses attributes, but is ultimately testing the traversal structure,
   #       such that match query does not throw. Perhaps we should introduce a new feature file
@@ -1726,7 +1726,7 @@ Feature: TypeQL Match Clause
         $x isa person, has graduation-date $date;
         $r links (employee: $x), isa employment, has start-date == $date;
       """
-    Then answer size: 1
+    Then answer size is: 1
     Then uniquely identify answer concepts
       | x         | r         | date                            |
       | key:ref:0 | key:ref:1 | attr:graduation-date:2009-07-16 |
@@ -1850,42 +1850,42 @@ Feature: TypeQL Match Clause
         $x isa house-number;
         $x == 1.0;
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match
         $x isa length;
         $x == 2;
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match
         $x isa house-number;
         $x 1.0;
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match
         $x isa length;
         $x 2;
       """
-    Then answer size: 1
+    Then answer size is: 1
     When get answers of typeql read query
       """
       match
         $x isa $a;
         $x >= 1;
       """
-    Then answer size: 2
+    Then answer size is: 2
     When get answers of typeql read query
       """
       match
         $x isa $a;
         $x < 2.0;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
     When get answers of typeql read query
       """
@@ -1894,7 +1894,7 @@ Feature: TypeQL Match Clause
         $y isa length;
         $x < $y;
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   Scenario: when a thing owns multiple attributes of the same type, a value comparison matches if any value matches
@@ -2001,7 +2001,7 @@ Feature: TypeQL Match Clause
         $y isa person;
         not { $x is $y; };
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: concept comparison of unbound variables throws an error
@@ -2054,12 +2054,12 @@ Feature: TypeQL Match Clause
       """
       match $x isa $t; { $t label person; } or { $t label company; };
       """
-    Then answer size: 0
+    Then answer size is: 0
     When get answers of typeql read query
       """
       match $x isa $t; { $t label person; } or { $t label company; };
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: negations can be applied to filtered variables
@@ -2129,17 +2129,17 @@ Feature: TypeQL Match Clause
       """
       match entity $t; $x isa $t;
       """
-    Given answer size: 2
+    Given answer size is: 2
     Given get answers of typeql read query
       """
       match relation $t; $x isa $t;
       """
-    Given answer size: 1
+    Given answer size is: 1
     Given get answers of typeql read query
       """
       match attribute $t; $x isa $t;
       """
-    Given answer size: 5
+    Given answer size is: 5
     When get answers of typeql read query
       """
       match $x isa $type;
@@ -2147,7 +2147,7 @@ Feature: TypeQL Match Clause
     # 2 entities x 1 type {person}
     # 1 relation x 1 type {friendship}
     # 5 attributes x 1 type {ref/name}
-    Then answer size: 8
+    Then answer size is: 8
 
 
   Scenario: all relations and their types can be retrieved
@@ -2168,19 +2168,19 @@ Feature: TypeQL Match Clause
       """
       match relation $t; $r isa $t;
       """
-    Given answer size: 1
+    Given answer size is: 1
     Given get answers of typeql read query
       """
       match ($x, $y);
       """
     # 2 permutations of the roleplayers
-    Given answer size: 2
+    Given answer size is: 2
     When get answers of typeql read query
       """
       match ($x, $y) isa $type;
       """
     # 2 permutations of the roleplayers
-    Then answer size: 2
+    Then answer size is: 2
 
 
   Scenario: variable role types with relations playing roles
@@ -2222,7 +2222,7 @@ Feature: TypeQL Match Clause
         not { $role-nested sub! $r; };
         not { $role-player sub! $r; };
       """
-    Then answer size: 1
+    Then answer size is: 1
 
     When get answers of typeql read query
       """
@@ -2236,7 +2236,7 @@ Feature: TypeQL Match Clause
         not { $role-nested sub! $r; };
         not { $role-player sub! $r; };
       """
-    Then answer size: 1
+    Then answer size is: 1
 
 
   #######################
@@ -2353,7 +2353,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa person, has favorite-phrase "请给我一";
       """
-    Then answer size: 0
+    Then answer size is: 0
 
 
   Scenario: type labels can be non-ascii

@@ -128,7 +128,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -136,7 +136,7 @@ Feature: Variable Role Resolution
       match (role1: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role2} (2 options => double answer size)
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
 
@@ -147,7 +147,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, $r1: $b) isa binary-base;
       """
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
@@ -158,7 +158,7 @@ Feature: Variable Role Resolution
         $r1 type binary-base:role1;
       get $a, $b, $r2;
       """
-    Then verify answer size: 18
+    Then verify answer size is: 18
     Then verify answers are sound
     Then verify answers are complete
 
@@ -169,7 +169,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -177,7 +177,7 @@ Feature: Variable Role Resolution
       match (role: $a, $r1: $b) isa binary-base;
       """
     # $r1 in {role, role1, role2} (3 options => triple answer size)
-    Then verify answer size: 27
+    Then verify answer size is: 27
     Then verify answers are sound
     Then verify answers are complete
 
@@ -188,7 +188,7 @@ Feature: Variable Role Resolution
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
-    Then verify answer size: 27
+    Then verify answer size is: 27
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
@@ -199,7 +199,7 @@ Feature: Variable Role Resolution
         $r1 type relation:role;
       get $a, $b, $r2;
       """
-    Then verify answer size: 27
+    Then verify answer size is: 27
     Then verify answers are sound
     Then verify answers are complete
 
@@ -210,7 +210,7 @@ Feature: Variable Role Resolution
       """
       match (role: $a, $r1: $b) isa binary-base;
       """
-    Then verify answer size: 27
+    Then verify answer size is: 27
     Then verify answers are sound
     Then verify answers are complete
     # This query should be equivalent to the one above
@@ -221,7 +221,7 @@ Feature: Variable Role Resolution
         $r1 sub relation:role;
       get $a, $b, $r2;
       """
-    Then verify answer size: 27
+    Then verify answer size is: 27
     Then verify answers are sound
     Then verify answers are complete
 
@@ -237,7 +237,7 @@ Feature: Variable Role Resolution
 
       """
     # $r1 must be 'role' and $r2 must be 'role2'
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     # This query is equivalent to the one above
@@ -248,7 +248,7 @@ Feature: Variable Role Resolution
         $r2 type binary-base:role2;
 
       """
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
 
@@ -259,7 +259,7 @@ Feature: Variable Role Resolution
       """
       match (role1: $a, role2: $b) isa binary-base;
       """
-    Then verify answer size: 9
+    Then verify answer size is: 9
     Then verify answers are sound
     Then verify answers are complete
     Given reasoning query
@@ -274,7 +274,7 @@ Feature: Variable Role Resolution
     # role1 | role2 |
     # role2 | role  |
     # role2 | role1 |
-    Then verify answer size: 63
+    Then verify answer size is: 63
     Then verify answers are sound
     Then verify answers are complete
 
@@ -334,13 +334,13 @@ Feature: Variable Role Resolution
 
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3) isa binary-base, as role1 and $a1 each have only 1 value
-    Then verify answer size: 63
+    Then verify answer size is: 63
     Given reasoning query
       """
       match (ternary-role1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
-    Then verify answer size: 189
+    Then verify answer size is: 189
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3) isa ternary-base;
@@ -359,7 +359,7 @@ Feature: Variable Role Resolution
     # For each pattern, we have one possible match per ternary-base relation
     # and there are 27 ternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 34 * 27 = 918
-    Then verify answer size: 918
+    Then verify answer size is: 918
 
 
   Scenario: variable roles are correctly mapped to answers for a quaternary relation with 3 possible roleplayers
@@ -371,13 +371,13 @@ Feature: Variable Role Resolution
 
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary-base
-    Then verify answer size: 918
+    Then verify answer size is: 918
     Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
       """
     # Now the bound role 'role1' is in {a, b, c}, tripling the answer size
-    Then verify answer size: 2754
+    Then verify answer size is: 2754
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary-base;
@@ -393,7 +393,7 @@ Feature: Variable Role Resolution
     # For each pattern, we have one possible match per quaternary-base relation
     # and there are 81 quaternary-base relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 81 = 16929
-    Then verify answer size: 16929
+    Then verify answer size is: 16929
 
 
   # Note: This test uses the sub-relation 'quaternary' while the others use the super-relations '{n}-ary-base'.
@@ -407,13 +407,13 @@ Feature: Variable Role Resolution
 
       """
     # This query is equivalent to matching ($r2: $a2, $r3: $a3, $r4: $a4) isa ternary
-    Then verify answer size: 272
+    Then verify answer size is: 272
     Given reasoning query
       """
       match (quat-role1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
       """
     # Now the bound role 'role1' is in {a, b}, doubling the answer size
-    Then verify answer size: 544
+    Then verify answer size is: 544
     Given reasoning query
       """
       match ($r1: $a1, $r2: $a2, $r3: $a3, $r4: $a4) isa quaternary;
@@ -422,4 +422,4 @@ Feature: Variable Role Resolution
     # For each pattern, we have one possible match per quaternary relation
     # and there are 16 quaternary relations in the knowledge graph (including both material and inferred)
     # giving an answer size of 209 * 16 = 3344
-    Then verify answer size: 3344
+    Then verify answer size is: 3344
