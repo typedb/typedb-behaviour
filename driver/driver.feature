@@ -281,7 +281,7 @@ Feature: TypeDB Driver
 #    Then transaction is open: false
 
 
-#  # TODO: Check options setting and retrieval
+  # TODO: Check options setting and retrieval
 
 
   # TODO: Fix on_close
@@ -338,7 +338,7 @@ Feature: TypeDB Driver
     Then transaction commits; fails
 
 
-  # TODO: check errors on transaction commits with callbacks set!
+  # TODO: check errors on transaction commits with callbacks (on_close) set!
 
   ###########
   # QUERIES #
@@ -350,9 +350,9 @@ Feature: TypeDB Driver
       """
       define entity person;
       """
-    Then answer type is ok
-    Then answer type is not concept rows
-    Then answer type is not concept trees
+    Then answer type is: ok
+    Then answer type is not: concept rows
+    Then answer type is not: concept trees
     Then result is a successful ok
     Then transaction commits
 
@@ -368,9 +368,9 @@ Feature: TypeDB Driver
       """
       match entity $p;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is read
     Then answer query type is not schema
     Then answer query type is not write
@@ -384,9 +384,9 @@ Feature: TypeDB Driver
       """
       match entity $p; attribute $n;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is read
     Then answer query type is not schema
     Then answer query type is not write
@@ -407,9 +407,9 @@ Feature: TypeDB Driver
       """
       match entity $p; attribute $n;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is read
     Then answer query type is not schema
     Then answer query type is not write
@@ -432,9 +432,9 @@ Feature: TypeDB Driver
       """
       match entity $p; attribute $n;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is read
     Then answer query type is not schema
     Then answer query type is not write
@@ -455,9 +455,9 @@ Feature: TypeDB Driver
       """
       match $p isa person;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer size: 0
 
     When transaction closes
@@ -466,9 +466,9 @@ Feature: TypeDB Driver
       """
       insert $p isa person, has name "John";
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is write
     Then answer query type is not schema
     Then answer query type is not read
@@ -482,9 +482,9 @@ Feature: TypeDB Driver
       """
       match $p isa person, has name $a;
       """
-    Then answer type is concept rows
-    Then answer type is not ok
-    Then answer type is not concept trees
+    Then answer type is: concept rows
+    Then answer type is not: ok
+    Then answer type is not: concept trees
     Then answer query type is read
     Then answer query type is not schema
     Then answer query type is not write
@@ -495,9 +495,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
     Then answer get row(0) get attribute(a) get type get label: name
-    Then answer get row(0) get attribute(a) get string value: "John"
+    Then answer get row(0) get attribute(a) get value is: "John"
     Then answer get row(0) get attribute by index of variable(a) get type get label: name
-    Then answer get row(0) get attribute by index of variable(a) get string value: "John"
+    Then answer get row(0) get attribute by index of variable(a) get value is: "John"
     Then transaction commits
 
 
@@ -550,7 +550,7 @@ Feature: TypeDB Driver
       """
       match entity $p;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer size: 1
 
     Then answer get row(0) get variable(p) is type: true
@@ -580,7 +580,7 @@ Feature: TypeDB Driver
       """
       match relation $p;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -611,7 +611,7 @@ Feature: TypeDB Driver
       """
       match $_ sub parentship, relates $p;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -641,7 +641,7 @@ Feature: TypeDB Driver
       """
       match attribute $a;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -685,7 +685,7 @@ Feature: TypeDB Driver
       """
       match attribute $a;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -755,7 +755,7 @@ Feature: TypeDB Driver
       """
       match attribute $a;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -805,7 +805,7 @@ Feature: TypeDB Driver
       """
       match $p isa person;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -847,7 +847,7 @@ Feature: TypeDB Driver
       """
       match $p isa parentship;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -889,7 +889,7 @@ Feature: TypeDB Driver
       """
       match $_ isa person, has $a;
       """
-    Then answer type is concept rows
+    Then answer type is: concept rows
     Then answer query type is read
     Then answer size: 1
 
@@ -924,24 +924,27 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) is datetime-tz: <is-datetime-tz>
     Then answer get row(0) get attribute(a) is duration: <is-duration>
     Then answer get row(0) get attribute(a) is struct: false
-    Then answer get row(0) get attribute(a) get <value-type> value: <value>
-#    Then answer get row(0) get attribute(a) as <value-type>: <value>
+    Then answer get row(0) get attribute(a) get value is: <value>
+    Then answer get row(0) get attribute(a) as <value-type> is: <value>
+    Then answer get row(0) get attribute(a) get value is not: <not-value>
+    Then answer get row(0) get attribute(a) as <value-type> is not: <not-value>
     Examples:
-      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | value-type  | value                                       | not-value                                    | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | boolean     | true                                        | false                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+      | long        | 12345090                                    | 0                                            | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                  | 2.01234568                                   | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890                    | 1234567890.001234567890                      | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                   | "John Baba Yaga Wick"                        | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                  | 2025-09-20                                   | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                         | 1999-02-26T12:15:00                          | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001               | 1999-02-26T12:15:05.00000001                 | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | 2024-06-20T15:40:05 America/New_York         | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | 2024-09-20T16:40:05.000000001 Europe/Belfast | false      | false   | false     | false      | false     | false   | false       | true           | false       |
       # TODO: Add datetime-tz with offsets
-      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | P1Y10M7DT15H44M5.0394892S                    | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                        | P67W                                         | false      | false   | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -991,7 +994,7 @@ Feature: TypeDB Driver
 #      """
 #      match $_ isa director, has $f;
 #      """
-#    Then answer type is concept rows
+#    Then answer type is: concept rows
 #    Then answer query type is read
 #    Then answer size: 1
 #
@@ -1026,8 +1029,10 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get attribute(f) is datetime-tz: false
 #    Then answer get row(0) get attribute(f) is duration: false
 #    Then answer get row(0) get attribute(f) is struct: true
-#    Then answer get row(0) get attribute(f) get <value-type> value: <value>
-#    Then answer get row(0) get attribute(a) as <value-type>: <value>
+#    Then answer get row(0) get attribute(f) get value is: <value>
+#    Then answer get row(0) get attribute(f) as <value-type> is: <value>
+#    Then answer get row(0) get attribute(f) get value is not: <value>
+#    Then answer get row(0) get attribute(f) as <value-type> is not: <not-value>
 
 
   # TODO: Implement value variables
@@ -1048,7 +1053,7 @@ Feature: TypeDB Driver
 #      match $_ isa person, has typed $v;
 #      $value = $v;
 #      """
-#    Then answer type is concept rows
+#    Then answer type is: concept rows
 #    Then answer query type is read
 #    Then answer size: 1
 #
@@ -1074,25 +1079,28 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(value) is datetime: <is-datetime>
 #    Then answer get row(0) get value(value) is datetime-tz: <is-datetime-tz>
 #    Then answer get row(0) get value(value) is duration: <is-duration>
-#    Then answer get row(0) get value(value) is struct: true
-#    Then answer get row(0) get value(value) get: <value>
-#    Then answer get row(0) get value(value) as <value-type>: <value>
+#    Then answer get row(0) get value(value) is struct: false
+#    Then answer get row(0) get value(value) get is: <value>
+#    Then answer get row(0) get value(value) as <value-type> is: <value>
+#    Then answer get row(0) get value(value) get is not: <not-value>
+#    Then answer get row(0) get value(value) as <value-type> is not: <not-value>
 #    Examples:
-#      | value-type  | value                                       | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-#      | boolean     | true                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-#      | long        | 12345090                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-#      | double      | 2.01234567                                  | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-#      | decimal     | 1234567890.0001234567890                    | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | decimal     | 0.000000000000000001                        | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | string      | "John \"Baba Yaga\" Wick"                   | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-#      | date        | 2024-09-20                                  | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05                         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05.000000001               | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | value-type  | value                                       | not-value                                    | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+#      | boolean     | true                                        | false                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+#      | long        | 12345090                                    | 0                                            | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+#      | double      | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+#      | double      | 2.01234567                                  | 2.01234568                                   | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+#      | decimal     | 1234567890.0001234567890                    | 1234567890.001234567890                      | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | decimal     | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | string      | "John \"Baba Yaga\" Wick"                   | "John Baba Yaga Wick"                        | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+#      | date        | 2024-09-20                                  | 2025-09-20                                   | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05                         | 1999-02-26T12:15:00                          | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05.000000001               | 1999-02-26T12:15:05.00000001                 | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | 2024-06-20T15:40:05 America/New_York         | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | 2024-09-20T16:40:05.000000001 Europe/Belfast | false      | false   | false     | false      | false     | false   | false       | true           | false       |
 #      # TODO: Add datetime-tz with offsets
-#      | duration    | P1Y10M7DT15H44M5.00394892S                  | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-#      | duration    | P66W                                        | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+#      | duration    | P1Y10M7DT15H44M5.00394892S                  | P1Y10M7DT15H44M5.0394892S                    | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+#      | duration    | P66W                                        | P67W                                         | false      | false   | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1142,7 +1150,7 @@ Feature: TypeDB Driver
 #      """
 #      match $_ isa director, has film $v;
 #      """
-#    Then answer type is concept rows
+#    Then answer type is: concept rows
 #    Then answer query type is read
 #    Then answer size: 1
 #
@@ -1169,8 +1177,87 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(v) is datetime-tz: <is-datetime-tz>
 #    Then answer get row(0) get value(v) is duration: <is-duration>
 #    Then answer get row(0) get value(v) is struct: <is-struct>
-#    Then answer get row(0) get value(v) get: <value>
-#    Then answer get row(0) get value(v) as <value-type>: <value>
+#    Then answer get row(0) get value(v) get is: <value>
+#    Then answer get row(0) get value(v) as <value-type> is: <value>
+#    Then answer get row(0) get value(v) get is not: <not-value>
+#    Then answer get row(0) get value(v) as <value-type> is not: <not-value>
 
 
-  # TODO: Add tests with time-zones set through "set time-zone" steps for datetime and datetime-tz
+  Scenario: Driver processes datetime values in different user time-zones identically
+    Given set time-zone: Asia/Calcutta
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute dt @independent, value datetime;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert $dt 2023-05-01T00:00:00 isa dt;
+      """
+    Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00
+    Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00
+
+    When get answers of typeql read query
+      """
+      match $x isa dt;
+      """
+    Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00
+    When transaction commits
+
+    When connection closes
+    When set time-zone: America/Chicago
+    When connection opens with default authentication
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa dt;
+      """
+    Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00
+
+
+  Scenario: Driver processes datetime-tz values in different user time-zones identically
+    Given set time-zone: Asia/Calcutta
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute dt @independent, value datetime-tz;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert $dt 2023-05-01T00:00:00 Asia/Calcutta isa dt;
+      """
+    Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
+    Then answer get row(0) get attribute(dt) get value is not: 2023-05-01T00:00:00 America/Chicago
+    Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 America/Chicago
+
+    When get answers of typeql read query
+      """
+      match $x isa dt;
+      """
+    Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 America/Chicago
+    When transaction commits
+
+    When connection closes
+    When set time-zone: America/Chicago
+    When connection opens with default authentication
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa dt;
+      """
+    Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 America/Chicago
