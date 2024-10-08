@@ -118,7 +118,7 @@ Feature: Connection Database
     When connection create database: alice
     Then connection has database: alice
 
-  Scenario: delete a nonexistent database throws an error
+  Scenario: delete a nonexistent database fails
     When connection delete database: typedb; fails
 
   Scenario: database cannot be deleted if it has open transactions
