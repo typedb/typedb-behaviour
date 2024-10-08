@@ -64,8 +64,9 @@ Feature: Connection Transaction
     Given connection open read transaction for database: typedb
     Then transaction rollbacks; fails
 
+    # TODO: Why @ignore?
   @ignore-typedb
-  Scenario: one database, many <type> transactions
+  Scenario Outline: one database, many <type> transactions
     When connection create database: typedb
     When connection open transactions for database: typedb, of type:
       | <type> |
@@ -100,6 +101,7 @@ Feature: Connection Transaction
       | write  |
       | schema |
 
+    # TODO: Why @ignore?
   @ignore-typedb
   Scenario: one database, many transactions of different types
     When connection create database: typedb
@@ -339,20 +341,19 @@ Feature: Connection Transaction
 #      """
 #    Then answer size is: 0
 
-  @ignore-typedb
-  Scenario: transaction timeouts are configurable
-    When connection create database: typedb
-    Then set session option session-idle-timeout-millis to: 20000
-    Given connection open schema session for database: typedb
-    Given set transaction option transaction-timeout-millis to: 10000
-    When session opens transaction of type: write
-    Then wait 8 seconds
-    Then typeql schema query
-      """
-      define entity person;
-      """
-    Then wait 4 seconds
-    Then typeql schema query; fails
-      """
-      define entity person;
-      """
+  # TODO: Uncomment when options are implemented. Decide if it needs the following tag.
+#  @ignore-typedb
+#  Scenario: transaction timeouts are configurable
+#    Given connection create database: typedb
+#    When set transaction option transaction-timeout-millis to: 10000
+#    When connection open schema transaction for database: typedb
+#    Then wait 8 seconds
+#    Then typeql schema query
+#      """
+#      define entity person;
+#      """
+#    Then wait 4 seconds
+#    Then typeql schema query; fails
+#      """
+#      define entity person;
+#      """
