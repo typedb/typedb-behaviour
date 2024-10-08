@@ -373,10 +373,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
     Then answer column names are:
       | p |
     Then answer get row(0) get entity type(p) get label: person
@@ -389,10 +389,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
     Then answer column names are:
       | p |
       | n |
@@ -412,10 +412,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
-    Then answer size: 2
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 2
     Then answer column names are:
       | p |
       | n |
@@ -437,10 +437,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
-    Then answer size: 2
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 2
     Then answer column names are:
       | p |
       | n |
@@ -460,7 +460,7 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer size: 0
+    Then answer size is: 0
 
     When transaction closes
     When connection open write transaction for database: typedb
@@ -471,10 +471,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is write
-    Then answer query type is not schema
-    Then answer query type is not read
-    Then answer size: 1
+    Then answer query type is: write
+    Then answer query type is not: schema
+    Then answer query type is not: read
+    Then answer size is: 1
     Then answer column names are:
       | p |
     Then answer get row(0) get entity(p) get type get label: person
@@ -487,10 +487,10 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
-    Then answer query type is read
-    Then answer query type is not schema
-    Then answer query type is not write
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
     Then answer column names are:
       | p |
       | a |
@@ -553,7 +553,7 @@ Feature: TypeDB Driver
       match entity $p;
       """
     Then answer type is: concept rows
-    Then answer size: 1
+    Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
     Then answer get row(0) get variable(p) is thing type: true
@@ -583,8 +583,8 @@ Feature: TypeDB Driver
       match relation $p;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
     Then answer get row(0) get variable(p) is thing type: true
@@ -614,8 +614,8 @@ Feature: TypeDB Driver
       match $_ sub parentship, relates $p;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
     Then answer get row(0) get variable(p) is thing type: false
@@ -644,8 +644,8 @@ Feature: TypeDB Driver
       match attribute $a;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
     Then answer get row(0) get variable(a) is thing type: true
@@ -688,8 +688,8 @@ Feature: TypeDB Driver
       match attribute $a;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
     Then answer get row(0) get variable(a) is thing type: true
@@ -758,8 +758,8 @@ Feature: TypeDB Driver
       match attribute $a;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
     Then answer get row(0) get variable(a) is thing type: true
@@ -808,8 +808,8 @@ Feature: TypeDB Driver
       match $p isa person;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: false
     Then answer get row(0) get variable(p) is thing type: false
@@ -850,8 +850,8 @@ Feature: TypeDB Driver
       match $p isa parentship;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: false
     Then answer get row(0) get variable(p) is thing type: false
@@ -892,8 +892,8 @@ Feature: TypeDB Driver
       match $_ isa person, has $a;
       """
     Then answer type is: concept rows
-    Then answer query type is read
-    Then answer size: 1
+    Then answer query type is: read
+    Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: false
     Then answer get row(0) get variable(a) is thing type: false
@@ -997,8 +997,8 @@ Feature: TypeDB Driver
 #      match $_ isa director, has $f;
 #      """
 #    Then answer type is: concept rows
-#    Then answer query type is read
-#    Then answer size: 1
+#    Then answer query type is: read
+#    Then answer size is: 1
 #
 #    Then answer get row(0) get variable(f) is type: false
 #    Then answer get row(0) get variable(f) is thing type: false
@@ -1056,8 +1056,8 @@ Feature: TypeDB Driver
 #      $value = $v;
 #      """
 #    Then answer type is: concept rows
-#    Then answer query type is read
-#    Then answer size: 1
+#    Then answer query type is: read
+#    Then answer size is: 1
 #
 #    Then answer get row(0) get variable(value) is type: false
 #    Then answer get row(0) get variable(value) is thing type: false
@@ -1153,8 +1153,8 @@ Feature: TypeDB Driver
 #      match $_ isa director, has film $v;
 #      """
 #    Then answer type is: concept rows
-#    Then answer query type is read
-#    Then answer size: 1
+#    Then answer query type is: read
+#    Then answer size is: 1
 #
 #    Then answer get row(0) get variable(v) is type: false
 #    Then answer get row(0) get variable(v) is thing type: false

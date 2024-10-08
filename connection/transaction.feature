@@ -314,7 +314,7 @@ Feature: Connection Transaction
 #      """
 #      match entity $x;
 #      """
-#    Then answer size: 0
+#    Then answer size is: 0
 
     # TODO: Fix rollback
 #  Scenario: commit after a write transaction rollback does nothing
@@ -337,7 +337,7 @@ Feature: Connection Transaction
 #      """
 #      match $x isa person;
 #      """
-#    Then answer size: 0
+#    Then answer size is: 0
 
   @ignore-typedb
   Scenario: transaction timeouts are configurable
