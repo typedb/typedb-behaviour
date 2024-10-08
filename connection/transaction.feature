@@ -64,7 +64,7 @@ Feature: Connection Transaction
     Given connection open read transaction for database: typedb
     Then transaction rollbacks; fails
 
-    # TODO: Why @ignore?
+    # TODO: Why @ignore? Right now it hangs on the server side.
   @ignore-typedb
   Scenario Outline: one database, many <type> transactions
     When connection create database: typedb
@@ -101,7 +101,7 @@ Feature: Connection Transaction
       | write  |
       | schema |
 
-    # TODO: Why @ignore?
+    # TODO: Why @ignore? Right now it hangs on the server side.
   @ignore-typedb
   Scenario: one database, many transactions of different types
     When connection create database: typedb
@@ -145,84 +145,86 @@ Feature: Connection Transaction
       | write  |
       | schema |
 
-    # TODO: Fix parallel execution for the server
-#  Scenario Outline: one database, many <type> transactions in parallel
-#    When connection create database: typedb
-#    When connection open transactions in parallel for database: typedb, of type:
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type:
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#    Examples:
-#      | type   |
-#      | read   |
-#      | write  |
-#      | schema |
+    # TODO: Why @ignore? Right now it hangs on the server side.
+  @ignore-typedb
+  Scenario Outline: one database, many <type> transactions in parallel
+    When connection create database: typedb
+    When connection open transactions in parallel for database: typedb, of type:
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+    Examples:
+      | type   |
+      | read   |
+      | write  |
+      | schema |
 
-    # TODO: Fix parallel execution for the server
-#  Scenario: one database, many transactions in parallel of different types
-#    When connection create database: typedb
-#    When connection open transactions in parallel for database: typedb, of type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
+    # TODO: Why @ignore? Right now it hangs on the server side.
+  @ignore-typedb
+  Scenario: one database, many transactions in parallel of different types
+    When connection create database: typedb
+    When connection open transactions in parallel for database: typedb, of type:
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
+      | read   |
+      | write  |
+      | schema |
 
   Scenario Outline: write in a <type> transaction fails
     Given connection create database: typedb
