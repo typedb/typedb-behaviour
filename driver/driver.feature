@@ -19,6 +19,8 @@ Feature: TypeDB Driver
     Given connection create database: typedb
     Given connection has database: typedb
 
+    # TODO: Add error strings checks
+
   ##############
   # CONNECTION #
   ##############
