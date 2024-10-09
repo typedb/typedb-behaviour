@@ -32,9 +32,9 @@ Feature: TypeDB Driver
 
   Scenario: Driver can connect after an unsuccessful connection attempt
     When connection closes
-    When connection opens with a wrong port; fails
+    When connection opens with a wrong port; fails with a message containing: "Can't assign requested address"
     Then connection is open: false
-    When connection opens with a wrong host; fails
+    When connection opens with a wrong host; fails with a message containing: "failed to lookup address information"
     Then connection is open: false
     When connection opens with default authentication
     Then connection is open: true
@@ -70,7 +70,7 @@ Feature: TypeDB Driver
 
   Scenario: Driver cannot delete non-existing database
     Given connection does not have database: does-not-exist
-    Then connection delete database: does-not-exist; fails
+    Then connection delete database: does-not-exist; fails with a message containing: "The database 'does-not-exist' has been deleted and no further operation is allowed"
     Then connection does not have database: does-not-exist
 
   Scenario: Driver can create and delete databases
@@ -206,6 +206,11 @@ Feature: TypeDB Driver
 #    attribute age, value long @range(0..);
 #    """
 
+
+  Scenario: Driver processes database management errors correctly
+    Given connection open schema transaction for database: typedb
+    Then connection create database with empty name; fails with a message containing: "Database name cannot be empty"
+
   ###############
   # TRANSACTION #
   ###############
@@ -213,11 +218,11 @@ Feature: TypeDB Driver
   Scenario: Driver cannot open transaction to non-existing database
     Given connection does not have database: does-not-exist
     Then transaction is open: false
-    Then connection open schema transaction for database: does-not-exist; fails
+    Then connection open schema transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
     Then transaction is open: false
-    Then connection open write transaction for database: does-not-exist; fails
+    Then connection open write transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
     Then transaction is open: false
-    Then connection open read transaction for database: does-not-exist; fails
+    Then connection open read transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
     Then transaction is open: false
 
 
@@ -258,7 +263,7 @@ Feature: TypeDB Driver
     When connection open read transaction for database: typedb
     Then transaction has type: read
     Then transaction is open: true
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "Read transactions cannot be committed"
     Then transaction is open: false
 
 
@@ -279,7 +284,7 @@ Feature: TypeDB Driver
 #    When connection open read transaction for database: typedb
 #    Then transaction has type: read
 #    Then transaction is open: true
-#    Then transaction rollbacks; fails
+#    Then transaction rollbacks; fails with a message containing: "todo"
 #    Then transaction is open: false
 
 
@@ -337,7 +342,7 @@ Feature: TypeDB Driver
       """
       define attribute name;
       """
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "Schema transaction commit failed"
 
 
   # TODO: check errors on transaction commits with callbacks (on_close) set!
@@ -355,7 +360,7 @@ Feature: TypeDB Driver
     Then answer type is: ok
     Then answer type is not: concept rows
     Then answer type is not: concept trees
-    Then result is a successful ok
+    Then answer unwraps as ok
     Then transaction commits
 
 
@@ -373,6 +378,7 @@ Feature: TypeDB Driver
     Then answer type is: concept rows
     Then answer type is not: ok
     Then answer type is not: concept trees
+    Then answer unwraps as concept rows
     Then answer query type is: read
     Then answer query type is not: schema
     Then answer query type is not: write
@@ -513,26 +519,26 @@ Feature: TypeDB Driver
 
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "Query Error"
       """
       """
-    Then typeql schema query; fails
-      """
-
-      """
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "Query Error"
       """
 
       """
-    Then typeql read query; fails
+    Then typeql schema query; fails with a message containing: "Query Error"
+      """
+
+      """
+    Then typeql read query; fails with a message containing: "Error during query type inference"
       """
       match relation $r;
       """
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "Query parsing failed"
       """
       define entity entity;
       """
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "Failed to execute define query"
       """
       define attribute name owns name;
       """
@@ -567,6 +573,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
 
+    Then answer get row(0) get variable(p) as entity type
     Then answer get row(0) get type(p) get label: person
     Then answer get row(0) get thing type(p) get label: person
     Then answer get row(0) get entity type(p) get label: person
@@ -598,6 +605,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
 
+    Then answer get row(0) get variable(p) as relation type
     Then answer get row(0) get type(p) get label: parentship
     Then answer get row(0) get thing type(p) get label: parentship
     Then answer get row(0) get relation type(p) get label: parentship
@@ -629,6 +637,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
 
+    Then answer get row(0) get variable(p) as role type
     Then answer get row(0) get type(p) get label: parentship:parent
     Then answer get row(0) get role type(p) get label: parentship:parent
 
@@ -659,6 +668,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is relation: false
     Then answer get row(0) get variable(a) is attribute: false
 
+    Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: untyped
     Then answer get row(0) get thing type(a) get label: untyped
     Then answer get row(0) get attribute type(a) get label: untyped
@@ -703,6 +713,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is relation: false
     Then answer get row(0) get variable(a) is attribute: false
 
+    Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: typed
     Then answer get row(0) get thing type(a) get label: typed
     Then answer get row(0) get attribute type(a) get label: typed
@@ -773,6 +784,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is relation: false
     Then answer get row(0) get variable(a) is attribute: false
 
+    Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: film
     Then answer get row(0) get thing type(a) get label: film
     Then answer get row(0) get attribute type(a) get label: film
@@ -823,6 +835,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
 
+    Then answer get row(0) get variable(p) as entity
     Then answer get row(0) get thing(p) get type get label: person
     Then answer get row(0) get entity(p) get iid exists
     Then answer get row(0) get entity(p) get type get label: person
@@ -865,6 +878,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: true
     Then answer get row(0) get variable(p) is attribute: false
 
+    Then answer get row(0) get variable(p) as relation
     Then answer get row(0) get thing(p) get type get label: parentship
     Then answer get row(0) get relation(p) get iid exists
     Then answer get row(0) get relation(p) get type get label: parentship
@@ -907,6 +921,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is relation: false
     Then answer get row(0) get variable(a) is attribute: true
 
+    Then answer get row(0) get variable(a) as attribute
     Then answer get row(0) get thing(a) get type get label: typed
     Then answer get row(0) get attribute(a) get type get label: typed
     Then answer get row(0) get attribute(a) get type is attribute: false
@@ -916,6 +931,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get type is role type: false
 
     Then answer get row(0) get attribute(a) get type get value type: <value-type>
+    Then answer get row(0) get attribute(a) as <value-type>
     Then answer get row(0) get attribute(a) is boolean: <is-boolean>
     Then answer get row(0) get attribute(a) is long: <is-long>
     Then answer get row(0) get attribute(a) is double: <is-double>
@@ -1012,6 +1028,7 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(f) is relation: false
 #    Then answer get row(0) get variable(f) is attribute: true
 #
+#    Then answer get row(0) get variable(f) as attribute
 #    Then answer get row(0) get thing(f) get type get label: typed
 #    Then answer get row(0) get attribute(f) get type get label: typed
 #    Then answer get row(0) get attribute(f) get type is attribute: false
@@ -1071,6 +1088,7 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(value) is relation: false
 #    Then answer get row(0) get variable(value) is attribute: false
 #
+#    Then answer get row(0) get variable(value) as value
 #    Then answer get row(0) get value(value) get value type: <value-type>
 #    Then answer get row(0) get value(value) is boolean: <is-boolean>
 #    Then answer get row(0) get value(value) is long: <is-long>
@@ -1168,6 +1186,7 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(v) is relation: false
 #    Then answer get row(0) get variable(v) is attribute: false
 #
+#    Then answer get row(0) get variable(v) as value
 #    Then answer get row(0) get value(v) get value type: <value-type>
 #    Then answer get row(0) get value(v) is boolean: <is-boolean>
 #    Then answer get row(0) get value(v) is long: <is-long>
@@ -1183,6 +1202,50 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(v) as <value-type> is: <value>
 #    Then answer get row(0) get value(v) get is not: <not-value>
 #    Then answer get row(0) get value(v) as <value-type> is not: <not-value>
+
+
+  Scenario: Driver processes concept errors correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute age @independent, value long; attribute name @independent, value string;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $a 25 isa age;  $n "John" isa name;
+      """
+
+    When get answers of typeql read query
+      """
+      match $a isa age;
+      """
+    Then answer unwraps as ok; fails with a message containing: "Invalid query answer conversion"
+    Then answer unwraps as concept trees; fails with a message containing: "Invalid query answer conversion"
+    Then answer get row(0) get variable(unknown); fails with a message containing: "The variable 'unknown' does not exist"
+    Then answer get row(0) get variable(); fails with a message containing: "Variable name cannot be null or empty"
+    Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
+    Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
+    Then answer get row(0) get variable(a) as value; fails with a message containing: "Invalid concept conversion"
+    Then answer get row(0) get attribute(a) as boolean; fails with a message containing: "Invalid value casting to 'boolean'"
+    Then answer get row(0) get attribute(a) as double; fails with a message containing: "Invalid value casting to 'double'"
+    Then answer get row(0) get attribute(a) as decimal; fails with a message containing: "Invalid value casting to 'decimal'"
+    Then answer get row(0) get attribute(a) as string; fails with a message containing: "Invalid value casting to 'string'"
+    Then answer get row(0) get attribute(a) as date; fails with a message containing: "Invalid value casting to 'date'"
+    Then answer get row(0) get attribute(a) as datetime; fails with a message containing: "Invalid value casting to 'datetime'"
+    Then answer get row(0) get attribute(a) as datetime-tz; fails with a message containing: "Invalid value casting to 'datetime-tz'"
+    Then answer get row(0) get attribute(a) as duration; fails with a message containing: "Invalid value casting to 'duration'"
+    Then answer get row(0) get attribute(a) as struct; fails with a message containing: "Invalid value casting to 'struct'"
+
+    When get answers of typeql read query
+      """
+      match $n isa name;
+      """
+    Then answer unwraps as ok; fails with a message containing: "Invalid query answer conversion"
+    Then answer unwraps as concept trees; fails with a message containing: "Invalid query answer conversion"
+    Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
+    Then answer get row(0) get attribute(n) as long; fails with a message containing: "Invalid value casting to 'long'"
 
 
   Scenario: Driver processes datetime values in different user time-zones identically
