@@ -32,7 +32,7 @@ Feature: TypeDB Driver
 
   Scenario: Driver can connect after an unsuccessful connection attempt
     When connection closes
-    When connection opens with a wrong port; fails with a message containing: "Can't assign requested address"
+    When connection opens with a wrong port; fails with a message containing: "connect error"
     Then connection is open: false
     When connection opens with a wrong host; fails with a message containing: "failed to lookup address information"
     Then connection is open: false
