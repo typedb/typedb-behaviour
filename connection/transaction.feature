@@ -96,11 +96,11 @@ Feature: Connection Transaction
     Examples:
       | type   |
       | read   |
-    # TODO: Fix write and schema
+# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
 #      | write  |
 #      | schema |
 
-  # TODO: Fix multiple write and schema transactions
+# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
 #  Scenario: one database, many transactions of different types
 #    When connection create database: typedb
 #    When connection open transactions for database: typedb, of type:
@@ -175,12 +175,12 @@ Feature: Connection Transaction
     Examples:
       | type   |
       | read   |
-    # TODO: Fix write and schema
+# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
 #      | write  |
 #      | schema |
 
 
-  # TODO: Fix multiple write and schema transactions
+# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
 #  Scenario: one database, many transactions in parallel of different types
 #    When connection create database: typedb
 #    When connection open transactions in parallel for database: typedb, of type:
