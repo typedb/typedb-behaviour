@@ -7,12 +7,12 @@ Feature: TypeQL Rule Validation
   Background: Initialise a session and transaction for each scenario
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
     Given connection create database: typedb
     Given connection open schema session for database: typedb
     Given session opens transaction of type: write
-    Given typeql define
+    Given typeql schema query
       """
       define
       person sub entity,
@@ -33,7 +33,7 @@ Feature: TypeQL Rule Validation
   # Note: These tests verify only the ability to create rules, and are not concerned with their application.
 
   Scenario: a rule can infer both an attribute and its ownership
-    Given typeql define
+    Given typeql schema query
       """
       define
       
@@ -48,7 +48,7 @@ Feature: TypeQL Rule Validation
 
   # Keys are validated at commit time, so integrity will not be harmed by writing one in a rule.
   Scenario: a rule can infer a 'key'
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule john-smiths-email: when {
@@ -61,7 +61,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has no 'when' clause, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
 
@@ -73,7 +73,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has no 'then' clause, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
 
@@ -84,7 +84,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule's 'when' clause is empty, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
 
@@ -97,7 +97,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule's 'then' clause is empty, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
 
@@ -109,7 +109,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can have negation in its 'when' clause
-    Given typeql define
+    Given typeql schema query
       """
       define
       only-child sub attribute, value boolean;
@@ -128,7 +128,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has a negation block whose pattern variables are all unbound outside it, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       has-robert sub attribute, value boolean;
@@ -145,7 +145,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has nested negation, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule unemployed-robert-maybe-doesnt-not-have-nickname-bob: when {
@@ -163,7 +163,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule may have multiple negations
-    Then typeql define
+    Then typeql schema query
       """
       define
 
@@ -184,7 +184,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule may have a conjunction in a negation
-    Then typeql define
+    Then typeql schema query
       """
       define
 
@@ -204,7 +204,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has two conclusions, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule robert-has-nicknames-bob-and-bobby: when {
@@ -217,7 +217,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can use conjunction in its 'when' clause
-    Given typeql define
+    Given typeql schema query
       """
       define
       person plays both-named-robert:named-robert;
@@ -233,7 +233,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can use disjunction in its 'when' clause
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule sophie-and-fiona-have-nickname-fi: when {
@@ -247,7 +247,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can use a negated disjunction in its 'when' clause
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule those-who-arent-sophie-and-fiona-have-nickname-notfi: when {
@@ -261,7 +261,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule contains an unbound variable in the 'then' clause, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule i-did-a-bad-typo: when {
@@ -273,7 +273,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: the variables in the conclusion of a rule must be bound in the trunk of its 'when' clause
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       person plays both-named-robert:named-robert;
@@ -288,7 +288,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: Relation variable in 'then' must not be explicit
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       person sub entity;
@@ -307,7 +307,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has an undefined attribute set in its 'then' clause, an error is thrown
-    Given typeql define; throws exception
+    Given typeql schema query; throws exception
       """
       define
       rule boudicca-is-1960-years-old: when {
@@ -319,7 +319,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule attaches an attribute to a type that can't have that attribute, an error is thrown
-    Given typeql define; throws exception
+    Given typeql schema query; throws exception
       """
       define
       age sub attribute, value long;
@@ -332,7 +332,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule creates an attribute value that doesn't match the attribute's type, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule may-has-nickname-5: when {
@@ -344,7 +344,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can materialise a long attribute for a double attribute type
-    Then typeql define
+    Then typeql schema query
       """
       define
       person owns age;
@@ -359,7 +359,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule creates double attribute for a long attribute type, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       person owns weight;
@@ -374,7 +374,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule infers a relation whose type doesn't exist, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule bonnie-and-clyde-are-partners-in-crime: when {
@@ -387,7 +387,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule infers a relation with an incorrect roleplayer, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       partners-in-crime sub relation, relates criminal, relates sidekick;
@@ -402,7 +402,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule infers an abstract relation, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       partners-in-crime sub relation, abstract, relates criminal, relates sidekick;
@@ -417,7 +417,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule infers an abstract attribute value, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       number-of-devices sub attribute, value long, abstract;
@@ -431,7 +431,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when defining a rule using an aliased role type, an error is thrown
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       part-time-employment sub employment;
@@ -446,7 +446,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when defining a rule to generate new entities from existing ones, an error is thrown
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -454,7 +454,7 @@ Feature: TypeQL Rule Validation
       derivedEntity sub entity;
       """
 
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule rule-1: when {
@@ -466,7 +466,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when defining a rule to generate new entities from existing relations, an error is thrown
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -483,7 +483,7 @@ Feature: TypeQL Rule Validation
           relates role2;
       """
 
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule rule-1: when {
@@ -496,7 +496,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when defining a rule to generate new relations from existing ones, an error is thrown
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -509,7 +509,7 @@ Feature: TypeQL Rule Validation
           relates role2;
       """
 
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule rule-1: when {
@@ -522,13 +522,13 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when defining a rule to infer an additional type that is missing a necessary attribute, an error is thrown
-    Given typeql define
+    Given typeql schema query
       """
       define
       dog sub entity;
       """
 
-    Then typeql define; throws exception
+    Then typeql schema query; throws exception
       """
       define
       rule romeo-is-a-dog: when {
@@ -541,7 +541,7 @@ Feature: TypeQL Rule Validation
 
   Scenario: when a rule negates its conclusion in the 'when', causing a (self-)loop, an error is thrown
   Ensure rule stratification is possible
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule there-are-no-unemployed: when {
@@ -557,7 +557,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: When multiple rules result in a loop with negation, an error is thrown
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule scholar-is-employee: when {
@@ -585,7 +585,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: When rules are mutually recursive via negated predicates (strictly negative loop), an error is thrown
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule employed-nonscholar-is-apprentice: when {
@@ -605,7 +605,7 @@ Feature: TypeQL Rule Validation
     Then transaction commits; throws exception
 
   Scenario: When any branch in a disjunction creates a negative loop, an error is thrown
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule employed-nonscholar-whois-apprentice: when {
@@ -623,7 +623,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: When rule creates a loop with negation within a type hierarchy via specialisation, an error is thrown
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule unemployed-are-selfemployed: when {
@@ -637,7 +637,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule can insert a generalisation of a negated type
-    Then typeql define
+    Then typeql schema query
       """
       define
       rule nonselfemployed-are-employed: when {
@@ -651,7 +651,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: the rule body can contradict itself
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule crazy-rule: when {
@@ -665,7 +665,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule negates itself in the rule body, the rule commits even if that cycle involves a then clause in another rule
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -687,7 +687,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: rules with cyclic inferences are allowed as long as there is no negation
-    When typeql define
+    When typeql schema query
       """
       define
 
@@ -710,7 +710,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has a conjunction as the conclusion, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
     """
     define
 
@@ -726,7 +726,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has a down-cast in a rule conclusion, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
       """
       define
 
@@ -743,7 +743,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: when a rule has a side-cast in a rule, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
       """
       define
 
@@ -767,7 +767,7 @@ Feature: TypeQL Rule Validation
 
   Scenario: when a rule adds a role to an existing relation, an error is thrown
   Checks adding new roles to existing relationships is not allowed
-    When typeql define; throws exception
+    When typeql schema query; throws exception
       """
       define
 
@@ -782,7 +782,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: if a rule's body uses a type that doesn't exist, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
       """
       define
 
@@ -796,7 +796,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: if a rule uses a missing type within a negation, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
       """
       define
 
@@ -811,7 +811,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule may infer a named variable for an attribute if the attribute type is left out
-    When typeql define
+    When typeql schema query
       """
       define
 
@@ -828,7 +828,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: a rule may infer an attribute type when the value is concrete
-    When typeql define
+    When typeql schema query
     """
     define
 
@@ -844,7 +844,7 @@ Feature: TypeQL Rule Validation
 
 
   Scenario: if a rule infers both an attribute type and a named variable, an error is thrown
-    When typeql define; throws exception
+    When typeql schema query; throws exception
     """
     define
 

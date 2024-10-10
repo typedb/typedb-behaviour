@@ -8,11 +8,11 @@ Feature: TypeQL Define Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person plays employment:employee, plays income:earner, owns name, owns email @key, owns phone-nr @unique;
@@ -35,7 +35,7 @@ Feature: TypeQL Define Query
   ################
 
   Scenario: new entity types can be defined
-    When typeql define
+    When typeql schema query
       """
       define entity dog;
       """
@@ -52,7 +52,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
-    When typeql define
+    When typeql schema query
       """
       define entity child sub person;
       """
@@ -70,49 +70,49 @@ Feature: TypeQL Define Query
 
 
   Scenario: when defining that a type owns a non-existent thing, an error is thrown
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity book owns pages;
       """
 
 
   Scenario: types cannot own entity types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity house owns person;
       """
 
 
   Scenario: types cannot own relation types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity company owns employment;
       """
 
 
   Scenario: when defining that a type plays a non-existent role, an error is thrown
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity house plays constructed:something;
       """
 
 
   Scenario: types cannot play entity types
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define entity parrot plays person;
       """
 
 
   Scenario: types can not own entity types as keys
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity passport owns person @key;
       """
 
 
   Scenario: a newly defined entity subtype inherits playable roles from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -130,7 +130,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined entity subtype inherits playable roles from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity athlete sub person;
@@ -153,7 +153,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -171,7 +171,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined entity subtype inherits attribute ownerships from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity athlete sub person;
@@ -194,7 +194,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined entity subtype inherits keys from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -212,7 +212,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined entity subtype inherits keys from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity athlete sub person;
@@ -235,7 +235,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a playable role is idempotent
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity house plays home-ownership:home, plays home-ownership:home, plays home-ownership:home;
@@ -255,7 +255,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute ownership is idempotent
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute price value double;
@@ -274,7 +274,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a key ownership is idempotent
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute address value string;
@@ -293,42 +293,42 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a type without a kind throws
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define flying-spaghetti-monster;
       """
 
 
   Scenario: a type definition must specify a kind
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define column;
       """
 
 
   Scenario: an entity type can not have a value type defined
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity cream value double;
       """
 
 
   Scenario: defining a thing with 'isa' is not possible in a 'define' query
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define $p isa person;
       """
 
 
   Scenario: adding an attribute instance to a thing is not possible in a 'define' query
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define $p has name "Loch Ness Monster";
       """
 
 
   Scenario: writing a variable in a 'define' is not allowed
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define entity $x;
       """
@@ -339,7 +339,7 @@ Feature: TypeQL Define Query
   ##################
 
   Scenario: new relation types can be defined
-    When typeql define
+    When typeql schema query
       """
       define relation pet-ownership relates pet-owner, relates owned-pet;
       """
@@ -356,7 +356,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
-    When typeql define
+    When typeql schema query
       """
       define relation fun-employment sub employment, relates employee-having-fun as employee;
       """
@@ -374,7 +374,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
-    Then typeql define
+    Then typeql schema query
       """
       define relation useless-relation;
       """
@@ -382,7 +382,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits roles from its supertype
-    Given typeql define
+    Given typeql schema query
       """
       define relation part-time-employment sub employment;
       """
@@ -399,7 +399,7 @@ Feature: TypeQL Define Query
       | label:part-time-employment |
 
   Scenario: a newly defined relation subtype inherits roles from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation part-time-employment sub employment, relates shift;
@@ -435,7 +435,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a relation type's role can be specialised in a child relation type using 'as'
-    When typeql define
+    When typeql schema query
       """
       define
         relation parenthood relates parent, relates child;
@@ -467,7 +467,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when a relation type's role is specialised, it creates a sub-role of the parent role type
-    When typeql define
+    When typeql schema query
       """
       define
       relation parenthood relates parent, relates child;
@@ -490,7 +490,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a specialised role is no longer associated with the relation type that specialises it
-    Given typeql define
+    Given typeql schema query
       """
       define relation part-time-employment sub employment, relates part-timer as employee;
       """
@@ -507,7 +507,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation close-friendship relates close-friend as friend;
@@ -515,7 +515,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: relation subtypes can have roles that their supertypes don't have
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity plane plays pilot-employment:preferred-plane;
@@ -535,7 +535,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: types cannot specialise plays in any <mode>
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
         define
         relation locates relates located;
@@ -551,7 +551,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits playable roles from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define relation contract-employment sub employment, relates contractor as employee;
       """
@@ -569,7 +569,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits playable roles from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation transport-employment sub employment, relates transport-worker as employee;
@@ -592,7 +592,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: inherited role types cannot be played via role type aliases
-    Given typeql define; fails
+    Given typeql schema query; fails
       """
       define
       relation part-time-employment sub employment;
@@ -601,7 +601,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define relation contract-employment sub employment, relates contractor as employee;
       """
@@ -619,7 +619,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits attribute ownerships from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation transport-employment sub employment, relates transport-worker as employee;
@@ -642,7 +642,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits keys from its parent type
-    Given typeql define
+    Given typeql schema query
       """
       define relation contract-employment sub employment, relates contractor as employee;
       """
@@ -660,7 +660,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined relation subtype inherits keys from all of its supertypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation transport-employment sub employment, relates transport-worker as employee;
@@ -683,7 +683,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a relation type cannot be defined with no roleplayers even if it is marked as @abstract
-    When typeql define
+    When typeql schema query
       """
       define relation connection @abstract;
       """
@@ -691,7 +691,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract relation type can be defined with both abstract and concrete role types
-    When typeql define
+    When typeql schema query
       """
       define relation connection @abstract, relates from, relates to @abstract;
       """
@@ -708,7 +708,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete relation type can be defined with abstract role types
-    When typeql define
+    When typeql schema query
       """
       define relation connection relates from, relates to @abstract;
       """
@@ -716,7 +716,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when defining a relation type, duplicate 'relates' are idempotent
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation parenthood relates parent, relates child, relates child, relates parent, relates child;
@@ -735,7 +735,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: unrelated relations are allowed to have roles with the same name
-    When typeql define
+    When typeql schema query
       """
       define
       relation ownership relates owner;
@@ -759,7 +759,7 @@ Feature: TypeQL Define Query
   ###################
 
   Scenario Outline: a '<value-type>' attribute type can be defined
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <label> value <value-type>;
       """
@@ -789,7 +789,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute type throws if you don't specify a value type
-    When typeql define
+    When typeql schema query
       """
       define attribute colour;
       """
@@ -797,7 +797,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an abstract attribute type does not throw if you don't specify a value type
-    When typeql define
+    When typeql schema query
       """
       define attribute colour @abstract;
       """
@@ -805,14 +805,14 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute type throws if the specified value type is not a recognised value type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute colour value rgba;
       """
 
 
   Scenario: a new attribute type can be defined as a subtype of an abstract attribute type
-    When typeql define
+    When typeql schema query
       """
       define
       attribute code @abstract, value string ;
@@ -832,7 +832,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a newly defined attribute subtype inherits the value type of its parent
-    When typeql define
+    When typeql schema query
       """
       define
       attribute code @abstract, value string;
@@ -851,35 +851,35 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
-    When typeql define
+    When typeql schema query
       """
       define attribute name @abstract; entity person @abstract;
       """
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute code-name sub name, value long;
       """
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define attribute code-name sub name; attribute code-name-2 value long;
       """
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute code-name value long;
       """
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute code-name-2 sub name;
       """
@@ -887,7 +887,7 @@ Feature: TypeQL Define Query
   # TODO: re-enable when fixed (currently gives wrong answer)
   @ignore
   Scenario: a regex constraint can be defined on a 'string' attribute type
-    Given typeql define
+    Given typeql schema query
       """
       define attribute response @regex("^(yes|no|maybe)$"), value string;
       """
@@ -904,14 +904,14 @@ Feature: TypeQL Define Query
 
 
   Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute name-in-binary @regex("^(0|1)+$"), value long;
       """
 
 
   Scenario Outline: a type can own a '<value_type>' attribute type
-    When typeql define
+    When typeql schema query
       """
       define
       attribute <label> value <value_type>;
@@ -950,7 +950,7 @@ Feature: TypeQL Define Query
   # TODO: Add tests for structs and their fields
 
   Scenario Outline: can set annotation @<annotation> to entity types
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player @<annotation>;
@@ -962,7 +962,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to entity types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity player @<annotation>;
@@ -981,7 +981,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to relation types
-    Then typeql define
+    Then typeql schema query
       """
       define
       relation parentship @<annotation>, relates parent;
@@ -994,7 +994,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to relation types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation parentship @<annotation>, relates parent;
@@ -1012,7 +1012,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to attribute types
-    Then typeql define
+    Then typeql schema query
       """
       define
       attribute description @<annotation>, value string;
@@ -1025,7 +1025,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to attribute types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description @<annotation>, value string;
@@ -1043,7 +1043,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to relates/role types
-    Then typeql define
+    Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
@@ -1056,7 +1056,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to relates/role types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
@@ -1074,7 +1074,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to relates/role types lists
-    Then typeql define
+    Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
@@ -1088,7 +1088,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to relates/role types lists
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
@@ -1105,7 +1105,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to owns
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player owns name @<annotation>;
@@ -1122,7 +1122,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity player owns name @<annotation>;
@@ -1136,7 +1136,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns of attribute type of wrong <value-type>
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description<value-type>;
@@ -1206,7 +1206,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to owns
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description, value <value-type>;
@@ -1215,7 +1215,7 @@ Feature: TypeQL Define Query
 
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description, value <value-type>;
@@ -1224,7 +1224,7 @@ Feature: TypeQL Define Query
 
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description, value <value-type>;
@@ -1244,7 +1244,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to owns lists
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player owns name[] @<annotation>;
@@ -1262,7 +1262,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns lists
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity player owns name[] @<annotation>;
@@ -1275,7 +1275,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to plays
-    Then typeql define
+    Then typeql schema query
       """
       define
       entity player plays employment:employee @<annotation>;
@@ -1287,7 +1287,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to plays
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity player plays employment:employee @<annotation>;
@@ -1306,7 +1306,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: can set annotation @<annotation> to value types
-    Then typeql define
+    Then typeql schema query
       """
       define
       attribute description value string @<annotation>;
@@ -1320,7 +1320,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to wrong value type <value-type>
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description value <value-type> @<annotation>;
@@ -1382,7 +1382,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to value type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description value <value-type> @values(<arg0>, <arg1>, <arg0>);
@@ -1390,7 +1390,7 @@ Feature: TypeQL Define Query
 
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description value <value-type> @values(<arg0>, <arg0>, <arg1>);
@@ -1398,7 +1398,7 @@ Feature: TypeQL Define Query
 
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description value <value-type> @values(<arg1>, <arg0>, <arg0>);
@@ -1417,7 +1417,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to value types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       attribute description value string @<annotation>;
@@ -1434,7 +1434,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set annotation @<annotation> to subs
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity player sub person @<annotation>;
@@ -1457,42 +1457,42 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @abstract annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player @abstract(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       relation parentship @abstract(<args>), relates parent;
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @abstract(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       relation parentship relates parent @abstract(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @abstract(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player plays employment:employee @abstract(<args>);
@@ -1510,14 +1510,14 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @distinct annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       relation parentship relates parent[] @distinct(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name[] @distinct(<args>);
@@ -1535,7 +1535,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @independent annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @independent(<args>);
@@ -1553,7 +1553,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @unique annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @unique(<args>);
@@ -1571,7 +1571,7 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @key annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @key(<args>);
@@ -1589,21 +1589,21 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @card annotation with invalid arguments <args>
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       relation parentship relates parent @card(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @card(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player plays employment:employee @card(<args>);
@@ -1626,14 +1626,14 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @regex annotation with arguments
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @regex(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @regex(<args>);
@@ -1655,14 +1655,14 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @range annotation with invalid arguments <args>
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @range(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @range(<args>);
@@ -1678,14 +1678,14 @@ Feature: TypeQL Define Query
 
 
   Scenario Outline: cannot set @values annotation with invalid arguments <args>
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @values(<args>);
       """
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity player owns name @values(<args>);
@@ -1707,7 +1707,7 @@ Feature: TypeQL Define Query
   ##################
 
   Scenario: an abstract entity type can be defined
-    When typeql define
+    When typeql schema query
       """
       define entity animal @abstract;
       """
@@ -1724,7 +1724,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete entity type can be defined as a subtype of an abstract entity type
-    When typeql define
+    When typeql schema query
       """
       define
       entity animal @abstract;
@@ -1744,7 +1744,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract entity type can be defined as a subtype of another abstract entity type
-    When typeql define
+    When typeql schema query
       """
       define
       entity animal @abstract;
@@ -1764,7 +1764,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract entity type cannot be defined as a subtype of a concrete entity type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity exception;
@@ -1773,7 +1773,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract relation type can be defined
-    When typeql define
+    When typeql schema query
       """
       define relation membership @abstract, relates member;
       """
@@ -1790,7 +1790,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete relation type can be defined as a subtype of an abstract relation type
-    When typeql define
+    When typeql schema query
       """
       define
       relation membership @abstract, relates member;
@@ -1810,7 +1810,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract relation type can be defined as a subtype of another abstract relation type
-    When typeql define
+    When typeql schema query
       """
       define
       relation requirement @abstract, relates prerequisite, relates outcome;
@@ -1830,7 +1830,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract relation type cannot be defined as a subtype of a concrete relation type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation requirement relates prerequisite, relates outcome;
@@ -1839,7 +1839,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract attribute type can be defined
-    When typeql define
+    When typeql schema query
       """
       define attribute number-of-limbs @abstract, value long;
       """
@@ -1856,7 +1856,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete attribute type can be defined as a subtype of an abstract attribute type
-    When typeql define
+    When typeql schema query
       """
       define
       attribute number-of-limbs @abstract, value long;
@@ -1876,7 +1876,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an abstract attribute type can be defined as a subtype of another abstract attribute type
-    When typeql define
+    When typeql schema query
       """
       define
       attribute number-of-limbs @abstract, value long;
@@ -1896,13 +1896,13 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining attribute type hierarchies is idempotent
-    When typeql define
+    When typeql schema query
       """
       define attribute super-name @abstract, value string; attribute location-name sub super-name;
       """
     Then transaction commits
     Then connection open schema transaction for database: typedb
-    Then typeql define
+    Then typeql schema query
       """
       define attribute super-name @abstract, value string; attribute location-name sub super-name;
       """
@@ -1923,7 +1923,7 @@ Feature: TypeQL Define Query
   @ignore
   @ignore-typedb-driver-rust
   Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
-    Given typeql define; fails
+    Given typeql schema query; fails
       """
       define entity animal @abstract @abstract @abstract;
       """
@@ -1933,7 +1933,7 @@ Feature: TypeQL Define Query
   ##############
 
   Scenario: annotations can be added on subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity child sub person, owns school-id @unique;
@@ -1943,7 +1943,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: annotations are inherited
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -1969,19 +1969,19 @@ Feature: TypeQL Define Query
 
 
   Scenario: redefining inherited annotations throws for types, does not for capabilities
-    Then typeql define
+    Then typeql schema query
       """
       define entity child sub person, owns email @key;
       """
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then typeql define
+    Then typeql schema query
       """
       define entity child sub person, owns phone-nr @unique;
       """
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then typeql define
+    Then typeql schema query
       """
       define email @abstract; attribute working-email sub email, value string @regex("^.*@.*$");
       """
@@ -1989,7 +1989,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: type cannot specialise owns
-    Then typeql define; parsing fails
+    Then typeql schema query; parsing fails
       """
       define
       entity person @abstract;
@@ -2000,7 +2000,7 @@ Feature: TypeQL Define Query
 
     # TODO: Should be checked without specialise
 #  Scenario: annotations are inherited through specialises
-#    Given typeql define
+#    Given typeql schema query
 #      """
 #      define
 #      entity person @abstract;
@@ -2018,7 +2018,7 @@ Feature: TypeQL Define Query
 #      | t            | a              |
 #      | label:person | label:phone-nr |
 #      | label:child  | label:mobile   |
-#    Given typeql define
+#    Given typeql schema query
 #      """
 #      define
 #      entity child @abstract;
@@ -2044,7 +2044,7 @@ Feature: TypeQL Define Query
   ###################
 
   Scenario: an existing type can be repeatedly redefined, and it is a no-op
-    When typeql define
+    When typeql schema query
       """
       define
       entity person owns name;
@@ -2062,7 +2062,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an entity type cannot be changed into a relation type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation person relates body-part;
@@ -2071,21 +2071,21 @@ Feature: TypeQL Define Query
 
 
   Scenario: a relation type cannot be changed into an attribute type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute employment value string;
       """
 
 
   Scenario: an attribute type cannot be changed into an entity type
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity name;
       """
 
 
   Scenario: a new attribute ownership can be defined on an existing type
-    When typeql define
+    When typeql schema query
       """
       define employment owns name;
       """
@@ -2103,7 +2103,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a new playable role can be defined on an existing type
-    When typeql define
+    When typeql schema query
       """
       define employment plays employment:employee;
       """
@@ -2121,7 +2121,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a key on an existing ownership is possible if data already conforms to key requirements
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute barcode value string;
@@ -2141,7 +2141,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       product owns barcode @key;
@@ -2159,7 +2159,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a key on a type throws if existing instances don't have that key
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute barcode value string;
@@ -2177,7 +2177,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       product owns barcode @key;
@@ -2185,7 +2185,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a key on a type throws if there is a key collision between two existing instances
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute barcode value string;
@@ -2203,7 +2203,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       product owns barcode @key;
@@ -2211,7 +2211,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a new role can be defined on an existing relation type
-    When typeql define
+    When typeql schema query
       """
       define
       entity company plays employment:employer;
@@ -2230,13 +2230,13 @@ Feature: TypeQL Define Query
 
 
   Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute name value long;
       """
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define attribute name value string;
       """
@@ -2254,7 +2254,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define name value string @regex("^A.*$");
       """
@@ -2281,54 +2281,54 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define name @regex("^A.*$");
       """
 
 
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
-    Given typeql define
+    Given typeql schema query
       """
       define attribute house-number value long;
       """
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define house-number @regex("^A.*$");
       """
 
 
   Scenario: related roles cannot be added to existing entity types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define person relates employee;
       """
 
 
   Scenario: related roles cannot be added to existing attribute types
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define name relates employee;
       """
 
 
   Scenario: the value type of an existing attribute type is not modifiable through define
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define name value long;
       """
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define attribute name value long;
       """
 
   Scenario: an attribute ownership can be converted to a key ownership
-    When typeql define
+    When typeql schema query
       """
       define person owns name @key;
       """
@@ -2345,7 +2345,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an attribute key ownership can be converted to a regular ownership
-    When typeql define
+    When typeql schema query
       """
       define person owns email;
       """
@@ -2367,7 +2367,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
-    Given typeql define
+    Given typeql schema query
       """
       define person owns name @card(0..);
       """
@@ -2383,7 +2383,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define person owns name @unique;
       """
@@ -2408,14 +2408,14 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Given typeql define; fails
+    Given typeql schema query; fails
       """
       define person owns name @unique;
       """
 
 
   Scenario: ownership uniqueness can be removed
-    Given typeql define
+    Given typeql schema query
       """
       define person owns phone-nr;
       """
@@ -2442,7 +2442,7 @@ Feature: TypeQL Define Query
     Given transaction commits
     Given connection open schema transaction for database: typedb
     # TODO: Wait for undefine queries to undefine unique!
-    Given typeql define
+    Given typeql schema query
       """
       define person owns email @unique;
       """
@@ -2479,7 +2479,7 @@ Feature: TypeQL Define Query
     Given transaction commits
     Given connection open schema transaction for database: typedb
     # TODO: Wait for undefine queries to undefine unique!
-    Given typeql define
+    Given typeql schema query
       """
       define
       person owns phone-nr @key;
@@ -2502,7 +2502,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Then typeql redefine; fails
+    Then typeql schema query; fails
       """
       define
       person owns phone-nr @key;
@@ -2514,7 +2514,7 @@ Feature: TypeQL Define Query
   #############################
 
   Scenario: a concrete entity type can be converted to an abstract entity type
-    When typeql define
+    When typeql schema query
       """
       define person @abstract;
       """
@@ -2531,13 +2531,13 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete relation type can be converted to an abstract relation type
-    When typeql define
+    When typeql schema query
       """
       define relation friendship relates friend;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define friendship @abstract;
       """
@@ -2554,13 +2554,13 @@ Feature: TypeQL Define Query
 
 
   Scenario: a concrete attribute type can be converted to an abstract attribute type
-    When typeql define
+    When typeql schema query
       """
       define attribute age value long;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define age @abstract;
       """
@@ -2586,7 +2586,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define person @abstract;
       """
@@ -2604,7 +2604,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define employment @abstract;
       """
@@ -2621,7 +2621,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define name @abstract;
       """
@@ -2643,7 +2643,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing entity type cannot be switched to a new supertype through define
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity apple-product;
@@ -2652,7 +2652,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity genius sub apple-product;
@@ -2660,7 +2660,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing relation type cannot be switched to a new supertype through define
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation sabbatical sub employment;
@@ -2669,7 +2669,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       relation sabbatical sub vacation;
@@ -2677,7 +2677,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: an existing attribute type can be switched to a new supertype with a matching value type
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute measure @abstract, value double;
@@ -2695,7 +2695,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       attribute size value double @abstract;
@@ -2715,7 +2715,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: assigning a supertype without previous supertype succeeds even if they have different attributes + roles, if there are no instances
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity species owns name, plays species-membership:species;
@@ -2727,7 +2727,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql define
+    When typeql schema query
       """
       define
       entity person sub organism;
@@ -2747,7 +2747,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: assigning a new supertype when having another supertype through define fails without preceding redefine/undefine
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity bird;
@@ -2763,14 +2763,14 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity animal;
       entity pigeon sub animal;
       """
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute name value string;
@@ -2787,14 +2787,14 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity animal owns name;
       entity pigeon2 sub animal;
       """
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity bird3 plays flying:flier;
@@ -2811,7 +2811,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity animal plays flying:flier;
@@ -2819,7 +2819,7 @@ Feature: TypeQL Define Query
       """
 
   Scenario: assigning a supertype while having another supertype through define fails even if there are no instances
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person sub organism;
@@ -2832,7 +2832,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity person sub species;
@@ -2866,7 +2866,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when adding a playable role to an existing type, the change is propagated to its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation employment relates employer;
@@ -2888,7 +2888,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when adding an attribute ownership to an existing type, the change is propagated to its subtypes
-    Given typeql define
+    Given typeql schema query
     """
        define
        entity person owns mobile;
@@ -2911,7 +2911,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when adding a key ownership to an existing type, the change is propagated to its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity child sub person;
@@ -2932,7 +2932,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation part-time-employment sub employment;
@@ -2956,7 +2956,7 @@ Feature: TypeQL Define Query
   ####################
 
   Scenario: uncommitted transaction writes are not persisted
-    When typeql define
+    When typeql schema query
       """
       define entity dog;
       """
@@ -2976,14 +2976,14 @@ Feature: TypeQL Define Query
   ########################
 
   Scenario: a type cannot be a subtype of itself
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define dog sub dog;
       """
 
 
   Scenario: a cyclic type hierarchy is not allowed
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define
       entity giant sub person;
@@ -2993,7 +2993,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: a relation type can relate to a role that it plays itself
-    When typeql define
+    When typeql schema query
       """
       define
       relation recursive-function relates function, plays recursive-function:function;
@@ -3011,7 +3011,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: two relation types in a type hierarchy can play each other's roles
-    When typeql define
+    When typeql schema query
       """
       define
       relation apple @abstract, relates role1, plays big-apple:role2;
@@ -3025,7 +3025,7 @@ Feature: TypeQL Define Query
   depend on each other, creating a dependency graph, they should all define successfully regardless of
   which variable was picked as the start vertex (#131)
 
-    When typeql define
+    When typeql schema query
       """
       define
 

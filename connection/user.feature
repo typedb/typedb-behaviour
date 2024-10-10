@@ -41,7 +41,7 @@ Feature: Connection Users
     Given connection opens with authentication: admin, password
     Then users create: user, password
     Then users create: user2, passw
-    Then users create: user3, pass; throws exception
+    Then users create: user3, pass; fails
 
   @ignore-typedb-driver
   Scenario: user passwords must comply with the minimum number of lowercase characters
@@ -52,7 +52,7 @@ Feature: Connection Users
     Given connection opens with authentication: admin, password
     Then users create: user, password
     Then users create: user2, paSSWORD
-    Then users create: user3, PASSWORD; throws exception
+    Then users create: user3, PASSWORD; fails
 
   @ignore-typedb-driver
   Scenario: user passwords must comply with the minimum number of uppercase characters
@@ -63,7 +63,7 @@ Feature: Connection Users
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD
     Then users create: user2, PAssword
-    Then users create: user3, password; throws exception
+    Then users create: user3, password; fails
 
   @ignore-typedb-driver
   Scenario: user passwords must comply with the minimum number of numeric characters
@@ -74,7 +74,7 @@ Feature: Connection Users
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD789
     Then users create: user2, PASSWORD78
-    Then users create: user3, PASSWORD7; throws exception
+    Then users create: user3, PASSWORD7; fails
 
   @ignore-typedb-driver
   Scenario: user passwords must comply with the minimum number of special characters
@@ -85,7 +85,7 @@ Feature: Connection Users
     Given connection opens with authentication: admin, password
     Then users create: user, PASSWORD!@£
     Then users create: user2, PASSWORD&(
-    Then users create: user3, PASSWORD); throws exception
+    Then users create: user3, PASSWORD); fails
 
   @ignore-typedb-driver
   Scenario: user passwords must comply with the minimum number of different characters
@@ -100,7 +100,7 @@ Feature: Connection Users
     Then user password update: password, new-password
     Then connection closes
     Given connection opens with authentication: user, new-password
-    Then user password update: new-password, bad-password; throws exception
+    Then user password update: new-password, bad-password; fails
     Then user password update: new-password, even-newer-password
     Then connection closes
     Given connection opens with authentication: user, even-newer-password
@@ -114,11 +114,11 @@ Feature: Connection Users
     Then users create: user, password
     Then connection closes
     Given connection opens with authentication: user, password
-    Then user password update: password, password; throws exception
+    Then user password update: password, password; fails
     Then user password update: password, new-password
     Then connection closes
     Given connection opens with authentication: user, new-password
-    Then user password update: new-password, password; throws exception
+    Then user password update: new-password, password; fails
     Then connection closes
     Given connection opens with authentication: user, new-password
     Then user password update: new-password, newer-password
@@ -152,7 +152,7 @@ Feature: Connection Users
     Then users create: user, password
     Then connection closes
     Then wait 5 seconds
-    Given connection opens with authentication: user, password; throws exception
+    Given connection opens with authentication: user, password; fails
 
   Scenario: non-admin user cannot perform permissioned actions
     Given typedb starts
@@ -161,10 +161,10 @@ Feature: Connection Users
     Then users create: user2, password2
     Then connection closes
     Given connection opens with authentication: user, password
-    Then users get all; throws exception
-    Then users get user: admin; throws exception
-    Then users create: user3, password; throws exception
-    Then users contains: admin; throws exception
-    Then users delete: admin; throws exception
-    Then users delete: user2; throws exception
-    Then users password set: user2, new-password; throws exception
+    Then users get all; fails
+    Then users get user: admin; fails
+    Then users create: user3, password; fails
+    Then users contains: admin; fails
+    Then users delete: admin; fails
+    Then users delete: user2; fails
+    Then users password set: user2, new-password; fails

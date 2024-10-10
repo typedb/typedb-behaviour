@@ -8,11 +8,11 @@ Feature: TypeQL Reduce Queries
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person
@@ -115,7 +115,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario Outline: the <reduction> of an answer set of '<type>' values can be retrieved
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr>, value <type>;
@@ -149,7 +149,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario Outline: the <reduction> of an answer set of '<type>' must be assigned to an optional variable
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr>, value <type>;
@@ -189,7 +189,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario: the sample standard deviation can be retrieved for an answer set of 'double' values
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute weight, value double;
@@ -297,7 +297,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario Outline: when an answer set is empty, calling '<reduction>' on it returns an empty answer
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute income value double;
@@ -368,7 +368,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario Outline: an error is thrown when getting the '<reduction>' of attributes that have the inapplicable type, '<type>'
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr> value <type>;
@@ -399,7 +399,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario Outline: an error is thrown when getting the fallible '<reduction>' of attributes that have the inapplicable type, '<type>'
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr> value <type>;
@@ -616,7 +616,7 @@ Feature: TypeQL Reduce Queries
 
   Scenario: Grouped standard deviation of one value returns an empty group value
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute income value double;

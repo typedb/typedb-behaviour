@@ -8,12 +8,12 @@ Feature: TypeQL Insert Query
   Background: Open connection and create a simple extensible schema
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection reset database: typedb
-#    Given connection does not have any database
+#    Given connection has 0 databases
 #    Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -49,7 +49,7 @@ Feature: TypeQL Insert Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given set time-zone is: Europe/London
+    Given set time-zone: Europe/London
 
   ####################
   # INSERTING THINGS #
@@ -129,7 +129,7 @@ Feature: TypeQL Insert Query
   Scenario: when running multiple identical insert queries in series, new things get created each time
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute breed value string;
@@ -194,7 +194,7 @@ Feature: TypeQL Insert Query
   Scenario: attempting to insert an instance of an abstract type throws an error
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity factory abstract;
@@ -337,7 +337,7 @@ Feature: TypeQL Insert Query
   Scenario: after inserting a new owner for every existing ownership of an attribute, its number of owners doubles
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity dog owns name;
@@ -384,7 +384,7 @@ Feature: TypeQL Insert Query
   Scenario Outline: an insert can attach multiple distinct values of the same <type> attribute to a single owner
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute <attr> value <type>, owns ref @key;
@@ -523,7 +523,7 @@ get;
   Scenario: when an attribute owns an attribute, an instance of that attribute can be inserted onto it
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute colour value string, owns hex-value;
@@ -568,7 +568,7 @@ get;
   Scenario: when inserting an additional attribute ownership on an attribute, the owner type can be optionally specified
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute colour value string, owns hex-value;
@@ -613,7 +613,7 @@ get;
   Scenario: when linking an attribute that doesn't exist yet to a relation, the attribute gets created
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation residence
@@ -668,7 +668,7 @@ get;
   Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       rule lucy-is-aged-32:
@@ -741,7 +741,7 @@ get;
   Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation residence
@@ -910,7 +910,7 @@ get;
   Scenario: a roleplayer can be inserted without explicitly specifying a role when the role is inherited
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation part-time-employment sub employment;
@@ -930,7 +930,7 @@ get;
   Scenario: when inserting a roleplayer that can play more than one role, an error is thrown
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       person plays employment:employer;
@@ -958,7 +958,7 @@ get;
   Scenario: parent types are not necessarily allowed to play the roles that their children play
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity animal;
@@ -1024,7 +1024,7 @@ get;
   Scenario: a relation currently inferred by a rule can be explicitly inserted
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation gym-membership relates member;
@@ -1082,7 +1082,7 @@ get;
   Scenario Outline: inserting an attribute of type '<type>' creates an instance of it
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> value <type>, owns ref @key;
       """
@@ -1122,7 +1122,7 @@ get;
   Scenario Outline: Attributes of type '<type>' can be inserted via value variables
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> value <type>, owns ref @key;
       """
@@ -1163,7 +1163,7 @@ get;
   Scenario: insert a regex attribute throws error if not conforming to regex
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person
@@ -1184,10 +1184,10 @@ get;
       """
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
-    Given set time-zone is: Asia/Calcutta
+    Given set time-zone: Asia/Calcutta
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
     """
     define
     attribute test_date value datetime;
@@ -1202,7 +1202,7 @@ get;
       $time_date 2023-05-01T00:00:00 isa test_date;
       """
 
-    Given set time-zone is: America/Chicago
+    Given set time-zone: America/Chicago
     Given transaction commits
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -1235,7 +1235,7 @@ get;
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute length value double;
@@ -1266,7 +1266,7 @@ get;
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute length value double;
@@ -1304,7 +1304,7 @@ get;
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute length value double;
@@ -1332,7 +1332,7 @@ get;
   Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> value <type>, owns ref @key;
       """
@@ -1375,7 +1375,7 @@ get;
   Scenario Outline: inserting [<value>] as a '<type>' throws an error
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define attribute <attr> value <type>, owns ref @key;
       """
@@ -1499,7 +1499,7 @@ get;
   Scenario: instances of an inherited key attribute don't have to be unique among instances of a type and its subtypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute ref value long;
@@ -1535,7 +1535,7 @@ get;
   Scenario: instances of an inherited key attribute don't have to be unique among its subtypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute ref value long;
@@ -1561,7 +1561,7 @@ get;
   Scenario: an error is thrown when inserting a second key attribute on an attribute that already has one
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       name owns ref @key;
@@ -1642,7 +1642,7 @@ get;
     Given transaction closes
     Given connection open schema transaction for database: typedb
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity child sub person;
@@ -1665,7 +1665,7 @@ get;
   Scenario: specialised uniqueness is respected
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity person abstract;
@@ -1693,7 +1693,7 @@ get;
   Scenario: instances of an inherited unique attribute don't have to be unique among instances of the type and its subtypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity child sub person;
@@ -1735,7 +1735,7 @@ get;
   Scenario: match-insert triggers one insert per answer of the match clause
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity language owns name, owns is-cool, owns ref @key;
@@ -1800,7 +1800,7 @@ get;
   Scenario: match-insert can take an attribute's value and copy it to an attribute of a different type
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute height value long;
@@ -1844,7 +1844,7 @@ get;
   Scenario: if match-insert matches nothing, then nothing is inserted
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation season-ticket-ownership relates holder;
@@ -2059,7 +2059,7 @@ get;
   Scenario: inserting a new type on an existing instance that is a subtype of its existing type throws
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -2085,7 +2085,7 @@ get;
   Scenario: inserting a new type on an existing instance that is a supertype of its existing type throws
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity child sub person;
       """
@@ -2111,7 +2111,7 @@ get;
   Scenario: inserting a new type on an existing instance that is unrelated to its existing type throws
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
         entity car;
@@ -2192,7 +2192,7 @@ get;
   Scenario: variable types in inserts cannot use aliased role types
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       relation part-time-employment sub employment;
@@ -2220,7 +2220,7 @@ get;
   Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       person owns score;
@@ -2274,7 +2274,7 @@ get;
   Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       person owns score;
@@ -2342,7 +2342,7 @@ get;
 
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -2435,7 +2435,7 @@ get;
   Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql undefine
+    Given typeql schema query
       """
       undefine
       employment owns ref;
@@ -2443,7 +2443,7 @@ get;
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -2493,7 +2493,7 @@ get;
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    When typeql undefine
+    When typeql schema query
       """
       undefine
       rule henry-is-employed;
@@ -2519,7 +2519,7 @@ get;
   Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -2636,7 +2636,7 @@ get;
   Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql undefine
+    Given typeql schema query
       """
       undefine
       person owns ref;
@@ -2767,7 +2767,7 @@ get;
   Scenario: if any insert in a transaction fails with a semantic error, none of the inserts are performed
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       attribute capacity value long;
@@ -2822,7 +2822,7 @@ get;
   Scenario: the 'iid' property is used internally by TypeDB and cannot be manually assigned
     Given transaction closes
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define
       entity bird;

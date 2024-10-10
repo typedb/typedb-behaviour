@@ -8,8 +8,8 @@ Feature: Connection Transaction
   Background:
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
-    Given connection does not have any database
+    Given connection is open: true
+    Given connection has 0 databases
 
   Scenario Outline: one database, one <type> transaction
     When connection create database: typedb
@@ -64,8 +64,7 @@ Feature: Connection Transaction
     Given connection open read transaction for database: typedb
     Then transaction rollbacks; fails
 
-  @ignore-typedb
-  Scenario: one database, many <type> transactions
+  Scenario Outline: one database, many <type> transactions
     When connection create database: typedb
     When connection open transactions for database: typedb, of type:
       | <type> |
@@ -97,89 +96,91 @@ Feature: Connection Transaction
     Examples:
       | type   |
       | read   |
-      | write  |
-      | schema |
+# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
+#      | write  |
+#      | schema |
 
-  @ignore-typedb
-  Scenario: one database, many transactions of different types
-    When connection create database: typedb
-    When connection open transactions for database: typedb, of type:
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-    Then transactions are open: true
-    Then transactions have type:
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-      | read   |
-      | write  |
-      | schema |
-
-    # TODO: Fix parallel execution for the server
-#  Scenario Outline: one database, many <type> transactions in parallel
+# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
+#  Scenario: one database, many transactions of different types
 #    When connection create database: typedb
-#    When connection open transactions in parallel for database: typedb, of type:
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type:
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#      | <type> |
-#    Examples:
-#      | type   |
+#    When connection open transactions for database: typedb, of type:
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#    Then transactions are open: true
+#    Then transactions have type:
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
+#      | read   |
+#      | write  |
+#      | schema |
 #      | read   |
 #      | write  |
 #      | schema |
 
-    # TODO: Fix parallel execution for the server
+  Scenario Outline: one database, many <type> transactions in parallel
+    When connection create database: typedb
+    When connection open transactions in parallel for database: typedb, of type:
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+      | <type> |
+    Examples:
+      | type   |
+      | read   |
+# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
+#      | write  |
+#      | schema |
+
+
+# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
 #  Scenario: one database, many transactions in parallel of different types
 #    When connection create database: typedb
 #    When connection open transactions in parallel for database: typedb, of type:
@@ -225,7 +226,7 @@ Feature: Connection Transaction
   Scenario Outline: write in a <type> transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -247,7 +248,7 @@ Feature: Connection Transaction
   Scenario Outline: <command> in a schema transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -261,7 +262,7 @@ Feature: Connection Transaction
   Scenario Outline: <command> in a write transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Given typeql define
+    Given typeql schema query
       """
       define entity person;
       """
@@ -281,7 +282,7 @@ Feature: Connection Transaction
   Scenario: schema modification in a write transaction fails
     Given connection create database: typedb
     Given connection open write transaction for database: typedb
-    Then typeql define; fails
+    Then typeql schema query; fails
       """
       define entity person;
       """
@@ -289,7 +290,7 @@ Feature: Connection Transaction
   Scenario: write data in a schema transaction is allowed
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
-    Then typeql define
+    Then typeql schema query
       """
       define entity person;
       """
@@ -303,7 +304,7 @@ Feature: Connection Transaction
 #  Scenario: commit after a schema transaction rollback does nothing
 #    Given connection create database: typedb
 #    Given connection open schema transaction for database: typedb
-#    When typeql define
+#    When typeql schema query
 #      """
 #      define entity person;
 #      """
@@ -320,7 +321,7 @@ Feature: Connection Transaction
 #  Scenario: commit after a write transaction rollback does nothing
 #    Given connection create database: typedb
 #    Given connection open schema transaction for database: typedb
-#    Given typeql define
+#    Given typeql schema query
 #      """
 #      define entity person;
 #      """
@@ -339,20 +340,19 @@ Feature: Connection Transaction
 #      """
 #    Then answer size is: 0
 
-  @ignore-typedb
-  Scenario: transaction timeouts are configurable
-    When connection create database: typedb
-    Then set session option session-idle-timeout-millis to: 20000
-    Given connection open schema session for database: typedb
-    Given set transaction option transaction-timeout-millis to: 10000
-    When session opens transaction of type: write
-    Then wait 8 seconds
-    Then typeql define
-      """
-      define entity person;
-      """
-    Then wait 4 seconds
-    Then typeql define; fails
-      """
-      define entity person;
-      """
+  # TODO: Uncomment when options are implemented. Decide if it needs the following tag.
+#  @ignore-typedb
+#  Scenario: transaction timeouts are configurable
+#    Given connection create database: typedb
+#    When set transaction option transaction-timeout-millis to: 10000
+#    When connection open schema transaction for database: typedb
+#    Then wait 8 seconds
+#    Then typeql schema query
+#      """
+#      define entity person;
+#      """
+#    Then wait 4 seconds
+#    Then typeql schema query; fails
+#      """
+#      define entity person;
+#      """

@@ -8,7 +8,7 @@ Feature: TypeQL Reasoning Explanation
   Background: Initialise a session and transaction for each scenario
     Given typedb starts
     Given connection opens with default authentication
-    Given connection has been opened
+    Given connection is open: true
     Given connection open schema session for database: test_explanation
     Given transaction is initialised
 
@@ -17,7 +17,7 @@ Feature: TypeQL Reasoning Explanation
 
   Verify the code path for atomic queries produces correct explanation and pattern.
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       name sub attribute,
@@ -48,7 +48,7 @@ Feature: TypeQL Reasoning Explanation
 
   @ignore-typedb-driver
   Scenario: relation has lookup explanation
-    Given typeql define
+    Given typeql schema query
       """
       define
       name sub attribute,
@@ -104,7 +104,7 @@ Feature: TypeQL Reasoning Explanation
 
   Verify the code path for non-atomic queries produces correct explanation and pattern.
 
-    Given typeql define
+    Given typeql schema query
       """
       define
       name sub attribute,
@@ -165,7 +165,7 @@ Feature: TypeQL Reasoning Explanation
   A negation explanation shows the resolution that occurred. It contains the pattern for the lookup that was performed,
   indicating that this lookup was then checked against the negation to verify that it satisfied the query.
 
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -214,7 +214,7 @@ Feature: TypeQL Reasoning Explanation
   Ids in the answer's pattern should sit outside the disjunction, this makes the disjunction valid as it provides outer scope variables for the disjunction to bind to.
   The explanation beneath should explain the disjunctive clause that was used to provide the original answer.
 
-    Given typeql define
+    Given typeql schema query
       """
       define
 
@@ -263,7 +263,7 @@ Feature: TypeQL Reasoning Explanation
   Due to the use of Disjunctive Normal Form, the answer's pattern should contain only one disjunction with ids outside as the outer scope.
   The explanation beneath should explain the disjunctive clause that was used to provide the original answer.
 
-    Given typeql define
+    Given typeql schema query
       """
       define
 
