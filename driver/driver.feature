@@ -333,6 +333,7 @@ Feature: TypeDB Driver
 #    Then connection has database: created-after-write
 #    Then connection has database: created-after-read
 
+# TODO: Test on_close with planned driver's closing on transaction close (similar to old networking_in_on_close in Rust)
 
   Scenario: Driver processes transaction commit errors correctly
     Given connection open schema transaction for database: typedb
@@ -541,6 +542,13 @@ Feature: TypeDB Driver
       define attribute name owns name;
       """
 
+#  TODO: Cover these cases (can also be moved to connection/transaction if it's fair for the server:
+#
+#  read queries can be opened and iterated concurrently & interleaved freely
+#  write and schema queries cancel previous read and write queries from responding their answers
+#  So as soon as you run a write of schema query, previous iterators will eventually be interrupted (didn't manage to make it "eager", youll either be able to finish the answers in the buffer and it's OK, or you eventually get an error in those streams.
+#
+#  Commit, rollback, and close actually do the same things!
 
   ############
   # CONCEPTS #

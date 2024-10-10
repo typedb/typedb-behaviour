@@ -223,6 +223,8 @@ Feature: Connection Transaction
 #      | write  |
 #      | schema |
 
+  # TODO: Read queries in parallel transactions are successful?
+
   Scenario Outline: write in a <type> transaction fails
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
