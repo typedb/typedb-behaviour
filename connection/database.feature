@@ -11,9 +11,16 @@ Feature: Connection Database
     Given connection is open: true
     Given connection has 0 databases
 
-  Scenario: create one database
-    When connection create database: alice
-    Then connection has database: alice
+  Scenario Outline: create one database with name <name>
+    When connection create database: <name>
+    Then connection has database: <name>
+    Examples:
+      | name                                                                  |
+      | alice                                                                 |
+      | ALICE                                                                 |
+      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile |
+      | 資料庫                                                                   |
+
 
   Scenario: create many databases
     When connection create databases:
@@ -49,15 +56,23 @@ Feature: Connection Database
       | eve     |
       | frank   |
 
+  Scenario: cannot create database with an incorrect name
+    Then connection create database with empty name; fails
+    Then connection create database: .; fails
+    Then connection create database: !; fails
+    Then connection create database: ...; fails
+    Then connection create database: ·‿·; fails
+    Then connection create database: 😎; fails
+    Then connection create database: my😎database; fails
+
   Scenario: delete one database
-      # This step should be rewritten once we can create keypsaces without opening sessions
     Given connection create database: alice
     When connection delete database: alice
     Then connection does not have database: alice
     Then connection has 0 databases
 
   Scenario: connection can delete many databases
-      Given connection create databases:
+    Given connection create databases:
       | alice   |
       | bob     |
       | charlie |
@@ -84,7 +99,7 @@ Feature: Connection Database
     Then connection has 0 databases
 
   Scenario: delete many databases in parallel
-      Given connection create databases in parallel:
+    Given connection create databases in parallel:
       | alice   |
       | bob     |
       | charlie |
