@@ -608,7 +608,7 @@ Feature: TypeDB Driver
     Then concurrently process 1 row from answers; fails
 
 
-  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+  Scenario: Driver's concurrent processing of read queries answers is interrupted by schema queries if answers are not prefetched
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
