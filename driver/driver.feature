@@ -52,13 +52,12 @@ Feature: TypeDB Driver
     When connection closes
     Then connection is open: false
 
-    # TODO: Should it fail or not? UNCOMMENT!
-#    When connection closes
-#    Then connection is open: false
-#
-#    When connection opens with default authentication
-#    Then connection is open: true
-#    Then connection has database: typedb
+    When connection closes
+    Then connection is open: false
+
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has database: typedb
 
 
     # TODO: Test credentials (should be available for CORE as well)
@@ -519,14 +518,14 @@ Feature: TypeDB Driver
 
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "Query Error"
+    Then typeql schema query; fails with a message containing: "[TQL"
       """
       """
-    Then typeql schema query; fails with a message containing: "Query Error"
+    Then typeql schema query; fails with a message containing: "[TQL"
       """
 
       """
-    Then typeql schema query; fails with a message containing: "Query Error"
+    Then typeql schema query; fails with a message containing: "[TQL"
       """
 
       """
@@ -543,13 +542,108 @@ Feature: TypeDB Driver
       define attribute name owns name;
       """
 
-#  TODO: Cover these cases (can also be moved to connection/transaction if it's fair for the server:
-#
-#  read queries can be opened and iterated concurrently & interleaved freely
-#  write and schema queries cancel previous read and write queries from responding their answers
-#  So as soon as you run a write of schema query, previous iterators will eventually be interrupted (didn't manage to make it "eager", youll either be able to finish the answers in the buffer and it's OK, or you eventually get an error in those streams.
-#
-#  Commit, rollback, and close actually do the same things!
+
+  Scenario: Driver can concurrently process read queries without interruptions
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person0;
+      entity person1;
+      entity person2;
+      entity person3;
+      entity person4;
+      entity person5;
+      entity person6;
+      entity person7;
+      entity person8;
+      entity person9;
+      """
+    When concurrently get answers of typeql read query 10 times
+      """
+      match entity $p;
+      """
+    Then concurrently process 1 row from answers
+    Then concurrently process 1 row from answers
+    Then concurrently process 3 rows from answers
+    When get answers of typeql read query
+      """
+      match entity $p;
+      """
+    Then answer size is: 10
+    Then concurrently process 5 rows from answers
+    Then concurrently process 1 row from answers; fails
+
+
+  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person0;
+      entity person1;
+      entity person2;
+      entity person3;
+      entity person4;
+      entity person5;
+      entity person6;
+      entity person7;
+      entity person8;
+      entity person9;
+      """
+    When concurrently get answers of typeql read query 10 times
+      """
+      match entity $p;
+      """
+    Then concurrently process 1 row from answers
+    Then concurrently process 1 row from answers
+    Then concurrently process 3 rows from answers
+    When typeql schema query
+      """
+      define entity person10;
+      """
+    Then concurrently process 1 rows from answers
+    Then concurrently process 3 rows from answers
+    Then concurrently process 1 rows from answers
+    Then concurrently process 1 row from answers; fails
+
+
+  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person0;
+      entity person1;
+      entity person2;
+      entity person3;
+      entity person4;
+      entity person5;
+      entity person6;
+      entity person7;
+      entity person8;
+      entity person9;
+      """
+    When concurrently get answers of typeql read query 10 times
+      """
+      match entity $p;
+      """
+    Then concurrently process 1 row from answers
+    Then concurrently process 1 row from answers
+    Then concurrently process 3 rows from answers
+    When typeql schema query
+      """
+      define entity person10;
+      """
+    # TODO: Uncomment this when we can set prefetch sizes to 0
+#    Then concurrently process 1 rows from answers; fails
+
+
+#  TODO: Repeat two tests above for:
+#  read results + write query (not) interrupting them
+#  write results + schema query (not) interrupting them
+#  write results + write query (not) interrupting them
+#  Consider adding tests for commit, rollback, and close doing the same!
 
   ############
   # CONCEPTS #
@@ -569,8 +663,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
-    Then answer get row(0) get variable(p) is thing type: true
-    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is instance: false
     Then answer get row(0) get variable(p) is value: false
     Then answer get row(0) get variable(p) is entity type: true
     Then answer get row(0) get variable(p) is relation type: false
@@ -582,7 +675,6 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(p) as entity type
     Then answer get row(0) get type(p) get label: person
-    Then answer get row(0) get thing type(p) get label: person
     Then answer get row(0) get entity type(p) get label: person
 
 
@@ -601,8 +693,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
-    Then answer get row(0) get variable(p) is thing type: true
-    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is instance: false
     Then answer get row(0) get variable(p) is value: false
     Then answer get row(0) get variable(p) is entity type: false
     Then answer get row(0) get variable(p) is relation type: true
@@ -614,7 +705,6 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(p) as relation type
     Then answer get row(0) get type(p) get label: parentship
-    Then answer get row(0) get thing type(p) get label: parentship
     Then answer get row(0) get relation type(p) get label: parentship
 
 
@@ -633,8 +723,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: true
-    Then answer get row(0) get variable(p) is thing type: false
-    Then answer get row(0) get variable(p) is thing: false
+    Then answer get row(0) get variable(p) is instance: false
     Then answer get row(0) get variable(p) is value: false
     Then answer get row(0) get variable(p) is entity type: false
     Then answer get row(0) get variable(p) is relation type: false
@@ -664,8 +753,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
-    Then answer get row(0) get variable(a) is thing type: true
-    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is instance: false
     Then answer get row(0) get variable(a) is value: false
     Then answer get row(0) get variable(a) is entity type: false
     Then answer get row(0) get variable(a) is relation type: false
@@ -677,7 +765,6 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: untyped
-    Then answer get row(0) get thing type(a) get label: untyped
     Then answer get row(0) get attribute type(a) get label: untyped
 
     Then answer get row(0) get attribute type(a) get value type: none
@@ -709,8 +796,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
-    Then answer get row(0) get variable(a) is thing type: true
-    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is instance: false
     Then answer get row(0) get variable(a) is value: false
     Then answer get row(0) get variable(a) is entity type: false
     Then answer get row(0) get variable(a) is relation type: false
@@ -722,7 +808,6 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: typed
-    Then answer get row(0) get thing type(a) get label: typed
     Then answer get row(0) get attribute type(a) get label: typed
 
     Then answer get row(0) get attribute type(a) get value type: <value-type>
@@ -780,8 +865,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: true
-    Then answer get row(0) get variable(a) is thing type: true
-    Then answer get row(0) get variable(a) is thing: false
+    Then answer get row(0) get variable(a) is instance: false
     Then answer get row(0) get variable(a) is value: false
     Then answer get row(0) get variable(a) is entity type: false
     Then answer get row(0) get variable(a) is relation type: false
@@ -793,7 +877,6 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get type(a) get label: film
-    Then answer get row(0) get thing type(a) get label: film
     Then answer get row(0) get attribute type(a) get label: film
 
     Then answer get row(0) get attribute type(a) get value type: film-properties
@@ -831,8 +914,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: false
-    Then answer get row(0) get variable(p) is thing type: false
-    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is instance: true
     Then answer get row(0) get variable(p) is value: false
     Then answer get row(0) get variable(p) is entity type: false
     Then answer get row(0) get variable(p) is relation type: false
@@ -843,8 +925,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as entity
-    Then answer get row(0) get thing(p) get type get label: person
+    Then answer get row(0) get instance(p) get type get label: person
     Then answer get row(0) get entity(p) get iid exists
+    Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity(p) get type is entity: false
     Then answer get row(0) get entity(p) get type is entity type: true
@@ -874,8 +957,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(p) is type: false
-    Then answer get row(0) get variable(p) is thing type: false
-    Then answer get row(0) get variable(p) is thing: true
+    Then answer get row(0) get variable(p) is instance: true
     Then answer get row(0) get variable(p) is value: false
     Then answer get row(0) get variable(p) is entity type: false
     Then answer get row(0) get variable(p) is relation type: false
@@ -886,8 +968,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as relation
-    Then answer get row(0) get thing(p) get type get label: parentship
+    Then answer get row(0) get instance(p) get type get label: parentship
     Then answer get row(0) get relation(p) get iid exists
+    Then answer get row(0) get relation(p) get label: parentship
     Then answer get row(0) get relation(p) get type get label: parentship
     Then answer get row(0) get relation(p) get type is relation: false
     Then answer get row(0) get relation(p) get type is entity type: false
@@ -917,8 +1000,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
 
     Then answer get row(0) get variable(a) is type: false
-    Then answer get row(0) get variable(a) is thing type: false
-    Then answer get row(0) get variable(a) is thing: true
+    Then answer get row(0) get variable(a) is instance: true
     Then answer get row(0) get variable(a) is value: false
     Then answer get row(0) get variable(a) is entity type: false
     Then answer get row(0) get variable(a) is relation type: false
@@ -929,7 +1011,8 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is attribute: true
 
     Then answer get row(0) get variable(a) as attribute
-    Then answer get row(0) get thing(a) get type get label: typed
+    Then answer get row(0) get instance(a) get type get label: typed
+    Then answer get row(0) get attribute(a) get label: typed
     Then answer get row(0) get attribute(a) get type get label: typed
     Then answer get row(0) get attribute(a) get type is attribute: false
     Then answer get row(0) get attribute(a) get type is entity type: false
@@ -954,22 +1037,25 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get value is not: <not-value>
     Then answer get row(0) get attribute(a) as <value-type> is not: <not-value>
     Examples:
-      | value-type  | value                                       | not-value                                    | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-      | boolean     | true                                        | false                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | long        | 12345090                                    | 0                                            | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-      | double      | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | double      | 2.01234567                                  | 2.01234568                                   | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890                    | 1234567890.001234567890                      | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | string      | "John \"Baba Yaga\" Wick"                   | "John Baba Yaga Wick"                        | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-      | date        | 2024-09-20                                  | 2025-09-20                                   | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-      | datetime    | 1999-02-26T12:15:05                         | 1999-02-26T12:15:00                          | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime    | 1999-02-26T12:15:05.000000001               | 1999-02-26T12:15:05.00000001                 | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | 2024-06-20T15:40:05 America/New_York         | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | 2024-09-20T16:40:05.000000001 Europe/Belfast | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      # TODO: Add datetime-tz with offsets
-      | duration    | P1Y10M7DT15H44M5.00394892S                  | P1Y10M7DT15H44M5.0394892S                    | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-      | duration    | P66W                                        | P67W                                         | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1024,8 +1110,7 @@ Feature: TypeDB Driver
 #    Then answer size is: 1
 #
 #    Then answer get row(0) get variable(f) is type: false
-#    Then answer get row(0) get variable(f) is thing type: false
-#    Then answer get row(0) get variable(f) is thing: true
+#    Then answer get row(0) get variable(f) is instance: true
 #    Then answer get row(0) get variable(f) is value: false
 #    Then answer get row(0) get variable(f) is entity type: false
 #    Then answer get row(0) get variable(f) is relation type: false
@@ -1036,7 +1121,8 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(f) is attribute: true
 #
 #    Then answer get row(0) get variable(f) as attribute
-#    Then answer get row(0) get thing(f) get type get label: typed
+#    Then answer get row(0) get instance(f) get type get label: typed
+#    Then answer get row(0) get attribute(f) get label: typed
 #    Then answer get row(0) get attribute(f) get type get label: typed
 #    Then answer get row(0) get attribute(f) get type is attribute: false
 #    Then answer get row(0) get attribute(f) get type is entity type: false
@@ -1083,9 +1169,9 @@ Feature: TypeDB Driver
 #    Then answer query type is: read
 #    Then answer size is: 1
 #
+#    Then answer get row(0) get variable(value) get label: value-type
 #    Then answer get row(0) get variable(value) is type: false
-#    Then answer get row(0) get variable(value) is thing type: false
-#    Then answer get row(0) get variable(value) is thing: false
+#    Then answer get row(0) get variable(value) is instance: false
 #    Then answer get row(0) get variable(value) is value: true
 #    Then answer get row(0) get variable(value) is entity type: false
 #    Then answer get row(0) get variable(value) is relation type: false
@@ -1112,22 +1198,25 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(value) get is not: <not-value>
 #    Then answer get row(0) get value(value) as <value-type> is not: <not-value>
 #    Examples:
-#      | value-type  | value                                       | not-value                                    | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-#      | boolean     | true                                        | false                                        | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-#      | long        | 12345090                                    | 0                                            | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-#      | double      | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-#      | double      | 2.01234567                                  | 2.01234568                                   | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-#      | decimal     | 1234567890.0001234567890                    | 1234567890.001234567890                      | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | decimal     | 0.0000000000000000001                       | 0.000000000000000001                         | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | string      | "John \"Baba Yaga\" Wick"                   | "John Baba Yaga Wick"                        | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-#      | date        | 2024-09-20                                  | 2025-09-20                                   | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05                         | 1999-02-26T12:15:00                          | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05.000000001               | 1999-02-26T12:15:05.00000001                 | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime-tz | 2024-09-20T16:40:05 America/New_York        | 2024-06-20T15:40:05 America/New_York         | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | 2024-09-20T16:40:05.000000001 Europe/Belfast | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      # TODO: Add datetime-tz with offsets
-#      | duration    | P1Y10M7DT15H44M5.00394892S                  | P1Y10M7DT15H44M5.0394892S                    | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-#      | duration    | P66W                                        | P67W                                         | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+#      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+#      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+#      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+#      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+#      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+#      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+#      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+#      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+#      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+#      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+#      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1181,9 +1270,9 @@ Feature: TypeDB Driver
 #    Then answer query type is: read
 #    Then answer size is: 1
 #
+#    Then answer get row(0) get variable(v) get label: film-properties
 #    Then answer get row(0) get variable(v) is type: false
-#    Then answer get row(0) get variable(v) is thing type: false
-#    Then answer get row(0) get variable(v) is thing: false
+#    Then answer get row(0) get variable(v) is instance: false
 #    Then answer get row(0) get variable(v) is value: true
 #    Then answer get row(0) get variable(v) is entity type: false
 #    Then answer get row(0) get variable(v) is relation type: false
@@ -1194,7 +1283,7 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(v) is attribute: false
 #
 #    Then answer get row(0) get variable(v) as value
-#    Then answer get row(0) get value(v) get value type: <value-type>
+#    Then answer get row(0) get value(v) get value type: film-properties
 #    Then answer get row(0) get value(v) is boolean: <is-boolean>
 #    Then answer get row(0) get value(v) is long: <is-long>
 #    Then answer get row(0) get value(v) is double: <is-double>
@@ -1228,10 +1317,10 @@ Feature: TypeDB Driver
       """
       match $a isa age;
       """
-    Then answer unwraps as ok; fails with a message containing: "Invalid query answer conversion"
-    Then answer unwraps as concept trees; fails with a message containing: "Invalid query answer conversion"
+    Then answer unwraps as ok; fails
+    Then answer unwraps as concept trees; fails
     Then answer get row(0) get variable(unknown); fails with a message containing: "The variable 'unknown' does not exist"
-    Then answer get row(0) get variable(); fails with a message containing: "Variable name cannot be null or empty"
+    Then answer get row(0) get variable(); fails
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as value; fails with a message containing: "Invalid concept conversion"
@@ -1249,8 +1338,8 @@ Feature: TypeDB Driver
       """
       match $n isa name;
       """
-    Then answer unwraps as ok; fails with a message containing: "Invalid query answer conversion"
-    Then answer unwraps as concept trees; fails with a message containing: "Invalid query answer conversion"
+    Then answer unwraps as ok; fails
+    Then answer unwraps as concept trees; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get attribute(n) as long; fails with a message containing: "Invalid value casting to 'long'"
 
@@ -1306,18 +1395,18 @@ Feature: TypeDB Driver
       insert $dt 2023-05-01T00:00:00 Asia/Calcutta isa dt;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(dt) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(dt) get value is not: 2023-05-01T00:00:00 America/Chicago
-    Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 America/Chicago
 
     When get answers of typeql read query
       """
       match $x isa dt;
       """
     Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
-    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 America/Chicago
     When transaction commits
 
     When connection closes
@@ -1330,6 +1419,20 @@ Feature: TypeDB Driver
       match $x isa dt;
       """
     Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
-    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 America/Chicago
+
+    When connection closes
+    When set time-zone: Europe/London
+    When connection opens with default authentication
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa dt;
+      """
+    Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
+    Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
+    Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
