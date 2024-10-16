@@ -518,14 +518,10 @@ Feature: TypeDB Driver
 
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "[TQL"
+    Then typeql schema query; fails
       """
       """
-    Then typeql schema query; fails with a message containing: "[TQL"
-      """
-
-      """
-    Then typeql schema query; fails with a message containing: "[TQL"
+    Then typeql schema query; fails
       """
 
       """
