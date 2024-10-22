@@ -384,6 +384,9 @@ Feature: TypeDB Driver
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) query type is: read
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: write
     Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -426,11 +429,17 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) query type is: read
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: write
     Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
     Then answer get row(0) get attribute type by index of variable(n) get label: name
+    Then answer get row(1) query type is: read
+    Then answer get row(1) query type is not: schema
+    Then answer get row(1) query type is not: write
     Then answer get row(1) get concepts size is: 2
     Then answer get row(1) get entity type(p) get label: person
     Then answer get row(1) get attribute type(n) get label: age
@@ -488,6 +497,9 @@ Feature: TypeDB Driver
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) query type is: write
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: read
     Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
