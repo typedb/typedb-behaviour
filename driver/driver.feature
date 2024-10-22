@@ -133,7 +133,7 @@ Feature: TypeDB Driver
 #    Then connection get database(typedb) has schema:
 #    """
 #    """
-#    Then connection get database(typedb) has type schema:
+#    Then connection get database(typedb) has type schema: # TODO: We will probably not have it
 #    """
 #    """
 #
@@ -384,6 +384,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get entity type by index of variable(p) get label: person
 
@@ -401,6 +402,7 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -424,10 +426,12 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
     Then answer get row(0) get attribute type by index of variable(n) get label: name
+    Then answer get row(1) get concepts size is: 2
     Then answer get row(1) get entity type(p) get label: person
     Then answer get row(1) get attribute type(n) get label: age
     Then answer get row(1) get entity type by index of variable(p) get label: person
@@ -449,10 +453,12 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
     Then answer get row(0) get attribute type by index of variable(n) get label: name
+    Then answer get row(1) get concepts size is: 2
     Then answer get row(1) get entity type(p) get label: person
     Then answer get row(1) get attribute type(n) get label: age
     Then answer get row(1) get entity type by index of variable(p) get label: person
@@ -482,6 +488,7 @@ Feature: TypeDB Driver
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
 
@@ -499,6 +506,7 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | a |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
     Then answer get row(0) get attribute(a) get type get label: name
@@ -508,12 +516,196 @@ Feature: TypeDB Driver
     Then transaction commits
 
 
+  Scenario: Driver processes concept document query answers correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person owns id @key, owns name @card(0..);
+      entity empty-person;
+      entity nameless-person, owns name;
+      attribute id, value long;
+      attribute name, value string;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person;
+      fetch {
+        "all attributes": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+    $z isa person, has id 1;
+    $y isa person, has id 2, has name "Yan";
+    $x isa person, has id 3, has name "Xena", has name "Warrior Princess";
+    $e isa empty-person;
+    $n isa nameless-person;
+    """
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person;
+      fetch {
+        "all attributes": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 3
+    # TODO: "id" will become scalar in the future, be ready for the server's change!
+    Then answer contains document:
+    """
+    { "all attributes": { "id": [ 1 ] } }
+    """
+    Then answer contains document:
+    """
+    {
+      "all attributes": {
+        "id": [ 2 ],
+        "name": [ "Yan" ]
+      }
+    }
+    """
+    Then answer contains document:
+    """
+    {
+        "all attributes": {
+            "id": [ 3 ],
+            "name": [
+                "Warrior Princess",
+                "Xena"
+            ]
+        }
+    }
+    """
+    Then answer does not contain document:
+    """
+    { "all attributes": { "id": [ 2 ] } }
+    """
+    Then answer does not contain document:
+    """
+    {
+      "all attributes": {
+        "id": [ 2 ],
+        "name": [
+            "Warrior Princess",
+            "Xena"
+        ]
+      }
+    }
+    """
+    When transaction commits
+    When connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person, has $a;
+        $a isa! $t;
+      fetch {
+        "single attribute type": $t,
+        "single attribute": $a,
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 6
+    Then answer contains document:
+    """
+    {
+        "single attribute": "Yan",
+        "single attribute type": {
+            "kind": "attribute",
+            "label": "name",
+            "value_type": "string"
+        }
+    }
+    """
+    Then answer contains document:
+    """
+    {
+        "single attribute": 1,
+        "single attribute type": {
+            "kind": "attribute",
+            "label": "id",
+            "value_type": "long"
+        }
+    }
+    """
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! empty-person;
+      fetch {
+        "empty-result": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "empty-result": { }
+    }
+    """
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! nameless-person;
+      fetch {
+        "null-result": $x.name,
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "null-result": null
+    }
+    """
+
+
   # TODO: Implement value groups checks
   #Scenario: Driver processes concept row query answers with value groups correctly
-
-
-  # TODO: Implement concept documents checks
-  #Scenario: Driver processes concept document query answers correctly
 
 
   Scenario: Driver processes query errors correctly
@@ -930,7 +1122,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) get label: person
     Then answer get row(0) get instance(p) get label: person
     Then answer get row(0) get instance(p) get type get label: person
-    Then answer get row(0) get entity(p) get iid exists
+    Then answer get row(0) get entity(p) contains iid
     Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get type get label: person
@@ -976,7 +1168,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) get label: parentship
     Then answer get row(0) get instance(p) get label: parentship
     Then answer get row(0) get instance(p) get type get label: parentship
-    Then answer get row(0) get relation(p) get iid exists
+    Then answer get row(0) get relation(p) contains iid
     Then answer get row(0) get relation(p) get label: parentship
     Then answer get row(0) get relation(p) get type get label: parentship
     Then answer get row(0) get relation(p) get type is relation: false
@@ -1310,6 +1502,52 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(v) as <value-type> is: <value>
 #    Then answer get row(0) get value(v) get is not: <not-value>
 #    Then answer get row(0) get value(v) as <value-type> is not: <not-value>
+
+  Scenario Outline: Driver processes values in concept documents correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person, owns typed;
+      attribute typed, value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has $a; fetch { "a": $a };
+      """
+    Then answer type is: concept documents
+    Then answer query type is: read
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    { "a": <expected> }
+    """
+    Then answer does not contain document:
+    """
+    { "a": <not-expected> }
+    """
+    Examples:
+      | value-type  | value                                       | expected                                      | not-expected                                 |
+      | boolean     | true                                        | true                                          | false                                        |
+      | long        | 12345090                                    | 12345090                                      | 0                                            |
+      | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
+      | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
+      | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
+      | decimal     | 0.0000000000000000001                       | "0.0000000000000000001"                       | 0.000000000000000001                         |
+      | string      | "outPUT"                                    | "outPUT"                                      | "output"                                     |
+      | date        | 2024-09-20                                  | "2024-09-20"                                  | "2025-09-20"                                 |
+      | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               | "1999-02-26T12:15:05"                        |
+      | datetime    | 1999-02-26T12:15:05.000000001               | "1999-02-26T12:15:05.000000001"               | "1999-02-26T12:15:05.000000000"              |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | "2024-09-20T16:40:05.000000001 Europe/London" | "2024-09-20T16:40:05.000000001Europe/London" |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100          | "2024-09-20T16:40:05.000000001+01:00"         | "2024-09-20T16:40:05.000000001+0100"         |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 | "P1Y10M7DT15H44M5.00394892S"                 |
+      | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
+    # TODO: Test documents and structs
 
 
   Scenario: Driver processes concept errors correctly
