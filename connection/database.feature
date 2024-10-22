@@ -21,7 +21,6 @@ Feature: Connection Database
       | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile |
       | 資料庫                                                                   |
 
-
   Scenario: create many databases
     When connection create databases:
       | alice   |
@@ -62,6 +61,10 @@ Feature: Connection Database
     Then connection create database: !; fails
     Then connection create database: ...; fails
     Then connection create database: ·‿·; fails
+
+    # TODO: Merge it with the regular "cannot create database with an incorrect name" after fixing https://github.com/typedb/typedb-driver/issues/699
+  @ignore-typedb-driver-java
+  Scenario: cannot create database with an emoji
     Then connection create database: 😎; fails
     Then connection create database: my😎database; fails
 
@@ -149,4 +152,3 @@ Feature: Connection Database
     Then transaction commits
     Then connection delete database: typedb
     Then connection does not have database: typedb
-
