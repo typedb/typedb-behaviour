@@ -30,7 +30,7 @@ Feature: TypeDB Driver
 
   Scenario: Driver can connect after an unsuccessful connection attempt
     When connection closes
-    When connection opens with a wrong port; fails with a message containing: "connect error"
+    When connection opens with a wrong port; fails with a message containing: "address"
     Then connection is open: false
     When connection opens with a wrong host; fails with a message containing: "failed to lookup address information"
     Then connection is open: false
@@ -133,7 +133,7 @@ Feature: TypeDB Driver
 #    Then connection get database(typedb) has schema:
 #    """
 #    """
-#    Then connection get database(typedb) has type schema:
+#    Then connection get database(typedb) has type schema: # TODO: We will probably not have it
 #    """
 #    """
 #
@@ -358,7 +358,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: ok
     Then answer type is not: concept rows
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer unwraps as ok
     Then transaction commits
 
@@ -376,7 +376,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer unwraps as concept rows
     Then answer query type is: read
     Then answer query type is not: schema
@@ -384,6 +384,10 @@ Feature: TypeDB Driver
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) query type is: read
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: write
+    Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get entity type by index of variable(p) get label: person
 
@@ -393,7 +397,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer query type is: read
     Then answer query type is not: schema
     Then answer query type is not: write
@@ -401,6 +405,7 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
@@ -416,7 +421,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer query type is: read
     Then answer query type is not: schema
     Then answer query type is not: write
@@ -424,10 +429,18 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) query type is: read
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: write
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
     Then answer get row(0) get attribute type by index of variable(n) get label: name
+    Then answer get row(1) query type is: read
+    Then answer get row(1) query type is not: schema
+    Then answer get row(1) query type is not: write
+    Then answer get row(1) get concepts size is: 2
     Then answer get row(1) get entity type(p) get label: person
     Then answer get row(1) get attribute type(n) get label: age
     Then answer get row(1) get entity type by index of variable(p) get label: person
@@ -441,7 +454,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer query type is: read
     Then answer query type is not: schema
     Then answer query type is not: write
@@ -449,10 +462,12 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | n |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity type(p) get label: person
     Then answer get row(0) get attribute type(n) get label: name
     Then answer get row(0) get entity type by index of variable(p) get label: person
     Then answer get row(0) get attribute type by index of variable(n) get label: name
+    Then answer get row(1) get concepts size is: 2
     Then answer get row(1) get entity type(p) get label: person
     Then answer get row(1) get attribute type(n) get label: age
     Then answer get row(1) get entity type by index of variable(p) get label: person
@@ -464,7 +479,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer size is: 0
 
     When transaction closes
@@ -475,13 +490,17 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer query type is: write
     Then answer query type is not: schema
     Then answer query type is not: read
     Then answer size is: 1
     Then answer column names are:
       | p |
+    Then answer get row(0) query type is: write
+    Then answer get row(0) query type is not: schema
+    Then answer get row(0) query type is not: read
+    Then answer get row(0) get concepts size is: 1
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
 
@@ -491,7 +510,7 @@ Feature: TypeDB Driver
       """
     Then answer type is: concept rows
     Then answer type is not: ok
-    Then answer type is not: concept trees
+    Then answer type is not: concept documents
     Then answer query type is: read
     Then answer query type is not: schema
     Then answer query type is not: write
@@ -499,6 +518,7 @@ Feature: TypeDB Driver
     Then answer column names are:
       | p |
       | a |
+    Then answer get row(0) get concepts size is: 2
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity by index of variable(p) get type get label: person
     Then answer get row(0) get attribute(a) get type get label: name
@@ -508,12 +528,196 @@ Feature: TypeDB Driver
     Then transaction commits
 
 
+  Scenario: Driver processes concept document query answers correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person owns id @key, owns name @card(0..);
+      entity empty-person;
+      entity nameless-person, owns name;
+      attribute id, value long;
+      attribute name, value string;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person;
+      fetch {
+        "all attributes": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+    $z isa person, has id 1;
+    $y isa person, has id 2, has name "Yan";
+    $x isa person, has id 3, has name "Xena", has name "Warrior Princess";
+    $e isa empty-person;
+    $n isa nameless-person;
+    """
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person;
+      fetch {
+        "all attributes": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 3
+    # TODO: "id" will become scalar in the future, be ready for the server's change!
+    Then answer contains document:
+    """
+    { "all attributes": { "id": [ 1 ] } }
+    """
+    Then answer contains document:
+    """
+    {
+      "all attributes": {
+        "id": [ 2 ],
+        "name": [ "Yan" ]
+      }
+    }
+    """
+    Then answer contains document:
+    """
+    {
+        "all attributes": {
+            "id": [ 3 ],
+            "name": [
+                "Warrior Princess",
+                "Xena"
+            ]
+        }
+    }
+    """
+    Then answer does not contain document:
+    """
+    { "all attributes": { "id": [ 2 ] } }
+    """
+    Then answer does not contain document:
+    """
+    {
+      "all attributes": {
+        "id": [ 2 ],
+        "name": [
+            "Warrior Princess",
+            "Xena"
+        ]
+      }
+    }
+    """
+    When transaction commits
+    When connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! person, has $a;
+        $a isa! $t;
+      fetch {
+        "single attribute type": $t,
+        "single attribute": $a,
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 6
+    Then answer contains document:
+    """
+    {
+        "single attribute": "Yan",
+        "single attribute type": {
+            "kind": "attribute",
+            "label": "name",
+            "value_type": "string"
+        }
+    }
+    """
+    Then answer contains document:
+    """
+    {
+        "single attribute": 1,
+        "single attribute type": {
+            "kind": "attribute",
+            "label": "id",
+            "value_type": "long"
+        }
+    }
+    """
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! empty-person;
+      fetch {
+        "empty-result": { $x.* },
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "empty-result": { }
+    }
+    """
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa! nameless-person;
+      fetch {
+        "null-result": $x.name,
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer unwraps as concept documents
+    Then answer query type is: read
+    Then answer query type is not: schema
+    Then answer query type is not: write
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "null-result": null
+    }
+    """
+
+
   # TODO: Implement value groups checks
   #Scenario: Driver processes concept row query answers with value groups correctly
-
-
-  # TODO: Implement concept trees checks
-  #Scenario: Driver processes concept tree query answers correctly
 
 
   Scenario: Driver processes query errors correctly
@@ -670,6 +874,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as entity type
+    Then answer get row(0) get variable(p) get label: person
     Then answer get row(0) get type(p) get label: person
     Then answer get row(0) get entity type(p) get label: person
 
@@ -700,6 +905,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as relation type
+    Then answer get row(0) get variable(p) get label: parentship
     Then answer get row(0) get type(p) get label: parentship
     Then answer get row(0) get relation type(p) get label: parentship
 
@@ -730,6 +936,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as role type
+    Then answer get row(0) get variable(p) get label: parentship:parent
     Then answer get row(0) get type(p) get label: parentship:parent
     Then answer get row(0) get role type(p) get label: parentship:parent
 
@@ -760,6 +967,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is attribute: false
 
     Then answer get row(0) get variable(a) as attribute type
+    Then answer get row(0) get variable(a) get label: untyped
     Then answer get row(0) get type(a) get label: untyped
     Then answer get row(0) get attribute type(a) get label: untyped
 
@@ -803,6 +1011,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is attribute: false
 
     Then answer get row(0) get variable(a) as attribute type
+    Then answer get row(0) get variable(a) get label: typed
     Then answer get row(0) get type(a) get label: typed
     Then answer get row(0) get attribute type(a) get label: typed
 
@@ -872,6 +1081,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is attribute: false
 
     Then answer get row(0) get variable(a) as attribute type
+    Then answer get row(0) get variable(a) get label: film
     Then answer get row(0) get type(a) get label: film
     Then answer get row(0) get attribute type(a) get label: film
 
@@ -921,8 +1131,11 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as entity
+    Then answer get row(0) get variable(p) get label: person
+    Then answer get row(0) get instance(p) get label: person
     Then answer get row(0) get instance(p) get type get label: person
-    Then answer get row(0) get entity(p) get iid exists
+    Then answer get row(0) get entity(p) contains iid
+    Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get entity(p) get type is entity: false
@@ -964,8 +1177,10 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is attribute: false
 
     Then answer get row(0) get variable(p) as relation
+    Then answer get row(0) get variable(p) get label: parentship
+    Then answer get row(0) get instance(p) get label: parentship
     Then answer get row(0) get instance(p) get type get label: parentship
-    Then answer get row(0) get relation(p) get iid exists
+    Then answer get row(0) get relation(p) contains iid
     Then answer get row(0) get relation(p) get label: parentship
     Then answer get row(0) get relation(p) get type get label: parentship
     Then answer get row(0) get relation(p) get type is relation: false
@@ -1007,6 +1222,8 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is attribute: true
 
     Then answer get row(0) get variable(a) as attribute
+    Then answer get row(0) get variable(a) get label: typed
+    Then answer get row(0) get instance(a) get label: typed
     Then answer get row(0) get instance(a) get type get label: typed
     Then answer get row(0) get attribute(a) get label: typed
     Then answer get row(0) get attribute(a) get type get label: typed
@@ -1117,6 +1334,8 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(f) is attribute: true
 #
 #    Then answer get row(0) get variable(f) as attribute
+#    Then answer get row(0) get variable(f) get label: typed
+#    Then answer get row(0) get instance(f) get label: typed
 #    Then answer get row(0) get instance(f) get type get label: typed
 #    Then answer get row(0) get attribute(f) get label: typed
 #    Then answer get row(0) get attribute(f) get type get label: typed
@@ -1165,7 +1384,6 @@ Feature: TypeDB Driver
 #    Then answer query type is: read
 #    Then answer size is: 1
 #
-#    Then answer get row(0) get variable(value) get label: value-type
 #    Then answer get row(0) get variable(value) is type: false
 #    Then answer get row(0) get variable(value) is instance: false
 #    Then answer get row(0) get variable(value) is value: true
@@ -1178,6 +1396,8 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(value) is attribute: false
 #
 #    Then answer get row(0) get variable(value) as value
+#    Then answer get row(0) get variable(value) get label: <value-type>
+#    Then answer get row(0) get value(value) get label: <value-type>
 #    Then answer get row(0) get value(value) get value type: <value-type>
 #    Then answer get row(0) get value(value) is boolean: <is-boolean>
 #    Then answer get row(0) get value(value) is long: <is-long>
@@ -1295,6 +1515,52 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get value(v) get is not: <not-value>
 #    Then answer get row(0) get value(v) as <value-type> is not: <not-value>
 
+  Scenario Outline: Driver processes values in concept documents correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person, owns typed;
+      attribute typed, value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has $a; fetch { "a": $a };
+      """
+    Then answer type is: concept documents
+    Then answer query type is: read
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    { "a": <expected> }
+    """
+    Then answer does not contain document:
+    """
+    { "a": <not-expected> }
+    """
+    Examples:
+      | value-type  | value                                       | expected                                      | not-expected                                 |
+      | boolean     | true                                        | true                                          | false                                        |
+      | long        | 12345090                                    | 12345090                                      | 0                                            |
+      | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
+      | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
+      | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
+      | decimal     | 0.0000000000000000001                       | "0.0000000000000000001"                       | 0.000000000000000001                         |
+      | string      | "outPUT"                                    | "outPUT"                                      | "output"                                     |
+      | date        | 2024-09-20                                  | "2024-09-20"                                  | "2025-09-20"                                 |
+      | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               | "1999-02-26T12:15:05"                        |
+      | datetime    | 1999-02-26T12:15:05.000000001               | "1999-02-26T12:15:05.000000001"               | "1999-02-26T12:15:05.000000000"              |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | "2024-09-20T16:40:05.000000001 Europe/London" | "2024-09-20T16:40:05.000000001Europe/London" |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100          | "2024-09-20T16:40:05.000000001+01:00"         | "2024-09-20T16:40:05.000000001+0100"         |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 | "P1Y10M7DT15H44M5.00394892S"                 |
+      | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
+    # TODO: Test documents and structs
+
 
   Scenario: Driver processes concept errors correctly
     Given connection open schema transaction for database: typedb
@@ -1314,7 +1580,7 @@ Feature: TypeDB Driver
       match $a isa age;
       """
     Then answer unwraps as ok; fails
-    Then answer unwraps as concept trees; fails
+    Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(unknown); fails with a message containing: "The variable 'unknown' does not exist"
     Then answer get row(0) get variable(); fails
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
@@ -1335,7 +1601,7 @@ Feature: TypeDB Driver
       match $n isa name;
       """
     Then answer unwraps as ok; fails
-    Then answer unwraps as concept trees; fails
+    Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get attribute(n) as long; fails with a message containing: "Invalid value casting to 'long'"
 
@@ -1391,7 +1657,6 @@ Feature: TypeDB Driver
       insert $dt 2023-05-01T00:00:00 Asia/Calcutta isa dt;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00 Asia/Calcutta
-    Then answer get row(0) get attribute(dt) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(dt) get value is not: 2023-05-01T00:00:00 America/Chicago
 
@@ -1400,7 +1665,6 @@ Feature: TypeDB Driver
       match $x isa dt;
       """
     Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
-    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
     When transaction commits
@@ -1415,7 +1679,6 @@ Feature: TypeDB Driver
       match $x isa dt;
       """
     Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
-    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
 
@@ -1429,6 +1692,5 @@ Feature: TypeDB Driver
       match $x isa dt;
       """
     Then answer get row(0) get attribute(x) get value is: 2023-05-01T00:00:00 Asia/Calcutta
-    Then answer get row(0) get attribute(x) get value is: 2023-04-30T13:30:00 America/Chicago
     Then answer get row(0) get attribute(x) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
     Then answer get row(0) get attribute(x) get value is not: 2023-05-01T00:00:00 America/Chicago
