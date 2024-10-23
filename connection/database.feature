@@ -64,7 +64,7 @@ Feature: Connection Database
 
     # TODO: Merge it with the regular "cannot create database with an incorrect name" after fixing https://github.com/typedb/typedb-driver/issues/699
   @ignore-typedb-driver-java
-  Scenario: cannot create database with an emoji
+  Scenario: cannot create database with an emoji in its name
     Then connection create database: 😎; fails
     Then connection create database: my😎database; fails
 
