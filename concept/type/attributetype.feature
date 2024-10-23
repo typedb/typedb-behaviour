@@ -2065,6 +2065,9 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute types with <value-type> value type can set @range annotation and unset it
     When create attribute type: email
     When attribute(email) set value type: <value-type>
+    Then attribute(email) set annotation: @range(<arg1>..<arg0>); fails
+    Then attribute(email) get constraints do not contain: @range(<arg1>..<arg0>)
+    Then attribute(email) get declared annotations do not contain: @range(<arg1>..<arg0>)
     When attribute(email) set annotation: @range(<arg0>..<arg1>)
     Then attribute(email) get constraints contain: @range(<arg0>..<arg1>)
     Then attribute(email) get declared annotations contain: @range(<arg0>..<arg1>)
@@ -2118,39 +2121,40 @@ Feature: Concept Attribute Type
     Then attribute(email) get constraints do not contain: @range(<arg0>..)
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..)
     Examples:
-      | value-type  | arg0                         | arg1                                                  |
-      | long        | 0                            | 1                                                     |
-      | long        | 1                            | 2                                                     |
-      | long        | 0                            | 2                                                     |
-      | long        | -1                           | 1                                                     |
-      | long        | -9223372036854775808         | 9223372036854775807                                   |
-      | string      | "A"                          | "a"                                                   |
-      | string      | "a"                          | "z"                                                   |
-      | string      | "A"                          | "福"                                                   |
-      | string      | "AA"                         | "AAA"                                                 |
-      | string      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-      | boolean     | false                        | true                                                  |
-      | double      | 0.0                          | 0.0001                                                |
-      | double      | 0.01                         | 1.0                                                   |
-      | double      | 123.123                      | 123123123123.122                                      |
-      | double      | -2.45                        | 2.45                                                  |
-      | decimal     | 0.0                          | 0.0001                                                |
-      | decimal     | 0.01                         | 1.0                                                   |
-      | decimal     | 123.123                      | 123123123123.122                                      |
-      | decimal     | -2.45                        | 2.45                                                  |
-      | date        | 2024-06-04                   | 2024-06-05                                            |
-      | date        | 2024-06-04                   | 2024-07-03                                            |
-      | date        | 2024-06-04                   | 2025-01-01                                            |
-      | date        | 1970-01-01                   | 9999-12-12                                            |
-      | date        | 2024-06-04                   | 2024-06-05                                            |
-      | date        | 2024-06-04                   | 2024-07-03                                            |
-      | date        | 2024-06-04                   | 2025-01-01                                            |
-      | date        | 1970-01-01                   | 9999-12-12                                            |
-      | datetime    | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-      | datetime-tz | 2024-06-04+0000              | 2024-06-05+0000                                       |
-      | datetime-tz | 2024-06-04+0100              | 2048-06-04+0100                                       |
-      | datetime-tz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+      | value-type  | arg0                              | arg1                                                  |
+      | long        | 0                                 | 1                                                     |
+      | long        | 1                                 | 2                                                     |
+      | long        | 0                                 | 2                                                     |
+      | long        | -1                                | 1                                                     |
+      | long        | -9223372036854775808              | 9223372036854775807                                   |
+      | string      | "A"                               | "a"                                                   |
+      | string      | "a"                               | "z"                                                   |
+      | string      | "A"                               | "福"                                                   |
+      | string      | "AA"                              | "AAA"                                                 |
+      | string      | "short string"                    | "very-very-very-very-very-very-very-very long string" |
+      | boolean     | false                             | true                                                  |
+      | double      | 0.0                               | 0.0001                                                |
+      | double      | 0.01                              | 1.0                                                   |
+      | double      | 123.123                           | 123123123123.122                                      |
+      | double      | -2.45                             | 2.45                                                  |
+      | decimal     | 0.0                               | 0.0001                                                |
+      | decimal     | 0.01                              | 1.0                                                   |
+      | decimal     | 123.123                           | 123123123123.122                                      |
+      | decimal     | -2.45                             | 2.45                                                  |
+      | date        | 2024-06-04                        | 2024-06-05                                            |
+      | date        | 2024-06-04                        | 2024-07-03                                            |
+      | date        | 2024-06-04                        | 2025-01-01                                            |
+      | date        | 1970-01-01                        | 9999-12-12                                            |
+      | date        | 2024-06-04                        | 2024-06-05                                            |
+      | date        | 2024-06-04                        | 2024-07-03                                            |
+      | date        | 2024-06-04                        | 2025-01-01                                            |
+      | date        | 1970-01-01                        | 9999-12-12                                            |
+      | datetime    | 2024-06-04T16:35:02.10            | 2024-06-04T16:35:02.11                                |
+      | datetime-tz | 2024-06-04+0000                   | 2024-06-05+0000                                       |
+      | datetime-tz | 2024-06-04+0100                   | 2048-06-04+0100                                       |
+      | datetime-tz | 2024-06-04T16:35:02.103+0100      | 2024-06-04T16:35:02.104+0100                          |
+      | datetime-tz | 2024-06-04 Asia/Kathmandu         | 2024-06-05 Asia/Kathmandu                             |
+      | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin | 2024-05-05T00:00:00 Europe/London                     |
 
   Scenario Outline: Attribute types with <value-type> value type cannot set @range annotation
     When create attribute type: email
@@ -2224,7 +2228,7 @@ Feature: Concept Attribute Type
   Scenario Outline: Attribute type with <value-type> value type cannot set @range with duplicated arguments
     When create attribute type: name
     When attribute(name) set value type: <value-type>
-    Then attribute(name) set annotation: @range(<arg0>..<args>); fails
+    Then attribute(name) set annotation: @range(<arg0>..<arg0>); fails
     Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     When transaction commits
@@ -2232,15 +2236,15 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
-      | value-type  | arg0                     | args                     |
-      | long        | 1                        | 1                        |
-      | double      | 1.0                      | 1.0                      |
-      | decimal     | 1.0                      | 1.0                      |
-      | string      | "123"                    | "123"                    |
-      | boolean     | false                    | false                    |
-      | date        | 2030-06-04               | 2030-06-04               |
-      | datetime    | 2030-06-04               | 2030-06-04               |
-      | datetime-tz | 2030-06-04 Europe/London | 2030-06-04 Europe/London |
+      | value-type  | arg0                     |
+      | long        | 1                        |
+      | double      | 1.0                      |
+      | decimal     | 1.0                      |
+      | string      | "123"                    |
+      | boolean     | false                    |
+      | date        | 2030-06-04               |
+      | datetime    | 2030-06-04               |
+      | datetime-tz | 2030-06-04 Europe/London |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name

@@ -2662,39 +2662,40 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @range
     Examples:
-      | value-type  | arg0                         | arg1                                                  |
-      | long        | 0                            | 1                                                     |
-      | long        | 1                            | 2                                                     |
-      | long        | 0                            | 2                                                     |
-      | long        | -1                           | 1                                                     |
-      | long        | -9223372036854775808         | 9223372036854775807                                   |
-      | string      | "A"                          | "a"                                                   |
-      | string      | "a"                          | "z"                                                   |
-      | string      | "A"                          | "福"                                                   |
-      | string      | "AA"                         | "AAA"                                                 |
-      | string      | "short string"               | "very-very-very-very-very-very-very-very long string" |
-      | boolean     | false                        | true                                                  |
-      | double      | 0.0                          | 0.0001                                                |
-      | double      | 0.01                         | 1.0                                                   |
-      | double      | 123.123                      | 123123123123.122                                      |
-      | double      | -2.45                        | 2.45                                                  |
-      | decimal     | 0.0                          | 0.0001                                                |
-      | decimal     | 0.01                         | 1.0                                                   |
-      | decimal     | 123.123                      | 123123123123.122                                      |
-      | decimal     | -2.45                        | 2.45                                                  |
-      | date        | 2024-06-04                   | 2024-06-05                                            |
-      | date        | 2024-06-04                   | 2024-07-03                                            |
-      | date        | 2024-06-04                   | 2025-01-01                                            |
-      | date        | 1970-01-01                   | 9999-12-12                                            |
-      | datetime    | 2024-06-04                   | 2024-06-05                                            |
-      | datetime    | 2024-06-04                   | 2024-07-03                                            |
-      | datetime    | 2024-06-04                   | 2025-01-01                                            |
-      | datetime    | 1970-01-01                   | 9999-12-12                                            |
-      | datetime    | 2024-06-04T16:35:02.10       | 2024-06-04T16:35:02.11                                |
-      | datetime-tz | 2024-06-04+0000              | 2024-06-05+0000                                       |
-      | datetime-tz | 2024-06-04+0100              | 2048-06-04+0100                                       |
-      | datetime-tz | 2024-06-04T16:35:02.103+0100 | 2024-06-04T16:35:02.104+0100                          |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu    | 2024-06-05 Asia/Kathmandu                             |
+      | value-type  | arg0                              | arg1                                                  |
+      | long        | 0                                 | 1                                                     |
+      | long        | 1                                 | 2                                                     |
+      | long        | 0                                 | 2                                                     |
+      | long        | -1                                | 1                                                     |
+      | long        | -9223372036854775808              | 9223372036854775807                                   |
+      | string      | "A"                               | "a"                                                   |
+      | string      | "a"                               | "z"                                                   |
+      | string      | "A"                               | "福"                                                   |
+      | string      | "AA"                              | "AAA"                                                 |
+      | string      | "short string"                    | "very-very-very-very-very-very-very-very long string" |
+      | boolean     | false                             | true                                                  |
+      | double      | 0.0                               | 0.0001                                                |
+      | double      | 0.01                              | 1.0                                                   |
+      | double      | 123.123                           | 123123123123.122                                      |
+      | double      | -2.45                             | 2.45                                                  |
+      | decimal     | 0.0                               | 0.0001                                                |
+      | decimal     | 0.01                              | 1.0                                                   |
+      | decimal     | 123.123                           | 123123123123.122                                      |
+      | decimal     | -2.45                             | 2.45                                                  |
+      | date        | 2024-06-04                        | 2024-06-05                                            |
+      | date        | 2024-06-04                        | 2024-07-03                                            |
+      | date        | 2024-06-04                        | 2025-01-01                                            |
+      | date        | 1970-01-01                        | 9999-12-12                                            |
+      | datetime    | 2024-06-04                        | 2024-06-05                                            |
+      | datetime    | 2024-06-04                        | 2024-07-03                                            |
+      | datetime    | 2024-06-04                        | 2025-01-01                                            |
+      | datetime    | 1970-01-01                        | 9999-12-12                                            |
+      | datetime    | 2024-06-04T16:35:02.10            | 2024-06-04T16:35:02.11                                |
+      | datetime-tz | 2024-06-04+0000                   | 2024-06-05+0000                                       |
+      | datetime-tz | 2024-06-04+0100                   | 2048-06-04+0100                                       |
+      | datetime-tz | 2024-06-04T16:35:02.103+0100      | 2024-06-04T16:35:02.104+0100                          |
+      | datetime-tz | 2024-06-04 Asia/Kathmandu         | 2024-06-05 Asia/Kathmandu                             |
+      | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin | 2024-05-05T00:00:00 Europe/London                     |
 
     # TODO: Struct parsing is not supported now
 #  Scenario: Owns cannot set @range annotation for struct value type
