@@ -35,7 +35,7 @@ Feature: TypeQL Match Clause
         relates employer @card(0..),
         owns ref @key;
       attribute name value string;
-      attribute age value long;
+      attribute age @independent, value long;
       attribute ref value long;
       attribute email value string;
       """
@@ -1694,7 +1694,7 @@ Feature: TypeQL Match Clause
       """
       match $x has bananananananana "rama";
       """
-    Then transaction is open: false
+    Then transaction is open: true
 
 
 
@@ -1832,8 +1832,8 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute house-number value long;
-      attribute length value double;
+      attribute house-number @independent, value long;
+      attribute length @independent, value double;
       """
     Given transaction commits
 
@@ -1865,14 +1865,14 @@ Feature: TypeQL Match Clause
       """
       match
         $x isa house-number;
-        $x 1.0;
+        $x == 1.0;
       """
     Then answer size is: 1
     When get answers of typeql read query
       """
       match
         $x isa length;
-        $x 2;
+        $x == 2;
       """
     Then answer size is: 1
     When get answers of typeql read query
@@ -1958,7 +1958,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute length value double;
+      attribute length @independent, value double;
       """
     Given transaction commits
 
@@ -2041,7 +2041,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
     When get answers of typeql read query
       """
-      match $x isa $_; [ $x has name "Jeff"; ] or { $x has name "Amazon"; };
+      match $x isa $_; { $x has name "Jeff"; } or { $x has name "Amazon"; };
       """
     Then uniquely identify answer concepts
       | x         |
@@ -2087,18 +2087,30 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
-  # TODO use non-root types
   Scenario: multiple negations can be applied
+    Given typeql schema query
+      """
+      define
+        entity direction;
+        entity east sub direction;
+        entity west sub direction;
+        entity north sub direction;
+        entity south sub direction;
+      """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub! thing; not { $x label thing; }; not { $x label entity; }; not { $x label relation; };
+      match
+        $x sub! direction;
+        not { $x label east; };
+        not { $x label west; };
+        not { $x label south; };
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:attribute |
+      | x           |
+      | label:north |
 
   Scenario: pattern variable without named variable is invalid
     Given transaction commits
@@ -2445,7 +2457,7 @@ Feature: TypeQL Match Clause
       match
       entity $0_leading_digit_allowed;
       """
-    Given transaction commits
+    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     Given typeql schema query; parsing fails
