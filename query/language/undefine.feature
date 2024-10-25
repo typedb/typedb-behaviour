@@ -70,7 +70,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x sub person;
@@ -111,7 +111,7 @@ Feature: TypeQL Undefine Query
       | x            |
       | label:person |
       | label:child  |
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine child;
@@ -135,7 +135,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine person;
@@ -149,19 +149,18 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person plays employment:employee;
+      undefine plays employment:employee from person;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x label child; $x plays employment:employee;
       """
-    Then answer size is: 0
 
 
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
@@ -171,19 +170,18 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person owns name;
+      undefine owns name from person;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x label child; $x owns name;
       """
-    Then answer size is: 0
 
 
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
@@ -193,19 +191,19 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person owns email;
+      undefine owns email from person;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
-      match $x label child; $x owns email @key;
+      match $x label child; $x owns email;
       """
-    Then answer size is: 0
+
 
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of typeql read query
@@ -227,14 +225,14 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine person;
       """
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql write query
       """
       match
@@ -245,7 +243,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine person;
@@ -298,7 +296,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match contract-employment plays $x;
@@ -330,7 +328,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x owns start-date;
@@ -363,7 +361,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x owns employment-reference @key;
@@ -398,7 +396,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine
@@ -428,14 +426,14 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine employment;
       """
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql write query
       """
       match
@@ -446,7 +444,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine employment;
@@ -499,7 +497,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x label <attr>;
@@ -558,7 +556,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match first-name plays $x;
@@ -590,7 +588,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x owns locale;
@@ -623,7 +621,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x owns name-id @key;
@@ -654,7 +652,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine
@@ -695,14 +693,14 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine name;
       """
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql write query
       """
       match
@@ -713,7 +711,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When transaction closes
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine name;
@@ -786,7 +784,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql write query
       """
       match
@@ -797,7 +795,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine
@@ -880,7 +878,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine employment relates employer;
@@ -899,7 +897,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine employment relates employer;
@@ -923,7 +921,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine employment relates employer;
@@ -961,7 +959,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql write query
       """
       match
@@ -972,7 +970,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine person plays employment:employee;
@@ -1017,7 +1015,7 @@ Feature: TypeQL Undefine Query
     """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql schema query; fails
     """
     undefine
@@ -1037,7 +1035,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine person plays employment:employee;
@@ -1090,7 +1088,7 @@ Feature: TypeQL Undefine Query
       """
     Then transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine child owns name;
@@ -1145,7 +1143,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine person owns name;
@@ -1170,7 +1168,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine person owns name;
@@ -1187,7 +1185,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       undefine person owns email;
@@ -1212,7 +1210,7 @@ Feature: TypeQL Undefine Query
 #      """
 #    Given transaction commits
 #
-#    When connection open write transaction for database: typedb
+#    When connection open schema transaction for database: typedb
 #    Then rules contain: a-rule
 #    When typeql schema query
 #      """
@@ -1255,7 +1253,7 @@ Feature: TypeQL Undefine Query
 #      | n                 |
 #      | attr:name:Samuel  |
 #    Given transaction closes
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #    When typeql schema query
 #      """
 #      undefine rule samuel-email-rule;
@@ -1296,7 +1294,7 @@ Feature: TypeQL Undefine Query
 #    Given transaction commits
 #
 #    Given transaction closes
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #    Given get answers of typeql read query
 #      """
 #      match
@@ -1337,7 +1335,7 @@ Feature: TypeQL Undefine Query
 #    """
 #    Given transaction commits
 #
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #
 #    Given typeql schema query; fails
 #    """
@@ -1363,7 +1361,7 @@ Feature: TypeQL Undefine Query
 #    """
 #    Given transaction commits
 #
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #
 #    Given typeql schema query; fails
 #    """
@@ -1388,7 +1386,7 @@ Feature: TypeQL Undefine Query
 #    """
 #    Given transaction commits
 #
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #
 #    Given typeql schema query; fails
 #    """
@@ -1412,7 +1410,7 @@ Feature: TypeQL Undefine Query
 #    """
 #    Given transaction commits
 #
-#    Given connection open write transaction for database: typedb
+#    Given connection open schema transaction for database: typedb
 #
 #    Given typeql schema query; fails
 #    """
@@ -1441,7 +1439,7 @@ Feature: TypeQL Undefine Query
       """
 
     Given transaction closes
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       undefine abstract-type abstract;
@@ -1501,7 +1499,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine abstract-type @abstract;
@@ -1531,7 +1529,7 @@ Feature: TypeQL Undefine Query
       """
     Given transaction commits
 
-    Given connection open write transaction for database: typedb
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine
