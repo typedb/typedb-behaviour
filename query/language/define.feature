@@ -449,7 +449,7 @@ Feature: TypeQL Define Query
       match
         $x relates parent;
         $x relates child;
-     
+
       """
     Then uniquely identify answer concepts
       | x                |
@@ -459,7 +459,7 @@ Feature: TypeQL Define Query
       match
         $x relates father;
         $x relates son;
-     
+
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -771,7 +771,7 @@ Feature: TypeQL Define Query
       match
         $x label <label>;
         attribute $x;
-     
+
       """
     Then answer size is: 1
 
@@ -1913,7 +1913,7 @@ Feature: TypeQL Define Query
       match
       $name type super-name @abstract;
       $location type location-name, sub super-name;
-     
+
       """
     Then uniquely identify answer concepts
       | name             | location            |
