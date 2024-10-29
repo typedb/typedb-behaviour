@@ -54,9 +54,8 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-type |
 
-
-    # TODO: Error or not?
-#  Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype errors
+# TODO: Implement
+#  Scenario: undefining non-existing entity type sub errors
 #    When typeql schema query; fails
 #      """
 #      undefine sub abstract-type from person;
@@ -258,7 +257,6 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-type |
 
-
   ##################
   # RELATION TYPES #
   ##################
@@ -282,6 +280,13 @@ Feature: TypeQL Undefine Query
       """
       match relation $x;
       """
+
+# TODO: Complete
+#  Scenario: undefining non-existing relation type sub errors
+#    When typeql schema query; fails
+#      """
+#      undefine sub abstract-type from person;
+#      """
 
 
 # TODO: This will be fixed when the owns executor is fixed...
@@ -612,7 +617,6 @@ Feature: TypeQL Undefine Query
       | x               |
       | label:email     |
 
-
   #############################
   # RELATED ROLES ('RELATES') #
   #############################
@@ -806,22 +810,20 @@ Feature: TypeQL Undefine Query
       """
     Then transaction commits
 
-# TODO: Strange random failure (same in match.feature)
-#    When connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $x label part-time; $x relates $role;
-#      """
-#    Then uniquely identify answer concepts
-#      | x               | role                      |
-#      | label:part-time | label:employment:employee |
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x label part-time; $x relates $role;
+      """
+    Then uniquely identify answer concepts
+      | x               | role                      |
+      | label:part-time | label:employment:employee |
 
   # TODO
   Scenario: removing a role from a super relation type also removes roles that specialise it in its subtypes (?)
 
   # TODO
   Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just its parent role (?)
-
 
   ############################
   # PLAYABLE ROLES ('PLAYS') #
@@ -921,7 +923,6 @@ Feature: TypeQL Undefine Query
       """
       undefine plays employment:employee from person;
       """
-
 
   ########################
   # ATTRIBUTE OWNERSHIPS #
@@ -1273,12 +1274,12 @@ Feature: TypeQL Undefine Query
 ##      name-to-undefine;
 ##    """
 
-  ####################
-  # TYPE ANNOTATIONS #
-  ####################
+  ###############
+  # ANNOTATIONS #
+  ###############
 
   Scenario: undefining a type as abstract converts an abstract to a concrete type, allowing creation of instances
-    # TODO: Uncomment when annotations queries are implemented
+    # TODO: Uncomment when "match @..." is implemented
 #    Given typeql read query; fails with a message containing: "empty-set for some variable"
 #      """
 #      match
@@ -1303,7 +1304,7 @@ Feature: TypeQL Undefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    # TODO: Uncomment when annotations queries are implemented
+    # TODO: Uncomment when "match @..." is implemented
 #    When get answers of typeql read query
 #      """
 #      match
@@ -1334,7 +1335,7 @@ Feature: TypeQL Undefine Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when annotations queries are implemented
+    # TODO: Uncomment when "match @..." is implemented
 #    When connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -1360,7 +1361,7 @@ Feature: TypeQL Undefine Query
       undefine @abstract from abstract-type;
       """
 
-    # TODO: Uncomment when annotations queries are implemented
+    # TODO: Uncomment when "match @..." is implemented
 #    When connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -1390,7 +1391,7 @@ Feature: TypeQL Undefine Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when annotations queries are implemented
+    # TODO: Uncomment when "match @..." is implemented
 #    When connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -1401,11 +1402,7 @@ Feature: TypeQL Undefine Query
 #    Then answer size is: 1
 
 
-  ##########################
-  # CAPABILITY ANNOTATIONS #
-  ##########################
-  # TODO: Write tests
-
+  # TODO: Write tests for capabilities, extend existing
 
   ###################
   # COMPLEX QUERIES #

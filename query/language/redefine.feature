@@ -39,7 +39,6 @@ Feature: TypeQL Redefine Query
 
     Given connection open schema transaction for database: typedb
 
-
   ################
   # ENTITY TYPES #
   ################
@@ -188,15 +187,16 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns name[];
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-    When transaction closes
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns name[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:person |
+#    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -272,7 +272,6 @@ Feature: TypeQL Redefine Query
       """
       redefine entity $x;
       """
-
 
   ##################
   # RELATION TYPES #
@@ -351,9 +350,9 @@ Feature: TypeQL Redefine Query
       match $x sub employment;
       """
     Then uniquely identify answer concepts
-      | x                    |
-      | label:employment     |
-      | label:fun-employment |
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
 
 
   Scenario: a redefined relation subtype inherits roles from its supertype
@@ -414,15 +413,16 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x relates employee[];
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
-    When transaction closes
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x relates employee[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:employment |
+#    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -462,15 +462,16 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns start-date[];
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
-    When transaction closes
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns start-date[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:employment |
+#    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -526,7 +527,6 @@ Feature: TypeQL Redefine Query
       redefine relation $x;
       """
 
-
   ###################
   # ATTRIBUTE TYPES #
   ###################
@@ -573,6 +573,45 @@ Feature: TypeQL Redefine Query
       redefine
       attribute email value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
+
+  Scenario: an existing attribute type can be switched to a new supertype with a matching value type
+    Given typeql schema query
+      """
+      define
+      attribute measure @abstract, value double;
+      attribute shoe-size sub measure;
+      entity shoe owns shoe-size;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $s isa shoe, has shoe-size 9;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute size @abstract, value double;
+      """
+    When typeql schema query
+      """
+      redefine
+      attribute shoe-size sub size;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub shoe-size;
+      """
+    Then uniquely identify answer concepts
+      | x               |
+      | label:shoe-size |
 
 
   Scenario Outline: attribute types' value type can be redefined from '<value-type-1>' to '<value-type-2>'
@@ -641,14 +680,15 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label empty-sub-data, value decimal;
-      """
-    Then uniquely identify answer concepts
-      | x                    |
-      | label:empty-sub-data |
+    # TODO: ConstraintBase::ValueType is not implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label empty-sub-data, value decimal;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                    |
+#      | label:empty-sub-data |
 
 
   Scenario: redefining an attribute subtype throws if it is given a different value type to what its parent has
@@ -701,7 +741,6 @@ Feature: TypeQL Redefine Query
       redefine attribute phone-nr value string;
       """
     Then transaction commits
-
 
   ###############
   # ANNOTATIONS #
@@ -1205,7 +1244,6 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-
   ######################
   # HIERARCHY MUTATION #
   ######################
@@ -1275,7 +1313,7 @@ Feature: TypeQL Redefine Query
       relation species-membership relates species, relates member;
       attribute lifespan value double;
       entity organism owns lifespan, plays species-membership:member;
-      entity human sub person;
+      entity human sub creature;
       """
     Given transaction commits
 
@@ -1283,7 +1321,7 @@ Feature: TypeQL Redefine Query
     When typeql schema query
       """
       redefine
-      entity creature sub organism;
+      creature sub organism;
       """
     Then transaction commits
 
@@ -1309,7 +1347,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -1349,7 +1387,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -1389,7 +1427,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """

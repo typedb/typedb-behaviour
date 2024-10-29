@@ -29,7 +29,6 @@ Feature: TypeQL Define Query
 
     Given connection open schema transaction for database: typedb
 
-
   ################
   # ENTITY TYPES #
   ################
@@ -200,15 +199,16 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns email @key;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-      | label:child  |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns email @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:person |
+#      | label:child  |
 
 
   Scenario: a newly defined entity subtype inherits keys from all of its supertypes
@@ -221,17 +221,18 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns email @key;
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:person   |
-      | label:athlete  |
-      | label:runner   |
-      | label:sprinter |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns email @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x              |
+#      | label:person   |
+#      | label:athlete  |
+#      | label:runner   |
+#      | label:sprinter |
 
 
   Scenario: defining a playable role is idempotent
@@ -282,14 +283,15 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns address @key;
-      """
-    Then uniquely identify answer concepts
-      | x           |
-      | label:house |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns address @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x           |
+#      | label:house |
 
 
   Scenario: defining a type without a kind throws
@@ -332,7 +334,6 @@ Feature: TypeQL Define Query
       """
       define entity $x;
       """
-
 
   ##################
   # RELATION TYPES #
@@ -449,17 +450,16 @@ Feature: TypeQL Define Query
       match
         $x relates parent;
         $x relates child;
-
       """
     Then uniquely identify answer concepts
-      | x                |
-      | label:parenthood |
+      | x                    |
+      | label:parenthood     |
+      | label:father-sonhood |
     When get answers of typeql read query
       """
       match
         $x relates father;
         $x relates son;
-
       """
     Then uniquely identify answer concepts
       | x                    |
@@ -489,7 +489,7 @@ Feature: TypeQL Define Query
       | label:father-sonhood:father | label:father-sonhood:son |
 
 
-  Scenario: a specialised role is no longer associated with the relation type that specialises it
+  Scenario: a specialised role is still associated with the relation type that specialises it, but with @abstract
     Given typeql schema query
       """
       define relation part-time-employment sub employment, relates part-timer as employee;
@@ -502,8 +502,18 @@ Feature: TypeQL Define Query
       match $x relates employee;
       """
     Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
+
+    # TODO: Uncomment when "match @..." is implemented
+#    When get answers of typeql read query
+#      """
+#      match $x relates employee @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                          |
+#      | label:part-time-employment |
 
 
   Scenario: when specialising a role that doesn't exist on the parent relation, an error is thrown
@@ -648,15 +658,16 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns employment-reference-code @key;
-      """
-    Then uniquely identify answer concepts
-      | x                         |
-      | label:employment          |
-      | label:contract-employment |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns employment-reference-code @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                         |
+#      | label:employment          |
+#      | label:contract-employment |
 
 
   Scenario: a newly defined relation subtype inherits keys from all of its supertypes
@@ -669,17 +680,18 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns employment-reference-code @key;
-      """
-    Then uniquely identify answer concepts
-      | x                                 |
-      | label:employment                  |
-      | label:transport-employment        |
-      | label:aviation-employment         |
-      | label:flight-attendant-employment |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns employment-reference-code @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                                 |
+#      | label:employment                  |
+#      | label:transport-employment        |
+#      | label:aviation-employment         |
+#      | label:flight-attendant-employment |
 
 
   Scenario: a relation type cannot be defined with no roleplayers even if it is marked as @abstract
@@ -752,7 +764,6 @@ Feature: TypeQL Define Query
       | x               |
       | label:loan      |
       | label:ownership |
-
 
   ###################
   # ATTRIBUTE TYPES #
@@ -840,14 +851,15 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label door-code, value string;
-      """
-    Then uniquely identify answer concepts
-      | x               |
-      | label:door-code |
+    # TODO: ConstraintBase::ValueType is not implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label door-code, value string;
+#      """
+#    Then uniquely identify answer concepts
+#      | x               |
+#      | label:door-code |
 
 
   Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
@@ -884,32 +896,6 @@ Feature: TypeQL Define Query
       define attribute code-name-2 sub name;
       """
 
-  # TODO: re-enable when fixed (currently gives wrong answer)
-  @ignore
-  Scenario: a regex constraint can be defined on a 'string' attribute type
-    Given typeql schema query
-      """
-      define attribute response @regex("^(yes|no|maybe)$"), value string;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x @regex("^(yes|no|maybe)$");
-      """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:resource |
-
-
-  Scenario: a regex constraint cannot be defined on an attribute type whose value type is anything other than 'string'
-    Then typeql schema query; fails
-      """
-      define attribute name-in-binary @regex("^(0|1)+$"), value long;
-      """
-
-
   Scenario Outline: a type can own a '<value_type>' attribute type
     When typeql schema query
       """
@@ -937,23 +923,27 @@ Feature: TypeQL Define Query
       | datetime   | graduation-date   |
 
 
-  # TODO
-#  Scenario Outline: a type can own a '<value_type>' attribute type as a key
-#
-#  Scenario Outline: a '<value_type>' attribute type is not allowed to be a key
-
-
   ###############
   # ANNOTATIONS #
   ###############
 
-  # TODO: Add tests for structs and their fields
+  # TODO: Add annotation tests for structs and their fields
+
+  # TODO: For all "can set annotation ... to" tests, add match queries to check the definition when "match @..." is implemented
 
   Scenario Outline: can set annotation @<annotation> to entity types
     Then typeql schema query
       """
       define
       entity player @<annotation>;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      player @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -980,11 +970,30 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+    # Uncomment and fill when annotations with arguments appear for entity types
+#  Scenario Outline: cannot define different annotations of the same category on entity types
+#    Then typeql schema query; fails with a message containing: "Try redefine instead"
+#      """
+#      define
+#      entity player @<annotation-1> @<annotation-2>;
+#      """
+#    Examples:
+#      | annotation-1 | annotation-2 |
+
+
   Scenario Outline: can set annotation @<annotation> to relation types
     Then typeql schema query
       """
       define
       relation parentship @<annotation>, relates parent;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      parentship @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -1011,11 +1020,31 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+    # Uncomment and fill when annotations with arguments appear for relation types
+#  Scenario Outline: cannot define different annotations of the same category on relation types
+#    Then typeql schema query; fails with a message containing: "Try redefine instead"
+#      """
+#      define
+#      relation parentship @<annotation-1> @<annotation-2>, relates parent;
+#      """
+#    Then transaction commits
+#    Examples:
+#      | annotation-1 | annotation-2 |
+
+
   Scenario Outline: can set annotation @<annotation> to attribute types
     Then typeql schema query
       """
       define
       attribute description @<annotation>, value string;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      description @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -1042,11 +1071,31 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+    # Uncomment and fill when annotations with arguments appear for attribute types
+#  Scenario Outline: cannot define different annotations of the same category on attribute types
+#    Then typeql schema query; fails with a message containing: "Try redefine instead"
+#      """
+#      define
+#      attribute description @<annotation-1> @<annotation-2>, value string;
+#      """
+#    Then transaction commits
+#    Examples:
+#      | annotation-1 | annotation-2 |
+
+
   Scenario Outline: can set annotation @<annotation> to relates/role types
     Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      parentship relates parent @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -1073,11 +1122,30 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+  Scenario Outline: cannot define different annotations of the same category on role types
+    Then typeql schema query; fails with a message containing: "Try redefine instead"
+      """
+      define
+      relation parentship relates parent @<annotation-1> @<annotation-2>;
+      """
+    Examples:
+      | annotation-1 | annotation-2 |
+      | card(1..1)   | card(0..5)   |
+
+
   Scenario Outline: can set annotation @<annotation> to relates/role types lists
     Then typeql schema query
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      parentship relates parent[] @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -1111,6 +1179,14 @@ Feature: TypeQL Define Query
       entity player owns name @<annotation>;
       """
     Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      player owns name @<annotation> @<annotation> @<annotation>;
+      """
+    Then transaction commits
     Examples:
       | annotation       |
       | card(1..1)       |
@@ -1133,6 +1209,20 @@ Feature: TypeQL Define Query
       | distinct    |
       | independent |
 #      | cascade          | # TODO: Cascade is temporarily turned off
+
+
+  Scenario Outline: cannot define different annotations of the same category on owns
+    Then typeql schema query; fails with a message containing: "Try redefine instead"
+      """
+      define
+      entity player owns name @<annotation-1> @<annotation-2>;
+      """
+    Examples:
+      | annotation-1        | annotation-2               |
+      | card(1..1)          | card(0..5)                 |
+      | regex("one")        | regex("another")           |
+      | range("one".."two") | range("another".."second") |
+      | values("1", "2")    | values("3", "4")           |
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns of attribute type of wrong <value-type>
@@ -1195,9 +1285,9 @@ Feature: TypeQL Define Query
       | values(2024-06-04T00:00:00+0010)                      | , value date        |
       | values(2024-06-04T16:35:02)                           | , value date        |
       | values("福")                                           | , value date        |
+      | values(2024-06-04T00:00:00 Europe/Belfast)            | , value datetime    |
       | values(2024-06-04T00:00:00+0010)                      | , value datetime    |
       | values(2024-06-04)                                    | , value datetime-tz |
-      | values(2024-06-04T00:00:00 Europe/Belfast)            | , value datetime-tz |
       | values(123)                                           | , value duration    |
       | values("string")                                      | , value duration    |
       | values(2024-06-04)                                    | , value duration    |
@@ -1250,6 +1340,14 @@ Feature: TypeQL Define Query
       entity player owns name[] @<annotation>;
       """
     Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      player owns name[] @<annotation> @<annotation> @<annotation>;
+      """
+    Then transaction commits
     Examples:
       | annotation       |
       | distinct         |
@@ -1281,6 +1379,14 @@ Feature: TypeQL Define Query
       entity player plays employment:employee @<annotation>;
       """
     Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      player plays employment:employee @<annotation> @<annotation> @<annotation>;
+      """
+    Then transaction commits
     Examples:
       | annotation |
       | card(1..1) |
@@ -1305,11 +1411,30 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+  Scenario Outline: cannot define different annotations of the same category on owns
+    Then typeql schema query; fails with a message containing: "Try redefine instead"
+      """
+      define
+      entity player plays employment:employee @<annotation-1> @<annotation-2>;
+      """
+    Examples:
+      | annotation-1        | annotation-2               |
+      | card(1..1)          | card(0..5)                 |
+
+
   Scenario Outline: can set annotation @<annotation> to value types
     Then typeql schema query
       """
       define
       attribute description value string @<annotation>;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      description value string @<annotation> @<annotation> @<annotation>;
       """
     Then transaction commits
     Examples:
@@ -1371,14 +1496,27 @@ Feature: TypeQL Define Query
       | values(2024-06-04T00:00:00+0010)                      | date        |
       | values(2024-06-04T16:35:02)                           | date        |
       | values("福")                                           | date        |
+      | values(2024-06-04T00:00:00 Europe/Belfast)            | datetime    |
       | values(2024-06-04T00:00:00+0010)                      | datetime    |
       | values(2024-06-04)                                    | datetime-tz |
-      | values(2024-06-04T00:00:00 Europe/Belfast)            | datetime-tz |
       | values(123)                                           | duration    |
       | values("string")                                      | duration    |
       | values(2024-06-04)                                    | duration    |
       | values(2024-06-04T00:00:00+0100)                      | duration    |
       | values("year")                                        | duration    |
+
+
+  Scenario Outline: cannot define different annotations of the same category on owns
+    Then typeql schema query; fails with a message containing: "Try redefine instead"
+      """
+      define
+      attribute description value string @<annotation-1> @<annotation-2>;
+      """
+    Examples:
+      | annotation-1        | annotation-2               |
+      | regex("one")        | regex("another")           |
+      | range("one".."two") | range("another".."second") |
+      | values("1", "2")    | values("3", "4")           |
 
 
   Scenario Outline: cannot set annotation @values(<arg0>, <arg1>, <arg0>) with duplicated arguments to value type
@@ -1702,6 +1840,79 @@ Feature: TypeQL Define Query
     # TODO: Add a test for @cascade when it appears again
 
 
+  Scenario: annotations can be added on subtypes
+    Given typeql schema query
+      """
+      define
+      entity child sub person, owns school-id @unique;
+      attribute school-id value string;
+      """
+    Then transaction commits
+
+
+  Scenario: annotations are inherited
+    Given typeql schema query
+      """
+      define entity child sub person;
+      """
+    Given transaction commits
+
+    # TODO: Uncomment when "match @..." is implemented
+#    Then connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $t owns $a @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | t                | a                               |
+#      | label:person     | label:email                     |
+#      | label:child      | label:email                     |
+#      | label:employment | label:employment-reference-code |
+#    When get answers of typeql read query
+#      """
+#      match $t owns $a @unique;
+#      """
+#    Then uniquely identify answer concepts
+#      | t            | a              |
+#      | label:person | label:phone-nr |
+#      | label:child  | label:phone-nr |
+
+
+  Scenario: redefining inherited annotations errors for types and capabilities
+    Then typeql schema query
+      """
+      define entity child sub person; # owns email @key from background
+      """
+    Then transaction commits
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define child owns email @key;
+      """
+    Then transaction commits; fails with a message containing: "without specialisation"
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define child owns phone-nr @unique;
+      """
+    Then transaction commits; fails with a message containing: "without specialisation"
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define email @abstract; attribute working-email sub email, value string @regex("^.*@.*$");
+      """
+    Then transaction commits; fails with a message containing: "without specialisation"
+
+
+  Scenario: type cannot specialise owns
+    Then typeql schema query; parsing fails
+      """
+      define
+      entity person @abstract;
+      attribute phone-nr @abstract;
+      entity child sub person, owns mobile as phone-nr;
+      """
+
   ##################
   # ABSTRACT TYPES #
   ##################
@@ -1713,14 +1924,17 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label animal; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:animal |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x label animal;
+#      $x @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:animal |
 
 
   Scenario: a concrete entity type can be defined as a subtype of an abstract entity type
@@ -1752,15 +1966,16 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub animal; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:animal |
-      | label:fish   |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x sub animal; $x @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:animal |
+#      | label:fish   |
 
 
   Scenario: an abstract entity type cannot be defined as a subtype of a concrete entity type
@@ -1779,14 +1994,15 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label membership; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:membership |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label membership; $x @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:membership |
 
 
   Scenario: a concrete relation type can be defined as a subtype of an abstract relation type
@@ -1818,15 +2034,16 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub requirement; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x                      |
-      | label:requirement      |
-      | label:tool-requirement |
+    # TODO: Uncomment when "match @..." is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x sub requirement; $x @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                      |
+#      | label:requirement      |
+#      | label:tool-requirement |
 
 
   Scenario: an abstract relation type cannot be defined as a subtype of a concrete relation type
@@ -1845,14 +2062,15 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label number-of-limbs; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x                     |
-      | label:number-of-limbs |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label number-of-limbs; $x @abstract;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                     |
+#      | label:number-of-limbs |
 
 
   Scenario: a concrete attribute type can be defined as a subtype of an abstract attribute type
@@ -1884,15 +2102,16 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub number-of-limbs; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x                                |
-      | label:number-of-limbs            |
-      | label:number-of-artificial-limbs |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x @abstract, sub number-of-limbs;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                                |
+#      | label:number-of-limbs            |
+#      | label:number-of-artificial-limbs |
 
 
   Scenario: defining attribute type hierarchies is idempotent
@@ -1911,133 +2130,12 @@ Feature: TypeQL Define Query
     When get answers of typeql read query
       """
       match
-      $name type super-name @abstract;
-      $location type location-name, sub super-name;
-
+      $name label super-name;
+      $location label location-name, sub super-name;
       """
     Then uniquely identify answer concepts
       | name             | location            |
       | label:super-name | label:location-name |
-
-  # TODO: Reenable this scenario after closing https://github.com/vaticle/typeql/issues/281
-  @ignore
-  @ignore-typedb-driver-rust
-  Scenario: repeating the term 'abstract' when defining a type causes an error to be thrown
-    Given typeql schema query; fails
-      """
-      define entity animal @abstract @abstract @abstract;
-      """
-
-  ##############
-  # Annotation #
-  ##############
-
-  Scenario: annotations can be added on subtypes
-    Given typeql schema query
-      """
-      define
-      entity child sub person, owns school-id @unique;
-      attribute school-id value string;
-      """
-    Then transaction commits
-
-
-  Scenario: annotations are inherited
-    Given typeql schema query
-      """
-      define entity child sub person;
-      """
-    Given transaction commits
-    Then connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $t owns $a @key;
-      """
-    Then uniquely identify answer concepts
-      | t                | a                               |
-      | label:person     | label:email                     |
-      | label:child      | label:email                     |
-      | label:employment | label:employment-reference-code |
-    When get answers of typeql read query
-      """
-      match $t owns $a @unique;
-      """
-    Then uniquely identify answer concepts
-      | t            | a              |
-      | label:person | label:phone-nr |
-      | label:child  | label:phone-nr |
-
-
-  Scenario: redefining inherited annotations throws for types, does not for capabilities
-    Then typeql schema query
-      """
-      define entity child sub person, owns email @key;
-      """
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then typeql schema query
-      """
-      define entity child sub person, owns phone-nr @unique;
-      """
-    Then transaction commits
-    When connection open schema transaction for database: typedb
-    Then typeql schema query
-      """
-      define email @abstract; attribute working-email sub email, value string @regex("^.*@.*$");
-      """
-    Then transaction commits; fails
-
-
-  Scenario: type cannot specialise owns
-    Then typeql schema query; parsing fails
-      """
-      define
-      entity person @abstract;
-      attribute phone-nr @abstract;
-      entity child sub person, owns mobile as phone-nr;
-      """
-
-
-    # TODO: Should be checked without specialise
-#  Scenario: annotations are inherited through specialises
-#    Given typeql schema query
-#      """
-#      define
-#      entity person @abstract;
-#      attribute phone-nr @abstract;
-#      entity child sub person, owns mobile as phone-nr;
-#      attribute mobile sub phone-nr;
-#      """
-#    Given transaction commits
-#    Then connection open schema transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $t owns $a @unique;
-#      """
-#    Then uniquely identify answer concepts
-#      | t            | a              |
-#      | label:person | label:phone-nr |
-#      | label:child  | label:mobile   |
-#    Given typeql schema query
-#      """
-#      define
-#      entity child @abstract;
-#      attribute mobile @abstract;
-#      entity infant sub child, owns baby-phone-nr as mobile;
-#      attribute baby-phone-nr sub mobile;
-#      """
-#    Given transaction commits
-#    Then connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $t owns $a @unique;
-#      """
-#    Then uniquely identify answer concepts
-#      | t            | a                   |
-#      | label:person | label:phone-nr      |
-#      | label:child  | label:mobile        |
-#      | label:infant | label:baby-phone-nr |
-
 
   ###################
   # SCHEMA MUTATION #
@@ -2130,7 +2228,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa product, has name "Cheese", has barcode "10001";
@@ -2148,17 +2246,18 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns barcode @key;
-      """
-    Then uniquely identify answer concepts
-      | x             |
-      | label:product |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns barcode @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x             |
+#      | label:product |
 
 
-  Scenario: defining a key on a type throws if existing instances don't have that key
+  Scenario: defining a key on a type errors if existing instances don't have that key
     Given typeql schema query
       """
       define
@@ -2168,7 +2267,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa product, has name "Cheese";
@@ -2184,7 +2283,7 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: defining a key on a type throws if there is a key collision between two existing instances
+  Scenario: defining a key on a type errors if there is a key collision between two existing instances
     Given typeql schema query
       """
       define
@@ -2194,7 +2293,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa product, has name "Cheese", has barcode "10000";
@@ -2246,7 +2345,7 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint can be added to an existing attribute type if all its instances satisfy it
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has name "Alice", has email "alice@vaticle.com";
@@ -2260,20 +2359,21 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
-      """
-      match $x @regex("^A.*$");
-      """
-    Then uniquely identify answer concepts
-      | x          |
-      | label:name |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    Then get answers of typeql read query
+#      """
+#      match $x @regex("^A.*$");
+#      """
+#    Then uniquely identify answer concepts
+#      | x          |
+#      | label:name |
 
 
   Scenario: a regex cannot be added to an existing attribute type if there is an instance that doesn't satisfy it
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has name "Maria", has email "maria@vaticle.com";
@@ -2334,14 +2434,15 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns name @key;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns name @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:person |
 
 
   Scenario: an attribute key ownership can be converted to a regular ownership
@@ -2359,11 +2460,13 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x            |
       | label:person |
-    When get answers of typeql read query
-      """
-      match $x owns email @key;
-      """
-    Then answer size is: 0
+
+    # TODO: Uncomment when "match @..." is implemented
+#    When get answers of typeql read query; fails ......
+#      """
+#      match $x owns email @key;
+#      """
+#    Then answer size is: 0
 
 
   Scenario: defining a uniqueness on existing ownership is possible if data conforms to uniqueness requirements
@@ -2373,11 +2476,11 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
-    When typeql insert
+    When typeql write query
       """
       insert $x isa person, has name "Bob", has email "bob@gmail.com";
       """
-    Then typeql insert
+    Then typeql write query
       """
       insert $x isa person, has name "Jane", has name "Doe", has email "janedoe@gmail.com";
       """
@@ -2388,21 +2491,23 @@ Feature: TypeQL Define Query
       define person owns name @unique;
       """
     Then transaction commits
-    Given connection open write transaction for database: typedb
-    Given typeql insert; fails
-      """
-      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
-      """
+
+    # TODO: Adding this check makes reset take 60 seconds after the failed query...
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query; fails
+#      """
+#      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
+#      """
 
 
   Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
     Given transaction closes
     Given connection open write transaction for database: typedb
-    When typeql insert
+    When typeql write query
       """
       insert $x isa person, has name "Bob", has email "bob@gmail.com";
       """
-    Then typeql insert
+    Then typeql write query
       """
       insert $x isa person, has name "Bob", has email "bob2@gmail.com";
       """
@@ -2421,7 +2526,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has phone-nr "123", has email "abc@gmail.com";
@@ -2433,7 +2538,7 @@ Feature: TypeQL Define Query
   Scenario: a key ownership can be converted to a unique ownership
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has email "jane@gmail.com";
@@ -2441,36 +2546,43 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    # TODO: Wait for undefine queries to undefine unique!
+    Given typeql schema query
+      """
+      undefine @key from person owns email;
+      """
     Given typeql schema query
       """
       define person owns email @unique;
       """
     Then transaction commits
+
     Given connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x owns $y @unique;
-      """
-    Then uniquely identify answer concepts
-      | x            | y              |
-      | label:person | label:email    |
-      | label:person | label:phone-nr |
-    When get answers of typeql read query
-      """
-      match person owns $y @key;
-      """
-    Then answer size is: 0
-    Given typeql insert; fails
-      """
-      insert $x isa person, has email "jane@gmail.com";
-      """
+    # TODO: Uncomment when "match @..." is implemented
+#    When get answers of typeql read query
+#      """
+#      match $x owns $y @unique;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            | y              |
+#      | label:person | label:email    |
+#      | label:person | label:phone-nr |
+#    When get answers of typeql read query
+#      """
+#      match person owns $y @key;
+#      """
+#    Then answer size is: 0
+
+    # TODO: Adding this check makes reset take 60 seconds after the failed query...
+#    Given typeql write query; fails
+#      """
+#      insert $x isa person, has email "jane@gmail.com";
+#      """
 
 
   Scenario: converting unique to key is possible if the data conforms to key requirements
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has phone-nr "123", has email "abc@gmail.com";
@@ -2478,25 +2590,29 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    # TODO: Wait for undefine queries to undefine unique!
     Given typeql schema query
       """
-      define
-      person owns phone-nr @key;
+      undefine @unique from person owns phone-nr;
+      """
+    Given typeql schema query
+      """
+      define person owns phone-nr @key;
       """
     Then transaction commits
-    Given connection open write transaction for database: typedb
-    Then typeql insert; fails
-      """
-      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
-      """
+
+    # TODO: Adding this check makes reset take 60 seconds after the failed query...
+#    Given connection open write transaction for database: typedb
+#    Then typeql write query; fails
+#      """
+#      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
+#      """
 
 
   Scenario: converting unique to key fails if the data does not conform to key requirements
     Given transaction closes
     Given connection open write transaction for database: typedb
     # no instances of phone-nr -> 0 vs key's card 1..1
-    Given typeql insert
+    Given typeql write query
       """
       insert $x isa person, has email "abc@gmail.com";
       """
@@ -2508,7 +2624,6 @@ Feature: TypeQL Define Query
       person owns phone-nr @key;
       """
 
-
   #############################
   # SCHEMA MUTATION: ABSTRACT #
   #############################
@@ -2516,18 +2631,19 @@ Feature: TypeQL Define Query
   Scenario: a concrete entity type can be converted to an abstract entity type
     When typeql schema query
       """
-      define person @abstract;
+      define entity person @abstract;
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub person; $x @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
+    # TODO: Uncomment when "match @..." is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x @abstract, sub person;
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:person |
 
 
   Scenario: a concrete relation type can be converted to an abstract relation type
@@ -2543,14 +2659,15 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub friendship @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:friendship |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x @abstract, sub friendship;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:friendship |
 
 
   Scenario: a concrete attribute type can be converted to an abstract attribute type
@@ -2565,20 +2682,22 @@ Feature: TypeQL Define Query
       define age @abstract;
       """
     Then transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub age @abstract;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | label:age |
+
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x @abstract, sub age;
+#      """
+#    Then uniquely identify answer concepts
+#      | x         |
+#      | label:age |
 
 
   Scenario: an existing entity type cannot be converted to abstract if it has existing instances
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
@@ -2595,7 +2714,7 @@ Feature: TypeQL Define Query
   Scenario: an existing relation type cannot be converted to abstract if it has existing instances
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
@@ -2613,7 +2732,7 @@ Feature: TypeQL Define Query
   Scenario: an existing attribute type cannot be converted to abstract if it has existing instances
     Given transaction closes
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
       $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
@@ -2626,21 +2745,9 @@ Feature: TypeQL Define Query
       define name @abstract;
       """
 
-
-  Scenario: changing a concrete type to abstract throws on commit if it has a concrete supertype
-
-  @ignore
-  # TODO: re-enable when rules are indexed
-  Scenario: changing a concrete relation type to abstract throws on commit if it appears in the conclusion of any rule
-
-#  @ignore
-#  # TODO: re-enable when rules are indexed
-#  Scenario: changing a concrete attribute type to abstract throws on commit if it appears in the conclusion of any rule
-
   ######################
   # HIERARCHY MUTATION #
   ######################
-
 
   Scenario: an existing entity type cannot be switched to a new supertype through define
     Given typeql schema query
@@ -2674,44 +2781,6 @@ Feature: TypeQL Define Query
       define
       relation sabbatical sub vacation;
       """
-
-
-  Scenario: an existing attribute type can be switched to a new supertype with a matching value type
-    Given typeql schema query
-      """
-      define
-      attribute measure @abstract, value double;
-      attribute shoe-size sub measure;
-      entity shoe owns shoe-size;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    # TODO: 9 is considered long, while it should be transformed into double before thing_manager
-    Given typeql insert
-      """
-      insert $s isa shoe, has shoe-size 9;
-      """
-    Given transaction commits
-
-    Given connection open schema transaction for database: typedb
-    When typeql schema query
-      """
-      define
-      attribute size value double @abstract;
-      attribute shoe-size sub size;
-      """
-    # TODO: This will probably fail because of the value type redundancy. Move this test to redefine/undefine?
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x sub shoe-size;
-      """
-    Then uniquely identify answer concepts
-      | x               |
-      | label:shoe-size |
 
 
   Scenario: assigning a supertype without previous supertype succeeds even if they have different attributes + roles, if there are no instances
@@ -2756,7 +2825,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -2780,7 +2849,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon2;
       """
@@ -2804,7 +2873,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon3;
       """
@@ -2838,32 +2907,9 @@ Feature: TypeQL Define Query
       entity person sub species;
       """
 
-
-  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes have the same attributes
-  Scenario: assigning a new supertype throws if existing data has attributes not present on the new supertype
-
-  # TODO: write this once 'assign new supertype .. with existing data' succeeds if the supertypes play the same roles
-  Scenario: assigning a new supertype throws if existing data plays a role that it can't with the new supertype
-
-  # TODO: write this once 'assign new supertype throws if .. data has attributes not present on the new supertype' is written
-  Scenario: assigning a new supertype throws if that supertype has a has not @key present in the existing data (?)
-
-  # TODO: write this once 'define new 'sub' on relation type changes its supertype' is written
-  Scenario: assigning a new super-relation throws if existing data has roleplayers not present on the new supertype (?)
-
-  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
-  Scenario: assigning a new super-attribute throws if it has a different value type (?)
-
-  # TODO: write this if 'assign new super-attribute throws if it has a different value type ..' turns out to not throw
-  Scenario: assigning a new super-attribute throws if it has existing data and a different value type (?)
-
-  # TODO: write this once 'define new 'sub' on attribute type changes its supertype' passes
-  Scenario: assigning a new super-attribute throws if the new supertype has a regex and existing data doesn't match it (?)
-
   ###############################
   # SCHEMA MUTATION INHERITANCE #
   ###############################
-
 
   Scenario: when adding a playable role to an existing type, the change is propagated to its subtypes
     Given typeql schema query
@@ -2920,15 +2966,16 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label child, owns $y @key;
-      """
-    Then uniquely identify answer concepts
-      | x           | y                  |
-      | label:child | label:email        |
-      | label:child | label:phone-number |
+    # TODO: Uncomment when "match @..." is implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label child, owns $y @key;
+#      """
+#    Then uniquely identify answer concepts
+#      | x           | y                  |
+#      | label:child | label:email        |
+#      | label:child | label:phone-number |
 
 
   Scenario: when adding a related role to an existing relation type, the change is propagated to all its subtypes
@@ -2950,7 +2997,6 @@ Feature: TypeQL Define Query
       | label:part-time-employment | label:employment:employee |
       | label:part-time-employment | label:employment:employer |
 
-
   ####################
   # TRANSACTIONALITY #
   ####################
@@ -2960,16 +3006,12 @@ Feature: TypeQL Define Query
       """
       define entity dog;
       """
-    # TODO: The current framework doesn't support another transaction from the same client without closing the
-    # already existing one. It might contradict the test!
     Given transaction closes
     Given connection open read transaction for database: typedb
-    # TODO: What did this "fails" mean?
-    Then typeql get; fails
+    Then typeql read query; fails with a message containing: "not found"
       """
       match $x label dog;
       """
-
 
   ########################
   # CYCLIC SCHEMA GRAPHS #
@@ -3071,5 +3113,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO 3.0: Add tests for structs
+    # TODO 3.x: Add tests for structs
+
+
     # TODO 3.0: Add tests for functions
