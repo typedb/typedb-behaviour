@@ -193,7 +193,7 @@ Feature: Connection Transaction
 #      | read   |
 #      | write  |
 #      | schema |
-#      | read   |
+#      | read   |ƒ
 #      | write  |
 #      | schema |
 #      | read   |
@@ -247,7 +247,7 @@ Feature: Connection Transaction
     Given connection open read transaction for database: typedb
     Then transaction commits; fails
 
-  Scenario Outline: <command> in a schema transaction fails
+  Scenario Outline: <command> in a schema transaction closes the transaction
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -261,7 +261,7 @@ Feature: Connection Transaction
       | close   |
       | commit  |
 
-  Scenario Outline: <command> in a write transaction fails
+  Scenario Outline: <command> in a write transaction closes the transaction
     Given connection create database: typedb
     Given connection open schema transaction for database: typedb
     Given typeql schema query

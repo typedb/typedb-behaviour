@@ -245,6 +245,29 @@ Feature: TypeQL Match Clause
       | label:person |
 
 
+  Scenario: 'owns' matches types that own the specified attribute type with their inheriting subtypes
+    Given typeql schema query
+      """
+      define
+      entity child sub person;
+      entity man sub person;
+      entity boy sub man;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x owns age;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+      | label:child  |
+      | label:man    |
+      | label:boy    |
+
+
   Scenario: 'owns' does not match types that own only a subtype of the specified attribute type
     Given typeql schema query
       """
@@ -338,6 +361,7 @@ Feature: TypeQL Match Clause
   #     | label:person | label:email |
 
 
+  # TODO: handle different annotations for different types/capabilities
   # TODO: handle type statement annotations
   # Scenario: inherited 'owns' annotations are queryable
   #   Given typeql schema query
@@ -429,6 +453,29 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | x            |
       | label:person |
+
+
+  Scenario: 'plays' matches types that own the specified attribute type with their inheriting subtypes
+    Given typeql schema query
+      """
+      define
+      entity child sub person;
+      entity man sub person;
+      entity boy sub man;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x plays friendship:friend;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+      | label:child  |
+      | label:man    |
+      | label:boy    |
 
 
   Scenario: 'plays' does not match types that only play a subrole of the specified role
@@ -590,6 +637,30 @@ Feature: TypeQL Match Clause
       | x                |
       | label:employment |
 
+
+  Scenario: 'plays' matches types that own the specified attribute type with their inheriting subtypes
+    Given typeql schema query
+      """
+      define
+      relation part-time-employment sub employment;
+      relation full-time-employment sub employment;
+      relation internship sub full-time-employment;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x relates employee;
+      """
+    Then uniquely identify answer concepts
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
+      | label:full-time-employment |
+      | label:internship           |
+
+
   # TODO cannot currently query for schema with 'as'
   @ignore
   Scenario: 'relates' with 'as' matches relation types that specialise the specified roleplayer
@@ -676,11 +747,11 @@ Feature: TypeQL Match Clause
       match $x isa $y;
       """
     Then uniquely identify answer concepts
-      | x          | y               |
-      | key:ref:0  | label:person    |
-      | key:ref:1  | label:person    |
-      | attr:ref:0 | label:ref       |
-      | attr:ref:1 | label:ref       |
+      | x          | y            |
+      | key:ref:0  | label:person |
+      | key:ref:1  | label:person |
+      | attr:ref:0 | label:ref    |
+      | attr:ref:1 | label:ref    |
 
   Scenario: 'isa' matches things of the specified type and all its subtypes
     Given typeql schema query
@@ -1456,14 +1527,14 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
     Examples:
-      | attr        | type        | value                              |
-      | colour      | string      | "Green"                            |
-      | calories    | long        | 1761                               |
-      | grams       | double      | 9.6                                |
-      | gluten-free | boolean     | false                              |
-      | use-by-date | datetime    | 2020-06-16                         |
-      | global-date | datetime-tz | 1990-01-01T11:22:33-0100           |
-      | interval    | duration    | P1Y2M3DT4H5M6.789S                 |
+      | attr        | type        | value                    |
+      | colour      | string      | "Green"                  |
+      | calories    | long        | 1761                     |
+      | grams       | double      | 9.6                      |
+      | gluten-free | boolean     | false                    |
+      | use-by-date | datetime    | 2020-06-16               |
+      | global-date | datetime-tz | 1990-01-01T11:22:33-0100 |
+      | interval    | duration    | P1Y2M3DT4H5M6.789S       |
 
 
   # TODO `like` / `contains`
@@ -2362,9 +2433,9 @@ Feature: TypeQL Match Clause
       match $phrase isa favorite-phrase;
       """
     Then uniquely identify answer concepts
-      | phrase                             |
+      | phrase                        |
       | attr:favorite-phrase:你明白了吗    |
-      | attr:favorite-phrase:בוקר טוב      |
+      | attr:favorite-phrase:בוקר טוב |
 
     Given get answers of typeql read query
       """
@@ -2412,7 +2483,7 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | t         |
-      | label:人  |
+      | label:人   |
       | label:אדם |
 
     Given get answers of typeql read query
@@ -2450,7 +2521,7 @@ Feature: TypeQL Match Clause
       match $人 isa person; $人 has name "Liu";
       """
     Then uniquely identify answer concepts
-      | 人        |
+      | 人         |
       | key:ref:0 |
 
     Given get answers of typeql read query
