@@ -54,12 +54,25 @@ Feature: TypeQL Undefine Query
       | x                   |
       | label:abstract-type |
 
-# TODO: Implement
-#  Scenario: undefining non-existing entity type sub errors
-#    When typeql schema query; fails
-#      """
-#      undefine sub abstract-type from person;
-#      """
+
+  Scenario: undefining non-existing entity type sub errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'person sub abstract-type'"
+      """
+      undefine sub abstract-type from person;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      person sub superperson;
+      entity superperson @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'person sub abstract-type', while"
+      """
+      undefine sub abstract-type from person;
+      """
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
@@ -281,15 +294,66 @@ Feature: TypeQL Undefine Query
       match relation $x;
       """
 
-# TODO: Complete
-#  Scenario: undefining non-existing relation type sub errors
-#    When typeql schema query; fails
-#      """
-#      undefine sub abstract-type from person;
-#      """
+
+  Scenario: undefining non-existing relation type sub errors
+    Given typeql schema query
+      """
+      define relation abstract-relation @abstract, relates abstract-employee @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment sub abstract-relation'"
+      """
+      undefine sub abstract-relation from employment;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      employment sub superemployment;
+      relation superemployment @abstract, relates superemployee @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment sub abstract-relation', while"
+      """
+      undefine sub abstract-relation from employment;
+      """
 
 
-# TODO: This will be fixed when the owns executor is fixed...
+  Scenario: a sub-relation type can be removed using 'sub' with its direct supertype, and its parent is preserved
+    Given typeql schema query
+      """
+      define relation part-time-employment sub employment, relates some-role;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x sub employment;
+      """
+    Given uniquely identify answer concepts
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
+    When typeql schema query
+      """
+      undefine sub employment from part-time-employment;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub employment;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:employment |
+
+
   Scenario: removing playable roles from a super relation type also removes them from its subtypes
     Given typeql schema query
       """
@@ -320,7 +384,6 @@ Feature: TypeQL Undefine Query
       match contract-employment plays $x;
       """
 
-# TODO: This will be fixed when the owns executor is fixed...
   Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
     Given typeql schema query
       """
@@ -519,6 +582,69 @@ Feature: TypeQL Undefine Query
       | datetime   | birth-date |
 
 
+  Scenario: undefining non-existing attribute type sub errors
+    Given typeql schema query
+      """
+      define attribute abstract-attribute @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'email sub abstract-attribute'"
+      """
+      undefine sub abstract-attribute from email;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      email sub superattribute;
+      attribute superattribute @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'email sub abstract-attribute', while"
+      """
+      undefine sub abstract-attribute from email;
+      """
+
+
+  Scenario: a sub-attribute type can be removed using 'sub' with its direct supertype, and its parent is preserved
+    Given typeql schema query
+      """
+      define attribute surname sub name; name @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x sub name;
+      """
+    Given uniquely identify answer concepts
+      | x             |
+      | label:name    |
+      | label:surname |
+    When typeql schema query
+      """
+      define surname value string;
+      """
+    When typeql schema query
+      """
+      undefine sub name from surname;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub name;
+      """
+    Then uniquely identify answer concepts
+      | x          |
+      | label:name |
+
+
   Scenario: undefining a @regex on an attribute type removes the regex constraints on the attribute
     Then typeql schema query; fails with a message containing: "Illegal annotation"
       """
@@ -547,7 +673,7 @@ Feature: TypeQL Undefine Query
 
 
   Scenario: undefining the value type of an attribute type is possible
-    Then typeql schema query; fails with a message containing: "value type is string"
+    Then typeql schema query; fails with a message containing: "defined 'value' is 'string'"
       """
       undefine value long from name;
       """
@@ -573,9 +699,9 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
+      | x           |
+      | label:name  |
+      | label:email |
     Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql write query
@@ -614,8 +740,8 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
+      | x           |
+      | label:email |
 
   #############################
   # RELATED ROLES ('RELATES') #
@@ -1422,9 +1548,9 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
+      | x           |
+      | label:name  |
+      | label:email |
     When typeql schema query
       """
       undefine
@@ -1446,8 +1572,8 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
+      | x           |
+      | label:email |
 
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given get answers of typeql read query
@@ -1470,9 +1596,9 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
+      | x           |
+      | label:name  |
+      | label:email |
     Given get answers of typeql read query
       """
       match $_ relates $x;
@@ -1507,8 +1633,8 @@ Feature: TypeQL Undefine Query
       match attribute $x;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
+      | x           |
+      | label:email |
     Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $_ relates $x;
