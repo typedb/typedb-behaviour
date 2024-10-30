@@ -68,7 +68,24 @@ Feature: TypeQL Define Query
       | label:child  |
 
 
-  Scenario: when defining that a type owns a non-existent thing, an error is thrown
+  Scenario: defining an entity type sub when a different sub is already defined errors
+    Given typeql schema query
+      """
+      define
+      person sub parent;
+      entity parent @abstract;
+      entity not-parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'person sub parent' is already defined"
+      """
+      define person sub not-parent;
+      """
+
+
+  Scenario: when defining that a type owns a non-existent attribute type, an error is thrown
     Then typeql schema query; fails
       """
       define entity book owns pages;
@@ -274,6 +291,27 @@ Feature: TypeQL Define Query
       | label:house |
 
 
+  Scenario: defining an ownership when a differently ordered ownership is already defined errors
+    Given typeql schema query
+      """
+      define person owns start-date[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'person owns name' is already defined"
+      """
+      define person owns name[];
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'person owns start-date[]' is already defined"
+      """
+      define person owns start-date;
+      """
+
+
   Scenario: defining a key ownership is idempotent
     Given typeql schema query
       """
@@ -374,6 +412,23 @@ Feature: TypeQL Define Query
       | label:fun-employment |
 
 
+  Scenario: defining a relation type sub when a different sub is already defined errors
+    Given typeql schema query
+      """
+      define
+      employment sub contract;
+      relation contract @abstract, relates side @abstract;
+      relation agreement, relates side;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'employment sub contract' is already defined"
+      """
+      define employment sub agreement;
+      """
+
+
   Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
     Then typeql schema query
       """
@@ -464,6 +519,43 @@ Feature: TypeQL Define Query
     Then uniquely identify answer concepts
       | x                    |
       | label:father-sonhood |
+
+
+  Scenario: defining a relates when a differently ordered relates is already defined errors
+    Given typeql schema query
+      """
+      define employment relates mentor[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'employment relates employee' is already defined"
+      """
+      define employment relates employee[];
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'employment relates mentor[]' is already defined"
+      """
+      define employment relates mentor;
+      """
+
+
+  Scenario: defining a relates specialise when a differently relates specialise is already defined errors
+    Given typeql schema query
+      """
+      define
+      employment relates employer;
+      relation part-time-employment sub employment, relates part-time-employee as employee;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'part-time-employment relates part-time-employee as employee' is already defined"
+      """
+      define part-time-employment relates part-time-employee as employer;
+      """
 
 
   Scenario: when a relation type's role is specialised, it creates a sub-role of the parent role type
@@ -826,7 +918,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      attribute code @abstract, value string ;
+      attribute code @abstract, value string;
       attribute door-code sub code;
       """
     Then transaction commits
@@ -840,6 +932,23 @@ Feature: TypeQL Define Query
       | x               |
       | label:code      |
       | label:door-code |
+
+
+  Scenario: defining an attribute type sub when a different sub is already defined errors
+    Given typeql schema query
+      """
+      define
+      name sub root-attribute;
+      attribute root-attribute @abstract;
+      attribute empty-attribute @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "different 'name sub root-attribute' is already defined"
+      """
+      define name sub empty-attribute;
+      """
 
 
   Scenario: a newly defined attribute subtype inherits the value type of its parent
@@ -922,6 +1031,12 @@ Feature: TypeQL Define Query
       | string     | first-word        |
       | datetime   | graduation-date   |
 
+
+  Scenario: defining an attribute type value when a different value is already defined errors
+    Then typeql schema query; fails with a message containing: "different 'name value string' is already defined"
+      """
+      define name value long;
+      """
 
   ###############
   # ANNOTATIONS #
@@ -1418,8 +1533,8 @@ Feature: TypeQL Define Query
       entity player plays employment:employee @<annotation-1> @<annotation-2>;
       """
     Examples:
-      | annotation-1        | annotation-2               |
-      | card(1..1)          | card(0..5)                 |
+      | annotation-1 | annotation-2 |
+      | card(1..1)   | card(0..5)   |
 
 
   Scenario Outline: can set annotation @<annotation> to value types
@@ -2147,7 +2262,20 @@ Feature: TypeQL Define Query
       define
       entity person owns name;
       entity person owns name;
+      relation employment relates employee;
+      relation employment relates employee;
+      relation employment relates employer;
+      relation employment relates employer;
+      attribute name value string;
+      attribute name;
+      attribute name value string;
+      entity person owns email @key;
+      entity person owns email @key;
+      entity person owns email;
       entity person owns name;
+      relation subemployment sub employment, relates subemployee as employee;
+      relation subemployment sub employment, relates subemployee as employee;
+      relation subemployment sub employment, relates subemployee as employee;
       """
     Then transaction commits
 
@@ -2157,6 +2285,56 @@ Feature: TypeQL Define Query
       match $x label person, owns name;
       """
     Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $x label person, owns email;
+      """
+    Then answer size is: 1
+
+    # TODO: Uncomment when "match @..." is implemented
+#    When get answers of typeql read query
+#      """
+#      match $x label person, owns email @key;
+#      """
+#    Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $x label employment, relates employee;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $x label employment, relates employer;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $x label subemployment, relates subemployee;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $_ relates subemployee as $x;
+      """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+      """
+      match $x label name;
+      """
+    Then answer size is: 1
+
+    # TODO: ConstraintBase::ValueType is not implemented
+#    When get answers of typeql read query
+#      """
+#      match $x label name, value string;
+#      """
+#    Then answer size is: 1
 
 
   Scenario: an entity type cannot be changed into a relation type
@@ -2328,7 +2506,7 @@ Feature: TypeQL Define Query
       | label:employment |
 
 
-  Scenario: Redefining an attribute type succeeds if and only if the value type remains unchanged
+  Scenario: Defining an attribute type multiple times succeeds if and only if the value type remains unchanged
     Then typeql schema query; fails
       """
       define attribute name value long;
