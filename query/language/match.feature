@@ -2008,35 +2008,33 @@ Feature: TypeQL Match Clause
       | attr:length:20.9 |
 
 
-  # TODO: `is` constraint
-  # Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert $x isa person, has ref 0;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match
-  #       $x isa person;
-  #       $y isa person;
-  #       not { $x is $y; };
-  #     """
-  #   Then answer size is: 0
+  Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
+    Given transaction commits
+  
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa person, has ref 0;
+      """
+    Given transaction commits
+  
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        not { $x is $y; };
+      """
+    Then answer size is: 0
 
 
-  # TODO: `is` constraint
-  # Scenario: concept comparison of unbound variables throws an error
-  #   Then typeql read query; fails
-  #     """
-  #     match $x is $y;
-  #     """
-  #   Then transaction is open: false
+  Scenario: concept comparison of unbound variables throws an error
+    Then typeql read query; fails
+      """
+      match $x is $y;
+      """
+    Then transaction is open: true
 
   ############
   # PATTERNS #
