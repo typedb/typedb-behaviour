@@ -2313,6 +2313,7 @@ Feature: TypeQL Undefine Query
       | label:email          |
       | label:root-attribute |
 
+
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given get answers of typeql read query
       """
@@ -2380,3 +2381,38 @@ Feature: TypeQL Undefine Query
       match $_ relates $x;
       """
 
+
+  Scenario: can undefine the same type's capabilities piece by piece in one query
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent @card(0..), relates child[];
+      relation fathership @abstract, sub parentship, relates father as parent @card(1..);
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      as parent from fathership relates father;
+      @card from fathership relates father;
+      relates father from fathership;
+      @abstract from fathership;
+      sub parentship from fathership;
+      fathership;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub parentship;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:parentship |
+    Then typeql read query; fails with a message containing: "not found"
+      """
+      match $x label fathership;
+      """
