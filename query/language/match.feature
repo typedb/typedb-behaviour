@@ -455,7 +455,7 @@ Feature: TypeQL Match Clause
       | label:person |
 
 
-  Scenario: 'plays' matches types that own the specified attribute type with their inheriting subtypes
+  Scenario: 'plays' matches types that play the specified role type with their inheriting subtypes
     Given typeql schema query
       """
       define
@@ -638,13 +638,34 @@ Feature: TypeQL Match Clause
       | label:employment |
 
 
-  Scenario: 'plays' matches types that own the specified attribute type with their inheriting subtypes
+  Scenario: 'relates' matches types that relate the specified role type with their inheriting subtypes, even as specialised
     Given typeql schema query
       """
       define
       relation part-time-employment sub employment;
       relation full-time-employment sub employment;
       relation internship sub full-time-employment;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x relates employee;
+      """
+    Then uniquely identify answer concepts
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
+      | label:full-time-employment |
+      | label:internship           |
+    When transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation full-time-employment relates full-time-employee as employee;
       """
     Given transaction commits
 

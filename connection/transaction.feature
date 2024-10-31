@@ -94,8 +94,8 @@ Feature: Connection Transaction
       | <type> |
       | <type> |
     Examples:
-      | type   |
-      | read   |
+      | type |
+      | read |
 # TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
 #      | write  |
 #      | schema |
@@ -173,8 +173,8 @@ Feature: Connection Transaction
       | <type> |
       | <type> |
     Examples:
-      | type   |
-      | read   |
+      | type |
+      | read |
 # TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
 #      | write  |
 #      | schema |
@@ -193,7 +193,7 @@ Feature: Connection Transaction
 #      | read   |
 #      | write  |
 #      | schema |
-#      | read   |ƒ
+#      | read   |
 #      | write  |
 #      | schema |
 #      | read   |
@@ -239,8 +239,8 @@ Feature: Connection Transaction
       insert $person isa person;
       """
     Examples:
-      | type   |
-      | read   |
+      | type |
+      | read |
 
   Scenario: commit in a read transaction fails
     When connection create database: typedb
