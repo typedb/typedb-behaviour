@@ -2455,7 +2455,7 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | phrase                        |
-      | attr:favorite-phrase:你明白了吗    |
+      | attr:favorite-phrase:你明白了吗 |
       | attr:favorite-phrase:בוקר טוב |
 
     Given get answers of typeql read query
