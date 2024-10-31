@@ -525,21 +525,16 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $_ relates $x as empty-abstract-role;
-      """
-    # TODO: This is incorrect! Fix the executor and add tests to match.feature. Skip for now...
-    Then uniquely identify answer concepts
-      | x                                         |
-      | label:employment:employee                 |
-      | label:income:earner                       |
-      | label:income:source                       |
-      | label:empty-relation:empty-role           |
-      | label:empty-relation:empty-abstract-role  |
-      | label:part-time-employment:part-time-role |
-    When transaction closes
+    # TODO: Uncomment when querying for specialise works. Now it returns every `$_ relates $x`.
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $_ relates $x as empty-abstract-role;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                                         |
+#      | label:part-time-employment:part-time-role |
+#    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "already defined"
@@ -869,6 +864,12 @@ Feature: TypeQL Redefine Query
       redefine attribute phone-nr value string;
       """
     Then transaction commits
+
+  ###########
+  # STRUCTS #
+  ###########
+
+    # TODO 3.x: Add tests for structs
 
   ###############
   # ANNOTATIONS #
@@ -1585,9 +1586,6 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x            |
       | label:pigeon |
-
-
-    # TODO 3.0: Add tests for structs
 
 
     # TODO 3.0: Add tests for functions?

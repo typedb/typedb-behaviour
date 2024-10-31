@@ -27,6 +27,64 @@ Feature: TypeQL Undefine Query
     Given connection open schema transaction for database: typedb
 
 
+  ###########
+  # PARSING #
+  ###########
+
+  Scenario: cannot use untargeted define-like syntax in undefine
+    Then typeql schema query; parsing fails
+      """
+      undefine entity person;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person plays employment:employee;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person owns name;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person, owns name;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person owns email @key;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name @independent;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string @regex(".+@\w+\..+");
+      """
+
   ################
   # ENTITY TYPES #
   ################
@@ -202,6 +260,32 @@ Feature: TypeQL Undefine Query
       """
       undefine owns root-attribute[] from person;
       """
+
+
+  Scenario: undefining entity type owns is possible
+    Then typeql schema query
+      """
+      undefine
+      owns name from person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      person owns name[];
+      """
+    When transaction commits
+
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      owns name[] from person;
+      """
+    Then transaction commits
 
 
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
@@ -514,6 +598,31 @@ Feature: TypeQL Undefine Query
       """
       undefine relates mentor[] from employment;
       """
+
+
+  Scenario: undefining relates is possible
+    Then typeql schema query
+      """
+      undefine
+      relates employee from employment;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      employment relates employee[];
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      relates employee[] from employment;
+      """
+    Then transaction commits
 
 
   Scenario: undefining non-existing relation type relates specialise errors
@@ -903,14 +1012,13 @@ Feature: TypeQL Undefine Query
       match $x relates employee;
       """
 
-    # TODO: Adding this check makes reset take 60 seconds after the failed query...
-#    Then typeql write query; fails
-#      """
-#      match
-#        $p isa person, has email "ganesh@typedb.com";
-#      insert
-#        (employee: $p) isa employment;
-#      """
+    Then typeql write query; fails
+      """
+      match
+        $p isa person, has email "ganesh@typedb.com";
+      insert
+        (employee: $p) isa employment;
+      """
 
 
   Scenario: removing all roles from a relation type without undefining the relation type errors on commit
@@ -1025,12 +1133,6 @@ Feature: TypeQL Undefine Query
       | x               | role                      |
       | label:part-time | label:employment:employee |
 
-  # TODO
-  Scenario: removing a role from a super relation type also removes roles that specialise it in its subtypes (?)
-
-  # TODO
-  Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just its parent role (?)
-
   ############################
   # PLAYABLE ROLES ('PLAYS') #
   ############################
@@ -1070,31 +1172,14 @@ Feature: TypeQL Undefine Query
       """
     When transaction closes
 
-    # TODO: Adding this check makes reset take 60 seconds after the failed query...
-#    When connection open write transaction for database: typedb
-#    Then typeql write query; fails
-#      """
-#      match
-#        $p isa person, has email "ganesh@typedb.com";
-#      insert
-#        (employee: $p) isa employment;
-#      """
-
-
-    # TODO: Should fail or OK?
-#  Scenario: undefining a playable role that was not actually playable to begin with errors
-#    Given get answers of typeql read query
-#      """
-#      match person plays $x;
-#      """
-#    Given uniquely identify answer concepts
-#      | x                         |
-#      | label:employment:employee |
-#
-#    When typeql schema query; fails
-#      """
-#      undefine plays employment:employer from person;
-#      """
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails
+      """
+      match
+        $p isa person, has email "ganesh@typedb.com";
+      insert
+        (employee: $p) isa employment;
+      """
 
 
   Scenario: undefining played inherited role types using alias role types errors
@@ -1113,7 +1198,7 @@ Feature: TypeQL Undefine Query
     """
 
 
-  Scenario: removing a playable role errors an error if it is played by existing instances
+  Scenario: removing a playable role errors if it is played by existing instances
     Given transaction closes
     Given connection open write transaction for database: typedb
     Given typeql write query
@@ -1157,14 +1242,6 @@ Feature: TypeQL Undefine Query
         $x owns name;
         $x label person;
       """
-
-
-    # TODO: Error or not?
-#  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin with errors
-#    When typeql schema query; fails
-#      """
-#      undefine owns name from employment;
-#      """
 
 
   Scenario: attempting to undefine an attribute ownership inherited from a parent errors
@@ -1257,6 +1334,11 @@ Feature: TypeQL Undefine Query
       undefine owns email from person;
       """
 
+  ###########
+  # STRUCTS #
+  ###########
+
+    # TODO 3.x: Add tests for structs
 
   #############
   # FUNCTIONS #
@@ -1334,7 +1416,7 @@ Feature: TypeQL Undefine Query
 #      """
 #
 #
-#  # TODO enable when we can do reasoning in a schema write transaction
+#  # enable when we can do reasoning in a schema write transaction (it was a todo previously, not relevant anymore)
 #  @ignore
 #  Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
 #    Given typeql schema query
@@ -1831,41 +1913,41 @@ Feature: TypeQL Undefine Query
       | card(1..1) | card     |
       | distinct   | distinct |
 
-# TODO: Decide if can or not
-#  Scenario Outline: cannot undefine annotation @<annotation> for relates/role types using wrong scalar/list notation
-#    Given typeql schema query
-#      """
-#      define
-#      relation parentship @abstract, relates parent[], relates child;
-#      """
-#    Given transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When typeql schema query
-#      """
-#      define
-#      relation parentship relates parent[] @<annotation>, relates child @<annotation>;
-#      """
-#    When transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then typeql schema query; fails with a message containing: "different"
-#      """
-#      undefine
-#      @<category> from parentship relates parent;
-#      """
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then typeql schema query; fails with a message containing: "different"
-#      """
-#      undefine
-#      @<category> from parentship relates child[];
-#      """
-#    Then transaction commits
-#    Examples:
-#      | annotation | category |
-#      | card(1..1) | card     |
+
+  Scenario Outline: cannot undefine annotation @<annotation> for relates/role types using wrong scalar/list notation
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent[], relates child;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship relates parent[] @<annotation>, relates child @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'parentship relates parent', while"
+      """
+      undefine
+      @<category> from parentship relates parent;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'parentship relates child[]', while"
+      """
+      undefine
+      @<category> from parentship relates child[];
+      """
+    Then transaction commits
+    Examples:
+      | annotation | category |
+      | card(1..1) | card     |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for owns
@@ -2007,41 +2089,41 @@ Feature: TypeQL Undefine Query
       | values("1", "2") | values   |
       | distinct         | distinct |
 
-# TODO: Decide if can or not
-#  Scenario Outline: cannot undefine annotation @<annotation> for owns using wrong scalar/list notation
-#    Given typeql schema query
-#      """
-#      define
-#      entity player owns name[], owns email;
-#      """
-#    Given transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    When typeql schema query
-#      """
-#      define
-#      player owns name[] @<annotation>, owns email @<annotation>;
-#      """
-#    When transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then typeql schema query; fails with a message containing: "different"
-#      """
-#      undefine
-#      @<category> from player owns name;
-#      """
-#    Then transaction commits
-#
-#    When connection open schema transaction for database: typedb
-#    Then typeql schema query; fails with a message containing: "different"
-#      """
-#      undefine
-#      @<category> from player owns email[];
-#      """
-#    Then transaction commits
-#    Examples:
-#      | annotation | category |
-#      | card(1..1) | card     |
+
+  Scenario Outline: cannot undefine annotation @<annotation> for owns using wrong scalar/list notation
+    Given typeql schema query
+      """
+      define
+      entity player owns name[], owns email;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      player owns name[] @<annotation>, owns email @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'player owns name', while"
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'player owns email[]', while"
+      """
+      undefine
+      @<category> from player owns email[];
+      """
+    Then transaction commits
+    Examples:
+      | annotation | category |
+      | card(1..1) | card     |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for plays
@@ -2205,6 +2287,7 @@ Feature: TypeQL Undefine Query
       | label:name           |
       | label:email          |
       | label:root-attribute |
+
     When typeql schema query
       """
       undefine
@@ -2297,4 +2380,3 @@ Feature: TypeQL Undefine Query
       match $_ relates $x;
       """
 
-    # TODO 3.0: Add tests for structs

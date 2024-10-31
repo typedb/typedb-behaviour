@@ -1038,11 +1038,15 @@ Feature: TypeQL Define Query
       define name value long;
       """
 
+  ###########
+  # STRUCTS #
+  ###########
+
+    # TODO 3.x: Add tests for structs
+
   ###############
   # ANNOTATIONS #
   ###############
-
-  # TODO: Add annotation tests for structs and their fields
 
   # TODO: For all "can set annotation ... to" tests, add match queries to check the definition when "match @..." is implemented
 
@@ -2670,12 +2674,11 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Adding this check makes reset take 60 seconds after the failed query...
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query; fails
-#      """
-#      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
-#      """
+    Given connection open write transaction for database: typedb
+    Given typeql write query; fails
+      """
+      insert $x isa person, has name "Bob", has email "bob2@gmail.com";
+      """
 
 
   Scenario: defining a uniqueness on existing ownership fail if data does not conform to uniqueness requirements
@@ -2750,11 +2753,10 @@ Feature: TypeQL Define Query
 #      """
 #    Then answer size is: 0
 
-    # TODO: Adding this check makes reset take 60 seconds after the failed query...
-#    Given typeql write query; fails
-#      """
-#      insert $x isa person, has email "jane@gmail.com";
-#      """
+    Given typeql write query; fails
+      """
+      insert $x isa person, has email "jane@gmail.com";
+      """
 
 
   Scenario: converting unique to key is possible if the data conforms to key requirements
@@ -2778,12 +2780,12 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Adding this check makes reset take 60 seconds after the failed query...
-#    Given connection open write transaction for database: typedb
-#    Then typeql write query; fails
-#      """
-#      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
-#      """
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert $x isa person, has phone-nr "9999", has phone-nr "8888", has email "pqr@gmail.com";
+      """
+    Then transaction commits; fails with a message containing: "key constraint violation"
 
 
   Scenario: converting unique to key fails if the data does not conform to key requirements
@@ -3290,8 +3292,5 @@ Feature: TypeQL Define Query
       relation huge-pineapple sub big-pineapple, relates tree as source, relates grows-from;
       """
     Then transaction commits
-
-    # TODO 3.x: Add tests for structs
-
 
     # TODO 3.0: Add tests for functions
