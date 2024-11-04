@@ -1594,6 +1594,17 @@ Feature: TypeQL Match Clause
       | label:parentship:child        |
       | label:fathership:father-child |
 
+    When get answers of typeql read query
+      """
+      match
+      $y relates $x;
+      $x sub parentship:child;
+      """
+    Then uniquely identify answer concepts
+      | x                             | y                |
+      | label:parentship:child        | label:parentship |
+      | label:fathership:father-child | label:fathership |
+
 #    When get answers of typeql read query
 #      """
 #      match
@@ -1601,7 +1612,17 @@ Feature: TypeQL Match Clause
 #      """
 #    Then uniquely identify answer concepts
 #      | x                  |
-#      | label:father-child |
+#      | label:fathership:father-child |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $y relates $x;
+#      $x sub! parentship:child;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                             | y                |
+#      | label:fathership:father-child | label:fathership |
 
     When get answers of typeql read query
       """
