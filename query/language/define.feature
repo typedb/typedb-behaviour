@@ -50,6 +50,39 @@ Feature: TypeQL Define Query
       | label:dog |
 
 
+  Scenario: new entity type declaration should contain kind
+    Then typeql schema query; fails
+      """
+      define dog;
+      """
+
+
+  Scenario: new entity types can be defined in multiple steps within one query
+    When typeql schema query
+      """
+      define
+      dog owns name;
+      dog plays income:earner;
+      dog @abstract;
+      dog;
+      entity dog;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $x owns name;
+      $x plays income:earner;
+      entity $x;
+      """
+    Then uniquely identify answer concepts
+      | x            |
+      | label:person |
+      | label:dog    |
+
+
   Scenario: a new entity type can be defined as a subtype, creating a new child of its parent type
     When typeql schema query
       """
@@ -332,7 +365,7 @@ Feature: TypeQL Define Query
 #      | label:house |
 
 
-  Scenario: defining a type without a kind throws
+  Scenario: defining a type without a kind errors
     Then typeql schema query; fails
       """
       define flying-spaghetti-monster;
@@ -394,6 +427,38 @@ Feature: TypeQL Define Query
       | label:pet-ownership |
 
 
+  Scenario: new relation type declaration should contain kind
+    Then typeql schema query; fails
+      """
+      define pet-ownership;
+      """
+
+
+  Scenario: new relation types can be defined in multiple steps within one query
+    When typeql schema query
+      """
+      define
+      pet-ownership relates pet-owner;
+      pet-ownership relates owned-pet;
+      pet-ownership @abstract;
+      pet-ownership;
+      relation pet-ownership;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $x relates pet-owner;
+      $x relates owned-pet;
+      relation $x;
+      """
+    Then uniquely identify answer concepts
+      | x                   |
+      | label:pet-ownership |
+
+
   Scenario: a new relation type can be defined as a subtype, creating a new child of its parent type
     When typeql schema query
       """
@@ -429,7 +494,7 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: defining a relation type throws on commit if it has no roleplayers and is not abstract
+  Scenario: defining a relation type errors on commit if it has no roleplayers and is not abstract
     Then typeql schema query
       """
       define relation useless-relation;
@@ -877,7 +942,6 @@ Feature: TypeQL Define Query
 
       """
     Then answer size is: 1
-
     Examples:
       | value-type  | label              |
       | long        | number-of-cows     |
@@ -891,7 +955,42 @@ Feature: TypeQL Define Query
       | duration    | procedure-duration |
 
 
-  Scenario: defining an attribute type throws if you don't specify a value type
+  Scenario: new attribute type declaration should contain kind
+    Then typeql schema query; fails
+      """
+      define number-of-cows;
+      """
+
+
+  Scenario: new attribute types can be defined in multiple steps within one query
+    When typeql schema query
+      """
+      define
+      number-of value long;
+      number-of @abstract;
+      number-of-cows @abstract;
+      number-of-cows sub number-of;
+      number-of;
+      attribute number-of-cows;
+      attribute number-of;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $x label number-of;
+      $x-cows sub! $x;
+      attribute $x;
+      attribute $x-cows;
+      """
+    Then uniquely identify answer concepts
+      | x               | x-cows               |
+      | label:number-of | label:number-of-cows |
+
+
+  Scenario: defining an attribute type errors if you don't specify a value type
     When typeql schema query
       """
       define attribute colour;
@@ -907,7 +1006,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
 
-  Scenario: defining an attribute type throws if the specified value type is not a recognised value type
+  Scenario: defining an attribute type errors if the specified value type is not a recognised value type
     Then typeql schema query; fails
       """
       define attribute colour value rgba;
@@ -971,7 +1070,7 @@ Feature: TypeQL Define Query
 #      | label:door-code |
 
 
-  Scenario: defining an attribute subtype throws if it is given a different value type to what its parent has
+  Scenario: defining an attribute subtype errors if it is given a different value type to what its parent has
     When typeql schema query
       """
       define attribute name @abstract; entity person @abstract;
