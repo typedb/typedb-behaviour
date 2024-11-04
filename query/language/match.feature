@@ -1490,47 +1490,302 @@ Feature: TypeQL Match Clause
     """
     Then answer size is: 1
 
+
+# TODO: Uncomment "as!" steps when it is implemented
+  Scenario: match 'as' pattern works similarly to `sub`
+    Given typeql schema query
+      """
+      define
+      relation parentship relates parent, relates child;
+      relation fathership sub parentship, relates father as parent, relates father-child as child;
+      relation adoption relates adopter, relates adoptee;
+      relation child-adoption sub adoption, relates child as adoptee;
+      relation boy-adoption sub child-adoption, relates boy as child;
+      """
+    Given transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $x relates $_ as parentship:child;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:fathership |
+      | label:parentship |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x relates $_ as! parentship:child;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:fathership |
+
+    When get answers of typeql read query
+      """
+      match
+      $x relates $_ as child;
+      """
+    Then uniquely identify answer concepts
+      | x                    |
+      | label:parentship     |
+      | label:fathership     |
+      | label:boy-adoption   |
+      | label:child-adoption |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x relates $_ as! child;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                  |
+#      | label:fathership   |
+#      | label:boy-adoption |
+
+    When get answers of typeql read query
+      """
+      match
+      $x relates $_ as parentship:parent;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:parentship |
+      | label:fathership |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x relates $_ as! parentship:parent;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:fathership |
+
+    When get answers of typeql read query
+      """
+      match
+      $x relates $_ as parent;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:parentship |
+      | label:fathership |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x relates $_ as! parent;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:fathership |
+
+    When get answers of typeql read query
+      """
+      match
+      $_ relates $x as parentship:child;
+      """
+    Then uniquely identify answer concepts
+      | x                             |
+      | label:parentship:child        |
+      | label:fathership:father-child |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $_ relates $x as! parentship:child;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                  |
+#      | label:father-child |
+
+    When get answers of typeql read query
+      """
+      match
+      $_ relates $x as child;
+      """
+    Then uniquely identify answer concepts
+      | x                             |
+      | label:parentship:child        |
+      | label:fathership:father-child |
+      | label:child-adoption:child    |
+      | label:boy-adoption:boy        |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $_ relates $x as! child;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                             |
+#      | label:fathership:father-child |
+#      | label:boy-adoption:boy        |
+
+    When get answers of typeql read query
+      """
+      match
+      $_ relates $x as parentship:parent;
+      """
+    Then uniquely identify answer concepts
+      | x                       |
+      | label:parentship:parent |
+      | label:fathership:father |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $_ relates $x as! parentship:parent;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                       |
+#      | label:fathership:father |
+
+    When get answers of typeql read query
+      """
+      match
+      $_ relates $x as parent;
+      """
+    Then uniquely identify answer concepts
+      | x                       |
+      | label:parentship:parent |
+      | label:fathership:father |
+
+#    When get answers of typeql read query
+#      """
+#      match
+#      $_ relates $x as! parent;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                       |
+#      | label:fathership:father |
+
   ##############
   # ATTRIBUTES #
   ##############
 
-  # TODO: `value` type constraint
-  # Scenario Outline: '<type>' attributes can be matched by value
-  #   Given typeql schema query
-  #     """
-  #     define attribute <attr> @independent, value <type>;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert $n <value> isa <attr>;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $a <value> isa <attr>;
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | a                   |
-  #     | attr:<attr>:<value> |
-  #
-  #   Examples:
-  #     | attr              | type        | value                              |
-  #     | is-alive          | boolean     | true                               |
-  #     | age               | long        | 21                                 |
-  #     | score             | double      | 123.456                            |
-  #     | balance           | decimal     | 123.456                            |
-  #     | name              | string      | "alice"                            |
-  #     | birth-date        | date        | 1990-01-01                         |
-  #     | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-  #     | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
-  #     | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
-  #     | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
-  #     | schedule-interval | duration    | P1Y2M3DT4H5M6S                     |
+  Scenario: match value pattern works for all built-in value types
+    Given typeql schema query
+      """
+      define
+      attribute root @abstract;
+      attribute age, value long;
+      attribute name, value string;
+      attribute is-new, value boolean;
+      attribute success, value double;
+      attribute balance, value decimal;
+      attribute birth-date, value date;
+      attribute birth-time, value datetime;
+      attribute current-time, value datetime-tz;
+      attribute expiration, value duration;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $lo value long;
+      $st value string;
+      $bo value boolean;
+      $do value double;
+      $de value decimal;
+      $date value date;
+      $datet value datetime;
+      $datet-t value datetime-tz;
+      $du value duration;
+
+      not { $st label email; };
+      not { $lo label ref; };
+      """
+    Then uniquely identify answer concepts
+      | lo        | st         | bo           | do            | de            | date             | datet            | datet-t            | du               |
+      | label:age | label:name | label:is-new | label:success | label:balance | label:birth-date | label:birth-time | label:current-time | label:expiration |
+
+    When typeql schema query
+      """
+      define
+      balance @abstract;
+      attribute shared-balance @abstract, sub balance;
+      attribute family-surname sub shared-balance;
+      attribute loading-time sub root, value duration;
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $de value decimal;
+      """
+    Then uniquely identify answer concepts
+      | de                   |
+      | label:balance        |
+      | label:shared-balance |
+      | label:family-surname |
+
+    When get answers of typeql read query
+      """
+      match
+      $du value duration;
+      """
+    Then uniquely identify answer concepts
+      | du                 |
+      | label:expiration   |
+      | label:loading-time |
+
+    When get answers of typeql read query
+      """
+      match
+      $datet value datetime;
+      """
+    Then uniquely identify answer concepts
+      | datet            |
+      | label:birth-time |
+
+
+  Scenario Outline: '<type>' attributes can be matched by value
+    Given typeql schema query
+       """
+       define attribute <attr> @independent, value <type>;
+       """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+       """
+       insert $n <value> isa <attr>;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $a <value> isa <attr>;
+       """
+    Then uniquely identify answer concepts
+      | a                   |
+      | attr:<attr>:<value> |
+
+    Examples:
+      | attr              | type        | value                              |
+      | is-alive          | boolean     | true                               |
+      | age               | long        | 21                                 |
+      | score             | double      | 123.456                            |
+      | balance           | decimal     | 123.456                            |
+      | name              | string      | "alice"                            |
+      | birth-date        | date        | 1990-01-01                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6S                     |
+
+
+    # TODO: Add tests for structs
 
 
   Scenario Outline: when matching a '<type>' attribute by a value that doesn't exist, an empty answer is returned
@@ -2102,14 +2357,14 @@ Feature: TypeQL Match Clause
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
     Given transaction commits
-  
+
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert $x isa person, has ref 0;
       """
     Given transaction commits
-  
+
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
@@ -2455,7 +2710,7 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | phrase                        |
-      | attr:favorite-phrase:你明白了吗 |
+      | attr:favorite-phrase:你明白了吗    |
       | attr:favorite-phrase:בוקר טוב |
 
     Given get answers of typeql read query
