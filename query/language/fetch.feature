@@ -11,62 +11,57 @@ Feature: TypeQL Fetch Query
     Given connection is open: true
     Given connection has 0 databases
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
     Given typeql schema query
       """
       define
-      person sub entity,
+      entity person
         plays friendship:friend,
         plays employment:employee,
-        owns person-name,
+        owns person-name @card(0..),
         owns age,
         owns karma,
         owns ref @key;
-      company sub entity,
+      entity company
         plays employment:employer,
         owns company-name,
         owns ref @key;
-      friendship sub relation,
-        relates friend,
+      relation friendship
+        relates friend @card(0..),
         owns ref @key;
-      employment sub relation,
+      relation employment
         relates employee,
         relates employer,
         owns ref @key,
         owns start-date,
         owns end-date;
-      name sub attribute, abstract, value string;
-      person-name sub name;
-      company-name sub name;
-      age sub attribute, value long;
-      karma sub attribute, value double;
-      ref sub attribute, value long;
-      start-date sub attribute, value datetime;
-      end-date sub attribute, value datetime;
+      attribute name @abstract, value string;
+      attribute person-name sub name;
+      attribute company-name sub name;
+      attribute age value long;
+      attribute karma value double;
+      attribute ref value long;
+      attribute start-date value datetime;
+      attribute end-date value datetime;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
       $p2 isa person, has person-name "Bob", has ref 1;
       $c1 isa company, has company-name "TypeDB", has ref 2;
-      $f1 (friend: $p1, friend: $p2) isa friendship, has ref 3;
-      $e1 (employee: $p1, employer: $c1) isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
+      $f1 links (friend: $p1, friend: $p2), isa friendship, has ref 3;
+      $e1 links (employee: $p1, employer: $c1), isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-
 
   Scenario: a type can be fetched
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p type person;
@@ -79,7 +74,7 @@ Feature: TypeQL Fetch Query
         "p": { "root": "entity", "label": "person" }
       }]
       """
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p type friendship:friend;
@@ -95,7 +90,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetched attribute type contains its value type
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $n type name;
@@ -112,7 +107,7 @@ Feature: TypeQL Fetch Query
 
   # TODO: remove this scenario when we finish deprecating 'thing' type
   Scenario: root thing type can be fetched
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p type thing;
@@ -128,7 +123,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: an attribute can be fetched
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $a isa name;
@@ -151,7 +146,7 @@ Feature: TypeQL Fetch Query
         "a": { "value":"TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
       }]
       """
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $a isa $t; $t value datetime;
@@ -171,7 +166,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a value can be fetched
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $a isa name;
@@ -198,7 +193,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a concept's attributes can be fetched
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or  { $n == "Bob"; };
@@ -233,7 +228,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a concept's attributes can be fetched using more general types than the concept type owns
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name "Alice";
@@ -258,24 +253,16 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: attribute ownership fetch can trigger inferred ownerships
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql schema query
+    Given typeql write query
       """
-      define
-      rule alice-as-alicia:
-      when {
-        $p isa person, has person-name "Alice";
-      } then {
-        $p has person-name "Alicia";
-      };
+      match
+      $p isa person, has person-name "Alice";
+      insert
+      $p has person-name "Alicia";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql fetch
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $p isa person, has age 10;
@@ -295,7 +282,7 @@ Feature: TypeQL Fetch Query
         }
       }]
       """
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has age 10;
@@ -320,24 +307,16 @@ Feature: TypeQL Fetch Query
       """
 
   Scenario: match limits do not affect attribute ownership fetch
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql schema query
+    Given typeql write query
       """
-      define
-      rule alice-as-alicia:
-      when {
-        $p isa person, has person-name "Alice";
-      } then {
-        $p has person-name "Alicia";
-      };
+      match
+      $p isa person, has person-name "Alice";
+      insert
+      $p has person-name "Alicia";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql fetch
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $p isa person, has age 10;
@@ -361,7 +340,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: attributes that can never be owned by any matching type of a variable throw exceptions
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name "Alice";
@@ -371,7 +350,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch subquery can be a match-fetch query
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -379,7 +358,7 @@ Feature: TypeQL Fetch Query
       $p: person-name, age;
       "employers": {
         match
-        (employee: $p, employer: $c) isa employment;
+        links (employee: $p, employer: $c), isa employment;
         fetch
         $c: name;
       };
@@ -423,7 +402,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch subquery can be a match-aggregate query
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -431,7 +410,7 @@ Feature: TypeQL Fetch Query
       $p: person-name, age;
       employment-count: {
         match
-        $r (employee: $p, employer: $c) isa employment;
+        $r links (employee: $p, employer: $c), isa employment;
         get $r;
         count;
       };
@@ -466,7 +445,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch subquery can be a match-aggregate query with zero answers
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name "Bob";
@@ -489,19 +468,19 @@ Feature: TypeQL Fetch Query
 
   Scenario: fetch subqueries can be nested and use bindings from any parent
     Given session transaction closes
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       match
       $p2 isa person, has person-name "Bob";
       $c1 isa company, has name "TypeDB";
       insert
-      (employee: $p2, employer: $c1) isa employment, has ref 6;
+      links (employee: $p2, employer: $c1), isa employment, has ref 6;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    When get answers of typeql fetch
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name "Alice";
@@ -509,12 +488,12 @@ Feature: TypeQL Fetch Query
       $p: age;
       alice-employers: {
         match
-        (employee: $p, employer: $c) isa employment;
+        links (employee: $p, employer: $c), isa employment;
         fetch
         $c as company: name;
         alice-employment-rel: {
           match
-          $r (employee: $p, employer: $c) isa employment;
+          $r links (employee: $p, employer: $c), isa employment;
           fetch
           $r: ref;
         };
@@ -554,7 +533,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch subquery is not affected by match-fetch query limits
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has age 10;
@@ -596,24 +575,16 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch subqueries can trigger reasoning
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql schema query
+    Given typeql write query
       """
-      define
-      rule alice-as-alicia:
-      when {
-        $p isa person, has person-name "Alice";
-      } then {
-        $p has person-name "Alicia";
-      };
+      match
+      $p isa person, has person-name "Alice";
+      insert
+      $p has person-name "Alicia";
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
-    When get answers of typeql fetch
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
       $p isa person, has age 10;
@@ -661,7 +632,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a projection can be relabeled
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p type person;
@@ -677,7 +648,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: labels can have spaces
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name "Alice";
@@ -698,7 +669,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: an attribute projection can be relabeled
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -733,7 +704,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch with zero projections throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n;
@@ -742,7 +713,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a variable projection that can contain entities or relations throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $x isa entity;
@@ -752,7 +723,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: an attribute projection with an invalid attribute type throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -760,8 +731,8 @@ Feature: TypeQL Fetch Query
       $p: type;
       sort $n;
       """
-    Given session opens transaction of type: read
-    When typeql fetch; throws exception
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -772,7 +743,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: an attribute projection from a type throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p type person;
@@ -782,7 +753,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetching a variable that is not present in the match throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n;
@@ -792,7 +763,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a subquery that is not connected to the match throws
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n;
@@ -807,7 +778,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch subquery cannot be an insert, match-get, match-group, or match-group-aggregate
-    When typeql fetch; throws exception
+    When typeql read query; fails
     """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -818,8 +789,8 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
-    Given session opens transaction of type: read
-    When typeql fetch; throws exception
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -832,8 +803,8 @@ Feature: TypeQL Fetch Query
       };
       sort $n;
       """
-    Given session opens transaction of type: read
-    When typeql fetch; throws exception
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
@@ -848,7 +819,7 @@ Feature: TypeQL Fetch Query
       sort $n;
       """
     Given session opens transaction of type: read
-    When typeql fetch; throws exception
+    When typeql read query; fails
       """
       match
       $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
