@@ -16,17 +16,21 @@ Feature: TypeQL Fetch Query
     Given typeql schema query
       """
       define
+      entity nothing;
       entity person
         plays friendship:friend,
         plays employment:employee,
+        owns name @card(0..),
         owns person-name @card(0..),
-        owns age,
-        owns karma,
+        owns age @card(0..1),
+        owns karma @card(0..2),
         owns ref @key;
       entity company
         plays employment:employer,
-        owns company-name,
-        owns description,
+        owns company-name @card(1..1),
+        owns description @card(1..1000),
+        owns achievement @card(0..1),
+        owns company-achievement @card(0..),
         owns ref @key;
       relation friendship
         relates friend @card(0..),
@@ -35,8 +39,8 @@ Feature: TypeQL Fetch Query
         relates employee,
         relates employer,
         owns ref @key,
-        owns start-date,
-        owns end-date;
+        owns start-date @card(0..),
+        owns end-date @card(0..);
       attribute name @abstract, value string;
       attribute person-name sub name;
       attribute company-name sub name;
@@ -46,6 +50,8 @@ Feature: TypeQL Fetch Query
       attribute ref value long;
       attribute start-date value datetime;
       attribute end-date value datetime;
+      attribute achievement @abstract;
+      attribute company-achievement sub achievement, value string;
       """
     Given transaction commits
 
@@ -53,14 +59,36 @@ Feature: TypeQL Fetch Query
     Given typeql write query
       """
       insert
+      $n isa nothing;
       $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
       $p2 isa person, has person-name "Bob", has ref 1;
-      $c1 isa company, has company-name "TypeDB", has ref 2, has description "Nice and shy guys";
+      $c1 isa company, has company-name "TypeDB", has ref 2, has description "Nice and shy guys", has company-achievement "Green BDD tests for fetch";
       $f1 links (friend: $p1, friend: $p2), isa friendship, has ref 3;
       $e1 links (employee: $p1, employer: $c1), isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
+
+
+  Scenario: a fetch with zero projections errors
+    Then typeql read query; parsing fails
+      """
+      match
+      $p isa person, has person-name $n;
+      fetch;
+      """
+
+
+  Scenario: a fetch with a not available variable errors
+# TODO when the server is updated with the needed step to check errors: check message "The variable 'p' is not available"
+    Then typeql read query; fails
+      """
+      match
+        entity $t;
+      fetch {
+        "name": $name,
+      };
+      """
 
 
   Scenario: a type can be fetched
@@ -142,6 +170,28 @@ Feature: TypeQL Fetch Query
 
 
   # TODO: Add tests for value types when value types match/fetch is implemented
+
+
+# TODO: Not implemented
+  Scenario: a variable projection of entities and relations is not acceptable
+    # TODO: Check error message: "Fetching entities and relations is not supported"
+    Then typeql read query; fails
+      """
+      match
+      entity $t; $x isa $t;
+      fetch {
+        "entity": $x
+      };
+      """
+    # TODO: Check error message: "Fetching entities and relations is not supported"
+    Then typeql read query; fails
+      """
+      match
+      relation $t; $x isa $t;
+      fetch {
+        "relation": $x
+      };
+      """
 
 
   Scenario: an attribute and a value can be fetched
@@ -228,32 +278,123 @@ Feature: TypeQL Fetch Query
       """
 
 
-  Scenario: an attribute and a value can be fetched from an object as scalar values
+  Scenario: a scalar attribute can be fetched from an object as a scalar value with nulls
     When get answers of typeql read query
       """
       match
       $p isa person;
       fetch {
-        "person": $p.person-name
+        "person's age": $p.age
       };
       """
     Then answer size is: 2
     Then answer contains document:
       """
       {
-        "person": "Bob"
+        "person's age": 10
       }
       """
-    # It can actually be "Alice" or "Allie"
+    Then answer contains document:
+      """
+      {
+        "person's age": null
+      }
+      """
     Then answer does not contain document:
       """
       {
-        "person": ["Alice", "Allie"]
+        "person's age": [ 10 ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+      $c isa company;
+      fetch {
+        "company's achievement": $c.company-achievement
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "company's achievement": "Green BDD tests for fetch"
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "company's achievement": [ "Green BDD tests for fetch" ]
       }
       """
 
 
-  Scenario: an attribute and a value can be fetched from an object as lists
+  Scenario: a scalar attribute can be fetched from an object as a list
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      fetch {
+        "person's age": [ $p.age ]
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "person's age": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person's age": [ ]
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "person's age": 10
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+      $c isa company;
+      fetch {
+        "company's achievement": [ $c.company-achievement ]
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "company's achievement": [ "Green BDD tests for fetch" ]
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "company's achievement": "Green BDD tests for fetch"
+      }
+      """
+
+
+  Scenario: trying to fetch a scalar value from an object's attribute with non-scalar cardinality leads to error
+    # TODO: Check error message: "this attribute can be owned more than 1 time"
+    Then typeql read query; fails
+      """
+      match
+        $p isa person;
+      fetch {
+        "non-existing karma": $p.person-name
+      };
+      """
+
+
+  Scenario: a non-scalar object's attribute can be fetched from as a list
     When get answers of typeql read query
       """
       match
@@ -302,14 +443,14 @@ Feature: TypeQL Fetch Query
       sort $r desc;
       limit 1;
       fetch {
-        "name": $p.person-name
+        "name": [ $p.person-name ]
       };
       """
     Then answer size is: 1
     Then answer contains document:
       """
       {
-        "name": "Bob"
+        "name": [ "Bob" ]
       }
       """
 
@@ -338,6 +479,28 @@ Feature: TypeQL Fetch Query
       """
 
 
+# TODO: Not implemented
+  Scenario: attributes that can never be owned by any matching type of a variable error
+    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
+    Then typeql read query; fails
+      """
+      match
+        $p isa person, has person-name "Alice";
+      fetch {
+        "company name": $p.company-name
+      };
+      """
+    # TODO when the server is updated with the needed step to check errors: check message "is not an object type"
+    Then typeql read query; fails
+      """
+      match
+        attribute $t; $a isa $t;
+      fetch {
+        "company name": $a.company-name
+      };
+      """
+
+
   Scenario: attributes that can never be owned by any matching type of a variable error
     # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
     Then typeql read query; fails
@@ -356,7 +519,7 @@ Feature: TypeQL Fetch Query
       match
         $p isa person, has ref 1;
       fetch {
-        "non-existing karma": $p.karma
+        "non-existing karma": $p.age
       };
       """
     Then answer size is: 1
@@ -378,47 +541,113 @@ Feature: TypeQL Fetch Query
       };
       """
     Then answer size is: 5
-    # TODO: ref should not be a list because of card. Same for age
     Then answer contains document:
       """
       {
         "person-name": [ "Alice", "Allie" ],
-        "age": [ 10.0 ],
+        "age": 10.0,
         "karma": [ 123.4567891 ],
-        "ref": [ 0.0 ]
+        "ref": 0.0
       }
       """
-    # TODO: ref should not be a list because of card
     Then answer contains document:
       """
       {
         "person-name": [ "Bob" ],
-        "ref": [ 1.0 ]
+        "ref": 1.0
       }
       """
-    # TODO: ref should not be a list because of card. Same for description
     Then answer contains document:
       """
       {
-        "company-name": [ "TypeDB" ],
+        "company-name": "TypeDB",
         "description": [ "Nice and shy guys" ],
-        "ref": [ 2.0 ]
+        "company-achievement": "Green BDD tests for fetch",
+        "ref": 2.0
       }
       """
-    # TODO: ref should not be a list because of card
     Then answer contains document:
       """
       {
-        "ref": [ 3.0 ]
+        "ref": 3.0
       }
       """
-    # TODO: ref should not be a list because of card
     Then answer contains document:
       """
       {
         "start-date": [ "2020-01-01T13:13:13.999000000" ],
         "end-date": [ "2021-01-01T00:00:00.000000000" ],
-        "ref": [ 4.0 ]
+        "ref": 4.0
+      }
+      """
+
+    Then typeql read query; parsing fails
+      """
+      match
+        $p has ref $_;
+      fetch {
+        "all attributes": $p.*
+      };
+      """
+    When connection open read transaction for database: typedb
+
+
+    When get answers of typeql read query
+      """
+      match
+        $p has ref $_;
+      fetch {
+        "all attributes": { $p.* }
+      };
+      """
+    Then answer size is: 5
+    Then answer contains document:
+      """
+      {
+        "all attributes": {
+          "person-name": [ "Alice", "Allie" ],
+          "age": 10.0,
+          "karma": [ 123.4567891 ],
+          "ref": 0.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "all attributes": {
+          "person-name": [ "Bob" ],
+          "ref": 1.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "all attributes": {
+          "company-name": "TypeDB",
+          "description": [ "Nice and shy guys" ],
+          "company-achievement": "Green BDD tests for fetch",
+          "ref": 2.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "all attributes": {
+          "ref": 3.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "all attributes": {
+          "start-date": [ "2020-01-01T13:13:13.999000000" ],
+          "end-date": [ "2021-01-01T00:00:00.000000000" ],
+          "ref": 4.0
+        }
       }
       """
 
@@ -535,7 +764,12 @@ Feature: TypeQL Fetch Query
     # TODO: Test documents and structs
 
 
-# TODO: Everything below is old!
+
+
+
+
+  # ///// ....... Tests below are not fixed, but serve as a tip for future tests reimplementations
+
 
 
   Scenario: a fetch subquery can be a match-fetch query
@@ -718,308 +952,4 @@ Feature: TypeQL Fetch Query
           }
         ]
       }]
-      """
-
-
-  Scenario: a fetch subquery is not affected by match-fetch query limits
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has age 10;
-      fetch
-      $p: age;
-      "names": {
-        match
-        $p has person-name $pn;
-        fetch
-        $pn as "person name";
-      };
-      limit 1;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        },
-        "names": [
-          {
-            "person name": {
-              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
-              "value": "Alice"
-            }
-          },
-          {
-            "person name": {
-              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
-              "value": "Allie"
-            }
-          }
-        ]
-      }]
-      """
-
-
-  Scenario: fetch subqueries can trigger reasoning
-    Given typeql write query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      insert
-      $p has person-name "Alicia";
-      """
-    Given transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has age 10;
-      fetch
-      $p: age;
-      "names": {
-        match
-        $p has person-name $pn;
-        fetch
-        $pn as "person name";
-      };
-      limit 1;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        },
-        "names": [
-          {
-            "person name": {
-              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
-              "value": "Alice"
-            }
-          },
-          {
-            "person name": {
-              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
-              "value": "Allie"
-            }
-          },
-          {
-            "person name": {
-              "type": { "root": "attribute", "label": "person-name", "value_type": "string" },
-              "value": "Alicia"
-            }
-          }
-        ]
-      }]
-      """
-
-
-  Scenario: a projection can be relabeled
-    When get answers of typeql read query
-      """
-      match
-      $p type person;
-      fetch
-      $p as person;
-      """
-    Then fetch answers are
-      """
-      [{
-        "person": { "root": "entity", "label": "person" }
-      }]
-      """
-
-
-  Scenario: labels can have spaces
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      fetch
-      $p as "person Alice": age as "her age";
-      """
-    Then fetch answers are
-      """
-      [{
-        "person Alice": {
-          "type": { "root": "entity", "label": "person" },
-          "her age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        }
-      }]
-      """
-
-
-  Scenario: an attribute projection can be relabeled
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name as name, age;
-      sort $n;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "name": [
-            { "value": "Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value": "Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        }
-      },
-      {
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "name": [
-            { "value": "Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": [ ]
-        }
-      }]
-      """
-
-
-  Scenario: a fetch with zero projections throws
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n;
-      fetch;
-      """
-
-
-  Scenario: a variable projection that can contain entities or relations throws
-    When typeql read query; fails
-      """
-      match
-      $x isa entity;
-      fetch
-      $x;
-      """
-
-
-  Scenario: an attribute projection with an invalid attribute type throws
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: type;
-      sort $n;
-      """
-    Given connection open read transaction for database: typedb
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person;
-      sort $n;
-      """
-
-
-  Scenario: an attribute projection from a type throws
-    When typeql read query; fails
-      """
-      match
-      $p type person;
-      fetch
-      $p: name;
-      """
-
-
-  Scenario: fetching a variable that is not present in the match throws
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n;
-      fetch
-      $x: type;
-      """
-
-
-  Scenario: a subquery that is not connected to the match throws
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n;
-      fetch
-      all-employments-count: {
-        match
-        $r isa employment;
-        get $r;
-        count;
-      };
-      """
-
-
-  Scenario: a fetch subquery cannot be an insert, match-get, match-group, or match-group-aggregate
-    When typeql read query; fails
-    """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      inserted: {
-        insert $p has age 20;
-      };
-      sort $n;
-      """
-    Given connection open read transaction for database: typedb
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      ages: {
-        match
-        $p has age $n;
-        get $n;
-      };
-      sort $n;
-      """
-    Given connection open read transaction for database: typedb
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      groups: {
-        match
-        $p has age $a;
-        get $p, $n;
-        group $p;
-      };
-      sort $n;
-      """
-    Given session opens transaction of type: read
-    When typeql read query; fails
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      group-counts: {
-        match
-        $p has age $n;
-        get $a, $n;
-        group $n;
-        count;
-      };
-      sort $n;
       """
