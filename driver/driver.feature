@@ -1579,19 +1579,36 @@ Feature: TypeDB Driver
       """
     When get answers of typeql read query
       """
-      match $_ isa person, has $a; fetch { "a": $a };
+      match $_ isa person, has $a;
+      fetch { "a": $a };
       """
     Then answer type is: concept documents
     Then answer query type is: read
     Then answer size is: 1
     Then answer contains document:
-    """
-    { "a": <expected> }
-    """
+      """
+      { "a": <expected> }
+      """
     Then answer does not contain document:
-    """
-    { "a": <not-expected> }
-    """
+      """
+      { "a": <not-expected> }
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has $a; $v = $a;
+      fetch { "v": $v };
+      """
+    Then answer type is: concept documents
+    Then answer query type is: read
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      { "v": <expected> }
+      """
+    Then answer does not contain document:
+      """
+      { "v": <not-expected> }
+      """
     Examples:
       | value-type  | value                                       | expected                                      | not-expected                                 |
       | boolean     | true                                        | true                                          | false                                        |

@@ -26,6 +26,7 @@ Feature: TypeQL Fetch Query
       entity company
         plays employment:employer,
         owns company-name,
+        owns description,
         owns ref @key;
       relation friendship
         relates friend @card(0..),
@@ -39,6 +40,7 @@ Feature: TypeQL Fetch Query
       attribute name @abstract, value string;
       attribute person-name sub name;
       attribute company-name sub name;
+      attribute description, value string;
       attribute age value long;
       attribute karma value double;
       attribute ref value long;
@@ -53,300 +55,487 @@ Feature: TypeQL Fetch Query
       insert
       $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
       $p2 isa person, has person-name "Bob", has ref 1;
-      $c1 isa company, has company-name "TypeDB", has ref 2;
+      $c1 isa company, has company-name "TypeDB", has ref 2, has description "Nice and shy guys";
       $f1 links (friend: $p1, friend: $p2), isa friendship, has ref 3;
       $e1 links (employee: $p1, employer: $c1), isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
       """
     Given transaction commits
+    Given connection open read transaction for database: typedb
 
 
   Scenario: a type can be fetched
     When get answers of typeql read query
       """
       match
-      $p type person;
-      fetch
-      $p;
+      $p label person;
+      fetch {
+        "entity type label": $p
+      };
       """
-    Then fetch answers are
+    Then answer size is: 1
+    Then answer contains document:
       """
-      [{
-        "p": { "root": "entity", "label": "person" }
-      }]
+      {
+        "entity type label": "person"
+      }
       """
+    Then answer does not contain document:
+      """
+      {
+        "p": "person"
+      }
+      """
+
     When get answers of typeql read query
       """
       match
-      $p type friendship:friend;
-      fetch
-      $p;
+      $f label friendship;
+      fetch {
+        "relation type label": $f
+      };
       """
-    Then fetch answers are
+    Then answer size is: 1
+    Then answer contains document:
       """
-      [{
-        "p": { "root": "relation:role", "label": "friendship:friend" }
-      }]
+      {
+        "relation type label": "friendship"
+      }
       """
 
-
-  Scenario: a fetched attribute type contains its value type
     When get answers of typeql read query
       """
       match
-      $n type name;
-      fetch
-      $n;
+      $n label name;
+      fetch {
+        "attribute type label": $n
+      };
       """
-    Then fetch answers are
+    Then answer size is: 1
+    Then answer contains document:
       """
-      [{
-        "n": { "root": "attribute", "label": "name", "value_type": "string" }
-      }]
+      {
+        "attribute type label": "name"
+      }
       """
 
-
-  # TODO: remove this scenario when we finish deprecating 'thing' type
-  Scenario: root thing type can be fetched
     When get answers of typeql read query
       """
       match
-      $p type thing;
-      fetch
-      $p;
+      $f label friendship:friend;
+      fetch {
+        "role type label": $f
+      };
       """
-    Then fetch answers are
+    Then answer size is: 1
+    Then answer does not contain document:
       """
-      [{
-        "p": { "root": "thing", "label": "thing" }
-      }]
+      {
+        "role type label": "friend"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "role type label": "friendship:friend"
+      }
       """
 
 
-  Scenario: an attribute can be fetched
+  # TODO: Add tests for value types when value types match/fetch is implemented
+
+
+  Scenario: an attribute and a value can be fetched
+    When get answers of typeql read query
+      """
+      match
+      $a isa person-name;
+      fetch {
+        "person": $a
+      };
+      """
+    Then answer size is: 3
+    Then answer contains document:
+      """
+      {
+        "person": "Alice"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": "Allie"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": "Bob"
+      }
+      """
+
     When get answers of typeql read query
       """
       match
       $a isa name;
-      fetch
-      $a;
-      sort $a;
+      $v = $a;
+      fetch {
+        "value": $v,
+        "attribute": $a
+      };
       """
-    Then fetch answers are
+    Then answer size is: 4
+    Then answer contains document:
       """
-      [{
-        "a": { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-      },
       {
-        "a": { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-      },
-      {
-        "a": { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-      },
-      {
-        "a": { "value":"TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
-      }]
+        "value": "Alice",
+        "attribute": "Alice"
+      }
       """
+    Then answer contains document:
+      """
+      {
+        "value": "Allie",
+        "attribute": "Allie"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "value": "Bob",
+        "attribute": "Bob"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "value": "TypeDB",
+        "attribute": "TypeDB"
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "value": "value",
+        "attribute": "value"
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "value": "Allie",
+        "attribute": "Alice"
+      }
+      """
+
+
+  Scenario: an attribute and a value can be fetched from an object as scalar values
     When get answers of typeql read query
       """
       match
-      $a isa $t; $t value datetime;
-      fetch
-      $a;
-      sort $a;
+      $p isa person;
+      fetch {
+        "person": $p.person-name
+      };
       """
-    Then fetch answers are
+    Then answer size is: 2
+    Then answer contains document:
       """
-      [{
-        "a": { "value": "2020-01-01T13:13:13.999", "type": { "root": "attribute", "label": "start-date", "value_type": "datetime" } }
-      },
       {
-        "a": { "value": "2021-01-01T00:00:00.000", "type": { "root": "attribute", "label": "end-date", "value_type": "datetime" } }
-      }]
+        "person": "Bob"
+      }
       """
-
-
-  Scenario: a value can be fetched
-    When get answers of typeql read query
+    # It can actually be "Alice" or "Allie"
+    Then answer does not contain document:
       """
-      match
-      $a isa name;
-      ?v = $a;
-      fetch
-      ?v;
-      sort $a;
-      """
-    Then fetch answers are
-      """
-      [{
-        "v": { "value":"Alice", "value_type": "string" }
-      },
       {
-        "v": { "value":"Allie", "value_type": "string" }
-      },
+        "person": ["Alice", "Allie"]
+      }
+      """
+
+
+  Scenario: an attribute and a value can be fetched from an object as lists
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      fetch {
+        "person": [ $p.person-name ]
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
       {
-        "v": { "value":"Bob", "value_type": "string" }
-      },
+        "person": [ "Alice", "Allie" ]
+      }
+      """
+    Then answer contains document:
+      """
       {
-        "v": { "value":"TypeDB", "value_type": "string" }
-      }]
+        "person": [ "Bob" ]
+      }
       """
 
 
-  Scenario: a concept's attributes can be fetched
+  Scenario: fetch uses results of match stream operators
     When get answers of typeql read query
       """
       match
-      $p isa person, has person-name $n; { $n == "Alice"; } or  { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      sort $n;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        }
-      },
-      {
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": []
-        }
-      }]
-      """
-
-
-  Scenario: a concept's attributes can be fetched using more general types than the concept type owns
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      fetch
-      $p: attribute;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "attribute": [
-            { "value": "Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value": "Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
-            { "value": 123.4567891, "type": { "root": "attribute", "label": "karma", "value_type": "double" } },
-            { "value": 0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } }
-          ]
-        }
-      }]
-      """
-
-
-  Scenario: attribute ownership fetch can trigger inferred ownerships
-    Given typeql write query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      insert
-      $p has person-name "Alicia";
-      """
-    Given transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has age 10;
-      fetch
-      $p: person-name;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ]
-        }
-      }]
-      """
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has age 10;
-      fetch
-      $p: attribute;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "attribute": [
-            { "value":10, "type": { "root": "attribute", "label": "age", "value_type": "long" } },
-            { "value": 123.4567891, "type": { "root": "attribute", "label": "karma", "value_type": "double" } },
-            { "value":0, "type": { "root": "attribute", "label": "ref", "value_type": "long" } },
-            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ]
-        }
-      }]
-      """
-
-  Scenario: match limits do not affect attribute ownership fetch
-    Given typeql write query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      insert
-      $p has person-name "Alicia";
-      """
-    Given transaction commits
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has age 10;
-      fetch
-      $p: person-name;
+        $p isa person, has age 10;
       limit 1;
+      fetch {
+        "person": [ $p.person-name ],
+      };
       """
-    Then fetch answers are
+    Then answer size is: 1
+    Then answer contains document:
       """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Alicia", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ]
-        }
-      }]
+      {
+        "person": ["Alice", "Allie"]
+      }
       """
 
-
-  Scenario: attributes that can never be owned by any matching type of a variable throw exceptions
-    When typeql read query; fails
+    When get answers of typeql read query
       """
       match
-      $p isa person, has person-name "Alice";
-      fetch
-      $p: company-name;
+        $p isa person, has ref $r;
+      sort $r desc;
+      limit 1;
+      fetch {
+        "name": $p.person-name
+      };
       """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "name": "Bob"
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $p-type sub person;
+        $p isa! $p-type, has $a;
+      select $p;
+      fetch {
+        "person": [ $p.person-name ],
+      };
+      """
+    Then answer size is: 7
+
+  # TODO when the server is updated with the needed step to check errors: check message "The variable 'p' is not available"
+    Then typeql read query; fails
+      """
+      match
+        $p-type sub person;
+        $p isa! $p-type, has $a;
+      select $a;
+      fetch {
+        "person": [ $p.person-name ],
+      };
+      """
+
+
+  Scenario: attributes that can never be owned by any matching type of a variable error
+    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
+    Then typeql read query; fails
+      """
+      match
+        $p isa person, has person-name "Alice";
+      fetch {
+        "company name": $p.company-name
+      };
+      """
+
+
+  Scenario: non-existing fetched attribute produces null
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has ref 1;
+      fetch {
+        "non-existing karma": $p.karma
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "non-existing karma": null
+      }
+      """
+
+
+  Scenario: all attributes of objects can be fetched with correct card representation
+    When get answers of typeql read query
+      """
+      match
+        $p has ref $_;
+      fetch {
+        $p.*
+      };
+      """
+    Then answer size is: 5
+    # TODO: ref should not be a list because of card. Same for age
+    Then answer contains document:
+      """
+      {
+        "person-name": [ "Alice", "Allie" ],
+        "age": [ 10.0 ],
+        "karma": [ 123.4567891 ],
+        "ref": [ 0.0 ]
+      }
+      """
+    # TODO: ref should not be a list because of card
+    Then answer contains document:
+      """
+      {
+        "person-name": [ "Bob" ],
+        "ref": [ 1.0 ]
+      }
+      """
+    # TODO: ref should not be a list because of card. Same for description
+    Then answer contains document:
+      """
+      {
+        "company-name": [ "TypeDB" ],
+        "description": [ "Nice and shy guys" ],
+        "ref": [ 2.0 ]
+      }
+      """
+    # TODO: ref should not be a list because of card
+    Then answer contains document:
+      """
+      {
+        "ref": [ 3.0 ]
+      }
+      """
+    # TODO: ref should not be a list because of card
+    Then answer contains document:
+      """
+      {
+        "start-date": [ "2020-01-01T13:13:13.999000000" ],
+        "end-date": [ "2021-01-01T00:00:00.000000000" ],
+        "ref": [ 4.0 ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa nothing;
+      fetch {
+        $n.*
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      { }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa nothing;
+      fetch {
+        "nothing": { $n.* }
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "nothing": { }
+      }
+      """
+
+
+  Scenario Outline: attributes and values of <value-type> type can be fetched
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity collection owns item;
+      attribute item value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $c isa collection, has item <value>;
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+        $_ isa collection, has $a;
+      fetch {
+        "a": $a
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "a": <expected>
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "a": <not-expected>
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $_ isa collection, has $a;
+        $v = $a;
+      fetch {
+        "v": $v
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "v": <expected>
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "v": <not-expected>
+      }
+      """
+    Examples:
+      | value-type  | value                                       | expected                                      | not-expected                                 |
+      | boolean     | true                                        | true                                          | false                                        |
+      | long        | 12345090                                    | 12345090                                      | 0                                            |
+      | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
+      | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
+      | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
+      | decimal     | 0.0000000000000000001                       | "0.0000000000000000001"                       | 0.000000000000000001                         |
+      | string      | "outPUT"                                    | "outPUT"                                      | "output"                                     |
+      | date        | 2024-09-20                                  | "2024-09-20"                                  | "2025-09-20"                                 |
+      | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               | "1999-02-26T12:15:05"                        |
+      | datetime    | 1999-02-26T12:15:05.000000001               | "1999-02-26T12:15:05.000000001"               | "1999-02-26T12:15:05.000000000"              |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | "2024-09-20T16:40:05.000000001 Europe/London" | "2024-09-20T16:40:05.000000001Europe/London" |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100          | "2024-09-20T16:40:05.000000001+01:00"         | "2024-09-20T16:40:05.000000001+0100"         |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 | "P1Y10M7DT15H44M5.00394892S"                 |
+      | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
+    # TODO: Test documents and structs
+
+
+# TODO: Everything below is old!
 
 
   Scenario: a fetch subquery can be a match-fetch query
