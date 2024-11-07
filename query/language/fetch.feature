@@ -172,9 +172,8 @@ Feature: TypeQL Fetch Query
   # TODO: Add tests for value types when value types match/fetch is implemented
 
 
-# TODO: Not implemented
   Scenario: a variable projection of entities and relations is not acceptable
-    # TODO: Check error message: "Fetching entities and relations is not supported"
+    # TODO: Check error message: "Fetching entities is not supported"
     Then typeql read query; fails
       """
       match
@@ -183,7 +182,7 @@ Feature: TypeQL Fetch Query
         "entity": $x
       };
       """
-    # TODO: Check error message: "Fetching entities and relations is not supported"
+    # TODO: Check error message: "Fetching relations is not supported"
     Then typeql read query; fails
       """
       match
@@ -479,7 +478,6 @@ Feature: TypeQL Fetch Query
       """
 
 
-# TODO: Not implemented
   Scenario: attributes that can never be owned by any matching type of a variable error
     # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
     Then typeql read query; fails
@@ -490,13 +488,31 @@ Feature: TypeQL Fetch Query
         "company name": $p.company-name
       };
       """
-    # TODO when the server is updated with the needed step to check errors: check message "is not an object type"
+    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
+    Then typeql read query; fails
+      """
+      match
+        $p isa person, has person-name "Alice";
+      fetch {
+        "company name": [ $p.company-name ]
+      };
+      """
+    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
     Then typeql read query; fails
       """
       match
         attribute $t; $a isa $t;
       fetch {
         "company name": $a.company-name
+      };
+      """
+    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
+    Then typeql read query; fails
+      """
+      match
+        attribute $t; $a isa $t;
+      fetch {
+        "company name": [ $a.company-name ]
       };
       """
 
@@ -762,6 +778,400 @@ Feature: TypeQL Fetch Query
       | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 | "P1Y10M7DT15H44M5.00394892S"                 |
       | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
     # TODO: Test documents and structs
+
+
+  Scenario: fetch subqueries should be written inside lists
+    Then typeql read query; parsing fails
+      """
+      match
+        $p isa person;
+      fetch {
+        "list pipeline":
+          match
+          $p has person-name $n;
+          fetch {
+            "person name": $n,
+          };
+      };
+      """
+    Given connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+      match
+        $p isa person;
+      fetch {
+        "list pipeline": {
+            match
+            $p has person-name $n;
+            fetch {
+              "person name": $n,
+            };
+        }
+      };
+      """
+    Given connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+      match
+        $p isa person;
+      fetch {
+        "list pipeline": (
+            match
+            $p has person-name $n;
+            fetch {
+              "person name": $n,
+            };
+        )
+      };
+      """
+    Given connection open read transaction for database: typedb
+    Then typeql read query
+      """
+      match
+        $p isa person;
+      fetch {
+        "list pipeline": [
+            match
+            $p has person-name $n;
+            fetch {
+              "person name": $n,
+            };
+        ]
+      };
+      """
+
+
+  Scenario: fetch subqueries can add only valid constraints to vars declared in parent queries
+    When get answers of typeql read query
+      """
+      match
+        entity $t;
+        $p isa! $t;
+      fetch {
+        "subquery": [
+            match
+            $p has person-name $pn;
+            $pn == "Alice";
+            fetch {
+              "Alice": $pn
+            };
+        ],
+      };
+      """
+    Then answer contains document:
+      """
+      {
+        "subquery": [
+          {
+            "Alice": "Alice"
+          }
+        ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        entity $t;
+        $p isa! $t;
+      fetch {
+        "subquery": [
+            match
+            $p isa person;
+            $p has person-name $pn;
+            $pn == "Alice";
+            fetch {
+              "Alice": $pn
+            };
+        ],
+      };
+      """
+    Then answer contains document:
+      """
+      {
+        "subquery": [
+          {
+            "Alice": "Alice"
+          }
+        ]
+      }
+      """
+
+    Then typeql read query; fails
+      """
+      match
+        entity $t;
+        $p isa! $t;
+      fetch {
+        "subquery": [
+            match
+            relation $t;
+            $p has person-name $pn;
+            $pn == "Alice";
+            fetch {
+              "Alice": $pn
+            };
+        ],
+      };
+      """
+
+    Then typeql read query; fails
+      """
+      match
+        entity $t;
+        $p isa! $t;
+      fetch {
+        "subquery": [
+            match
+            relation $t2;
+            $p isa! $t2;
+            $p has person-name $pn;
+            $pn == "Alice";
+            fetch {
+              "Alice": $pn
+            };
+        ],
+      };
+      """
+
+    Then typeql read query; fails
+      """
+      match
+        entity $t;
+        $p isa! $t;
+      fetch {
+        "subquery": [
+            match
+            relation $p;
+            $p has person-name $pn;
+            $pn == "Alice";
+            fetch {
+              "Alice": $pn
+            };
+        ],
+      };
+      """
+
+
+  Scenario: fetch subqueries produce lists of answers for every parent result respecting parent vars
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $n;
+      fetch {
+        "list pipeline": [
+            match
+            $p has person-name $pn;
+            $pn != $n;
+            fetch {
+              "name": $n,
+              "also known as": $pn
+            };
+        ],
+      };
+      """
+    Then answer size is: 3
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [
+          {
+            "name": "Alice",
+            "also known as": "Allie"
+          }
+        ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [
+          {
+            "name": "Allie",
+            "also known as": "Alice"
+          }
+        ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [ ]
+      }
+      """
+
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $p isa person, has person-name "Alice", has person-name "Allie";
+      insert
+        $p has person-name "Alicia";
+      """
+    When transaction commits
+    When connection open read transaction for database: typedb
+
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $n;
+      fetch {
+        "list pipeline": [
+            match
+              $p has person-name $pn;
+              $pn != $n;
+            fetch {
+              "name": $n,
+              "also known as": $pn
+            };
+        ],
+      };
+      """
+    Then answer size is: 4
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [
+          {
+            "name": "Alice",
+            "also known as": "Allie"
+          },
+          {
+            "name": "Alice",
+            "also known as": "Alicia"
+          }
+        ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [
+          {
+            "name": "Allie",
+            "also known as": "Alice"
+          },
+          {
+            "name": "Allie",
+            "also known as": "Alicia"
+          }
+        ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [
+          {
+            "name": "Alicia",
+            "also known as": "Alice"
+          },
+          {
+            "name": "Alicia",
+            "also known as": "Allie"
+          }
+        ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "list pipeline": [ ]
+      }
+      """
+
+
+  Scenario: same fetch parameter names in one fetch object are not permitted
+    # TODO: Check error: "multiple mappings for one key"
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "first": $t,
+        "first": $n,
+      };
+      """
+    # TODO: Check error: "multiple mappings for one key"
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "first": $t,
+        "first": [ $p.ref ],
+      };
+      """
+    # TODO: Check error: "multiple mappings for one key"
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "first": $n,
+        "first": [ $p.person-name ],
+      };
+      """
+    # TODO: Check error: "multiple mappings for one key"
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "first": $n,
+        "first": $n,
+      };
+      """
+
+
+  Scenario: same fetch parameter names in parent and sub fetches are permitted
+    When get answers of typeql read query
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "first": $t,
+        "second": [
+          match
+            $v = $n;
+          fetch {
+            "first": $n,
+            "second": $v
+          };
+        ],
+        "third": [
+          match
+            $p has age $v;
+          fetch {
+            "first": $v,
+            "second": $n
+          };
+        ],
+        "fourth": $n
+      };
+      """
+    Then answer contains document:
+      """
+      {
+        "first": "person",
+        "second": [
+          {
+            "first": "Alice",
+            "second": "Alice"
+          }
+        ],
+        "third": [
+          {
+            "first": 10.0,
+            "second": "Alice"
+          }
+        ],
+        "fourth": "Alice"
+      }
+      """
+
 
 
 
