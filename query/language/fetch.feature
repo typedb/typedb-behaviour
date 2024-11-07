@@ -1146,7 +1146,15 @@ Feature: TypeQL Fetch Query
             $p has age $v;
           fetch {
             "first": $v,
-            "second": $n
+            "second": $n,
+            "third": [
+              match
+                $f links (friend: $p, friend: $friend);
+                not { $friend has person-name "Alice"; };
+              fetch {
+                "first": [ $friend.person-name ]
+              };
+            ]
           };
         ],
         "fourth": $n
@@ -1165,7 +1173,12 @@ Feature: TypeQL Fetch Query
         "third": [
           {
             "first": 10.0,
-            "second": "Alice"
+            "second": "Alice",
+            "third": [
+              {
+                "first": [ "Bob" ]
+              }
+            ]
           }
         ],
         "fourth": "Alice"
@@ -1181,57 +1194,6 @@ Feature: TypeQL Fetch Query
   # ///// ....... Tests below are not fixed, but serve as a tip for future tests reimplementations
 
 
-
-  Scenario: a fetch subquery can be a match-fetch query
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has person-name $n; { $n == "Alice"; } or { $n == "Bob"; };
-      fetch
-      $p: person-name, age;
-      "employers": {
-        match
-        links (employee: $p, employer: $c), isa employment;
-        fetch
-        $c: name;
-      };
-      sort $n;
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Alice", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } },
-            { "value":"Allie", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        },
-        "employers": [
-          {
-            "c": {
-              "type": { "root": "entity", "label": "company" },
-              "name": [
-                { "value": "TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "person-name": [
-            { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
-          ],
-          "age": [ ]
-        },
-        "employers": [ ]
-      }]
-      """
 
 
   Scenario: a fetch subquery can be a match-aggregate query
@@ -1295,71 +1257,5 @@ Feature: TypeQL Fetch Query
       """
       [{
         "ages-sum": null
-      }]
-      """
-
-
-  Scenario: fetch subqueries can be nested and use bindings from any parent
-    Given session transaction closes
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      match
-      $p2 isa person, has person-name "Bob";
-      $c1 isa company, has name "TypeDB";
-      insert
-      links (employee: $p2, employer: $c1), isa employment, has ref 6;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-      $p isa person, has person-name "Alice";
-      fetch
-      $p: age;
-      alice-employers: {
-        match
-        links (employee: $p, employer: $c), isa employment;
-        fetch
-        $c as company: name;
-        alice-employment-rel: {
-          match
-          $r links (employee: $p, employer: $c), isa employment;
-          fetch
-          $r: ref;
-        };
-      };
-      """
-    Then fetch answers are
-      """
-      [{
-        "p": {
-          "type": { "root": "entity", "label": "person" },
-          "age": [
-            { "value": 10, "type": { "root": "attribute", "label": "age", "value_type": "long" } }
-          ]
-        },
-        "alice-employers": [
-          {
-            "company": {
-              "type": { "root": "entity", "label": "company" },
-              "name": [
-                { "value": "TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
-              ]
-            },
-            "alice-employment-rel": [
-              {
-                "r": {
-                  "ref": [
-                    { "value": 4, "type": { "root": "attribute", "label": "ref", "value_type": "long" } }
-                  ],
-                  "type": { "root": "relation", "label": "employment" }
-                }
-              }
-            ]
-          }
-        ]
       }]
       """
