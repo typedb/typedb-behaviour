@@ -1395,3 +1395,4 @@ Feature: TypeQL Fetch Query
       }
       """
 
+# TODO: Add tests for write queries
