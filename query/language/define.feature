@@ -2424,7 +2424,7 @@ Feature: TypeQL Define Query
       """
       match $_ relates subemployee as $x;
       """
-    Then answer size is: 1
+    Then answer size is: 2
 
     When get answers of typeql read query
       """

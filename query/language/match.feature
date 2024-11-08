@@ -1491,7 +1491,7 @@ Feature: TypeQL Match Clause
 
 
 # TODO: Uncomment "as!" steps when it is implemented
-  Scenario: match 'as' pattern works similarly to `sub`, but with a constraint to declared `as`
+  Scenario: match 'as' pattern works similarly to `sub`
     Given typeql schema query
       """
       define
