@@ -69,6 +69,9 @@ Feature: TypeQL Fetch Query
     Given transaction commits
     Given connection open read transaction for database: typedb
 
+  ##################
+  # SINGLE QUERIES #
+  ##################
 
   Scenario: a fetch with zero projections errors
     Then typeql read query; parsing fails
@@ -779,6 +782,15 @@ Feature: TypeQL Fetch Query
       | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
     # TODO: Test documents and structs
 
+  ###############
+  # EXPRESSIONS #
+  ###############
+
+  # TODO: Write expression tests
+
+  ##############
+  # SUBQUERIES #
+  ##############
 
   Scenario: fetch subqueries should be written inside lists
     Then typeql read query; parsing fails
@@ -1282,5 +1294,104 @@ Feature: TypeQL Fetch Query
           limit 10;
         ]
       };
+      """
+  # TODO: Uncomment these steps when a good error is written instead of an unreachable!() on the server side
+#    Then typeql read query; fails
+#      """
+#      match
+#      $p isa! $t, has person-name $n;
+#      fetch {
+#        "subquery": [
+#          match
+#            $p has person-name $pn;
+#            $nv = $n;
+#            $pnv = $pn;
+#            not { $nv == $pnv; };
+#          insert
+#            $p has person-name "Paul";
+#        ]
+#      };
+#      """
+#    Then typeql read query; fails
+#      """
+#      match
+#      $p isa! $t, has person-name $n;
+#      fetch {
+#        "subquery": [
+#          match
+#            $p has person-name $pn;
+#            $nv = $n;
+#            $pnv = $pn;
+#            not { $nv == $pnv; };
+#          insert
+#            $p has person-name "Paul";
+#          fetch {
+#            "Paul's old name": $n
+#          };
+#        ]
+#      };
+#      """
+#    Then typeql read query; fails
+#      """
+#      match
+#      $p isa! $t, has person-name $n;
+#      fetch {
+#        "subquery": [
+#          match
+#            $p has person-name $pn;
+#            $nv = $n;
+#            $pnv = $pn;
+#            not { $nv == $pnv; };
+#          define
+#            person-name @card(0..99);
+#        ]
+#      };
+#      """
+#    Then typeql read query; fails
+#      """
+#      match
+#      $p isa! $t, has person-name $n;
+#      fetch {
+#        "subquery": [
+#          match
+#            $p has person-name $pn;
+#            $nv = $n;
+#            $pnv = $pn;
+#            not { $nv == $pnv; };
+#          define
+#            person-name @card(0..99);
+#          fetch {
+#            "Paul's old name": $n
+#          };
+#        ]
+#      };
+#      """
+
+
+  Scenario: a subquery that is not connected to the parent query is permitted
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $n;
+      fetch {
+        "all employments multiple times": [
+          match
+            $r isa employment, has start-date $s;
+          fetch {
+            "unconnected employment's start date": $s
+          };
+        ]
+      };
+      """
+    Then answer size is: 3
+    Then answer contains document:
+      """
+      {
+        "all employments multiple times": [
+          {
+            "unconnected employment's start date": "2020-01-01T13:13:13.999000000"
+          }
+        ]
+      }
       """
 
