@@ -1492,7 +1492,7 @@ Feature: TypeQL Match Clause
 
 
 # TODO: Uncomment "as!" steps when it is implemented
-  Scenario: match 'as' pattern works similarly to `sub`
+  Scenario: match 'as' pattern works similarly to `sub`, but with a constraint to declared `as`
     Given typeql schema query
       """
       define
@@ -1603,6 +1603,7 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | x                             | y                |
       | label:parentship:child        | label:parentship |
+      | label:parentship:child        | label:fathership |
       | label:fathership:father-child | label:fathership |
 
 #    When get answers of typeql read query
