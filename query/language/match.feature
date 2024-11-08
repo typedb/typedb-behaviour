@@ -746,7 +746,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
-  Scenario: 'isa' matches no answers if the type tree is fully abstract
+  Scenario: type inference fails if the type tree is fully abstract
     Given typeql schema query
       """
       define
@@ -758,11 +758,10 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql read query
+    Then typeql read query; fails
       """
       match $x isa person;
       """
-    Then answer size is: 0
 
 
   # TODO: iids, "each answer satisfies" step
