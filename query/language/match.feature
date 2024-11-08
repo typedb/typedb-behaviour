@@ -1614,15 +1614,15 @@ Feature: TypeQL Match Clause
 #      | x                  |
 #      | label:fathership:father-child |
 
-#    When get answers of typeql read query
-#      """
-#      match
-#      $y relates $x;
-#      $x sub! parentship:child;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                             | y                |
-#      | label:fathership:father-child | label:fathership |
+    When get answers of typeql read query
+      """
+      match
+      $y relates $x;
+      $x sub! parentship:child;
+      """
+    Then uniquely identify answer concepts
+      | x                             | y                |
+      | label:fathership:father-child | label:fathership |
 
     When get answers of typeql read query
       """
