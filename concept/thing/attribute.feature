@@ -59,16 +59,17 @@ Feature: Concept Attribute
     Then attribute $x has value type: <type>
     Then attribute $x has value: <value>
     Examples:
-      | attr              | type        | value                              |
-      | is-alive          | boolean     | true                               |
-      | age               | long        | 21                                 |
-      | score             | double      | 123.456                            |
-      | name              | string      | alice                              |
-      | birth-date        | date        | 1990-01-01                         |
-      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
-      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
-      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
+      | attr              | type        | value                                                                              |
+      | is-alive          | boolean     | true                                                                               |
+      | age               | long        | 21                                                                                 |
+      | score             | double      | 123.456                                                                            |
+      | name              | string      | alice                                                                              |
+      | name              | string      | very-long-string-with_@strangESymßo¬s¡2)*(()˚¬ª#08uj!@%@£^%*&%(*@!_++±§≥≤<>?:😎資料庫 |
+      | birth-date        | date        | 1990-01-01                                                                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789                                                      |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu                                                 |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100                                                           |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                                                                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
     When $x = attribute(<attr>) put instance with value: <value>
@@ -78,16 +79,17 @@ Feature: Concept Attribute
     When $x = attribute(<attr>) get instance with value: <value>
     Then attribute(<attr>) get instances contain: $x
     Examples:
-      | attr              | type        | value                              |
-      | is-alive          | boolean     | true                               |
-      | age               | long        | 21                                 |
-      | score             | double      | 123.456                            |
-      | name              | string      | alice                              |
-      | birth-date        | date        | 1990-01-01                         |
-      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |
-      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu |
-      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100           |
-      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 |
+      | attr              | type        | value                                                                              |
+      | is-alive          | boolean     | true                                                                               |
+      | age               | long        | 21                                                                                 |
+      | score             | double      | 123.456                                                                            |
+      | name              | string      | alice                                                                              |
+      | name              | string      | very-long-string-with_@strangESymßo¬s¡2)*(()˚¬ª#08uj!@%@£^%*&%(*@!_++±§≥≤<>?:😎資料庫 |
+      | birth-date        | date        | 1990-01-01                                                                         |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789                                                      |
+      | global-date       | datetime-tz | 1990-01-01 11:22:33 Asia/Kathmandu                                                 |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33-0100                                                           |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                                                                 |
 
   Scenario Outline: Attribute with value type <type> can be deleted
     When $x = attribute(<attr>) put instance with value: <value>

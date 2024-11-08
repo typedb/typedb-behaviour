@@ -9,71 +9,139 @@ Feature: TypeQL Undefine Query
     Given typedb starts
     Given connection opens with default authentication
     Given connection is open: true
-    Given connection has 0 databases
-    Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection reset database: typedb
+    Given connection open schema transaction for database: typedb
 
     Given typeql schema query
       """
       define
-      person sub entity, plays employment:employee, owns name, owns email @key;
-      employment sub relation, relates employee, relates employer;
-      name sub attribute, value string;
-      email sub attribute, value string, regex ".+@\w+\..+";
-      abstract-type sub entity, abstract;
+      entity person, plays employment:employee, owns name, owns email @key;
+      relation employment, relates employee, relates employer;
+      attribute name @independent, value string;
+      attribute email @independent, value string @regex(".+@\w+\..+");
+      entity abstract-type @abstract;
+      attribute root-attribute @abstract;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
 
+
+  ###########
+  # PARSING #
+  ###########
+
+  Scenario: cannot use untargeted define-like syntax in undefine
+    Then typeql schema query; parsing fails
+      """
+      undefine entity person;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person plays employment:employee;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person owns name;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person, owns name;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine person owns email @key;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name @independent;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine name value string @regex(".+@\w+\..+");
+      """
 
   ################
   # ENTITY TYPES #
   ################
 
-  Scenario: calling 'undefine' with 'sub entity' on a subtype of 'entity' deletes it
+  Scenario: calling 'undefine' with entity on an entity deletes it
     Given get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Given uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
       | label:person        |
-      | label:entity        |
     When typeql schema query
       """
-      undefine person sub entity;
+      undefine person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Then uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
-      | label:entity        |
 
 
-  Scenario: when undefining 'sub' on an entity type, specifying a type that isn't really its supertype throws
-    When typeql schema query; throws exception
+  Scenario: undefining non-existing entity type sub errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'person sub abstract-type'"
       """
-      undefine person sub relation;
+      undefine sub abstract-type from person;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      person sub superperson;
+      entity superperson @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'person sub abstract-type', while"
+      """
+      undefine sub abstract-type from person;
       """
 
 
   Scenario: a sub-entity type can be removed using 'sub' with its direct supertype, and its parent is preserved
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x sub person;
@@ -84,11 +152,11 @@ Feature: TypeQL Undefine Query
       | label:child  |
     When typeql schema query
       """
-      undefine child sub person;
+      undefine sub person from child;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x sub person;
@@ -101,11 +169,11 @@ Feature: TypeQL Undefine Query
   Scenario: undefining a type 'sub' an indirect supertype should still remove that type
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x sub person;
@@ -114,14 +182,16 @@ Feature: TypeQL Undefine Query
       | x            |
       | label:person |
       | label:child  |
-    When session opens transaction of type: write
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine child sub entity;
+      undefine child;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x sub person;
@@ -131,145 +201,185 @@ Feature: TypeQL Undefine Query
       | label:person |
 
 
-  Scenario: undefining a supertype throws an error if subtypes exist
+  Scenario: undefining a supertype errors if subtypes exist
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
-    Then typeql schema query; throws exception
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine person sub entity;
+      undefine person;
+      """
+
+
+  Scenario: undefining non-existing entity type plays errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'person plays employment:employer'"
+      """
+      undefine plays employment:employer from person;
       """
 
 
   Scenario: removing a playable role from a super entity type also removes it from its subtypes
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person plays employment:employee;
+      undefine plays employment:employee from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
-      match $x type child; $x plays employment:employee;
+      match $x label child; $x plays employment:employee;
       """
-    Then answer size is: 0
+
+
+  Scenario: undefining non-existing entity type owns errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'person owns root-attribute'"
+      """
+      undefine owns root-attribute from person;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      person owns root-attribute;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'person owns root-attribute[]', while"
+      """
+      undefine owns root-attribute[] from person;
+      """
+
+
+  Scenario: undefining entity type owns is possible
+    Then typeql schema query
+      """
+      undefine
+      owns name from person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      person owns name[];
+      """
+    When transaction commits
+
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      owns name[] from person;
+      """
+    Then transaction commits
 
 
   Scenario: removing an attribute ownership from a super entity type also removes it from its subtypes
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person owns name;
+      undefine owns name from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
-      match $x type child; $x owns name;
+      match $x label child; $x owns name;
       """
-    Then answer size is: 0
 
 
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person owns email;
+      undefine owns email from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
-      match $x type child; $x owns email @key;
+      match $x label child; $x owns email;
       """
-    Then answer size is: 0
+
 
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
     Given get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Given uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
       | label:person        |
-      | label:entity        |
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
-      insert $x isa person, has name "Victor", has email "victor@vaticle.com";
+      insert $x isa person, has name "Dmitrii", has email "dmitrii@typedb.com";
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    When session opens transaction of type: write
-    Then typeql schema query; throws exception
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine person sub entity;
+      undefine person;
       """
 
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When typeql delete
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When typeql write query
       """
       match
         $x isa person;
       delete
-        $x isa person;
+        $x;
       """
     Then transaction commits
 
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person sub entity;
+      undefine person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Then uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
-      | label:entity        |
-
 
   ##################
   # RELATION TYPES #
@@ -278,39 +388,94 @@ Feature: TypeQL Undefine Query
   Scenario: undefining a relation type removes it
     Given get answers of typeql read query
       """
-      match $x sub relation;
+      match relation $x;
       """
     Given uniquely identify answer concepts
       | x                |
       | label:employment |
-      | label:relation   |
     When typeql schema query
       """
-      undefine employment sub relation;
+      undefine employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match relation $x;
+      """
+
+
+  Scenario: undefining non-existing relation type sub errors
+    Given typeql schema query
+      """
+      define relation abstract-relation @abstract, relates abstract-employee @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment sub abstract-relation'"
+      """
+      undefine sub abstract-relation from employment;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      employment sub superemployment;
+      relation superemployment @abstract, relates superemployee @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment sub abstract-relation', while"
+      """
+      undefine sub abstract-relation from employment;
+      """
+
+
+  Scenario: a sub-relation type can be removed using 'sub' with its direct supertype, and its parent is preserved
+    Given typeql schema query
+      """
+      define relation part-time-employment sub employment, relates some-role;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x sub employment;
+      """
+    Given uniquely identify answer concepts
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
+    When typeql schema query
+      """
+      undefine sub employment from part-time-employment;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub relation;
+      match $x sub employment;
       """
     Then uniquely identify answer concepts
-      | x              |
-      | label:relation |
+      | x                |
+      | label:employment |
 
 
   Scenario: removing playable roles from a super relation type also removes them from its subtypes
     Given typeql schema query
       """
       define
-      employment-terms sub relation, relates employment;
+      relation employment-terms, relates employment;
       employment plays employment-terms:employment;
-      contract-employment sub employment;
+      relation contract-employment sub employment;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match contract-employment plays $x;
@@ -320,29 +485,27 @@ Feature: TypeQL Undefine Query
       | label:employment-terms:employment |
     When typeql schema query
       """
-      undefine employment plays employment-terms:employment;
+      undefine plays employment-terms:employment from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match contract-employment plays $x;
       """
-    Then answer size is: 0
-
 
   Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
     Given typeql schema query
       """
       define
-      start-date sub attribute, value datetime;
+      attribute start-date, value datetime;
       employment owns start-date;
-      contract-employment sub employment;
+      relation contract-employment sub employment;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given get answers of typeql read query
       """
       match $x owns start-date;
@@ -353,140 +516,195 @@ Feature: TypeQL Undefine Query
       | label:contract-employment |
     When typeql schema query
       """
-      undefine employment owns start-date;
+      undefine owns start-date from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x owns start-date;
       """
-    Then answer size is: 0
+
+# TODO: match with annotations (do we really need this test in this file? Only for undefine + match purposes...)
+#  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
+#    Given typeql schema query
+#      """
+#      define
+#      attribute employment-reference, value string;
+#      employment owns employment-reference @key;
+#      relation contract-employment sub employment;
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    Given get answers of typeql read query
+#      """
+#      match $x owns employment-reference @key;
+#      """
+#    Given uniquely identify answer concepts
+#      | x                         |
+#      | label:employment          |
+#      | label:contract-employment |
+#    When typeql schema query
+#      """
+#      undefine employment owns employment-reference;
+#      """
+#    Then transaction commits
+#
+#    When connection open read transaction for database: typedb
+#    Then typeql read query; fails with a message containing: "empty-set for some variable"
+#      """
+#      match $x owns employment-reference @key;
+#      """
 
 
-  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
-    Given typeql schema query
-      """
-      define
-      employment-reference sub attribute, value string;
-      employment owns employment-reference @key;
-      contract-employment sub employment;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match $x owns employment-reference @key;
-      """
-    Given uniquely identify answer concepts
-      | x                         |
-      | label:employment          |
-      | label:contract-employment |
-    When typeql schema query
-      """
-      undefine employment owns employment-reference;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x owns employment-reference @key;
-      """
-    Then answer size is: 0
-
-
-  Scenario: undefining a relation type throws on commit if it has existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+  Scenario: undefining a relation type errors on commit if it has existing instances
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has name "Harald", has email "harald@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has name "Harald", has email "harald@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
       undefine
-      employment relates employee;
-      employment relates employer;
-      person plays employment:employee;
-      employment sub relation;
+      relates employee from employment;
+      relates employer from employment;
+      plays employment:employee from person;
+      employment;
+      """
+
+
+  Scenario: undefining non-existing relation type relates errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment relates mentor'"
+      """
+      undefine relates mentor from employment;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      employment relates mentor;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'employment relates mentor[]', while"
+      """
+      undefine relates mentor[] from employment;
+      """
+
+
+  Scenario: undefining relates is possible
+    Then typeql schema query
+      """
+      undefine
+      relates employee from employment;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      employment relates employee[];
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      relates employee[] from employment;
+      """
+    Then transaction commits
+
+
+  Scenario: undefining non-existing relation type relates specialise errors
+    Given typeql schema query
+      """
+      define relation part-time-employment sub employment, relates part-time-employee;
+      """
+    Given transaction commits
+    When connection open schema transaction for database: typedb
+
+    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates part-time-employee as employee'"
+      """
+      undefine as employee from part-time-employment relates part-time-employee;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      part-time-employment relates part-time-employee as employee;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates part-time-employee as employer', while"
+      """
+      undefine as employer from part-time-employment relates part-time-employee;
       """
 
 
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of typeql read query
       """
-      match $x sub relation;
+      match relation $x;
       """
     Given uniquely identify answer concepts
       | x                |
       | label:employment |
-      | label:relation   |
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has name "Harald", has email "harald@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has name "Harald", has email "harald@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine employment sub relation;
+      undefine employment;
       """
 
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When typeql delete
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When typeql write query
       """
       match
         $r isa employment;
       delete
-        $r isa employment;
+        $r;
       """
     Then transaction commits
 
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine employment sub relation;
+      undefine employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
-      match $x sub relation;
+      match relation $x;
       """
-    Then uniquely identify answer concepts
-      | x              |
-      | label:relation |
 
 
   Scenario: undefining a relation type automatically detaches any possible roleplayers
     Given get answers of typeql read query
       """
       match
-        $x type person;
+        $x label person;
         $x plays $y;
 
       """
@@ -495,20 +713,225 @@ Feature: TypeQL Undefine Query
       | label:person | label:employment:employee |
     When typeql schema query
       """
-      undefine employment sub relation;
+      undefine employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match
-        $x type person;
+        $x label person;
         $x plays $y;
 
       """
-    Then answer size is: 0
 
+  ###################
+  # ATTRIBUTE TYPES #
+  ###################
+
+  Scenario Outline: undefining attribute on an attribute type with value type '<value_type>' removes it
+    Given typeql schema query
+      """
+      define attribute <attr>, value <value_type>;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x label <attr>;
+      """
+    Given answer size is: 1
+    When typeql schema query
+      """
+      undefine <attr>;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match $x label <attr>;
+      """
+    Examples:
+      | value_type | attr       |
+      | string     | colour     |
+      | long       | age        |
+      | double     | height     |
+      | boolean    | is-awake   |
+      | datetime   | birth-date |
+
+
+  Scenario: undefining non-existing attribute type sub errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'email sub root-attribute'"
+      """
+      undefine sub root-attribute from email;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      email sub superattribute;
+      attribute superattribute @abstract;
+      """
+    Then typeql schema query; fails with a message containing: "there is no defined 'email sub root-attribute', while"
+      """
+      undefine sub root-attribute from email;
+      """
+
+
+  Scenario: a sub-attribute type can be removed using 'sub' with its direct supertype, and its parent is preserved
+    Given typeql schema query
+      """
+      define attribute surname sub name; name @abstract;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x sub name;
+      """
+    Given uniquely identify answer concepts
+      | x             |
+      | label:name    |
+      | label:surname |
+    When typeql schema query
+      """
+      define surname value string;
+      """
+    When typeql schema query
+      """
+      undefine sub name from surname;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub name;
+      """
+    Then uniquely identify answer concepts
+      | x          |
+      | label:name |
+
+
+  Scenario: undefining non-existing attribute type value errors
+    Then typeql schema query; fails with a message containing: "there is no defined 'root-attribute value string'"
+      """
+      undefine value string from root-attribute;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'name value datetime-tz', while"
+      """
+      undefine value datetime-tz from name;
+      """
+
+
+  Scenario: undefining a @regex on an attribute type removes the regex constraints on the attribute
+    Then typeql schema query; fails with a message containing: "Illegal annotation"
+      """
+      undefine @regex from email;
+      """
+
+    When typeql schema query
+      """
+      undefine @regex from email value string;
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert $x "not-email-regex" isa email;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa email;
+      """
+    Then answer size is: 1
+
+
+  Scenario: undefining the value type of an attribute type is possible
+    Then typeql schema query; fails with a message containing: "defined 'value' is 'string'"
+      """
+      undefine value long from name;
+      """
+
+    Then typeql schema query; fails with a message containing: "should be abstract"
+      """
+      undefine value string from name;
+      """
+
+    When typeql schema query
+    """
+    define name @abstract;
+    """
+    Then typeql schema query
+      """
+      undefine value string from name;
+      """
+
+
+  Scenario: all existing instances of an attribute type must be deleted in order to undefine it
+    Given get answers of typeql read query
+      """
+      match attribute $x;
+      """
+    Given uniquely identify answer concepts
+      | x                    |
+      | label:name           |
+      | label:email          |
+      | label:root-attribute |
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x "Colette" isa name;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine name;
+      """
+
+    When transaction closes
+    When connection open schema transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $x isa name;
+      delete
+        $x;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine name;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match attribute $x;
+      """
+    Then uniquely identify answer concepts
+      | x                    |
+      | label:email          |
+      | label:root-attribute |
 
   #############################
   # RELATED ROLES ('RELATES') #
@@ -525,11 +948,11 @@ Feature: TypeQL Undefine Query
       | label:employment:employer |
     When typeql schema query
       """
-      undefine employment relates employee;
+      undefine relates employee from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match employment relates $x;
@@ -542,84 +965,77 @@ Feature: TypeQL Undefine Query
   Scenario: undefining all players of a role produces a valid schema
     When typeql schema query
       """
-      undefine person plays employment:employee;
+      undefine plays employment:employee from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x plays employment:employee;
       """
-    Then answer size is: 0
 
-  #TODO: test is not working
-  @ignore
+
   Scenario: after removing a role from a relation type, relation instances can no longer be created with that role
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has email "ganesh@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has email "ganesh@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
-    Given typeql delete
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
       """
       match
         $r isa employment;
       delete
-        $r isa employment;
+        $r;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine
-      person plays employment:employee;
-      employment relates employee;
+      plays employment:employee from person;
+      relates employee from employment;
       """
     Then transaction commits
 
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When get answers of typeql read query
+    When connection open write transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Role label not found"
       """
       match $x relates employee;
       """
-    Then answer size is: 0
-    Then typeql insert; throws exception
+
+    Then typeql write query; fails
       """
       match
-        $p isa person, has email "ganesh@vaticle.com";
+        $p isa person, has email "ganesh@typedb.com";
       insert
-        $r (employee: $p) isa employment;
+        (employee: $p) isa employment;
       """
 
 
-  Scenario: removing all roles from a relation type without undefining the relation type throws on commit
+  Scenario: removing all roles from a relation type without undefining the relation type errors on commit
     When typeql schema query
       """
       undefine
-      employment relates employee;
-      employment relates employer;
+      relates employee from employment;
+      relates employer from employment;
       """
-    Then transaction commits; throws exception
+    Then transaction commits; fails
 
 
   Scenario: undefining a role type automatically detaches any possible roleplayers
     Given get answers of typeql read query
       """
       match
-        $x type person;
+        $x label person;
         $x plays $y;
 
       """
@@ -628,72 +1044,63 @@ Feature: TypeQL Undefine Query
       | label:person | label:employment:employee |
     When typeql schema query
       """
-      undefine employment relates employee;
+      undefine relates employee from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match
-        $x type person;
+        $x label person;
         $x plays $y;
-
       """
-    Then answer size is: 0
 
 
-  Scenario: removing a role throws an error if it is played by existing roleplayers in relations
+  Scenario: removing a role errors if it is played by existing roleplayers in relations
     Given typeql schema query
       """
       define
-      company sub entity, owns name, plays employment:employer;
+      entity company, owns name, plays employment:employer;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has name "Ada", has email "ada@vaticle.com";
+      $p isa person, has name "Ada", has email "ada@typedb.com";
       $c isa company, has name "IBM";
-      $r (employee: $p, employer: $c) isa employment;
+      (employee: $p, employer: $c) isa employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine employment relates employer;
+      undefine relates employer from employment;
       """
 
 
   Scenario: a role that is not played in any existing instance of its relation type can be safely removed
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has name "Vijay", has email "vijay@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has name "Vijay", has email "vijay@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine employment relates employer;
+      undefine relates employer from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match employment relates $x;
@@ -706,385 +1113,107 @@ Feature: TypeQL Undefine Query
   Scenario: removing a role from a super relation type also removes it from its subtypes
     Given typeql schema query
       """
-      define part-time sub employment;
+      define relation part-time sub employment;
       """
     Given transaction commits
 
-    When session opens transaction of type: write
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine employment relates employer;
+      undefine relates employer from employment;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x type part-time; $x relates $role;
+      match $x label part-time; $x relates $role;
       """
     Then uniquely identify answer concepts
       | x               | role                      |
       | label:part-time | label:employment:employee |
-
-  # TODO
-  Scenario: removing a role from a super relation type also removes roles that specialise it in its subtypes (?)
-
-  # TODO
-  Scenario: after undefining a sub-role from a relation type, it is gone and the type is left with just its parent role (?)
-
 
   ############################
   # PLAYABLE ROLES ('PLAYS') #
   ############################
 
   Scenario: after undefining a playable role from a type, the type can no longer play the role
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has email "ganesh@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has email "ganesh@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given session opens transaction of type: write
-    Given typeql delete
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       match
         $r isa employment;
       delete
-        $r isa employment;
+        $r;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person plays employment:employee;
+      undefine plays employment:employee from person;
       """
     Then transaction commits
 
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x plays employment:employee;
       """
-    Then answer size is: 0
-    Then typeql insert; throws exception
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails
       """
       match
-        $p isa person, has email "ganesh@vaticle.com";
+        $p isa person, has email "ganesh@typedb.com";
       insert
-        $r (employee: $p) isa employment;
+        (employee: $p) isa employment;
       """
 
 
-  Scenario: undefining a playable role that was not actually playable to begin with throws
-    Given get answers of typeql read query
-      """
-      match person plays $x;
-      """
-    Given uniquely identify answer concepts
-      | x                         |
-      | label:employment:employee |
-    When typeql schema query; throws exception
-      """
-      undefine person plays employment:employer;
-      """
-
-
-  Scenario: undefining played inherited role types using alias role types throws
+  Scenario: undefining played inherited role types using alias role types errors
     Given typeql schema query
     """
     define
-    part-time-employment sub employment;
+    relation part-time-employment sub employment;
     """
     Given transaction commits
 
-    Given session opens transaction of type: write
-    Given typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query; fails
     """
     undefine
-    person plays part-time-employment:employee;
+    plays part-time-employment:employee from person;
     """
 
 
-  Scenario: removing a playable role throws an error if it is played by existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+  Scenario: removing a playable role errors if it is played by existing instances
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $p isa person, has email "ganesh@vaticle.com";
-      $r (employee: $p) isa employment;
+      $p isa person, has email "ganesh@typedb.com";
+      (employee: $p) isa employment;
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine person plays employment:employee;
+      undefine plays employment:employee from person;
       """
-
-
-  ###################
-  # ATTRIBUTE TYPES #
-  ###################
-
-  Scenario Outline: undefining 'sub attribute' on an attribute type with value type '<value_type>' removes it
-    Given typeql schema query
-      """
-      define <attr> sub attribute, value <value_type>;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match $x type <attr>;
-      """
-    Given answer size is: 1
-    When typeql schema query
-      """
-      undefine <attr> sub attribute;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    Then typeql throws exception
-      """
-      match $x type <attr>;
-      """
-
-    Examples:
-      | value_type | attr       |
-      | string     | colour     |
-      | long       | age        |
-      | double     | height     |
-      | boolean    | is-awake   |
-      | datetime   | birth-date |
-
-
-  Scenario: undefining a regex on an attribute type removes the regex constraints on the attribute
-    When typeql schema query
-      """
-      undefine email regex ".+@\w+\..+";
-      """
-    Then transaction commits
-
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When typeql insert
-      """
-      insert $x "not-email-regex" isa email;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x isa email;
-      """
-    Then answer size is: 1
-
-
-  Scenario: removing playable roles from a super attribute type also removes them from its subtypes
-    Given typeql schema query
-      """
-      define
-      employment relates manager-name;
-      abstract-name sub attribute, abstract, value string, plays employment:manager-name;
-      first-name sub abstract-name;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match first-name plays $x;
-      """
-    Given uniquely identify answer concepts
-      | x                             |
-      | label:employment:manager-name |
-    When typeql schema query
-      """
-      undefine abstract-name plays employment:manager-name;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match first-name plays $x;
-      """
-    Then answer size is: 0
-
-
-  Scenario: removing attribute ownerships from a super attribute type also removes them from its subtypes
-    Given typeql schema query
-      """
-      define
-      locale sub attribute, value string;
-      abstract-name sub attribute, abstract, value string, owns locale;
-      first-name sub abstract-name;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match $x owns locale;
-      """
-    Given uniquely identify answer concepts
-      | x                   |
-      | label:abstract-name |
-      | label:first-name    |
-    When typeql schema query
-      """
-      undefine abstract-name owns locale;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x owns locale;
-      """
-    Then answer size is: 0
-
-
-  Scenario: removing a key ownership from a super attribute type also removes it from its subtypes
-    Given typeql schema query
-      """
-      define
-      name-id sub attribute, value long;
-      abstract-name sub attribute, abstract, value string, owns name-id @key;
-      first-name sub abstract-name;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match $x owns name-id @key;
-      """
-    Given uniquely identify answer concepts
-      | x                   |
-      | label:abstract-name |
-      | label:first-name    |
-    When typeql schema query
-      """
-      undefine abstract-name owns name-id;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x owns name-id @key;
-      """
-    Then answer size is: 0
-
-
-  Scenario: an attribute and its self-ownership can be removed simultaneously
-    Given typeql schema query
-      """
-      define
-      name owns name;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    When typeql schema query
-      """
-      undefine
-      name owns name;
-      name sub attribute;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    Then typeql throws exception
-      """
-      match $x type name;
-      """
-
-
-  Scenario: undefining the value type of an attribute throws an error
-    When typeql schema query; throws exception
-      """
-      undefine name value string;
-      """
-
-
-  Scenario: all existing instances of an attribute type must be deleted in order to undefine it
-    Given get answers of typeql read query
-      """
-      match $x sub attribute;
-      """
-    Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
-      | label:attribute |
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert $x "Colette" isa name;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
-      """
-      undefine name sub attribute;
-      """
-
-    When connection close all sessions
-    When connection open data session for database: typedb
-    When session opens transaction of type: write
-    When typeql delete
-      """
-      match
-        $x isa name;
-      delete
-        $x isa name;
-      """
-    Then transaction commits
-
-    When connection close all sessions
-    When connection open schema session for database: typedb
-    When session opens transaction of type: write
-    When typeql schema query
-      """
-      undefine name sub attribute;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x sub attribute;
-      """
-    Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
-      | label:attribute |
-
 
   ########################
   # ATTRIBUTE OWNERSHIPS #
@@ -1095,76 +1224,51 @@ Feature: TypeQL Undefine Query
       """
       match
         $x owns name;
-        $x type person;
-
+        $x label person;
       """
     Given uniquely identify answer concepts
       | x            |
       | label:person |
     When typeql schema query
       """
-      undefine person owns name;
+      undefine owns name from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match
         $x owns name;
-        $x type person;
-
-      """
-    Then answer size is: 0
-
-
-  Scenario: attempting to undefine an attribute ownership that was not actually owned to begin throws
-    When typeql schema query; throws exception
-      """
-      undefine employment owns name;
+        $x label person;
       """
 
 
-  Scenario: attempting to undefine an attribute ownership inherited from a parent throws
+  Scenario: attempting to undefine an attribute ownership inherited from a parent errors
     Given typeql schema query
       """
-      define child sub person;
+      define entity child sub person;
       """
     Then transaction commits
 
-    When session opens transaction of type: write
-    Then typeql schema query; throws exception
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine child owns name;
+      undefine owns name from child;
       """
 
 
   Scenario: undefining a key ownership removes it
     When typeql schema query
       """
-      undefine person owns email;
+      undefine owns email from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x owns email;
-      """
-    Then answer size is: 0
-
-
-  Scenario: writing '@key' when undefining a key ownership is not allowed
-    Then typeql schema query; throws exception
-      """
-      undefine person owns email @key;
-      """
-
-
-  Scenario: writing '@key' when undefining an attribute ownership is not allowed
-    Then typeql schema query; throws exception
-      """
-      undefine person owns name @key;
       """
 
 
@@ -1178,432 +1282,988 @@ Feature: TypeQL Undefine Query
       | label:person |
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
-      insert $x isa person, has email "anon@vaticle.com";
+      insert $x isa person, has email "anon@typedb.com";
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     When typeql schema query
       """
-      undefine person owns name;
+      undefine owns name from person;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
       """
       match $x owns name;
       """
-    Then answer size is: 0
 
 
-  Scenario: removing an attribute ownership throws an error if it is owned by existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+  Scenario: removing an attribute ownership errors if it is owned by existing instances
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
-      insert $x isa person, has name "Tomas", has email "tomas@vaticle.com";
+      insert $x isa person, has name "Tomas", has email "tomas@typedb.com";
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine person owns name;
+      undefine owns name from person;
       """
 
 
-  Scenario: undefining a key ownership throws an error if it is owned by existing instances
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+  Scenario: undefining a key ownership errors if it is owned by existing instances
+    Given transaction closes
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
-      insert $x isa person, has name "Daniel", has email "daniel@vaticle.com";
+      insert $x isa person, has name "Daniel", has email "daniel@typedb.com";
       """
     Given transaction commits
 
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Then typeql schema query; throws exception
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
-      undefine person owns email;
+      undefine owns email from person;
       """
 
+  ###########
+  # STRUCTS #
+  ###########
 
-  #########
-  # RULES #
-  #########
+    # TODO 3.x: Add tests for structs
 
-  Scenario: undefining a rule removes it
+  #############
+  # FUNCTIONS #
+  #############
+# TODO: Write new tests for functions. Consider old Rules tests to be reimplemented if applicable
+#  Scenario: undefining a rule removes it
+#    Given typeql schema query
+#      """
+#      define
+#      entity company, plays employment:employer;
+#      rule a-rule:
+#      when {
+#        $c isa company; $y isa person;
+#      } then {
+#        (employer: $c, employee: $y) isa employment;
+#      };
+#      """
+#    Given transaction commits
+#
+#    When connection open schema transaction for database: typedb
+#    Then rules contain: a-rule
+#    When typeql schema query
+#      """
+#      undefine rule a-rule;
+#      """
+#    Then transaction commits
+#
+#    When connection open read transaction for database: typedb
+#    Then rules do not contain: a-rule
+#
+#  Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
+#    Given typeql schema query
+#      """
+#      define
+#      rule samuel-email-rule:
+#      when {
+#        $x has email "samuel@typedb.com";
+#      } then {
+#        $x has name "Samuel";
+#      };
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert $x isa person, has email "samuel@typedb.com";
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    Given get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Given uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#    Given transaction closes
+#    Given connection open schema transaction for database: typedb
+#    When typeql schema query
+#      """
+#      undefine rule samuel-email-rule;
+#      """
+#    Then transaction commits
+#
+#    When connection open read transaction for database: typedb
+#    Then typeql read query; fails with a message containing: "empty-set for some variable"
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#
+#
+#  # enable when we can do reasoning in a schema write transaction (it was a todo previously, not relevant anymore)
+#  @ignore
+#  Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
+#    Given typeql schema query
+#      """
+#      define
+#      rule samuel-email-rule:
+#      when {
+#        $x has email "samuel@typedb.com";
+#      } then {
+#        $x has name "Samuel";
+#      };
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert $x isa person, has email "samuel@typedb.com";
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    Given get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Given uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#    When typeql schema query
+#      """
+#      undefine rule samuel-email-rule;
+#      """
+#
+#    When get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Then uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#
+#  Scenario: You cannot undefine a type if it is used in a rule
+#    Given typeql schema query
+#    """
+#    define
+#
+#    entity type-to-undefine, owns name;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa type-to-undefine;
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in a negation in a rule
+#    Given typeql schema query
+#    """
+#    define
+#    relation rel, relates rol;
+#    entity other-type, owns name, plays rel:rol;
+#    entity type-to-undefine, owns name, plays rel:rol;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa other-type;
+#      not { ($x, $y) isa relation; $y isa type-to-undefine; };
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in any disjunction in a rule
+#    Given typeql schema query
+#    """
+#    define
+#
+#    entity type-to-undefine, owns name;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x has name $y;
+#      { $x isa person; } or { $x isa type-to-undefine; };
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in the then of a rule
+#    Given typeql schema query
+#    """
+#    define
+#    attribute name-to-undefine, value string;
+#    entity some-type, owns name-to-undefine;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa some-type;
+#    } then {
+#      $x has name-to-undefine "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      name-to-undefine;
+#    """
+
+  ###############
+  # ANNOTATIONS #
+  ###############
+
+  Scenario Outline: cannot undefine annotation @<annotation> for entity types
     Given typeql schema query
+      """
+      define entity player;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
       define
-      company sub entity, plays employment:employer;
-      rule a-rule:
-      when {
-        $c isa company; $y isa person;
-      } then {
-        (employer: $c, employee: $y) isa employment;
-      };
+      entity player @<annotation>;
       """
-    Given transaction commits
+    When transaction closes
 
-    When session opens transaction of type: write
-    Then rules contain: a-rule
-    When typeql schema query
-      """
-      undefine rule a-rule;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    Then rules do not contain: a-rule
-
-  Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
-    Given typeql schema query
-      """
-      define
-      rule samuel-email-rule:
-      when {
-        $x has email "samuel@vaticle.com";
-      } then {
-        $x has name "Samuel";
-      };
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert $x isa person, has email "samuel@vaticle.com";
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: read
-    Given get answers of typeql read query
-      """
-      match
-        $x has name $n;
-      get $n;
-      """
-    Given uniquely identify answer concepts
-      | n                 |
-      | attr:name:Samuel  |
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    When typeql schema query
-      """
-      undefine rule samuel-email-rule;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match
-        $x has name $n;
-      get $n;
-      """
-    Then answer size is: 0
-
-
-  # TODO enable when we can do reasoning in a schema write transaction
-  @ignore
-  Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
-    Given typeql schema query
-      """
-      define
-      rule samuel-email-rule:
-      when {
-        $x has email "samuel@vaticle.com";
-      } then {
-        $x has name "Samuel";
-      };
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
-      """
-      insert $x isa person, has email "samuel@vaticle.com";
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given get answers of typeql read query
-      """
-      match
-        $x has name $n;
-      get $n;
-      """
-    Given uniquely identify answer concepts
-      | n                 |
-      | attr:name:Samuel  |
-    When typeql schema query
-      """
-      undefine rule samuel-email-rule;
-      """
-
-    When get answers of typeql read query
-      """
-      match
-        $x has name $n;
-      get $n;
-      """
-    Then uniquely identify answer concepts
-      | n                 |
-      | attr:name:Samuel  |
-
-  Scenario: You cannot undefine a type if it is used in a rule
-    Given typeql schema query
-    """
-    define
-
-    type-to-undefine sub entity, owns name;
-
-    rule rule-referencing-type-to-undefine:
-    when {
-      $x isa type-to-undefine;
-    } then {
-      $x has name "dummy";
-    };
-    """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-
-    Given typeql schema query; throws exception
-    """
-    undefine
-      type-to-undefine sub entity;
-    """
-
-  Scenario: You cannot undefine a type if it is used in a negation in a rule
-    Given typeql schema query
-    """
-    define
-    rel sub relation, relates rol;
-    other-type sub entity, owns name, plays rel:rol;
-    type-to-undefine sub entity, owns name, plays rel:rol;
-
-    rule rule-referencing-type-to-undefine:
-    when {
-      $x isa other-type;
-      not { ($x, $y) isa relation; $y isa type-to-undefine; };
-    } then {
-      $x has name "dummy";
-    };
-    """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-
-    Given typeql schema query; throws exception
-    """
-    undefine
-      type-to-undefine sub entity;
-    """
-
-  Scenario: You cannot undefine a type if it is used in any disjunction in a rule
-    Given typeql schema query
-    """
-    define
-
-    type-to-undefine sub entity, owns name;
-
-    rule rule-referencing-type-to-undefine:
-    when {
-      $x has name $y;
-      { $x isa person; } or { $x isa type-to-undefine; };
-    } then {
-      $x has name "dummy";
-    };
-    """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-
-    Given typeql schema query; throws exception
-    """
-    undefine
-      type-to-undefine sub entity;
-    """
-
-  Scenario: You cannot undefine a type if it is used in the then of a rule
-    Given typeql schema query
-    """
-    define
-    name-to-undefine sub attribute, value string;
-    some-type sub entity, owns name-to-undefine;
-
-    rule rule-referencing-type-to-undefine:
-    when {
-      $x isa some-type;
-    } then {
-      $x has name-to-undefine "dummy";
-    };
-    """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-
-    Given typeql schema query; throws exception
-    """
-    undefine
-      name-to-undefine sub entity;
-    """
-
-  ############
-  # ABSTRACT #
-  ############
-
-  Scenario: undefining a type as abstract converts an abstract to a concrete type, allowing creation of instances
-    Given get answers of typeql read query
-      """
-      match
-        $x type abstract-type;
-        not { $x abstract; };
-
-      """
-    Given answer size is: 0
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert; throws exception
-      """
-      insert $x isa abstract-type;
-      """
-
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql schema query
-      """
-      undefine abstract-type abstract;
-      """
-    Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    When get answers of typeql read query
-      """
-      match
-        $x type abstract-type;
-        not { $x abstract; };
-
-      """
-    Then uniquely identify answer concepts
-      | x                   |
-      | label:abstract-type |
-    When typeql insert
-      """
-      insert $x isa abstract-type;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $x isa abstract-type;
-      """
-    Then answer size is: 1
-
-
-  Scenario: undefining abstract on a type that is already non-abstract does nothing
-    When typeql schema query
-      """
-      undefine person abstract;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match
-        $x type person;
-        not { $x abstract; };
-
-      """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-
-
-  Scenario: an abstract type can be changed into a concrete type even if has an abstract child type
-    Given typeql schema query
-      """
-      define sub-abstract-type sub abstract-type, abstract;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    When typeql schema query
-      """
-      undefine abstract-type abstract;
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match
-        $x type abstract-type;
-        not { $x abstract; };
-
-      """
-    Then uniquely identify answer concepts
-      | x                   |
-      | label:abstract-type |
-
-
-  Scenario: undefining abstract on an attribute type is allowed, even if that attribute type has an owner
-    Given typeql schema query
-      """
-      define
-      person abstract;
-      vehicle-registration sub attribute, value string, abstract;
-      person owns vehicle-registration;
-      """
-    Given transaction commits
-
-    Given session opens transaction of type: write
-    When typeql schema query
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
       """
       undefine
-      vehicle-registration abstract;
+      @<category> from player;
+      """
+    Examples:
+      | annotation       | category    |
+      | distinct         | distinct    |
+      | independent      | independent |
+      | unique           | unique      |
+      | key              | key         |
+#      | cascade          | cascade     | # TODO: Cascade is temporarily turned off
+      | card(1..1)       | card        |
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for entity types, cannot undefine not defined
+    Given typeql schema query
+      """
+      define entity player;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity player @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from player;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
       """
-      match
-        $x type vehicle-registration;
-        not { $x abstract; };
-
+      undefine
+      @<category> from player;
       """
-    Then answer size is: 1
+    Examples:
+      | annotation | category |
+      | abstract   | abstract |
 
+
+  Scenario Outline: cannot undefine annotation @<annotation> for relation types
+    Given typeql schema query
+      """
+      define
+      relation parentship relates parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query; fails
+      """
+      define
+      relation parentship @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from parentship;
+      """
+    Examples:
+      | annotation       | category    |
+      | distinct         | distinct    |
+      | independent      | independent |
+      | unique           | unique      |
+      | key              | key         |
+      | card(1..1)       | card        |
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for relation types, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      relation parentship relates parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from parentship;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from parentship;
+      """
+    Examples:
+      | annotation | category |
+      | abstract   | abstract |
+#      | cascade    | cascade  | # TODO: Cascade is temporarily turned off
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for attribute types
+    Given typeql schema query
+      """
+      define
+      attribute description value string;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      attribute description @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from description;
+      """
+    Examples:
+      | annotation       | category |
+      | distinct         | distinct |
+      | unique           | unique   |
+      | key              | key      |
+#      | cascade          | cascade  | # TODO: Cascade is temporarily turned off
+      | card(1..1)       | card     |
+      | regex("val")     | regex    |
+      | range("1".."2")  | range    |
+      | values("1", "2") | values   |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for attribute types, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      attribute description value string;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute description @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from description;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from description;
+      """
+    Examples:
+      | annotation  | category    |
+      | abstract    | abstract    |
+      | independent | independent |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for relates/role types
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from parentship relates parent;
+      """
+    Examples:
+      | annotation       | category    |
+      | independent      | independent |
+      | distinct         | distinct    |
+      | unique           | unique      |
+      | key              | key         |
+#      | cascade          | cascade     | # TODO: Cascade is temporarily turned off
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for relates/role types, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from parentship relates parent;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from parentship relates parent;
+      """
+    Examples:
+      | annotation | category |
+      | abstract   | abstract |
+      | card(1..1) | card     |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> to relates/role types lists
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from parentship relates parent[];
+      """
+    Examples:
+      | annotation       | category    |
+      | independent      | independent |
+      | unique           | unique      |
+      | key              | key         |
+#      | cascade          | cascade         | # TODO: Cascade is temporarily turned off
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for relates/role types lists, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent[] @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from parentship relates parent[];
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from parentship relates parent[];
+      """
+    Examples:
+      | annotation | category |
+      | abstract   | abstract |
+      | card(1..1) | card     |
+      | distinct   | distinct |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for relates/role types using wrong scalar/list notation
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent[], relates child;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship relates parent[] @<annotation>, relates child @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'parentship relates parent', while"
+      """
+      undefine
+      @<category> from parentship relates parent;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'parentship relates child[]', while"
+      """
+      undefine
+      @<category> from parentship relates child[];
+      """
+    Then transaction commits
+    Examples:
+      | annotation | category |
+      | card(1..1) | card     |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for owns
+    Given typeql schema query
+      """
+      define
+      entity player owns name;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Examples:
+      | annotation  | category    |
+      | abstract    | abstract    |
+      | independent | independent |
+      | distinct    | distinct    |
+#      | cascade     | cascade     | # TODO: Cascade is temporarily turned off
+
+
+  Scenario Outline: can undefine annotation @<annotation> for owns, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      entity player owns name;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity player owns name @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Examples:
+      | annotation       | category |
+      | unique           | unique   |
+      | key              | key      |
+      | card(1..1)       | card     |
+      | regex("val")     | regex    |
+      | range("1".."2")  | range    |
+      | values("1", "2") | values   |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for owns lists
+    Given typeql schema query
+      """
+      define
+      entity player owns name[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from player owns name[];
+      """
+    Examples:
+      | annotation  | category    |
+      | abstract    | abstract    |
+      | independent | independent |
+#      | cascade     | cascade     | # TODO: Cascade is temporarily turned off
+
+
+  Scenario Outline: can undefine annotation @<annotation> for owns lists, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      entity player owns name[];
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity player owns name[] @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from player owns name[];
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from player owns name[];
+      """
+    Examples:
+      | annotation       | category |
+      | unique           | unique   |
+      | key              | key      |
+      | card(1..1)       | card     |
+      | regex("val")     | regex    |
+      | range("1".."2")  | range    |
+      | values("1", "2") | values   |
+      | distinct         | distinct |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for owns using wrong scalar/list notation
+    Given typeql schema query
+      """
+      define
+      entity player owns name[], owns email;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      player owns name[] @<annotation>, owns email @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'player owns name', while"
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined 'player owns email[]', while"
+      """
+      undefine
+      @<category> from player owns email[];
+      """
+    Then transaction commits
+    Examples:
+      | annotation | category |
+      | card(1..1) | card     |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for plays
+    Given typeql schema query
+      """
+      define
+      entity player plays employment:employee;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from player plays employment:employee;
+      """
+    Examples:
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | independent      | independent |
+      | distinct         | distinct    |
+      | unique           | unique      |
+      | key              | key         |
+#      | cascade          | cascade     | # TODO: Cascade is temporarily turned off
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for plays, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      entity player plays employment:employee;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from player plays employment:employee;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from player plays employment:employee;
+      """
+    Examples:
+      | annotation | category |
+      | card(1..1) | card     |
+
+
+  Scenario Outline: cannot undefine annotation @<annotation> for value types
+    Given typeql schema query
+      """
+      define
+      attribute description value string;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from description value string;
+      """
+    Examples:
+      | annotation  | category    |
+      | unique      | unique      |
+      | key         | key         |
+      | abstract    | abstract    |
+      | independent | independent |
+      | distinct    | distinct    |
+#      | cascade     |category     | # TODO: Cascade is temporarily turned off
+      | card(1..1)  | card        |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for value types, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      attribute description value string;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute description value string @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from description value string;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from description value string;
+      """
+    Examples:
+      | annotation       | category |
+      | regex("val")     | regex    |
+      | range("1".."2")  | range    |
+      | values("1", "2") | values   |
 
   ###################
   # COMPLEX QUERIES #
@@ -1612,121 +2272,147 @@ Feature: TypeQL Undefine Query
   Scenario: a type and an attribute type that it owns can be removed simultaneously
     Given get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Given uniquely identify answer concepts
       | x                   |
       | label:person        |
       | label:abstract-type |
-      | label:entity        |
     Given get answers of typeql read query
       """
-      match $x sub attribute;
+      match attribute $x;
       """
     Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
-      | label:attribute |
+      | x                    |
+      | label:name           |
+      | label:email          |
+      | label:root-attribute |
+
     When typeql schema query
       """
       undefine
-      person sub entity, owns name;
-      name sub attribute;
+      person;
+      name;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Then uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
-      | label:entity        |
     When get answers of typeql read query
       """
-      match $x sub attribute;
+      match attribute $x;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
-      | label:attribute |
+      | x                    |
+      | label:email          |
+      | label:root-attribute |
+
 
   Scenario: a type, a relation type that it plays in and an attribute type that it owns can be removed simultaneously
     Given get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Given uniquely identify answer concepts
       | x                   |
       | label:person        |
       | label:abstract-type |
-      | label:entity        |
     Given get answers of typeql read query
       """
-      match $x sub relation;
+      match relation $x;
       """
     Given uniquely identify answer concepts
       | x                |
       | label:employment |
-      | label:relation   |
     Given get answers of typeql read query
       """
-      match $x sub attribute;
+      match attribute $x;
       """
     Given uniquely identify answer concepts
-      | x               |
-      | label:name      |
-      | label:email     |
-      | label:attribute |
+      | x                    |
+      | label:name           |
+      | label:email          |
+      | label:root-attribute |
     Given get answers of typeql read query
       """
-      match $x sub relation:role;
+      match $_ relates $x;
       """
     Given uniquely identify answer concepts
       | x                         |
       | label:employment:employee |
       | label:employment:employer |
-      | label:relation:role       |
     When typeql schema query
       """
       undefine
-      person sub entity, owns name, owns email, plays employment:employee;
-      employment sub relation, relates employee, relates employer;
-      name sub attribute;
+      person;
+      employment;
+      name;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub entity;
+      match entity $x;
       """
     Then uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
-      | label:entity        |
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match relation $x;
+      """
     When get answers of typeql read query
       """
-      match $x sub relation;
+      match attribute $x;
       """
     Then uniquely identify answer concepts
-      | x              |
-      | label:relation |
+      | x                    |
+      | label:email          |
+      | label:root-attribute |
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match $_ relates $x;
+      """
+
+
+  Scenario: can undefine the same type's capabilities piece by piece in one query
+    Given typeql schema query
+      """
+      define
+      relation parentship @abstract, relates parent @card(0..), relates child[];
+      relation fathership @abstract, sub parentship, relates father as parent @card(1..);
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      as parent from fathership relates father;
+      @card from fathership relates father;
+      relates father from fathership;
+      @abstract from fathership;
+      sub parentship from fathership;
+      fathership;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x sub attribute;
+      match $x sub parentship;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:email     |
-      | label:attribute |
-    When get answers of typeql read query
+      | x                |
+      | label:parentship |
+    Then typeql read query; fails with a message containing: "not found"
       """
-      match $x sub relation:role;
+      match $x label fathership;
       """
-    Then uniquely identify answer concepts
-      | x                   |
-      | label:relation:role |

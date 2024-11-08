@@ -22,7 +22,7 @@ Feature: TypeQL Redefine Query
       entity empty-entity @abstract;
       entity child sub empty-entity;
 
-      relation empty-relation relates empty-role;
+      relation empty-relation relates empty-role, relates empty-abstract-role @abstract;
       relation part-time-employment sub empty-relation, relates part-time-role;
 
       attribute name value string;
@@ -38,7 +38,6 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-
 
   ################
   # ENTITY TYPES #
@@ -98,12 +97,19 @@ Feature: TypeQL Redefine Query
       """
 
 
-  Scenario: can redefine entity type's sub
+  Scenario: can redefine entity type's sub, cannot redefine unchanged
     When typeql schema query
       """
-      redefine entity child sub person;
+      redefine child sub person;
       """
     Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "already defined"
+      """
+      redefine child sub person;
+      """
+    When transaction closes
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -114,6 +120,13 @@ Feature: TypeQL Redefine Query
       | x            |
       | label:person |
       | label:child  |
+
+
+  Scenario: cannot redefine entity type's sub if it's not defined
+    Then typeql schema query; fails with a message containing: "Try define instead"
+      """
+      redefine person sub empty-entity;
+      """
 
 
   Scenario: a redefined entity subtype inherits playable roles from its parent type
@@ -174,34 +187,42 @@ Feature: TypeQL Redefine Query
       """
 
 
-  Scenario: can redefine entity type's owns ordering
+  Scenario: can redefine entity type's owns ordering, cannot redefine unchanged
     Then typeql schema query; fails
       """
-      define entity person owns name[];
+      define person owns name[];
       """
     Given transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      redefine entity person owns name[];
+      redefine person owns name[];
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns name[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x            |
+#      | label:person |
+#    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
       """
-      match $x owns name[];
+      redefine person owns name[];
       """
-    Then uniquely identify answer concepts
-      | x            |
-      | label:person |
-    When transaction closes
+    Then transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      redefine entity person owns name;
+      redefine person owns name;
       """
     Then transaction commits
 
@@ -213,6 +234,20 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x            |
       | label:person |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
+      """
+      redefine person owns name;
+      """
+
+
+  Scenario: cannot redefine entity type's owns if it's not defined
+    Then typeql schema query; fails with a message containing: "Try define instead"
+      """
+      redefine person owns start-date[];
+      """
 
 
   Scenario: cannot redefine entity type's owns both ordering and annotation
@@ -272,7 +307,6 @@ Feature: TypeQL Redefine Query
       """
       redefine entity $x;
       """
-
 
   ##################
   # RELATION TYPES #
@@ -351,9 +385,9 @@ Feature: TypeQL Redefine Query
       match $x sub employment;
       """
     Then uniquely identify answer concepts
-      | x                    |
-      | label:employment     |
-      | label:fun-employment |
+      | x                          |
+      | label:employment           |
+      | label:part-time-employment |
 
 
   Scenario: a redefined relation subtype inherits roles from its supertype
@@ -400,7 +434,7 @@ Feature: TypeQL Redefine Query
       | label:part-time-employment |
 
 
-  Scenario: can redefine relation type's relates ordering
+  Scenario: can redefine relation type's relates ordering, cannot redefine unchanged
     Then typeql schema query; fails
       """
       define relation employment relates employee[];
@@ -410,18 +444,26 @@ Feature: TypeQL Redefine Query
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      redefine relation employment relates employee[];
+      redefine employment relates employee[];
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x relates employee[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:employment |
+#    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
       """
-      match $x relates employee[];
+      redefine employment relates employee[];
       """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
     When transaction closes
 
     When connection open schema transaction for database: typedb
@@ -439,6 +481,20 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x                |
       | label:employment |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
+      """
+      redefine employment relates employee;
+      """
+
+
+  Scenario: cannot redefine relation type's relates if it's not defined
+    Then typeql schema query; fails with a message containing: "Try define instead"
+      """
+      redefine employment relates mentor[];
+      """
 
 
   Scenario: cannot redefine relation type's relates both ordering and annotation
@@ -448,34 +504,88 @@ Feature: TypeQL Redefine Query
       """
 
 
-  Scenario: can redefine relation type's owns ordering
+  Scenario: can redefine relation type's relates specialise, cannot redefine unchanged
+    Given typeql schema query
+      """
+      define part-time-employment relates part-time-role as empty-role;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
-      define relation employment owns start-date[];
+      define part-time-employment relates part-time-role as empty-abstract-role;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      redefine part-time-employment relates part-time-role as empty-abstract-role;
+      """
+    Then transaction commits
+
+    # TODO: Uncomment when querying for specialise works. Now it returns every `$_ relates $x`.
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $_ relates $x as empty-abstract-role;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                                         |
+#      | label:part-time-employment:part-time-role |
+#    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "already defined"
+      """
+      redefine part-time-employment relates part-time-role as empty-abstract-role;
+      """
+
+
+  Scenario: cannot redefine relation type's relates specialise if it's not defined
+    Then typeql schema query; fails with a message containing: "Try define instead"
+      """
+      redefine part-time-employment relates part-time-role as empty-role;
+      """
+
+
+  Scenario: can redefine relation type's owns ordering, cannot redefine unchanged
+    Then typeql schema query; fails
+      """
+      define employment owns start-date[];
       """
     Given transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      redefine relation employment owns start-date[];
+      redefine employment owns start-date[];
       """
     Then transaction commits
 
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
+    # TODO: Uncomment when match with lists is implemented
+#    When connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x owns start-date[];
+#      """
+#    Then uniquely identify answer concepts
+#      | x                |
+#      | label:employment |
+#    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
       """
-      match $x owns start-date[];
+      redefine employment owns start-date[];
       """
-    Then uniquely identify answer concepts
-      | x                |
-      | label:employment |
     When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      redefine relation employment owns start-date;
+      redefine employment owns start-date;
       """
     Then transaction commits
 
@@ -487,6 +597,20 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x                |
       | label:employment |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Nothing was redefined"
+      """
+      redefine employment owns start-date;
+      """
+
+
+  Scenario: cannot redefine relation type's owns if it's not defined
+    Then typeql schema query; fails with a message containing: "Try define instead"
+      """
+      redefine employment owns name[];
+      """
 
 
   Scenario: cannot redefine relation type's owns both ordering and annotation
@@ -525,7 +649,6 @@ Feature: TypeQL Redefine Query
       """
       redefine relation $x;
       """
-
 
   ###################
   # ATTRIBUTE TYPES #
@@ -573,6 +696,45 @@ Feature: TypeQL Redefine Query
       redefine
       attribute email value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
+
+  Scenario: an existing attribute type can be switched to a new supertype with a matching value type
+    Given typeql schema query
+      """
+      define
+      attribute measure @abstract, value double;
+      attribute shoe-size sub measure;
+      entity shoe owns shoe-size;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $s isa shoe, has shoe-size 9;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute size @abstract, value double;
+      """
+    When typeql schema query
+      """
+      redefine
+      attribute shoe-size sub size;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub shoe-size;
+      """
+    Then uniquely identify answer concepts
+      | x               |
+      | label:shoe-size |
 
 
   Scenario Outline: attribute types' value type can be redefined from '<value-type-1>' to '<value-type-2>'
@@ -641,14 +803,15 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x label empty-sub-data, value decimal;
-      """
-    Then uniquely identify answer concepts
-      | x                    |
-      | label:empty-sub-data |
+    # TODO: ConstraintBase::ValueType is not implemented
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x label empty-sub-data, value decimal;
+#      """
+#    Then uniquely identify answer concepts
+#      | x                    |
+#      | label:empty-sub-data |
 
 
   Scenario: redefining an attribute subtype throws if it is given a different value type to what its parent has
@@ -702,19 +865,24 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
+  ###########
+  # STRUCTS #
+  ###########
+
+    # TODO 3.x: Add tests for structs
 
   ###############
   # ANNOTATIONS #
   ###############
 
   Scenario Outline: cannot redefine annotation @<annotation> for entity types
-    When typeql schema query
+    Given typeql schema query
       """
       define entity player;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -722,7 +890,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -747,14 +915,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for relation types
-    When typeql schema query
+    Given typeql schema query
       """
       define
       relation parentship relates parent;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql schema query<define-fail>
       """
       define
@@ -762,7 +930,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -786,15 +954,15 @@ Feature: TypeQL Redefine Query
       | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
 
 
-  Scenario Outline: can redefine annotation @<annotation> for attribute types
-    When typeql schema query
+  Scenario Outline: cannot redefine annotation @<annotation> for attribute types
+    Given typeql schema query
       """
       define
       attribute description value string;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -802,7 +970,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -828,14 +996,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for relates/role types
-    When typeql schema query
+    Given typeql schema query
       """
       define
       relation parentship @abstract, relates parent;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -843,7 +1011,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -851,31 +1019,31 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | abstract         | abstract         |             | ; fails       | commits          |
-      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
-      | distinct         | distinct         | ; fails     | ; fails       | closes           |
-      | unique           | unique           | ; fails     | ; fails       | closes           |
-      | key              | key              | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | abstract         | abstract         |             | ; fails                                              | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails with a message containing: "already defined" | commits          |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
+      | distinct         | distinct         | ; fails     | ; fails                                              | closes           |
+      | unique           | unique           | ; fails     | ; fails                                              | closes           |
+      | key              | key              | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
-      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
-      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails                                              | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails                                              | closes           |
 
 
   Scenario Outline: can redefine annotation @<annotation> for relates/role types
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       relation parentship @abstract, relates parent @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -888,14 +1056,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> to relates/role types lists
-    When typeql schema query
+    Given typeql schema query
       """
       define
       relation parentship @abstract, relates parent[];
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -903,7 +1071,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -911,31 +1079,31 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | abstract         | abstract         |             | ; fails       | commits          |
-      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
-      | distinct         | distinct         |             | ; fails       | commits          |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
-      | unique           | unique           | ; fails     | ; fails       | closes           |
-      | key              | key              | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | abstract         | abstract         |             | ; fails                                              | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails with a message containing: "already defined" | commits          |
+      | distinct         | distinct         |             | ; fails                                              | commits          |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
+      | unique           | unique           | ; fails     | ; fails                                              | closes           |
+      | key              | key              | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
-      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
-      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails                                              | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails                                              | closes           |
 
 
   Scenario Outline: can redefine annotation @<annotation> for relates/role types lists
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       relation parentship @abstract, relates parent[] @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -948,14 +1116,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for owns
-    When typeql schema query
+    Given typeql schema query
       """
       define
       entity player owns name;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -963,7 +1131,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -971,28 +1139,28 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | unique           | unique           |             | ; fails       | commits          |
-      | key              | key              |             | ; fails       | commits          |
-      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
-      | regex("val")     | regex("val")     |             | ; fails       | commits          |
-      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
-      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
-      | abstract         | abstract         | ; fails     | ; fails       | closes           |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
-      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | unique           | unique           |             | ; fails                                              | commits          |
+      | key              | key              |             | ; fails                                              | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails with a message containing: "already defined" | commits          |
+      | regex("val")     | regex("val")     |             | ; fails with a message containing: "already defined" | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails with a message containing: "already defined" | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails with a message containing: "already defined" | commits          |
+      | abstract         | abstract         | ; fails     | ; fails                                              | closes           |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
+      | distinct         | distinct         | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       entity player owns name @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -1008,14 +1176,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for owns lists
-    When typeql schema query
+    Given typeql schema query
       """
       define
       entity player owns name[];
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -1023,7 +1191,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -1031,28 +1199,28 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | unique           | unique           |             | ; fails       | commits          |
-      | key              | key              |             | ; fails       | commits          |
-      | distinct         | distinct         |             | ; fails       | commits          |
-      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
-      | regex("val")     | regex("val")     |             | ; fails       | commits          |
-      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
-      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
-      | abstract         | abstract         | ; fails     | ; fails       | closes           |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | unique           | unique           |             | ; fails                                              | commits          |
+      | key              | key              |             | ; fails                                              | commits          |
+      | distinct         | distinct         |             | ; fails                                              | commits          |
+      | card(1..1)       | card(1..1)       |             | ; fails with a message containing: "already defined" | commits          |
+      | regex("val")     | regex("val")     |             | ; fails with a message containing: "already defined" | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails with a message containing: "already defined" | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails with a message containing: "already defined" | commits          |
+      | abstract         | abstract         | ; fails     | ; fails                                              | closes           |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
 
 
   Scenario Outline: can redefine annotation @<annotation> for owns lists
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       entity player owns name[] @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -1068,14 +1236,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for plays
-    When typeql schema query
+    Given typeql schema query
       """
       define
       entity player plays employment:employee;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -1083,7 +1251,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -1091,31 +1259,31 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | card(1..1)       | card(1..1)       |             | ; fails       | commits          |
-      | abstract         | abstract         | ; fails     | ; fails       | closes           |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
-      | distinct         | distinct         | ; fails     | ; fails       | closes           |
-      | unique           | unique           | ; fails     | ; fails       | closes           |
-      | key              | key              | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | card(1..1)       | card(1..1)       |             | ; fails with a message containing: "already defined" | commits          |
+      | abstract         | abstract         | ; fails     | ; fails                                              | closes           |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
+      | distinct         | distinct         | ; fails     | ; fails                                              | closes           |
+      | unique           | unique           | ; fails     | ; fails                                              | closes           |
+      | key              | key              | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
-      | regex("val")     | regex("val")     | ; fails     | ; fails       | closes           |
-      | regex("val")     | regex("lav")     | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails       | closes           |
-      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("1", "2") | ; fails     | ; fails       | closes           |
-      | values("1", "2") | values("0", "2") | ; fails     | ; fails       | closes           |
+      | regex("val")     | regex("val")     | ; fails     | ; fails                                              | closes           |
+      | regex("val")     | regex("lav")     | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("1".."2")  | ; fails     | ; fails                                              | closes           |
+      | range("1".."2")  | range("0".."2")  | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("1", "2") | ; fails     | ; fails                                              | closes           |
+      | values("1", "2") | values("0", "2") | ; fails     | ; fails                                              | closes           |
 
 
   Scenario Outline: can redefine annotation @<annotation> for plays
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       entity player plays employment:employee @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -1128,14 +1296,14 @@ Feature: TypeQL Redefine Query
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for value types
-    When typeql schema query
+    Given typeql schema query
       """
       define
       attribute description value string;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<define-fail>
       """
       define
@@ -1143,7 +1311,7 @@ Feature: TypeQL Redefine Query
       """
     When transaction <define-tx-action>
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query<redefine-fail>
       """
       redefine
@@ -1151,29 +1319,29 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation       | annotation-2     | define-fail | redefine-fail | define-tx-action |
-      | regex("val")     | regex("val")     |             | ; fails       | commits          |
-      | range("1".."2")  | range("1".."2")  |             | ; fails       | commits          |
-      | values("1", "2") | values("1", "2") |             | ; fails       | commits          |
-      | unique           | unique           | ; fails     | ; fails       | closes           |
-      | key              | key              | ; fails     | ; fails       | closes           |
-      | abstract         | abstract         | ; fails     | ; fails       | closes           |
-      | independent      | independent      | ; fails     | ; fails       | closes           |
-      | distinct         | distinct         | ; fails     | ; fails       | closes           |
+      | annotation       | annotation-2     | define-fail | redefine-fail                                        | define-tx-action |
+      | regex("val")     | regex("val")     |             | ; fails with a message containing: "already defined" | commits          |
+      | range("1".."2")  | range("1".."2")  |             | ; fails with a message containing: "already defined" | commits          |
+      | values("1", "2") | values("1", "2") |             | ; fails with a message containing: "already defined" | commits          |
+      | unique           | unique           | ; fails     | ; fails                                              | closes           |
+      | key              | key              | ; fails     | ; fails                                              | closes           |
+      | abstract         | abstract         | ; fails     | ; fails                                              | closes           |
+      | independent      | independent      | ; fails     | ; fails                                              | closes           |
+      | distinct         | distinct         | ; fails     | ; fails                                              | closes           |
 #      | cascade          | cascade          | ; fails     | ; fails       | closes           | # TODO: Cascade is temporarily turned off
-      | card(1..1)       | card(1..1)       | ; fails     | ; fails       | closes           |
-      | card(1..1)       | card(0..1)       | ; fails     | ; fails       | closes           |
+      | card(1..1)       | card(1..1)       | ; fails     | ; fails                                              | closes           |
+      | card(1..1)       | card(0..1)       | ; fails     | ; fails                                              | closes           |
 
 
   Scenario Outline: can redefine annotation @<annotation> for value types
-    Then typeql schema query
+    Given typeql schema query
       """
       define
       attribute description value string @<annotation>;
       """
-    When transaction commits
+    Given transaction commits
 
-    Given connection open schema transaction for database: typedb
+    When connection open schema transaction for database: typedb
     Then typeql schema query
       """
       redefine
@@ -1188,11 +1356,11 @@ Feature: TypeQL Redefine Query
 
 
   Scenario: cannot redefine multiple annotations in one query
-    Then typeql schema query; fails
+    Given typeql schema query; fails
       """
       redefine entity person owns name @card(0..1) @regex("^[a-zA-Z]+$");
       """
-    When transaction closes
+    Given transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query
@@ -1204,7 +1372,6 @@ Feature: TypeQL Redefine Query
       redefine entity person owns name @card(0..1);
       """
     Then transaction commits
-
 
   ######################
   # HIERARCHY MUTATION #
@@ -1275,7 +1442,7 @@ Feature: TypeQL Redefine Query
       relation species-membership relates species, relates member;
       attribute lifespan value double;
       entity organism owns lifespan, plays species-membership:member;
-      entity human sub person;
+      entity human sub creature;
       """
     Given transaction commits
 
@@ -1283,7 +1450,7 @@ Feature: TypeQL Redefine Query
     When typeql schema query
       """
       redefine
-      entity creature sub organism;
+      creature sub organism;
       """
     Then transaction commits
 
@@ -1309,7 +1476,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -1349,7 +1516,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -1389,7 +1556,7 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert $p isa pigeon;
       """
@@ -1421,5 +1588,4 @@ Feature: TypeQL Redefine Query
       | label:pigeon |
 
 
-    # TODO 3.0: Add tests for structs
     # TODO 3.0: Add tests for functions?
