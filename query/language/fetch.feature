@@ -1186,6 +1186,104 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: fetch subqueries can contain complex streams
+    Then get answers of typeql read query
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          sort $nv;
+          select $pnv;
+          limit 10;
+          fetch {
+            "another person name": $pnv
+          };
+        ]
+      };
+      """
+    Then answer contains document:
+      """
+      {
+        "subquery": [
+          {
+            "another person name": "Alice"
+          }
+        ]
+      }
+      """
+
+
+  Scenario: non-fetch subqueries are not permitted
+    # TODO: Check error message: "sub-query: no fetch"
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $v = $n;
+        ]
+      };
+      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            entity $t;
+        ]
+      };
+      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p2 isa! $t;
+        ]
+      };
+      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p2 isa! $t;
+          select $p2;
+        ]
+      };
+      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          sort $nv;
+          select $pnv;
+          limit 10;
+        ]
+      };
+      """
+
 
 
 
