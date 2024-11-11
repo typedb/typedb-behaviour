@@ -41,6 +41,7 @@ Feature: Relation Inference Resolution
       """
     # each scenario specialises the schema further
 
+  # TODO: Do we want to keep this? Taken from relation-inference
   # nth triangle number = sum of all integers from 1 to n, inclusive
   Scenario: when inferring relations on all pairs from n concepts, the number of relations is the nth triangle number
     Given reasoning schema
@@ -106,3 +107,64 @@ Feature: Relation Inference Resolution
     Then verify answers are sound
     Then verify answers are complete
 
+
+
+  # TODO: Do we want to keep this? Taken from value-predicate
+  Scenario: attribute comparison can be used to classify concept pairs as predecessors and successors of each other
+    Given reasoning schema
+      """
+      define
+
+      post sub entity,
+          plays reply-of:original,
+          plays reply-of:reply,
+          plays message-succession:predecessor,
+          plays message-succession:successor,
+          owns creation-date;
+
+      reply-of sub relation,
+          relates original,
+          relates reply;
+
+      message-succession sub relation,
+          relates predecessor,
+          relates successor;
+
+      creation-date sub attribute, value datetime;
+
+      rule succession-rule: when {
+          (original:$p, reply:$s) isa reply-of;
+          $s has creation-date $d1;
+          $d1 < $d2;
+          (original:$p, reply:$r) isa reply-of;
+          $r has creation-date $d2;
+      } then {
+          (predecessor:$s, successor:$r) isa message-succession;
+      };
+      """
+    Given reasoning data
+      """
+      insert
+
+      $x isa post, has creation-date 2020-07-01;
+      $x1 isa post, has creation-date 2020-07-02;
+      $x2 isa post, has creation-date 2020-07-03;
+      $x3 isa post, has creation-date 2020-07-04;
+      $x4 isa post, has creation-date 2020-07-05;
+      $x5 isa post, has creation-date 2020-07-06;
+
+      (original:$x, reply:$x1) isa reply-of;
+      (original:$x, reply:$x2) isa reply-of;
+      (original:$x, reply:$x3) isa reply-of;
+      (original:$x, reply:$x4) isa reply-of;
+      (original:$x, reply:$x5) isa reply-of;
+      """
+    Given verifier is initialised
+    Given reasoning query
+      """
+      match (predecessor:$x1, successor:$x2) isa message-succession;
+      """
+    # the (n-1)th triangle number, where n is the number of replies to the first post
+    Then verify answer size is: 10
+    Then verify answers are sound
+    Then verify answers are complete

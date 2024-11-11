@@ -14,7 +14,7 @@ Feature: Function call positions behaviour
 
 
   Scenario: Functions can be called in comparators.
-    # TODO
+    # TODO: On the left, right, or both-sides.
 
 
   Scenario: Functions can be called in `is` statements.
