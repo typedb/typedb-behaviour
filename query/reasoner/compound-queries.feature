@@ -26,7 +26,18 @@ Feature: Compound Query Resolution
     # each scenario specialises the schema further
 
 
-  Scenario: repeated concludable patterns within a query trigger rules from all pattern occurrences
+  Scenario: Functions can be called in expressions.
+    # TODO
+
+  Scenario: Functions can be called in comparators.
+    # TODO
+
+  Scenario: Functions can be called in `is` statements.
+    # TODO
+
+  
+
+  Scenario: repeated function calls within a query trigger execution from all pattern occurrences
     Given reasoning schema
       """
       define

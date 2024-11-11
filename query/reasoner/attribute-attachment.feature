@@ -40,154 +40,11 @@ Feature: Attribute Attachment Resolution
       """
 
 
-  Scenario: when a rule copies an attribute from one entity to another, the existing attribute instance is reused
-    Given reasoning schema
-      """
-      define
-      rule transfer-string-attribute-to-other-people: when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      } then {
-        $y has $r1;
-      };
-      """
-    Given reasoning data
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $x isa person, has string-attribute $y;
-      """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
-    Given reasoning query
-      """
-      match $x isa string-attribute;
-      """
-    Then verify answer size is: 1
-    Then verify answers are sound
-    Then verify answers are complete
-
-
-  Scenario: when the same attribute is inferred on an entity and relation, both owners are correctly retrieved
-    Given reasoning schema
-      """
-      define
-      rule transfer-string-attribute-to-other-people: when {
-        $x isa person, has string-attribute $r1;
-        $y isa person;
-      } then {
-        $y has $r1;
-      };
-
-      rule transfer-string-attribute-from-people-to-teams: when {
-        $x isa person, has string-attribute $y;
-        $z isa team;
-      } then {
-        $z has $y;
-      };
-      """
-    Given reasoning data
-      """
-      insert
-      $geX isa person, has string-attribute "banana";
-      $geY isa person;
-      (leader:$geX, member:$geX) isa team;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $x has string-attribute $y;
-      """
-    Then verify answer size is: 3
-    Then verify answers are sound
-    Then verify answers are complete
-
-
+  # TODO: REMOVE: I guess we can't do this anymore.
   Scenario: a rule can infer an attribute value that did not previously exist in the graph
-    Given reasoning schema
-      """
-      define
-      rule tesco-sells-all-soft-drinks: when {
-        $x isa soft-drink;
-      } then {
-        $x has retailer 'Tesco';
-      };
-
-      rule if-ocado-exists-it-sells-all-soft-drinks: when {
-        $x isa retailer;
-        $x == 'Ocado';
-        $y isa soft-drink;
-      } then {
-        $y has retailer 'Ocado';
-      };
-      """
-    Given reasoning data
-      """
-      insert
-      $aeX isa soft-drink;
-      $aeY isa soft-drink;
-      $r "Ocado" isa retailer;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $x has retailer 'Ocado';
-      """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
-    Given reasoning query
-      """
-      match $x has retailer $r;
-      """
-    Then verify answer size is: 4
-    Then verify answers are sound
-    Then verify answers are complete
-    Given reasoning query
-      """
-      match $x has retailer 'Tesco';
-      """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
 
 
-  Scenario: a rule can make a thing own an attribute that had no prior owners
-    Given reasoning schema
-      """
-      define
-      rule if-ocado-exists-it-sells-all-soft-drinks: when {
-        $x isa retailer;
-        $x == 'Ocado';
-        $y isa soft-drink;
-      } then {
-        $y has $x;
-      };
-      """
-    Given reasoning data
-      """
-      insert
-      $aeX isa soft-drink;
-      $aeY isa soft-drink;
-      $r "Ocado" isa retailer;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $x isa soft-drink, has retailer 'Ocado';
-      """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
-
-
-  Scenario: a rule with disjunctions considers every branch
+  Scenario: a function with disjunctions considers every branch
     Given reasoning schema
       """
       define
@@ -224,7 +81,7 @@ Feature: Attribute Attachment Resolution
       """
 
 
-  Scenario: a rule with negated disjunctions considers every branch
+  Scenario: a function with negated disjunctions considers every branch
     Given reasoning schema
       """
       define
@@ -261,46 +118,7 @@ Feature: Attribute Attachment Resolution
       """
 
 
-  Scenario: Querying for anonymous attributes with predicates finds the correct answers
-    Given reasoning schema
-      """
-      define
-      rule people-have-a-specific-age: when {
-        $x isa person;
-      } then {
-        $x has age 10;
-      };
-      """
-    Given reasoning data
-      """
-      insert
-      $geY isa person;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $x has age > 20;
-      """
-    Then verify answer size is: 0
-    Then verify answers are sound
-    Then verify answers are complete
-    Given reasoning query
-      """
-      match $x has age > 5;
-      """
-    Then verify answer size is: 1
-    Then verify answers are sound
-    Then verify answers are complete
-    Given reasoning query
-      """
-      match $x has age > 5; $x has age < 8;
-      """
-    Then verify answer size is: 0
-    Then verify answers are sound
-    Then verify answers are complete
-
-
-  Scenario: A rule can infer an attribute from a value derived from an expression
+  Scenario: A function can return a value derived from an expression
     Given reasoning schema
       """
       define
