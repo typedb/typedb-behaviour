@@ -49,14 +49,14 @@ Feature: Relation Inference Resolution
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Given  get answers of typeql read query
+    Given get answers of typeql read query
       """
       match
        $x isa person, has name "Abigail";
        $friend in friends-of($x);
       """
     Then answer size is: 5
-    Given  get answers of typeql read query
+    Given get answers of typeql read query
       """
       match
        $x isa person;
@@ -89,7 +89,7 @@ Feature: Relation Inference Resolution
 
       attribute creation-date, value datetime;
 
-      fun message-successor-pairs():
+      fun message-successor-pairs() -> { post, post }:
         match
           (original:$p, reply:$s) isa reply-of;
           $s has creation-date $d1;
@@ -121,10 +121,10 @@ Feature: Relation Inference Resolution
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Given typeql read query
+    Given get answers of typeql read query
       """
-      match $x1, $x2 in message-succession();
+      match $x1, $x2 in message-successor-pairs();
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
-    Then verify answer size is: 10
+    Then answer size is: 10
 
