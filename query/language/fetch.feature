@@ -83,8 +83,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a fetch with a not available variable errors
-# TODO when the server is updated with the needed step to check errors: check message "The variable 'p' is not available"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "The variable 'name' is not available"
       """
       match
         entity $t;
@@ -176,8 +175,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: a variable projection of entities and relations is not acceptable
-    # TODO: Check error message: "Fetching entities is not supported"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "Fetching entities is not supported"
       """
       match
       entity $t; $x isa $t;
@@ -185,8 +183,7 @@ Feature: TypeQL Fetch Query
         "entity": $x
       };
       """
-    # TODO: Check error message: "Fetching relations is not supported"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "Fetching relations is not supported"
       """
       match
       relation $t; $x isa $t;
@@ -385,8 +382,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: trying to fetch a scalar value from an object's attribute with non-scalar cardinality leads to error
-    # TODO: Check error message: "this attribute can be owned more than 1 time"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "this attribute can be owned more than 1 time"
       """
       match
         $p isa person;
@@ -468,8 +464,7 @@ Feature: TypeQL Fetch Query
       """
     Then answer size is: 7
 
-  # TODO when the server is updated with the needed step to check errors: check message "The variable 'p' is not available"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "The variable 'p' is not available"
       """
       match
         $p-type sub person;
@@ -482,8 +477,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: attributes that can never be owned by any matching type of a variable error
-    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "attribute 'company-name' cannot be"
       """
       match
         $p isa person, has person-name "Alice";
@@ -491,8 +485,7 @@ Feature: TypeQL Fetch Query
         "company name": $p.company-name
       };
       """
-    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "attribute 'company-name' cannot be"
       """
       match
         $p isa person, has person-name "Alice";
@@ -500,8 +493,7 @@ Feature: TypeQL Fetch Query
         "company name": [ $p.company-name ]
       };
       """
-    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "attribute 'company-name' cannot be"
       """
       match
         attribute $t; $a isa $t;
@@ -509,8 +501,7 @@ Feature: TypeQL Fetch Query
         "company name": $a.company-name
       };
       """
-    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "attribute 'company-name' cannot be"
       """
       match
         attribute $t; $a isa $t;
@@ -521,8 +512,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: attributes that can never be owned by any matching type of a variable error
-    # TODO when the server is updated with the needed step to check errors: check message "attribute 'company-name' cannot be"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "attribute 'company-name' cannot be"
       """
       match
         $p isa person, has person-name "Alice";
@@ -1096,8 +1086,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: same fetch parameter names in one fetch object are not permitted
-    # TODO: Check error: "multiple mappings for one key"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "multiple mappings for one key"
       """
       match
       $p isa! $t, has person-name $n;
@@ -1106,8 +1095,7 @@ Feature: TypeQL Fetch Query
         "first": $n,
       };
       """
-    # TODO: Check error: "multiple mappings for one key"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "multiple mappings for one key"
       """
       match
       $p isa! $t, has person-name $n;
@@ -1116,8 +1104,7 @@ Feature: TypeQL Fetch Query
         "first": [ $p.ref ],
       };
       """
-    # TODO: Check error: "multiple mappings for one key"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "multiple mappings for one key"
       """
       match
       $p isa! $t, has person-name $n;
@@ -1126,8 +1113,7 @@ Feature: TypeQL Fetch Query
         "first": [ $p.person-name ],
       };
       """
-    # TODO: Check error: "multiple mappings for one key"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "multiple mappings for one key"
       """
       match
       $p isa! $t, has person-name $n;
@@ -1232,8 +1218,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: non-fetch subqueries are not permitted
-    # TODO: Check error message: "sub-query: no fetch"
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "sub-query: no fetch"
       """
       match
       $p isa! $t, has person-name $n;
