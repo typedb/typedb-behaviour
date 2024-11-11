@@ -9,5 +9,21 @@ Feature: Tests for functions with non-trivial pipelines in the body
     # TODO
 
 
-  Scenario: Sort, Offset & Limit can be used in function bodies
+  Scenario: Sort, Offset & Limit can be used in function bodies. Further, the results remains consistent across runs.
     # TODO
+
+
+  Scenario: Reduce can be used in function bodies
+    # TODO
+
+  Scenario: A function may not have write stages in the body
+    # TODO
+
+
+  Scenario: A cycle cannot pass through a function with a reduce clause in its body
+    # TODO
+
+
+  Scenario: A cycle cannot pass through a function with a sort clause in its body
+    # TODO: Or can it?
+
