@@ -31,6 +31,7 @@ Feature: Relation Inference Resolution
 
       fun friends-of($who: person) -> { person } :
       match
+        $who isa person;
         $friend isa person;
       return { $friend };
       """
@@ -48,20 +49,20 @@ Feature: Relation Inference Resolution
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Given typeql read query
+    Given  get answers of typeql read query
       """
       match
        $x isa person, has name "Abigail";
        $friend in friends-of($x);
       """
     Then answer size is: 5
-    Given typeql read query
+    Given  get answers of typeql read query
       """
       match
        $x isa person;
        $friend in friends-of($x);
       """
-    Then verify answer size is: 25
+    Then answer size is: 25
 
 
   # TODO: Do we want to keep this? Taken from value-predicate
@@ -122,7 +123,7 @@ Feature: Relation Inference Resolution
     Given connection open read transaction for database: typedb
     Given typeql read query
       """
-      match (predecessor:$x1, successor:$x2) isa message-succession;
+      match $x1, $x2 in message-succession();
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then verify answer size is: 10
