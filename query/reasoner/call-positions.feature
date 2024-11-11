@@ -28,5 +28,4 @@ Feature: Function call positions behaviour
   Scenario: The same variable cannot be 'assigned' to twice, either by the same or different functions.
     # TODO:
 
-  Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
-    # TODO: Interesting
+  Scenario: All returns must be assigned to some (possibly anonymous) variable
