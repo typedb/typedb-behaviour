@@ -13,11 +13,16 @@ Feature: Tests for various shapes of function bodies
     # TODO
 
 
+  Scenario: a recursive function with disjunctions considers every branch
+    # TODO
+
+
   Scenario: a function with negated disjunctions considers every branch
     # TODO
 
 
   Scenario: A function can return a value derived from an expression
     # TODO
+
 
 
