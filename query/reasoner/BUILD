@@ -11,7 +11,7 @@ files = [
     "compound-queries.feature",
     "concept-inequality.feature",
     "negation.feature",
-    "recursion-old.feature",
+    "recursion.feature",
     "relation-inference.feature",
     "schema-queries.feature",
     "rule-interaction.feature",
