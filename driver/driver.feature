@@ -346,6 +346,55 @@ Feature: TypeDB Driver
 
   # TODO: check errors on transaction commits with callbacks (on_close) set!
 
+
+  Scenario: Driver processes multiple failing schema and write transactions correctly
+    Given connection open schema transaction for database: typedb
+    When typeql schema query; fails
+      """
+      define entity new-entity sub unknown-entity;
+      """
+    Then transaction is open: false
+
+    Then connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define entity new-entity sub unknown-entity;
+      """
+    Then transaction is open: false
+
+    Then connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define entity new-entity;
+      """
+    Then transaction is open: true
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query; fails
+      """
+      insert $e isa unknown-entity;
+      """
+
+    Then connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $e isa new-entity;
+      """
+    Then transaction commits
+
+    Then connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define new-entity sub unknown-entity;
+      """
+
+    Then connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $e isa new-entity;
+      """
+
   ###########
   # QUERIES #
   ###########
