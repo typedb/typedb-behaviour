@@ -24,3 +24,9 @@ Feature: Function call positions behaviour
   Scenario: repeated function calls within a query trigger execution from all pattern occurrences
     # TODO: (Something non-recursive)
 
+
+  Scenario: The same variable cannot be 'assigned' to twice, either by the same or different functions.
+    # TODO:
+
+  Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
+    # TODO: Interesting
