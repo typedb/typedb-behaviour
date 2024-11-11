@@ -25,4 +25,10 @@ Feature: Tests for various shapes of function bodies
     # TODO
 
 
+  Scenario: Functions which do not return the specified type are an error
+    # TODO
+
+
+  Scenario: Functions which do not return the specified type are an error
+    # TODO
 
