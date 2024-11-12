@@ -11,72 +11,74 @@ Feature: Recursion Resolution
   Background: Set up database
     Given typedb starts
     Given connection opens with default authentication
-    Given reasoning schema
+    Given connection is open: true
+    Given connection has 0 databases
+    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      person sub entity,
+      entity person,
         owns name,
         plays friendship:friend,
         plays employment:employee;
 
-      company sub entity,
+      entity company,
         owns name,
         plays employment:employer;
 
-      place sub entity,
+      entity place,
         owns name,
         plays location-hierarchy:subordinate,
         plays location-hierarchy:superior;
 
-      friendship sub relation,
-        relates friend;
+      relation friendship,
+        relates friend @card(2);
 
-      employment sub relation,
+      relation employment,
         relates employee,
         relates employer;
 
-      location-hierarchy sub relation,
+      relation location-hierarchy,
         relates subordinate,
         relates superior;
 
-      name sub attribute, value string;
+      attribute name value string;
       """
+    Given transaction commits
 
 
 
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
     # TODO: Taken from relation-inference
 
+  # TODO: Remove? this doesn't seem to add much
   Scenario: the types of entities in inferred relations can be used to make further inferences
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      big-place sub place,
-        plays big-location-hierarchy:big-subordinate,
-        plays big-location-hierarchy:big-superior;
+      entity big-place sub place;
 
-      big-location-hierarchy sub location-hierarchy,
-        relates big-subordinate as subordinate,
-        relates big-superior as superior;
-
-      rule transitive-location: when {
+      fun transitive_location_hierarchy() -> { place, place }:
+      match
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
-      } then {
-        (subordinate: $x, superior: $z) isa location-hierarchy;
-      };
+      return {$x, $z};
 
-      rule if-a-big-thing-is-in-a-big-place-then-its-a-big-location: when {
+      fun big_location_hierarchy() -> { place, place }:
+      match
+        $x, $y in transitive_location_hierarchy();
         $x isa big-place;
         $y isa big-place;
-        (subordinate: $x, superior: $y) isa location-hierarchy;
-      } then {
-        (big-subordinate: $x, big-superior: $y) isa big-location-hierarchy;
-      };
+      return {$x, $y};
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
       $x isa big-place, has name "Mount Kilimanjaro";
@@ -86,186 +88,51 @@ Feature: Recursion Resolution
       (subordinate: $x, superior: $y) isa location-hierarchy;
       (subordinate: $y, superior: $z) isa location-hierarchy;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match (subordinate: $x, superior: $y) isa big-location-hierarchy;
+      match $x, $y in big_location_hierarchy();
       """
-    Then verify answer size is: 1
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 1
 
 
   # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
   Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
-    Given reasoning schema
-      """
-      define
-
-      dream sub relation,
-        relates dreamer,
-        relates subject,
-        plays dream:subject;
-
-      person plays dream:dreamer, plays dream:subject;
-
-      rule inception: when {
-        $x isa person;
-        $z (dreamer: $x, subject: $y) isa dream;
-      } then {
-        (dreamer: $x, subject: $z) isa dream;
-      };
-      """
-    Given reasoning data
-    """
-      insert
-      $x isa person, has name "Yusuf";
-      # If only Yusuf didn't dream about himself...
-      (dreamer: $x, subject: $x) isa dream;
-      """
-    Given reasoning query
-      """
-      match $x isa dream; limit 10;
-      """
-    Then verify answer size is: 10
+    # not-so-fun-fact: We can't have infinite streams anymore.
 
 
-  # TODO: re-enable all steps when materialisation is possible (may be an infinite graph?) (#75)
-  Scenario: when relations' and attributes' inferences are mutually recursive, the inferred concepts can be retrieved
-    Given reasoning schema
-      """
-      define
-
-      word sub entity,
-          plays inheritance:subtype,
-          plays inheritance:supertype,
-          plays pair:prep,
-          plays pair:pobj,
-          owns name;
-
-      f sub word;
-      o sub word;
-
-      inheritance sub relation,
-          relates supertype,
-          relates subtype;
-
-      pair sub relation,
-          relates prep,
-          relates pobj,
-          owns typ,
-          owns name;
-
-      name sub attribute, value string;
-      typ sub attribute, value string;
-
-      rule inference-all-pairs: when {
-          $x isa word;
-          $y isa word;
-          $x has name != 'f';
-          $y has name != 'o';
-      } then {
-          (prep: $x, pobj: $y) isa pair;
-      };
-
-      rule inference-pairs-ff: when {
-          $f isa f;
-          (subtype: $prep, supertype: $f) isa inheritance;
-          (subtype: $pobj, supertype: $f) isa inheritance;
-          $p (prep: $prep, pobj: $pobj) isa pair;
-      } then {
-          $p has name 'ff';
-      };
-
-      rule inference-pairs-fo: when {
-          $f isa f;
-          $o isa o;
-          (subtype: $prep, supertype: $f) isa inheritance;
-          (subtype: $pobj, supertype: $o) isa inheritance;
-          $p (prep: $prep, pobj: $pobj) isa pair;
-      } then {
-          $p has name 'fo';
-      };
-      """
-    Given reasoning data
-    """
-      insert
-
-      $f isa f, has name "f";
-      $o isa o, has name "o";
-
-      $aa isa word, has name "aa";
-      $bb isa word, has name "bb";
-      $cc isa word, has name "cc";
-
-      (supertype: $o, subtype: $aa) isa inheritance;
-      (supertype: $o, subtype: $bb) isa inheritance;
-      (supertype: $o, subtype: $cc) isa inheritance;
-
-      $pp isa word, has name "pp";
-      $qq isa word, has name "qq";
-      $rr isa word, has name "rr";
-      $rr2 isa word, has name "rr";
-
-      (supertype: $f, subtype: $pp) isa inheritance;
-      (supertype: $f, subtype: $qq) isa inheritance;
-      (supertype: $f, subtype: $rr) isa inheritance;
-      (supertype: $f, subtype: $rr2) isa inheritance;
-      """
-    Given verifier is initialised
-    Given reasoning query
-      """
-      match $p isa pair, has name 'ff';
-      """
-    Then verify answer size is: 16
-    Then verify answers are sound
-    # Then verify answers are complete  # Not yet supported
-    Given reasoning query
-      """
-      match $p isa pair;
-      """
-    Then verify answer size is: 64
-    Then verify answers are sound
-    # Then verify answers are complete  # Not yet supported
-
-
-
-
-  # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
-  # Note: some of the commented steps intermittently succeed; may be caused by inconsistent query planning
-  Scenario: ancestor test
-
+  Scenario: ancestor test in pairs
   from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      person sub entity,
-        owns name;
-
-      parentship sub relation, relates parent, relates child;
+      attribute name, value string;
+      entity person, owns name;
+      relation parentship, relates parent, relates child;
       person plays parentship:parent, plays parentship:child;
 
-      ancestorship sub relation, relates ancestor, relates descendant;
-      person plays ancestorship:ancestor, plays ancestorship:descendant;
 
-      name sub attribute, value string;
+      fun ancestor_pairs() -> { person, person } :
+        match
+         $x isa person; $y isa person;
+         { (parent: $x, child: $y) isa parentship; } or
+         {
+            (parent: $x1, child: $z) isa parentship;
+            $z, $y1 in ancestor_pairs();
+            $y is $y1; $x is $x1;
+          };
+        return { $x, $y };
 
-      rule rule-1: when {
-        (parent: $x, child: $z) isa parentship;
-        (ancestor: $z, descendant: $y) isa ancestorship;
-      } then {
-        (ancestor: $x, descendant: $y) isa ancestorship;
-      };
-
-      rule rule-2: when {
-        (parent: $x, child: $y) isa parentship;
-      } then {
-        (ancestor: $x, descendant: $y) isa ancestorship;
-      };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -285,49 +152,31 @@ Feature: Recursion Resolution
       (parent: $aaa, child: $aaaa) isa parentship;
       (parent: $c, child: $ca) isa parentship;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (ancestor: $X, descendant: $Y) isa ancestorship;
+        $X, $Y in ancestor_pairs();
         $X has name 'aa';
         $Y has name $name;
-      get $Y, $name;
+      select $Y, $name;
       """
-    Then verify answer size is: 3
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 3
     Then verify answer set is equivalent for query
       """
       match
         $Y isa person, has name $name;
         {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
-      get $Y, $name;
+      select $Y, $name;
       """
-    Given reasoning query
+
+    Given get answers of typeql read query
       """
-      match
-        ($X, $Y) isa ancestorship;
-        $X has name 'aa';
-      get $Y;
+      match $X, $Y in ancestor_pairs();
       """
-    Then verify answer size is: 4
-    Then verify answers are sound
-    Then verify answers are complete
-    Then verify answer set is equivalent for query
-      """
-      match
-        $Y isa person, has name $name;
-        {$name == 'a';} or {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
-      get $Y;
-      """
-    Given reasoning query
-      """
-      match (ancestor: $X, descendant: $Y) isa ancestorship;
-      """
-    Then verify answer size is: 10
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 10
     Then verify answer set is equivalent for query
       """
       match
@@ -338,78 +187,44 @@ Feature: Recursion Resolution
         {$nameX == 'a';$nameY == 'aaaa';} or {$nameX == 'aa';$nameY == 'aaa';} or
         {$nameX == 'aa';$nameY == 'aab';} or {$nameX == 'aa';$nameY == 'aaaa';} or
         {$nameX == 'aaa';$nameY == 'aaaa';} or {$nameX == 'c';$nameY == 'ca';};
-      get $X, $Y;
+      select $X, $Y;
       """
-    Given reasoning query
-      """
-      match ($X, $Y) isa ancestorship;
-      """
-    Then verify answer size is: 20
-    Then verify answers are sound
-    Then verify answers are complete
-    Then verify answer set is equivalent for query
-      """
-      match
-        $X isa person, has name $nameX;
-        $Y isa person, has name $nameY;
-        {$nameX == 'a';$nameY == 'aa';} or
-        {$nameX == 'a';$nameY == 'ab';} or {$nameX == 'a';$nameY == 'aaa';} or
-        {$nameX == 'a';$nameY == 'aab';} or {$nameX == 'a';$nameY == 'aaaa';} or
-        {$nameY == 'a';$nameX == 'aa';} or
-        {$nameY == 'a';$nameX == 'ab';} or {$nameY == 'a';$nameX == 'aaa';} or
-        {$nameY == 'a';$nameX == 'aab';} or {$nameY == 'a';$nameX == 'aaaa';} or
-
-        {$nameX == 'aa';$nameY == 'aaa';} or {$nameX == 'aa';$nameY == 'aab';} or
-        {$nameX == 'aa';$nameY == 'aaaa';} or
-        {$nameY == 'aa';$nameX == 'aaa';} or {$nameY == 'aa';$nameX == 'aab';} or
-        {$nameY == 'aa';$nameX == 'aaaa';} or
-
-        {$nameX == 'aaa';$nameY == 'aaaa';} or
-        {$nameY == 'aaa';$nameX == 'aaaa';} or
-
-        {$nameX == 'c';$nameY == 'ca';} or
-        {$nameY == 'c';$nameX == 'ca';};
-      get $X, $Y;
-      """
+    Given transaction closes
 
 
   Scenario: ancestor-friend test
 
   from Vieille - Recursive Axioms in Deductive Databases (QSQ approach) p. 186
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      person sub entity,
+       entity person,
           owns name,
           plays parentship:parent,
-          plays parentship:child,
-          plays friendship:friend,
-          plays friendship:friend,
-          plays ancestor-friendship:ancestor,
-          plays ancestor-friendship:friend;
+          plays parentship:child;
 
-      friendship sub relation, relates friend;
-      parentship sub relation, relates parent, relates child;
-      ancestor-friendship sub relation, relates ancestor, relates friend;
+      relation parentship, relates parent, relates child;
 
-      name sub attribute, value string;
+      attribute name, value string;
 
-      rule rule-1: when {
-        (friend: $x, friend: $y) isa friendship;
-      } then {
-        (ancestor: $x, friend: $y) isa ancestor-friendship;
-      };
-
-      rule rule-2: when {
-        (parent: $x, child: $z) isa parentship;
-        (ancestor: $z, friend: $y) isa ancestor-friendship;
-      } then {
-        (ancestor: $x, friend: $y) isa ancestor-friendship;
-      };
+      fun ancestor_friendship_pairs() -> { person, person }:
+      match
+        $x isa person; $y isa person;
+        { (friend: $x, friend: $y) isa friendship; not { $x is $y; }; } or
+        {
+          (parent: $x1, child: $z) isa parentship;
+          $z, $y1 in ancestor_friendship_pairs();
+          $y is $y1; $x is $x1;
+        };
+        return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -424,42 +239,34 @@ Feature: Recursion Resolution
       (friend: $a, friend: $g) isa friendship;
       (friend: $c, friend: $d) isa friendship;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (ancestor: $X, friend: $Y) isa ancestor-friendship;
+        $X, $Y in ancestor_friendship_pairs();
         $X has name 'a';
         $Y has name $name;
-      get $Y;
+      select $Y;
       """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 2
     Then verify answer set is equivalent for query
       """
       match
         $Y has name $name;
         {$name == 'd';} or {$name == 'g';};
-      get $Y;
+      select $Y;
       """
-    And verify answer set is equivalent for query
-      """
-      match
-        ($X, $Y) isa ancestor-friendship;
-        $X has name 'a';
-      get $Y;
-      """
-    Given reasoning query
+
+    Given get answers of typeql read query
       """
       match
-        (ancestor: $X, friend: $Y) isa ancestor-friendship;
+        $X, $Y in ancestor_friendship_pairs();
         $Y has name 'd';
-      get $X;
+      select $X;
       """
-    Then verify answer size is: 3
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 3
     Then verify answer set is equivalent for query
       """
       match
@@ -467,50 +274,41 @@ Feature: Recursion Resolution
         {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
       get $X;
       """
-    And verify answer set is equivalent for query
-      """
-      match
-        ($X, $Y) isa ancestor-friendship;
-        $Y has name 'd';
-      get $X;
-      """
 
 
   Scenario: same-generation test
 
   from Vieille - Recursive Query Processing: The power of logic p. 25
-
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      entity2 sub entity,
-          owns name;
-      Human sub entity2;
+      entity entity2, owns name;
+      entity Human sub entity2;
 
-      parentship sub relation, relates parent, relates child;
+      relation parentship, relates parent, relates child;
       entity2 plays parentship:parent, plays parentship:child;
 
-      SameGen sub relation, relates SG-role;
-      entity2 plays SameGen:SG-role;
+      attribute name, value string;
 
-      name sub attribute, value string;
-
-      rule rule-1: when {
-        $x isa Human;
-      } then {
-        (SG-role: $x, SG-role: $x) isa SameGen;
+      fun same_gen_pairs() -> { entity2, entity2 }:
+      match
+      $x isa entity2; $y isa entity2;
+      {
+        $x isa Human; $y is $x;
+      } or {
+        (parent: $x1, child: $u) isa parentship;
+        (parent: $y1, child: $v) isa parentship;
+        $u, $v in same_gen_pairs();
+        $x is $x1; $y is $y1;
       };
-
-      rule rule-2: when {
-        (parent: $x, child: $u) isa parentship;
-        (parent: $y, child: $v) isa parentship;
-        (SG-role: $u, SG-role: $v) isa SameGen;
-      } then {
-        (SG-role: $x, SG-role: $y) isa SameGen;
-      };
+      return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -534,23 +332,23 @@ Feature: Recursion Resolution
       (parent: $g, child: $f) isa parentship;
       (parent: $h, child: $g) isa parentship;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        ($x, $y) isa SameGen;
+        $x, $y in same_gen_pairs();
         $x has name 'a';
-      get $y;
+      select $y;
       """
-    Then verify answer size is: 2
-    Then verify answers are sound
-    Then verify answers are complete
+    Then answer size is: 2
     Then verify answer set is equivalent for query
       """
       match
         $y has name $name;
         {$name == 'f';} or {$name == 'a';};
-      get $y;
+      select $y;
       """
 
 
@@ -619,7 +417,7 @@ Feature: Recursion Resolution
         $y has index 'a';
       get $x;
       """
-    Then verify answer size is: 1
+    Then answer size is: 1
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -708,7 +506,7 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa reachable;
       """
-    Then verify answer size is: 7
+    Then answer size is: 7
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -784,7 +582,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-    Then verify answer size is: 4
+    Then answer size is: 4
     # Then verify answers are sound     # TODO: Runs out of memory on factory
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -861,7 +659,7 @@ Feature: Recursion Resolution
         $x has name 'ann';
       get $y;
       """
-    Then verify answer size is: 3
+    Then answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -969,7 +767,7 @@ Feature: Recursion Resolution
         $x has name 'a';
       get $y;
       """
-    Then verify answer size is: 3
+    Then answer size is: 3
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -983,7 +781,7 @@ Feature: Recursion Resolution
       """
       match (from: $x, to: $y) isa RevSG;
       """
-    Then verify answer size is: 11
+    Then answer size is: 11
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1161,7 +959,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then verify answer size is: 5
+    Then answer size is: 5
     Then verify answers are sound
     Then verify answers are complete
 
@@ -1366,7 +1164,7 @@ Feature: Recursion Resolution
         $x has index 'a0';
       get $y;
       """
-    Then verify answer size is: 60
+    Then answer size is: 60
     Then verify answers are sound
     Then verify answers are complete
     Then verify answer set is equivalent for query
@@ -1516,7 +1314,7 @@ Feature: Recursion Resolution
         $x has index 'a';
       get $y;
       """
-    Then verify answer size is: 25
+    Then answer size is: 25
     Then verify answers are sound
     Then verify answers are complete
 
