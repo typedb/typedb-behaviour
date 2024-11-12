@@ -1731,7 +1731,7 @@ Feature: TypeQL Fetch Query
       """
 
 
-  Scenario: fetch can use a custom function block a single return of attributes
+  Scenario: fetch can use a custom function block with a single return of attributes
     When get answers of typeql read query
       """
         match
@@ -1814,7 +1814,7 @@ Feature: TypeQL Fetch Query
       """
 
 
-  Scenario: fetch can use a custom function block a single return of values
+  Scenario: fetch can use a custom function block with a single return of values
     When get answers of typeql read query
       """
         match
@@ -1899,6 +1899,34 @@ Feature: TypeQL Fetch Query
         "age value": null
       }
       """
+
+
+    # TODO: Uncomment when reduce executor for function is implemented
+#  Scenario: fetch can use a custom function block with reduce operation
+#    When get answers of typeql read query
+#      """
+#        match
+#            $p isa person;
+#        fetch {
+#            "names count": match
+#              $p has person-name $name;
+#              sort $name;
+#              return count($name);
+#        };
+#      """
+#    Then answer size is: 2
+#    Then answer contains document:
+#      """
+#      {
+#        "names count": 2
+#      }
+#      """
+#    Then answer contains document:
+#      """
+#      {
+#        "names count": 1
+#      }
+#      """
 
 
   Scenario: fetching a single-return function block which actually returns a tuple leads to error
@@ -1990,6 +2018,258 @@ Feature: TypeQL Fetch Query
   # STREAM-RETURN FUNCTIONS #
   ###########################
 
+  Scenario: fetch can use a function expression with a stream return of attributes
+    Given get answers of typeql read query
+      """
+        with
+        fun get_names($p_arg: person) -> { name }:
+        match
+          $p_arg has person-name $name;
+        return { $name };
+
+        match
+          $p isa person;
+          $z in get_names($p);
+      """
+    Given answer size is: 3
+    Given uniquely identify answer concepts
+      | z                      |
+      | attr:person-name:Alice |
+      | attr:person-name:Allie |
+      | attr:person-name:Bob   |
+
+    Given get answers of typeql read query
+      """
+        with
+        fun get_ages($p_arg: person) -> { age }:
+        match
+          $p_arg has age $age;
+        return { $age };
+
+        match
+          $p isa person;
+          $z in get_ages($p);
+      """
+    Given answer size is: 1
+    Given uniquely identify answer concepts
+      | z           |
+      | attr:age:10 |
+
+    When get answers of typeql read query
+      """
+        with
+        fun get_names($p_arg: person) -> { name }:
+        match
+          $p_arg has person-name $name;
+        return { $name };
+
+        match
+            $p isa person;
+        fetch {
+            "names": [ get_names($p) ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        with
+        fun get_ages($p_arg: person) -> { age }:
+        match
+          $p_arg has age $age;
+        return { $age };
+
+        match
+            $p isa person;
+        fetch {
+            "ages": [ get_ages($p) ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "ages": [ ]
+      }
+      """
 
 
+  Scenario: fetch can use a function expression with a stream return of values
+    Given get answers of typeql read query
+      """
+        with
+        fun get_names($p_arg: person) -> { string }:
+        match
+          $p_arg has person-name $name;
+          $v = $name;
+        return { $v };
 
+        match
+          $p isa person;
+          $z in get_names($p);
+      """
+    Given answer size is: 3
+    Given uniquely identify answer concepts
+      | z                  |
+      | value:string:Alice |
+      | value:string:Allie |
+      | value:string:Bob   |
+
+    Given get answers of typeql read query
+      """
+        with
+        fun get_ages($p_arg: person) -> { long }:
+        match
+          $p_arg has age $age;
+          $v = $age;
+        return { $v };
+
+        match
+          $p isa person;
+          $z in get_ages($p);
+      """
+    Given answer size is: 1
+    Given uniquely identify answer concepts
+      | z             |
+      | value:long:10 |
+
+    When get answers of typeql read query
+      """
+        with
+        fun get_names($p_arg: person) -> { string }:
+        match
+          $p_arg has person-name $name;
+          $v = $name;
+        return { $v };
+
+        match
+            $p isa person;
+        fetch {
+            "name values": [ get_names($p) ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "name values": [ "Alice", "Allie" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name values": [ "Bob" ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        with
+        fun get_ages($p_arg: person) -> { long }:
+        match
+          $p_arg has age $age;
+          $v = $age;
+        return { $v };
+
+        match
+            $p isa person;
+        fetch {
+            "age values": [ get_ages($p) ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "age values": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "age values": [ ]
+      }
+      """
+
+
+  Scenario: fetching a list-return function which actually returns a single result wraps the result into a list
+    When get answers of typeql read query
+      """
+        with
+        fun get_name($p_arg: person) -> name:
+        match
+          $p_arg has person-name $name;
+        sort $name;
+        return first $name;
+
+        match
+            $p isa person;
+        fetch {
+            "names": [ get_name($p) ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ]
+      }
+      """
+
+
+  Scenario: fetching a list-return function expression which actually returns a tuple leads to error
+    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+      """
+        with
+        fun get_info($p_arg: person) -> name, age:
+        match
+          $p_arg has person-name $name, has age $age;
+        sort $name;
+        return first $name, $age;
+
+        match
+            $p isa person;
+        fetch {
+            "name": [ get_info($p) ]
+        };
+      """
+
+    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+      """
+        with
+        fun get_info($p_arg: person) -> { name, age }:
+        match
+          $p_arg has person-name $name, has age $age;
+        sort $name;
+        return { $name, $age };
+
+        match
+            $p isa person;
+        fetch {
+            "name": [ get_info($p) ]
+        };
+      """
