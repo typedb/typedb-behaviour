@@ -1375,6 +1375,49 @@ Feature: TypeQL Fetch Query
 
 # TODO: Add tests for write queries
 
+  #####################
+  # VALUE EXPRESSIONS #
+  #####################
+
+  Scenario: fetch can use single constants
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $pn, has karma $k;
+        $pn == "Alice";
+      fetch {
+        "just value": 100,
+        "created for": "Alice"
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "just value": 100,
+        "created for": "Alice"
+      }
+      """
+
+
+  Scenario: fetch can use value operations in expressions
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $pn, has karma $k;
+        $pn == "Alice";
+      fetch {
+        "excessive karma": $k - 100
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "excessive karma": 23.4567891
+      }
+      """
+
   ###########################
   # SINGLE-RETURN FUNCTIONS #
   ###########################
@@ -1884,13 +1927,69 @@ Feature: TypeQL Fetch Query
         };
       """
 
+
+  Scenario: fetch can use a custom function block that is not linked to the main 'match'
+    When get answers of typeql read query
+      """
+        match
+            $person isa person;
+        fetch {
+            "name": match
+              $unlinked-person has person-name $name;
+              sort $name;
+              return first $name;
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "name": "Alice"
+      }
+      """
+    Then answer does not contain document:
+      """
+      {
+        "name": "Bob"
+      }
+      """
+
+
+  # TODO: Uncomment when expressions allow function calling with math operations
+#  Scenario: fetch can use an expression calling a function
+#    When get answers of typeql read query
+#      """
+#        with
+#        fun get_karma($p_arg: person) -> double:
+#        match
+#            $p_arg has karma $k;
+#            $v = $k;
+#        return first $v;
+#
+#        match
+#            $p isa person;
+#        fetch {
+#            "excessive karma": get_karma($p) - 100
+#        };
+#      """
+#    Then answer size is: 2
+#    Then answer contains document:
+#      """
+#      {
+#        "excessive karma": 23.4567891
+#      }
+#      """
+#    Then answer contains document:
+#      """
+#      {
+#        "excessive karma": null
+#      }
+#      """
+
   ###########################
   # STREAM-RETURN FUNCTIONS #
   ###########################
 
 
 
-  #######################
-  # COMPLEX EXPRESSIONS #
-  #######################
 
