@@ -600,35 +600,34 @@ Feature: Recursion Resolution
   a -- b -- c -- d
 
   We find the set of vertices connected to 'a', which is in fact all of the vertices, including 'a' itself.
-
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      vertex sub entity,
+      entity vertex,
         owns index @key,
-        plays link:coordinate,
-        plays reachable:reachable-coordinate;
+        plays link:coordinate;
 
-      link sub relation, relates coordinate;
-      reachable sub link, relates reachable-coordinate as coordinate;
+      relation link, relates coordinate @card(1..2);
+      attribute index, value string;
 
-      index sub attribute, value string;
+      fun reachable_pairs() -> { vertex, vertex }:
+      match
+        $x isa vertex; $y isa vertex;
+        { ($x, $y) isa link; } or
+        {
+          ($x, $z) isa link;
+          $z, $y1 in reachable_pairs();
+          $y is $y1;
+        };
+      return { $x, $y };
 
-      rule a-linked-point-is-reachable: when {
-        ($x, $y) isa link;
-      } then {
-        (reachable-coordinate: $x, reachable-coordinate: $y) isa reachable;
-      };
-
-      rule a-point-reachable-from-a-linked-point-is-reachable: when {
-        ($x, $z) isa link;
-        ($z, $y) isa reachable;
-      } then {
-        (reachable-coordinate: $x, reachable-coordinate: $y) isa reachable;
-      };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -642,23 +641,23 @@ Feature: Recursion Resolution
       (coordinate: $c, coordinate: $c) isa link;
       (coordinate: $c, coordinate: $d) isa link;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        ($x, $y) isa reachable;
+        $x, $y in reachable_pairs();
         $x has index 'a';
-      get $y;
+      select $y;
       """
     Then answer size is: 4
-    # Then verify answers are sound     # TODO: Runs out of memory on factory
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
         $y has index $indY;
         {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
-      get $y;
+      select $y;
       """
 
 
