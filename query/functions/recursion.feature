@@ -503,58 +503,59 @@ Feature: Recursion Resolution
   aa -> bb -> cc -> dd
 
   and finds all pairs (from, to) such that 'to' is reachable from 'from'.
-
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      indexable sub entity,
-          owns index;
+       entity indexable, owns index;
 
-      traversable sub indexable,
+      entity traversable sub indexable,
           plays pair:from,
           plays pair:to;
 
-      vertex sub traversable;
-      node sub traversable;
+      entity vertex sub traversable;
+      entity node sub traversable;
 
-      pair sub relation, relates from, relates to;
-      link sub pair;
-      indirect-link sub pair;
-      reachable sub pair;
-      unreachable sub pair;
+      relation pair, relates from, relates to;
+      relation link sub pair;
+      relation indirect-link sub pair;
+      relation reachable sub pair;
+      relation unreachable sub pair;
 
-      index sub attribute, value string;
+      attribute index, value string;
 
-      rule reachability-transitivityA: when {
-          (from: $x, to: $y) isa link;
-      } then {
-          (from: $x, to: $y) isa reachable;
-      };
-
-      rule reachability-transitivityB: when {
+      fun reachable_pairs() -> {traversable, traversable}:
+      match
+        $x isa traversable; $y isa traversable;
+        { (from: $x, to: $y) isa link; } or
+        {
           (from: $x, to: $z) isa link;
-          (from: $z, to: $y) isa reachable;
-      } then {
-          (from: $x, to: $y) isa reachable;
-      };
+          $z, $y1 in reachable_pairs();
+          $y1 is $y;
+        };
+      return {$x, $y};
 
-      rule indirect-link-rule: when {
-          (from: $x, to: $y) isa reachable;
+      fun indirect_link_pairs() -> { traversable, traversable }:
+        match
+          $x, $y in reachable_pairs();
           not {(from: $x, to: $y) isa link;};
-      } then {
-          (from: $x, to: $y) isa indirect-link;
-      };
+        return { $x, $y };
 
-      rule unreachability-rule: when {
+      fun unreachable_pairs() -> {traversable, traversable}:
+        match
           $x isa vertex;
           $y isa vertex;
-          not {(from: $x, to: $y) isa reachable;};
-      } then {
-          (from: $x, to: $y) isa unreachable;
-      };
+          not {
+            $x1, $y1 in reachable_pairs();
+             $x is $x1; $y is $y1;
+          };
+        return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -568,14 +569,14 @@ Feature: Recursion Resolution
       (from: $cc, to: $cc) isa link;
       (from: $cc, to: $dd) isa link;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
-      match (from: $x, to: $y) isa reachable;
+      match $x, $y in reachable_pairs();
       """
     Then answer size is: 7
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
