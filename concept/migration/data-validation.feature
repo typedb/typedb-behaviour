@@ -1268,10 +1268,10 @@ Feature: Data validation
     Then transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $alice = attribute(email) put instance with value: alice@vaticle.com
+    When $alice = attribute(email) put instance with value: alice@typedb.com
     When entity $a set has: $alice
     When $b = entity(person) get instance with key(username): bob
-    When $bob = attribute(email) put instance with value: bob@vaticle.com
+    When $bob = attribute(email) put instance with value: bob@typedb.com
     When entity $b set has: $bob
     Then transaction commits
     When connection open schema transaction for database: typedb

@@ -2629,7 +2629,7 @@ Feature: TypeQL Define Query
     Given typeql write query
       """
       insert
-      $x isa person, has name "Alice", has email "alice@vaticle.com";
+      $x isa person, has name "Alice", has email "alice@typedb.com";
       """
     Given transaction commits
 
@@ -2657,7 +2657,7 @@ Feature: TypeQL Define Query
     Given typeql write query
       """
       insert
-      $x isa person, has name "Maria", has email "maria@vaticle.com";
+      $x isa person, has name "Maria", has email "maria@typedb.com";
       """
     Given transaction commits
 
@@ -2979,7 +2979,7 @@ Feature: TypeQL Define Query
     Given typeql write query
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
+      $x isa person, has name "Jeremy", has email "jeremy@typedb.com";
       """
     Given transaction commits
 
@@ -2996,7 +2996,7 @@ Feature: TypeQL Define Query
     Given typeql write query
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
+      $x isa person, has name "Jeremy", has email "jeremy@typedb.com";
       $r isa employment, links (employee: $x), has employment-reference-code "J123123";
       """
     Given transaction commits
@@ -3014,7 +3014,7 @@ Feature: TypeQL Define Query
     Given typeql write query
       """
       insert
-      $x isa person, has name "Jeremy", has email "jeremy@vaticle.com";
+      $x isa person, has name "Jeremy", has email "jeremy@typedb.com";
       """
     Given transaction commits
 

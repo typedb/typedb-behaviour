@@ -56,7 +56,7 @@ Feature: TypeQL Fetch Query
       insert
       $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
       $p2 isa person, has person-name "Bob", has ref 1;
-      $c1 isa company, has company-name "Vaticle", has ref 2;
+      $c1 isa company, has company-name "TypeDB", has ref 2;
       $f1 (friend: $p1, friend: $p2) isa friendship, has ref 3;
       $e1 (employee: $p1, employer: $c1) isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
       """
@@ -148,7 +148,7 @@ Feature: TypeQL Fetch Query
         "a": { "value":"Bob", "type": { "root": "attribute", "label": "person-name", "value_type": "string" } }
       },
       {
-        "a": { "value":"Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
+        "a": { "value":"TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
       }]
       """
     When get answers of typeql fetch
@@ -192,7 +192,7 @@ Feature: TypeQL Fetch Query
         "v": { "value":"Bob", "value_type": "string" }
       },
       {
-        "v": { "value":"Vaticle", "value_type": "string" }
+        "v": { "value":"TypeDB", "value_type": "string" }
       }]
       """
 
@@ -403,7 +403,7 @@ Feature: TypeQL Fetch Query
             "c": {
               "type": { "root": "entity", "label": "company" },
               "name": [
-                { "value": "Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
+                { "value": "TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
               ]
             }
           }
@@ -494,7 +494,7 @@ Feature: TypeQL Fetch Query
       """
       match
       $p2 isa person, has person-name "Bob";
-      $c1 isa company, has name "Vaticle";
+      $c1 isa company, has name "TypeDB";
       insert
       (employee: $p2, employer: $c1) isa employment, has ref 6;
       """
@@ -534,7 +534,7 @@ Feature: TypeQL Fetch Query
             "company": {
               "type": { "root": "entity", "label": "company" },
               "name": [
-                { "value": "Vaticle", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
+                { "value": "TypeDB", "type": { "root": "attribute", "label": "company-name", "value_type": "string" } }
               ]
             },
             "alice-employment-rel": [
