@@ -666,46 +666,49 @@ Feature: Recursion Resolution
 
   test 6.6 from Cao p.76
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      person sub entity,
-        owns name;
+      entity person,owns name;
 
-      parentship sub relation, relates parent, relates child;
+      relation parentship, relates parent, relates child;
       person plays parentship:parent, plays parentship:child;
 
-      Sibling sub relation, relates A, relates B;
+      relation Sibling, relates A, relates B;
       person plays Sibling:A, plays Sibling:B;
 
-      SameGen sub relation, relates A, relates B;
+      relation SameGen, relates A, relates B;
       person plays SameGen:A, plays SameGen:B;
 
-      name sub attribute, value string;
+      attribute name, value string;
 
-      rule rule-1: when {
-        (A: $x, B: $y) isa Sibling;
-      } then {
-        (A: $x, B: $y) isa SameGen;
-      };
+      fun same_gen_pairs() -> { person, person }:
+      match
+        $x isa person; $y isa person;
+        { $x1, $y1 in sibling_pairs(); $x1 is $x; $y1 is $y; } or
+        {
+          (parent: $x, child: $u) isa parentship;
+          $u, $v in same_gen_pairs();
+          (parent: $y, child: $v) isa parentship;
+        };
+      return { $x, $y };
 
-      rule rule-2: when {
-        (parent: $x, child: $u) isa parentship;
-        ($u, $v) isa SameGen;
-        (parent: $y, child: $v) isa parentship;
-      } then {
-        (A: $x, B: $y) isa SameGen;
-      };
-
-      rule rule-3: when {
-        (parent: $z, child: $x) isa parentship;
-        (parent: $z, child: $y) isa parentship;
-      } then {
-        (A: $x, B: $y) isa Sibling;
-      };
+      fun sibling_pairs() -> { person, person }:
+      match
+        $x isa person; $y isa person;
+        { (A: $x, B: $y) isa Sibling; } or
+        {
+          (parent: $z, child: $x) isa parentship;
+          (parent: $z, child: $y) isa parentship;
+        };
+      return {$x, $y};
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
     """
       insert
 
@@ -718,23 +721,23 @@ Feature: Recursion Resolution
       (parent: $john, child: $peter) isa parentship;
       (parent: $john, child: $bill) isa parentship;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        ($x, $y) isa SameGen;
-        $x has name 'ann';
-      get $y;
+        $x has name 'ann'; $y isa person;
+        $x, $y in same_gen_pairs();
+      select $y;
       """
     Then answer size is: 3
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
         $y has name $name;
         {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
-      get $y;
+      select $y;
       """
 
 
@@ -742,16 +745,15 @@ Feature: Recursion Resolution
 
   from Abiteboul - Foundations of databases p. 312/Cao test 6.14 p. 89
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      person sub entity,
+      entity person,
         owns name,
         plays parentship:parent,
         plays parentship:child,
-        plays RevSG:from,
-        plays RevSG:to,
         plays up:from,
         plays up:to,
         plays down:from,
@@ -759,33 +761,31 @@ Feature: Recursion Resolution
         plays flat:from,
         plays flat:to;
 
-      parentship sub relation, relates parent, relates child;
+      relation parentship, relates parent, relates child;
 
-      RevSG sub relation, relates from, relates to;
+      relation up, relates from, relates to;
 
-      up sub relation, relates from, relates to;
+      relation down, relates from, relates to;
 
-      down sub relation, relates from, relates to;
+      relation flat, relates to, relates from;
 
-      flat sub relation, relates to, relates from;
+      attribute name, value string;
 
-      name sub attribute, value string;
-
-      rule rule-1: when {
-        (from: $x, to: $y) isa flat;
-      } then {
-        (from: $x, to: $y) isa RevSG;
-      };
-
-      rule rule-2: when {
+      fun rev_sg_pairs() -> { person, person }:
+      match
+      $x isa person; $y isa person;
+      { (from: $x, to: $y) isa flat; } or
+      {
         (from: $x, to: $x1) isa up;
-        (from: $y1, to: $x1) isa RevSG;
+        $y1, $x1 in rev_sg_pairs();
         (from: $y1, to: $y) isa down;
-      } then {
-        (from: $x, to: $y) isa RevSG;
       };
+      return {$x, $y};
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -826,17 +826,17 @@ Feature: Recursion Resolution
       (from: $i, to: $d) isa down;
       (from: $p, to: $k) isa down;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (from: $x, to: $y) isa RevSG;
+        $x, $y in rev_sg_pairs();
         $x has name 'a';
-      get $y;
+      select $y;
       """
     Then answer size is: 3
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
@@ -844,13 +844,11 @@ Feature: Recursion Resolution
         {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
       get $y;
       """
-    Given reasoning query
+    Given get answers of typeql read query
       """
-      match (from: $x, to: $y) isa RevSG;
+      match $x, $y in rev_sg_pairs();
       """
     Then answer size is: 11
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match
