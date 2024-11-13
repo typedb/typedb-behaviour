@@ -2620,7 +2620,7 @@ Feature: TypeQL Match Clause
   #   Given transaction commits
   #   Given connection open read transaction for database: typedb
   #
-  #   # Force traversal of role edges in each direction: See vaticle/typedb#6925
+  #   # Force traversal of role edges in each direction: See typedb/typedb#6925
   #   When get answers of typeql read query
   #     """
   #     match
