@@ -1949,9 +1949,39 @@ Feature: TypeQL Fetch Query
         match
             $p isa person;
         fetch {
-            "name": match
+            "names": match
               $p has person-name $name;
               return { $name };
+        };
+      """
+
+    Then typeql read query; fails with a message containing: "must be wrapped in `[]`"
+      """
+        match
+            $p isa person;
+        fetch {
+            "names": (
+              match
+                $p has person-name $name;
+                return { $name };
+            )
+        };
+      """
+
+    Then typeql read query; fails with a message containing: "must be wrapped in `[]`"
+      """
+        match
+          $p isa person;
+        fetch {
+          "names": (
+            match
+              $p has person-name $v;
+              return { $v };
+          ),
+          "ages": [ match
+            $p has age $v;
+            return { $v };
+          ]
         };
       """
 
@@ -2272,4 +2302,261 @@ Feature: TypeQL Fetch Query
         fetch {
             "name": [ get_info($p) ]
         };
+      """
+
+
+  Scenario: fetch can use a custom function block with a stream return of attributes
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "names": [
+              match
+                $p has person-name $name;
+                return { $name };
+            ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        match
+          $p isa person;
+        fetch {
+          "names": [
+            match
+              $p has person-name $v;
+              return { $v };
+          ],
+          "ages": [
+            match
+              $p has age $v;
+              return { $v };
+          ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ],
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ],
+        "ages": [ ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "ages": [
+              match
+                $p has age $age;
+                return { $age };
+            ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "ages": [ ]
+      }
+      """
+
+
+  Scenario: fetch can use a custom function block with a stream return of values
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "names": [
+              match
+                $p has person-name $name;
+                $v = $name;
+                return { $v };
+            ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        match
+          $p isa person;
+        fetch {
+          "names": [
+            match
+              $p has person-name $name;
+              $v = $name;
+              return { $v };
+          ],
+          "ages": [
+            match
+              $p has age $age;
+              $v = $age;
+              return { $v };
+          ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ],
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ],
+        "ages": [ ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "ages": [
+              match
+                $p has age $age;
+                $v = $age;
+                return { $v };
+            ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "ages": [ ]
+      }
+      """
+
+
+  Scenario: fetching a stream-return function block which actually returns a tuple leads to error
+    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+      """
+        match
+            $p isa person;
+        fetch {
+            "name": [
+              match
+                $p has person-name $name, has age $age;
+                sort $name;
+                return { $name, $age };
+            ]
+        };
+      """
+
+
+  Scenario: fetch can use a custom function block with a single return of attributes wrapped in a list
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "names": [
+              match
+                $p has person-name $name;
+                sort $name;
+                return first $name;
+            ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ]
+      }
+      """
+
+    When get answers of typeql read query
+      """
+        match
+          $p isa person;
+        fetch {
+          "names": [
+            match
+              $p has person-name $v;
+              sort $v;
+              return last $v;
+          ],
+          "ages": [
+            match
+              $p has age $v;
+              return first $v;
+          ]
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Allie" ],
+        "ages": [ 10 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ],
+        "ages": [ ]
+      }
       """
