@@ -1901,32 +1901,44 @@ Feature: TypeQL Fetch Query
       """
 
 
-    # TODO: Uncomment when reduce executor for function is implemented
-#  Scenario: fetch can use a custom function block with reduce operation
-#    When get answers of typeql read query
-#      """
-#        match
-#            $p isa person;
-#        fetch {
-#            "names count": match
-#              $p has person-name $name;
-#              sort $name;
-#              return count($name);
-#        };
-#      """
-#    Then answer size is: 2
-#    Then answer contains document:
-#      """
-#      {
-#        "names count": 2
-#      }
-#      """
-#    Then answer contains document:
-#      """
-#      {
-#        "names count": 1
-#      }
-#      """
+  Scenario: fetch can use a custom function block with a scalar reduce operation result
+    When get answers of typeql read query
+      """
+        match
+            $p isa person;
+        fetch {
+            "names": [
+              match
+                $p has person-name $name;
+                return { $name };
+            ],
+            "names count listed": [
+              match
+                $p has person-name $name;
+                return count($name);
+            ],
+            "names count": match
+              $p has person-name $name;
+              return count($name);
+        };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "names": [ "Alice", "Allie" ],
+        "names count listed": [ 2 ],
+        "names count": 2
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "names": [ "Bob" ],
+        "names count listed": [ 1 ],
+        "names count": 1
+      }
+      """
 
 
   Scenario: fetching a single-return function block which actually returns a tuple leads to error
@@ -2492,7 +2504,6 @@ Feature: TypeQL Fetch Query
             "name": [
               match
                 $p has person-name $name, has age $age;
-                sort $name;
                 return { $name, $age };
             ]
         };
