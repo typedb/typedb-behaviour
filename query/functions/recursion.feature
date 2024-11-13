@@ -429,50 +429,43 @@ Feature: Recursion Resolution
   Scenario: TC test
 
   from Vieille - Recursive Query Processing: The power of logic p. 18
-
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      entity2 sub entity,
+       entity entity2,
           owns index,
-          plays N-TC:roleB,
-          plays N-TC:roleA,
-          plays TC:roleA,
-          plays TC:roleB,
           plays P:roleA,
           plays P:roleB;
-      q sub entity2;
+      entity q sub entity2;
 
-      N-TC sub relation, relates roleB, relates roleA;
+      relation P, relates roleA, relates roleB;
 
-      TC sub relation, relates roleA, relates roleB;
+      attribute index, value string;
 
-      P sub relation, relates roleA, relates roleB;
-
-      index sub attribute, value string;
-
-      rule rule-1: when {
+      fun ntc_pairs() -> { entity2, entity2 } :
+      match
         $x isa q;
-        (roleA: $x, roleB: $y) isa TC;
-      } then {
-        (roleA: $x, roleB: $y) isa N-TC;
-      };
+        $x, $y in tc_pairs();
+      return { $x, $y };
 
-      rule rule-2: when {
-        (roleA: $x, roleB: $y) isa P;
-      } then {
-        (roleA: $x, roleB: $y) isa TC;
-      };
+      fun tc_pairs() -> { entity2, entity2 } :
+      match
+        $x isa entity2; $y isa entity2;
+        { (roleA: $x, roleB: $y) isa P; } or
+        {
+          (roleA: $x, roleB: $z) isa P;
+          $z, $y1 in tc_pairs();
+          $y is $y1;
+        };
+      return { $x, $y };
 
-      rule rule-3: when {
-        (roleA: $x, roleB: $z) isa P;
-        (roleA: $z, roleB: $y) isa TC;
-      } then {
-        (roleA: $x, roleB: $y) isa TC;
-      };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -483,17 +476,17 @@ Feature: Recursion Resolution
       (roleA: $a1, roleB: $a) isa P;
       (roleA: $a2, roleB: $a1) isa P;
       """
-    Given verifier is initialised
-    Given reasoning query
-      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
       match
-        ($x, $y) isa N-TC;
+        $x, $y in ntc_pairs();
         $y has index 'a';
-      get $x;
+      select $x;
       """
     Then answer size is: 1
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match $x has index 'a2';
