@@ -62,18 +62,31 @@ Feature: Recursion Resolution
 
       entity big-place sub place;
 
-      fun transitive_location_hierarchy() -> { place, place }:
+      fun transitive_location_hierarchy_pairs() -> { place, place }:
       match
         (subordinate: $x, superior: $y) isa location-hierarchy;
         (subordinate: $y, superior: $z) isa location-hierarchy;
       return {$x, $z};
 
-      fun big_location_hierarchy() -> { place, place }:
+      fun big_location_hierarchy_pairs() -> { place, place }:
       match
-        $x, $y in transitive_location_hierarchy();
+        $x, $y in transitive_location_hierarchy_pairs();
         $x isa big-place;
         $y isa big-place;
       return {$x, $y};
+
+
+      fun transitive_location_hierarchy_directed($x: place) -> { place }:
+      match
+        (subordinate: $x, superior: $y) isa location-hierarchy;
+        (subordinate: $y, superior: $z) isa location-hierarchy;
+      return {$z};
+
+      fun big_location_hierarchy_directed($x: big-place) -> { big-place }:
+      match
+        $y in transitive_location_hierarchy_directed($x);
+        $y isa big-place;
+      return {$y};
       """
     Given transaction commits
 
@@ -93,7 +106,13 @@ Feature: Recursion Resolution
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x, $y in big_location_hierarchy();
+      match $x, $y in big_location_hierarchy_pairs();
+      """
+    Then answer size is: 1
+
+    Given get answers of typeql read query
+      """
+      match $x isa big-place; $y in big_location_hierarchy_directed($x);
       """
     Then answer size is: 1
 
@@ -122,11 +141,22 @@ Feature: Recursion Resolution
          $x isa person; $y isa person;
          { (parent: $x, child: $y) isa parentship; } or
          {
-            (parent: $x1, child: $z) isa parentship;
+            (parent: $x, child: $z) isa parentship;
             $z, $y1 in ancestor_pairs();
-            $y is $y1; $x is $x1;
+            $y is $y1;
           };
         return { $x, $y };
+
+      fun ancestors_directed($x: person) -> { person } :
+        match
+         $y isa person;
+         { (parent: $x, child: $y) isa parentship; } or
+         {
+            (parent: $x, child: $z) isa parentship;
+            $y1 in ancestors_directed($z);
+            $y is $y1;
+          };
+        return { $y };
 
       """
     Given transaction commits
@@ -160,6 +190,22 @@ Feature: Recursion Resolution
       match
         $X, $Y in ancestor_pairs();
         $X has name 'aa';
+        $Y has name $name;
+      select $Y, $name;
+      """
+    Then answer size is: 3
+    Then verify answer set is equivalent for query
+      """
+      match
+        $Y isa person, has name $name;
+        {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+      select $Y, $name;
+      """
+    Given get answers of typeql read query
+      """
+      match
+        $X isa person, has name 'aa';
+        $Y in ancestors_directed($X);
         $Y has name $name;
       select $Y, $name;
       """
@@ -304,6 +350,20 @@ Feature: Recursion Resolution
         $x is $x1; $y is $y1;
       };
       return { $x, $y };
+
+     fun same_gen_directed($x: entity2) -> { entity2 }:
+      match
+      $x isa entity2; $y isa entity2;
+      {
+        # $x is $y; # is unimplemented when $x is input. So we workaround with names
+        $x has name $name; $y has name $name;
+      } or {
+        (parent: $x, child: $u) isa parentship;
+        (parent: $y1, child: $v) isa parentship;
+        $u in same_gen_directed($v);
+        $y is $y1;
+      };
+      return { $y };
       """
     Given transaction commits
 
@@ -350,7 +410,21 @@ Feature: Recursion Resolution
         {$name == 'f';} or {$name == 'a';};
       select $y;
       """
-
+    Given get answers of typeql read query
+      """
+      match
+        $x has name 'a';
+        $y in same_gen_directed($x);
+      select $y;
+      """
+    Then answer size is: 2
+    Then verify answer set is equivalent for query
+      """
+      match
+        $y has name $name;
+        {$name == 'f';} or {$name == 'a';};
+      select $y;
+      """
 
   Scenario: TC test
 
