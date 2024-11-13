@@ -1806,7 +1806,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetching a single-return function expression which actually returns a tuple leads to error
-    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+    Then typeql read query; fails with a message containing: "returns a non-scalar result"
       """
         with
         fun get_info($p_arg: person) -> name, age:
@@ -2050,8 +2050,136 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: fetch can have a subquery returning a list of aggregations
+    Given get answers of typeql read query
+      """
+        with fun get_info($p_arg: person) -> long, long, long:
+          match
+            $p_arg has person-name $name, has age $age;
+            return count($name), sum($age), count($age);
+
+        match
+          $p isa person;
+          $x, $y, $z in get_info($p);
+      """
+    Given answer size is: 2
+    Given uniquely identify answer concepts
+      | x            | y             | z            |
+      | value:long:2 | value:long:20 | value:long:2 |
+      | value:long:0 | value:long:0  | value:long:0 |
+    When get answers of typeql read query
+      """
+        match
+          $p isa person;
+          fetch {
+            "info": [
+              match
+                $p has person-name $name, has age $age;
+                return count($name), sum($age), count($age);
+            ]
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "info": [ 2, 20, 2 ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "info": [ 0, 0, 0 ]
+      }
+      """
+
+
+  Scenario: fetching a subquery with a returned list of aggregations mixed with non-aggregations leads to error
+    Then typeql read query; parsing fails
+      """
+        match
+          $p isa person;
+          fetch {
+            "info": [
+              match
+                $p has person-name $name, has age $age;
+                return count($name), $age;
+            ]
+          };
+      """
+
+    When connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+        match
+          $p isa person;
+          fetch {
+            "info": [
+              match
+                $p has person-name $name, has age $age;
+                return $age, count($name);
+            ]
+          };
+      """
+
+    When connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+        match
+          $p isa person;
+          fetch {
+            "info": [
+              match
+                $p has person-name $name, has age $age;
+                return { count($name), $age };
+            ]
+          };
+      """
+
+    When connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+        match
+          $p isa person;
+          fetch {
+            "info": [
+              match
+                $p has person-name $name, has age $age;
+                return { count($name), count($age) };
+            ]
+          };
+      """
+
+
+  Scenario: fetching a list of aggregates for a single function block leads to error
+    Then typeql read query; parsing fails
+      """
+        match
+          $p isa person;
+          fetch {
+            "info":
+              match
+                $p has person-name $name, has age $age;
+                return count($name), $age;
+          };
+      """
+
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "returns a non-scalar result"
+      """
+        match
+          $p isa person;
+          fetch {
+            "info":
+              match
+                $p has person-name $name, has age $age;
+                return count($name), count($age);
+          };
+      """
+
+
   Scenario: fetching a single-return function block which actually returns a tuple leads to error
-    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+    Then typeql read query; fails with a message containing: "returns a non-scalar result"
       """
         match
             $p isa person;
@@ -2393,7 +2521,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetching a list-return function expression which actually returns a tuple leads to error
-    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+    Then typeql read query; fails with a message containing: "non-scalar result"
       """
         with
         fun get_info($p_arg: person) -> name, age:
@@ -2409,7 +2537,7 @@ Feature: TypeQL Fetch Query
         };
       """
 
-    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+    Then typeql read query; fails with a message containing: "returns a non-scalar result"
       """
         with
         fun get_info($p_arg: person) -> { name, age }:
@@ -2605,7 +2733,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetching a stream-return function block which actually returns a tuple leads to error
-    Then typeql read query; fails with a message containing: "expected a scalar return, got a tuple instead"
+    Then typeql read query; fails with a message containing: "non-scalar non-reduce result"
       """
         match
             $p isa person;
@@ -2614,6 +2742,19 @@ Feature: TypeQL Fetch Query
               match
                 $p has person-name $name, has age $age;
                 return { $name, $age };
+            ]
+        };
+      """
+
+    Then typeql read query; parsing fails
+      """
+        match
+            $p isa person;
+        fetch {
+            "name": [
+              match
+                $p has person-name $name, has age $age;
+                return $name, $age;
             ]
         };
       """
