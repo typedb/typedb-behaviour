@@ -14,13 +14,13 @@ build:
     dependency-analysis:
       image: vaticle-ubuntu-22.04
       command: |
-        bazel run @vaticle_dependencies//factory/analysis:dependency-analysis
+        bazel run @typedb_dependencies//factory/analysis:dependency-analysis
   correctness:
     build:
       image: vaticle-ubuntu-22.04
       command: |
         bazel build //... --test_output=errors
-        bazel run @vaticle_dependencies//tool/checkstyle:test-coverage
+        bazel run @typedb_dependencies//tool/checkstyle:test-coverage
         bazel test $(bazel query 'kind(checkstyle_test, //...)') --test_output=errors
     sync-dependencies:
       image: vaticle-ubuntu-22.04
@@ -30,5 +30,5 @@ build:
       dependencies: [build]
       command: |
           export SYNC_DEPENDENCIES_TOKEN=$REPO_GITHUB_TOKEN
-          bazel run @vaticle_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
+          bazel run @typedb_dependencies//tool/sync:dependencies -- --source ${FACTORY_REPO}@${FACTORY_COMMIT}
       
