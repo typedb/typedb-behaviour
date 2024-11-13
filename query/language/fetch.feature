@@ -387,7 +387,7 @@ Feature: TypeQL Fetch Query
       match
         $p isa person;
       fetch {
-        "non-existing karma": $p.person-name
+        "name": $p.person-name
       };
       """
 
@@ -527,14 +527,69 @@ Feature: TypeQL Fetch Query
       match
         $p isa person, has ref 1;
       fetch {
-        "non-existing karma": $p.age
+        "non-existing age": $p.age
       };
       """
     Then answer size is: 1
     Then answer contains document:
       """
       {
-        "non-existing karma": null
+        "non-existing age": null
+      }
+      """
+
+
+  Scenario: fetching super attribute type returns its sub attributes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute surname sub name;
+      person owns surname;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      match
+      $p1 isa person, has person-name "Alice";
+      $p2 isa person, has person-name "Bob";
+      insert
+      $p1 has surname "Cooper";
+      $p2 has surname "Marley";
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+      fetch {
+        "all names": [ $p.name ],
+        "person names": [ $p.person-name ],
+        "surnames": [ $p.surname ],
+        "the only surname": $p.surname
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "all names": [ "Alice", "Allie", "Cooper" ],
+        "person names": [ "Alice", "Allie" ],
+        "surnames": [ "Cooper" ],
+        "the only surname": "Cooper"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "all names": [ "Bob", "Marley" ],
+        "person names": [ "Bob" ],
+        "surnames": [ "Marley" ],
+        "the only surname": "Marley"
       }
       """
 
@@ -770,6 +825,60 @@ Feature: TypeQL Fetch Query
       | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 | "P1Y10M7DT15H44M5.00394892S"                 |
       | duration    | P66W                                        | "P462D"                                       | "P66W"                                       |
     # TODO: Test documents and structs
+
+
+  Scenario: fetch can have nested documents
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person, has person-name $name;
+          fetch {
+            "info": {
+              "name": {
+                "from entity": [ $p.person-name ],
+                "from var": $name,
+              },
+              "optional age": $p.age,
+            }
+          };
+      """
+    Then answer size is: 3
+    Then answer contains document:
+      """
+      {
+        "info": {
+          "name": {
+            "from entity": [ "Alice", "Allie" ],
+            "from var": "Alice"
+          },
+          "optional age": 10
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "info": {
+          "name": {
+            "from entity": [ "Alice", "Allie" ],
+            "from var": "Allie"
+          },
+          "optional age": 10
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "info": {
+          "name": {
+            "from entity": [ "Bob" ],
+            "from var": "Bob"
+          },
+          "optional age": null
+        }
+      }
+      """
 
   ##############
   # SUBQUERIES #
