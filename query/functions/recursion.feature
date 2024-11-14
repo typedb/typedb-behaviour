@@ -49,6 +49,8 @@ Feature: Recursion Resolution
     Given transaction commits
 
 
+  Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
+    # TODO: We need to use arithmetic for this. I can probably just count upwards, one at a time.
 
   Scenario: when a query using transitivity has a limit exceeding the result size, answers are consistent between runs
     # TODO: Taken from relation-inference
@@ -115,11 +117,6 @@ Feature: Recursion Resolution
       match $x isa big-place; $y in big_location_hierarchy_directed($x);
       """
     Then answer size is: 1
-
-
-  # TODO: re-enable all steps when we have a solution for materialisation of infinite graphs (#75)
-  Scenario: when resolution produces an infinite stream of answers, limiting the answer size allows it to terminate
-    # not-so-fun-fact: We can't have infinite streams anymore.
 
 
   Scenario: ancestor test in pairs
