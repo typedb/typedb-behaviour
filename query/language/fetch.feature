@@ -980,13 +980,13 @@ Feature: TypeQL Fetch Query
         $p isa! $t;
       fetch {
         "subquery": [
-            match
-            $p isa person;
-            $p has person-name $pn;
-            $pn == "Alice";
-            fetch {
-              "Alice": $pn
-            };
+          match
+          $p isa person;
+          $p has person-name $pn;
+          $pn == "Alice";
+          fetch {
+            "Alice": $pn
+          };
         ],
       };
       """
@@ -1577,9 +1577,9 @@ Feature: TypeQL Fetch Query
         return first $name;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": get_name($p)
+          "name": get_name($p)
         };
       """
     Then answer size is: 2
@@ -1612,10 +1612,10 @@ Feature: TypeQL Fetch Query
         return first $age;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": get_name($p),
-            "age": get_age($p)
+          "name": get_name($p),
+          "age": get_age($p)
         };
       """
     Then answer size is: 2
@@ -1643,9 +1643,9 @@ Feature: TypeQL Fetch Query
         return first $age;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "age": get_age($p)
+          "age": get_age($p)
         };
       """
     Then answer size is: 2
@@ -1714,9 +1714,9 @@ Feature: TypeQL Fetch Query
         return first $value;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name value": get_name($p)
+          "name value": get_name($p)
         };
       """
     Then answer size is: 2
@@ -1751,10 +1751,10 @@ Feature: TypeQL Fetch Query
         return first $value;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name value": get_name($p),
-            "age value": get_age($p)
+          "name value": get_name($p),
+          "age value": get_age($p)
         };
       """
     Then answer size is: 2
@@ -1783,9 +1783,9 @@ Feature: TypeQL Fetch Query
         return first $value;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "age value": get_age($p)
+          "age value": get_age($p)
         };
       """
     Then answer size is: 2
@@ -1814,9 +1814,9 @@ Feature: TypeQL Fetch Query
         return first $name, $age;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": get_info($p)
+          "name": get_info($p)
         };
       """
 
@@ -1831,9 +1831,9 @@ Feature: TypeQL Fetch Query
         return { $name };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": get_names($p)
+          "name": get_names($p)
         };
       """
 
@@ -1842,12 +1842,12 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": match
-              $p has person-name $name;
-              sort $name;
-              return first $name;
+          "name": match
+            $p has person-name $name;
+            sort $name;
+            return first $name;
         };
       """
     Then answer size is: 2
@@ -1899,11 +1899,11 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "age": match
-              $p has age $age;
-              return first $age;
+          "age": match
+            $p has age $age;
+            return first $age;
         };
       """
     Then answer size is: 2
@@ -1925,13 +1925,13 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name value": match
-              $p has person-name $name;
-              $v = $name;
-              sort $v;
-              return first $v;
+          "name value": match
+            $p has person-name $name;
+            $v = $name;
+            sort $v;
+            return first $v;
         };
       """
     Then answer size is: 2
@@ -1985,12 +1985,12 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "age value": match
-              $p has age $age;
-              $v = $age;
-              return first $v;
+          "age value": match
+            $p has age $age;
+            $v = $age;
+            return first $v;
         };
       """
     Then answer size is: 2
@@ -2012,21 +2012,21 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [
-              match
-                $p has person-name $name;
-                return { $name };
-            ],
-            "names count listed": [
-              match
-                $p has person-name $name;
-                return count($name);
-            ],
-            "names count": match
+          "names": [
+            match
+              $p has person-name $name;
+              return { $name };
+          ],
+          "names count listed": [
+            match
               $p has person-name $name;
               return count($name);
+          ],
+          "names count": match
+            $p has person-name $name;
+            return count($name);
         };
       """
     Then answer size is: 2
@@ -2180,12 +2180,12 @@ Feature: TypeQL Fetch Query
     Then typeql read query; fails with a message containing: "returns a non-scalar result"
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": match
-              $p has person-name $name, has age $age;
-              sort $name;
-              return first $name, $age;
+          "name": match
+            $p has person-name $name, has age $age;
+            sort $name;
+            return first $name, $age;
         };
       """
 
@@ -2194,24 +2194,24 @@ Feature: TypeQL Fetch Query
     Then typeql read query; fails with a message containing: "must be wrapped in `[]` to collect into a list"
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": match
-              $p has person-name $name;
-              return { $name };
+          "names": match
+            $p has person-name $name;
+            return { $name };
         };
       """
 
     Then typeql read query; fails with a message containing: "must be wrapped in `[]`"
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": (
-              match
-                $p has person-name $name;
-                return { $name };
-            )
+          "names": (
+            match
+              $p has person-name $name;
+              return { $name };
+          )
         };
       """
 
@@ -2272,9 +2272,9 @@ Feature: TypeQL Fetch Query
 #        return first $v;
 #
 #        match
-#            $p isa person;
+#          $p isa person;
 #        fetch {
-#            "excessive karma": get_karma($p) - 100
+#          "excessive karma": get_karma($p) - 100
 #        };
 #      """
 #    Then answer size is: 2
@@ -2341,9 +2341,9 @@ Feature: TypeQL Fetch Query
         return { $name };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [ get_names($p) ]
+          "names": [ get_names($p) ]
         };
       """
     Then answer size is: 2
@@ -2369,9 +2369,9 @@ Feature: TypeQL Fetch Query
         return { $age };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "ages": [ get_ages($p) ]
+          "ages": [ get_ages($p) ]
         };
       """
     Then answer size is: 2
@@ -2438,9 +2438,9 @@ Feature: TypeQL Fetch Query
         return { $v };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name values": [ get_names($p) ]
+          "name values": [ get_names($p) ]
         };
       """
     Then answer size is: 2
@@ -2467,9 +2467,9 @@ Feature: TypeQL Fetch Query
         return { $v };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "age values": [ get_ages($p) ]
+          "age values": [ get_ages($p) ]
         };
       """
     Then answer size is: 2
@@ -2498,9 +2498,9 @@ Feature: TypeQL Fetch Query
         return first $name;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [ get_name($p) ]
+          "names": [ get_name($p) ]
         };
       """
     Then answer size is: 2
@@ -2529,9 +2529,9 @@ Feature: TypeQL Fetch Query
         return first $name, $age;
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": [ get_info($p) ]
+          "name": [ get_info($p) ]
         };
       """
 
@@ -2545,9 +2545,9 @@ Feature: TypeQL Fetch Query
         return { $name, $age };
 
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": [ get_info($p) ]
+          "name": [ get_info($p) ]
         };
       """
 
@@ -2556,13 +2556,13 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [
-              match
-                $p has person-name $name;
-                return { $name };
-            ]
+          "names": [
+            match
+              $p has person-name $name;
+              return { $name };
+          ]
         };
       """
     Then answer size is: 2
@@ -2615,13 +2615,13 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "ages": [
-              match
-                $p has age $age;
-                return { $age };
-            ]
+          "ages": [
+            match
+              $p has age $age;
+              return { $age };
+          ]
         };
       """
     Then answer size is: 2
@@ -2643,14 +2643,14 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [
-              match
-                $p has person-name $name;
-                $v = $name;
-                return { $v };
-            ]
+          "names": [
+            match
+              $p has person-name $name;
+              $v = $name;
+              return { $v };
+          ]
         };
       """
     Then answer size is: 2
@@ -2705,14 +2705,14 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "ages": [
-              match
-                $p has age $age;
-                $v = $age;
-                return { $v };
-            ]
+          "ages": [
+            match
+              $p has age $age;
+              $v = $age;
+              return { $v };
+          ]
         };
       """
     Then answer size is: 2
@@ -2734,26 +2734,26 @@ Feature: TypeQL Fetch Query
     Then typeql read query; fails with a message containing: "non-scalar non-reduce result"
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": [
-              match
-                $p has person-name $name, has age $age;
-                return { $name, $age };
-            ]
+          "name": [
+            match
+              $p has person-name $name, has age $age;
+              return { $name, $age };
+          ]
         };
       """
 
     Then typeql read query; parsing fails
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "name": [
-              match
-                $p has person-name $name, has age $age;
-                return $name, $age;
-            ]
+          "name": [
+            match
+              $p has person-name $name, has age $age;
+              return $name, $age;
+          ]
         };
       """
 
@@ -2762,14 +2762,14 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         match
-            $p isa person;
+          $p isa person;
         fetch {
-            "names": [
-              match
-                $p has person-name $name;
-                sort $name;
-                return first $name;
-            ]
+          "names": [
+            match
+              $p has person-name $name;
+              sort $name;
+              return first $name;
+          ]
         };
       """
     Then answer size is: 2
