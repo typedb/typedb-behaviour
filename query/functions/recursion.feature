@@ -1233,46 +1233,39 @@ Feature: Recursion Resolution
 
   test 6.9 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic p.82
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      entity2 sub entity,
-        owns index @key,
-        plays S:from,
-        plays S:to;
-      a-entity sub entity2;
+      entity entity2, owns index @key;
+      entity a-entity sub entity2;
 
-      P sub relation, relates from, relates to;
-      entity2 plays P:from, plays P:to;
-
-      Q sub relation, relates from, relates to;
+      relation Q, relates from, relates to;
       entity2 plays Q:from, plays Q:to;
 
-      S sub relation, relates from, relates to;
+      attribute index, value string;
 
-      index sub attribute, value string;
-
-      rule rule-1: when {
-        (from: $x, to: $y) isa Q;
-      } then {
-        (from: $x, to: $y) isa P;
-      };
-
-      rule rule-2: when {
+      fun p_pairs() -> { entity2, entity2 }:
+      match
+      $x isa entity2; $y isa entity2;
+      { (from: $x, to: $y) isa Q; } or
+      {
         (from: $x, to: $z) isa Q;
-        (from: $z, to: $y) isa P;
-      } then {
-        (from: $x, to: $y) isa P;
+        $z, $y1 in p_pairs();
+        $y is $y1;
       };
+      return { $x, $y };
 
-      rule rule-3: when {
-        (from: $x, to: $y) isa P;
-      } then {
-        (from: $x, to: $y) isa S;
-      };
+      fun s_pairs() -> { entity2, entity2 }:
+      match
+        $x, $y in p_pairs();
+      return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
 
@@ -1362,18 +1355,17 @@ Feature: Recursion Resolution
       (from: $a5_3, to: $a5_4) isa Q;
       (from: $a5_4, to: $a5_5) isa Q;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (from: $x, to: $y) isa P;
+        $x, $y in p_pairs();
         $x has index 'a';
       select $y;
       """
     Then answer size is: 25
-    Then verify answers are sound
-    Then verify answers are complete
-
     Then verify answer set is equivalent for query
       """
       match $y isa a-entity;
