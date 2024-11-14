@@ -1045,14 +1045,18 @@ Feature: Recursion Resolution
 
       attribute index, value string;
 
+     fun identity($x: entity2) -> { entity2 }:
+      match $x isa entity2; # no-op purely for binding
+      return { $x };
+
       fun p_pairs() -> {entity2, entity2}:
       match
-        $x isa entity2; $y isa entity2;
-        { (from: $x, to: $y) isa Q; } or
+        $x in identity($x1);
+        $y in identity($y1);
+        { (from: $x1, to: $y1) isa Q; } or
         {
-          (from: $x, to: $z) isa Q;
-          $z, $y1 in p_pairs();
-          $y1 is $y;
+          (from: $x1, to: $z1) isa Q;
+          $z1, $y1 in p_pairs();
         };
       return { $x, $y };
       """
