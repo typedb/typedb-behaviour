@@ -1382,77 +1382,77 @@ Feature: TypeQL Fetch Query
         ]
       };
       """
-  # TODO: Uncomment these steps when a good error is written instead of an unreachable!() on the server side
-#    Then typeql read query; fails
-#      """
-#      match
-#      $p isa! $t, has person-name $n;
-#      fetch {
-#        "subquery": [
-#          match
-#            $p has person-name $pn;
-#            $nv = $n;
-#            $pnv = $pn;
-#            not { $nv == $pnv; };
-#          insert
-#            $p has person-name "Paul";
-#        ]
-#      };
-#      """
-#    Then typeql read query; fails
-#      """
-#      match
-#      $p isa! $t, has person-name $n;
-#      fetch {
-#        "subquery": [
-#          match
-#            $p has person-name $pn;
-#            $nv = $n;
-#            $pnv = $pn;
-#            not { $nv == $pnv; };
-#          insert
-#            $p has person-name "Paul";
-#          fetch {
-#            "Paul's old name": $n
-#          };
-#        ]
-#      };
-#      """
-#    Then typeql read query; fails
-#      """
-#      match
-#      $p isa! $t, has person-name $n;
-#      fetch {
-#        "subquery": [
-#          match
-#            $p has person-name $pn;
-#            $nv = $n;
-#            $pnv = $pn;
-#            not { $nv == $pnv; };
-#          define
-#            person-name @card(0..99);
-#        ]
-#      };
-#      """
-#    Then typeql read query; fails
-#      """
-#      match
-#      $p isa! $t, has person-name $n;
-#      fetch {
-#        "subquery": [
-#          match
-#            $p has person-name $pn;
-#            $nv = $n;
-#            $pnv = $pn;
-#            not { $nv == $pnv; };
-#          define
-#            person-name @card(0..99);
-#          fetch {
-#            "Paul's old name": $n
-#          };
-#        ]
-#      };
-#      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          insert
+            $p has person-name "Paul";
+        ]
+      };
+      """
+    Then typeql read query; fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          insert
+            $p has person-name "Paul";
+          fetch {
+            "Paul's old name": $n
+          };
+        ]
+      };
+      """
+    Then typeql read query; parsing fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          define
+            person-name @card(0..99);
+        ]
+      };
+      """
+    When connection open read transaction for database: typedb
+    Then typeql read query; parsing fails
+      """
+      match
+      $p isa! $t, has person-name $n;
+      fetch {
+        "subquery": [
+          match
+            $p has person-name $pn;
+            $nv = $n;
+            $pnv = $pn;
+            not { $nv == $pnv; };
+          define
+            person-name @card(0..99);
+          fetch {
+            "Paul's old name": $n
+          };
+        ]
+      };
+      """
 
 
   Scenario: a subquery that is not connected to the parent query is permitted
@@ -1481,8 +1481,6 @@ Feature: TypeQL Fetch Query
         ]
       }
       """
-
-# TODO: Add tests for write queries
 
   #####################
   # VALUE EXPRESSIONS #
@@ -2819,5 +2817,136 @@ Feature: TypeQL Fetch Query
       {
         "names": [ "Bob" ],
         "ages": [ ]
+      }
+      """
+
+  ###################
+  # WRITE PIPELINES #
+  ###################
+
+  Scenario: fetch can be used in write pipelines
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $n, has person-name $pn;
+        $pn != $n;
+      fetch {
+        "name": $n,
+        "also known as": $pn
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "name": "Alice",
+        "also known as": "Allie"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "Allie",
+        "also known as": "Alice"
+      }
+      """
+
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $n = "John";
+        $pn = "Johnny";
+      insert
+        $p isa person, has person-name == $n, has person-name == $pn, has ref 66;
+      fetch {
+        "name": $n,
+        "also known as": $pn
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "name": "John",
+        "also known as": "Johnny"
+      }
+      """
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $n "John" isa person-name;
+        $pn "Jon" isa person-name;
+        $p isa person, has $n, has $pn, has ref 77;
+      fetch {
+        "name": $n,
+        "also known as": $pn
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "name": "John",
+        "also known as": "Jon"
+      }
+      """
+    When transaction commits
+    When connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has person-name $n, has person-name $pn;
+        $pn != $n;
+      fetch {
+        "name": $n,
+        "also known as": $pn
+      };
+      """
+    Then answer size is: 6
+    Then answer contains document:
+      """
+      {
+        "name": "Alice",
+        "also known as": "Allie"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "Allie",
+        "also known as": "Alice"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "John",
+        "also known as": "Johnny"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "Johnny",
+        "also known as": "John"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "Jon",
+        "also known as": "John"
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": "John",
+        "also known as": "Jon"
       }
       """
