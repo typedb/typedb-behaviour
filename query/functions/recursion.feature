@@ -318,7 +318,7 @@ Feature: Recursion Resolution
       match
         $X has name $name;
         {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
-      get $X;
+      select $X;
       """
 
 
@@ -589,7 +589,7 @@ Feature: Recursion Resolution
         {$indX == 'aa';$indY == 'cc';} or
         {$indX == 'bb';$indY == 'dd';} or
         {$indX == 'aa';$indY == 'dd';};
-      get $x, $y;
+      select $x, $y;
       """
 
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
@@ -842,7 +842,7 @@ Feature: Recursion Resolution
       match
         $y isa person, has name $name;
         {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
-      get $y;
+      select $y;
       """
     Given get answers of typeql read query
       """
@@ -860,7 +860,7 @@ Feature: Recursion Resolution
         {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
         {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
         {$nameX == 'f';$nameY == 'k';};
-      get $x, $y;
+      select $x, $y;
       """
 
 
@@ -870,64 +870,58 @@ Feature: Recursion Resolution
 
   Tests an 'n' x 'm' linear transitivity matrix (in this scenario, n = m = 5)
 
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      entity2 sub entity,
+      entity entity2,
         owns index @key,
         plays P:from, plays P:to,
-        plays Q1:from, plays Q1:to,
-        plays Q2:from, plays Q2:to,
         plays R1:from, plays R1:to,
         plays R2:from, plays R2:to;
 
-      start sub entity2;
-      end sub entity2;
-      a-entity sub entity2;
-      b-entity sub entity2;
+      entity start sub entity2;
+      entity end sub entity2;
+      entity a-entity sub entity2;
+      entity b-entity sub entity2;
 
-      R1 sub relation, relates from, relates to;
-      R2 sub relation, relates from, relates to;
-      Q1 sub relation, relates from, relates to;
-      Q2 sub relation, relates from, relates to;
-      P sub relation, relates from, relates to;
+      relation R1, relates from, relates to;
+      relation R2, relates from, relates to;
+      relation P, relates from, relates to;
+      attribute index, value string;
 
-      index sub attribute, value string;
+      fun q1_pairs() -> { entity2, entity2 }:
+        match
+         $x isa entity2; $y isa entity2;
+         { (from: $x, to: $y) isa R1; } or
+         {
+            (from: $x, to: $z) isa R1;
+            $z, $y1 in q1_pairs();
+            $y is $y1;
+         };
+        return { $x, $y };
 
-      rule rule-1: when {
-        (from: $x, to: $y) isa R1;
-      } then {
-        (from: $x, to: $y) isa Q1;
-      };
+      fun q2_pairs() -> { entity2, entity2 }:
+      match
+        $x isa entity2; $y isa entity2;
+        { (from: $x, to: $y) isa R2; }
+        or {
+            (from: $x, to: $z) isa R2;
+            $z, $y1 in q2_pairs();
+            $y is $y1;
+        };
+        return { $x, $y };
 
-      rule rule-2: when {
-        (from: $x, to: $z) isa R1;
-        (from: $z, to: $y) isa Q1;
-      } then {
-        (from: $x, to: $y) isa Q1;
-      };
-
-      rule rule-3: when {
-        (from: $x, to: $y) isa R2;
-      } then {
-        (from: $x, to: $y) isa Q2;
-      };
-
-      rule rule-4: when {
-        (from: $x, to: $z) isa R2;
-        (from: $z, to: $y) isa Q2;
-      } then {
-        (from: $x, to: $y) isa Q2;
-      };
-
-      rule rule-5: when {
-        (from: $x, to: $y) isa Q1;
-      } then {
-        (from: $x, to: $y) isa P;
-      };
+      fun p_pairs() -> { entity2, entity2 }:
+      match
+        $x, $y in q1_pairs();
+      return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
     # These insert statements can be procedurally generated based on 'm' and 'n', the width and height of the matrix
     """
       insert
@@ -1016,62 +1010,59 @@ Feature: Recursion Resolution
       (from: $b25, to: $b35) isa R2;
       (from: $b35, to: $b45) isa R2;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (from: $x, to: $y) isa Q1;
+        $x, $y in q1_pairs();
         $x has index 'a0';
-      get $y;
+      select $y;
       """
     Then answer size is: 5
-    Then verify answers are sound
-    Then verify answers are complete
 
     Then verify answer set is equivalent for query
       """
-      match $y isa $t; { $t type a-entity; } or { $t type end; }; get $y;
+      match $y isa $t; { $t type a-entity; } or { $t type end; }; select $y;
       """
 
 
   Scenario: tail recursion test
 
   test 6.3 from Cao - Methods for evaluating queries to Horn knowledge bases in first-order logic, p 75
-
-    Given reasoning schema
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
       """
       define
 
-      entity2 sub entity,
+      entity entity2,
         owns index @key,
-        plays P:from,
-        plays P:to,
         plays Q:from,
         plays Q:to;
 
-      a-entity sub entity2;
-      b-entity sub entity2;
+      entity a-entity sub entity2;
+      entity b-entity sub entity2;
 
-      P sub relation, relates from, relates to;
+      relation Q, relates from, relates to;
 
-      Q sub relation, relates from, relates to;
+      attribute index, value string;
 
-      index sub attribute, value string;
-
-      rule rule-1: when {
-        (from: $x, to: $y) isa Q;
-      } then {
-        (from: $x, to: $y) isa P;
-      };
-
-      rule rule-2: when {
-        (from: $x, to: $z) isa Q;
-        (from: $z, to: $y) isa P;
-      } then {
-        (from: $x, to: $y) isa P;
-      };
+      fun p_pairs() -> {entity2, entity2}:
+      match
+        $x isa entity2; $y isa entity2;
+        { (from: $x, to: $y) isa Q; } or
+        {
+          (from: $x, to: $z) isa Q;
+          $z, $y1 in p_pairs();
+          $y1 is $y;
+        };
+      return { $x, $y };
       """
-    Given reasoning data
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
     """
       insert
 
@@ -1221,17 +1212,17 @@ Feature: Recursion Resolution
       (from: $b4_10, to: $b5_10) isa Q;
       (from: $b5_10, to: $b6_10) isa Q;
       """
-    Given verifier is initialised
-    Given reasoning query
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
       """
       match
-        (from: $x, to: $y) isa P;
+        $x, $y in p_pairs();
         $x has index 'a0';
-      get $y;
+      select $y;
       """
     Then answer size is: 60
-    Then verify answers are sound
-    Then verify answers are complete
     Then verify answer set is equivalent for query
       """
       match $y isa b-entity;
@@ -1377,7 +1368,7 @@ Feature: Recursion Resolution
       match
         (from: $x, to: $y) isa P;
         $x has index 'a';
-      get $y;
+      select $y;
       """
     Then answer size is: 25
     Then verify answers are sound
