@@ -8,3 +8,8 @@ Feature: Effects a function signature have on the caller
   Background: Set up database
     # TODO
 
+
+
+  Scenario: Functions which do not return the specified type are an error
+    # TODO
+

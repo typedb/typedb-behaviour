@@ -45,8 +45,9 @@ Feature: Tests for various shapes of function bodies
       """
       insert
       $p1 isa person, has name "Alice", has name "Allie", has age 10, has ref 0;
-      $p2 isa person, has name "Bob", has ref 1;
-      $p3 isa person, has name "Charlie", has ref 2;
+      $p2 isa person, has name "Bob", has age 12, has ref 1;
+      $p3 isa person, has name "Charlie", has age 9, has ref 2;
+      $p4 isa person, has name "Dave", has age 11, has ref 3;
       """
     Given transaction commits
 
@@ -96,21 +97,68 @@ Feature: Tests for various shapes of function bodies
     Then uniquely identify answer concepts
       | p         |
       | key:ref:2 |
+      | key:ref:3 |
 
 
+  Scenario: Sort, Offset & Limit can be used in function bodies.
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun second_and_third_largest_ages() -> { age }:
+      match
+        $p isa person, has age $age;
+      sort $age desc;
+      offset 1;
+      limit 2;
+      return { $age };
+      """
+    Given transaction commits
 
-  Scenario: Functions which do not return the specified type are an error
-    # TODO
-
-
-  Scenario: Sort, Offset & Limit can be used in function bodies. Further, the results remains consistent across runs.
-    # TODO
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match $age in second_and_third_largest_ages();
+    """
+    Then uniquely identify answer concepts
+      | age           |
+      | value:long:10 |
+      | value:long:11 |
 
 
   Scenario: Reduce can be used in function bodies
-    # TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun sum_all_ages() -> { long }:
+      match
+        $p isa person, has age $age;
+      reduce $sum_ages = sum($age);
+      return { $sum_ages };
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match $sum_ages in sum_all_ages();
+    """
+    Then uniquely identify answer concepts
+      | sum_ages      |
+      | value:long:42 |
+
 
   Scenario: A function may not have write stages in the body
-    # TODO
-
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query; fails
+      """
+      define
+      fun try_adding_an_age_to_alice() -> { person }:
+      match
+        $p isa person;
+      insert
+        $p has age 1;
+      return { $p };
+      """
 
