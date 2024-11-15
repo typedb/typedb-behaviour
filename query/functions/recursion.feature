@@ -930,6 +930,30 @@ Feature: Recursion Resolution
         (from: $y1, to: $y) isa down;
       };
       return {$x, $y};
+
+
+      fun rev_sg_directed_from_bound($x: person) -> { person }:
+      match
+      $x isa person; $y isa person;
+      { (from: $x, to: $y) isa flat; } or
+      {
+        (from: $x, to: $x1) isa up;
+        $y1 in rev_sg_directed_to_bound($x1);
+        (from: $y1, to: $y) isa down;
+      };
+      return {$y};
+
+
+      fun rev_sg_directed_to_bound($y: person) -> { person }:
+      match
+      $x isa person; $y isa person;
+      { (from: $x, to: $y) isa flat; } or
+      {
+        (from: $x, to: $x1) isa up;
+        $x1 in rev_sg_directed_from_bound($y1);
+        (from: $y1, to: $y) isa down;
+      };
+      return {$x};
       """
     Given transaction commits
 
@@ -996,6 +1020,62 @@ Feature: Recursion Resolution
     Given get answers of typeql read query
       """
       match $x, $y in rev_sg_pairs();
+      """
+    Then answer size is: 11
+    Then verify answer set is equivalent for query
+      """
+      match
+        $x has name $nameX;
+        $y has name $nameY;
+        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
+        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
+        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
+        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
+        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
+        {$nameX == 'f';$nameY == 'k';};
+      select $x, $y;
+      """
+
+    Given get answers of typeql read query
+      """
+      match
+        $y in rev_sg_directed_from_bound($x);
+        $x has name 'a';
+      select $y;
+      """
+    Then answer size is: 3
+    Then verify answer set is equivalent for query
+      """
+      match
+        $y isa person, has name $name;
+        {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
+      select $y;
+      """
+    Given get answers of typeql read query
+      """
+      match
+      $x isa person;
+      $y in rev_sg_directed_from_bound($x);
+      """
+    Then answer size is: 11
+    Then verify answer set is equivalent for query
+      """
+      match
+        $x has name $nameX;
+        $y has name $nameY;
+        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
+        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
+        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
+        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
+        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
+        {$nameX == 'f';$nameY == 'k';};
+      select $x, $y;
+      """
+    Given get answers of typeql read query
+      """
+      match
+      $y isa person;
+      $x in rev_sg_directed_to_bound($y);
       """
     Then answer size is: 11
     Then verify answer set is equivalent for query
