@@ -1120,6 +1120,8 @@ Feature: Recursion Resolution
       relation P, relates from, relates to;
       attribute index, value string;
 
+      # --- pairs ---
+
       fun q1_pairs() -> { entity2, entity2 }:
         match
          $x isa entity2; $y isa entity2;
@@ -1146,6 +1148,35 @@ Feature: Recursion Resolution
       match
         $x, $y in q1_pairs();
       return { $x, $y };
+
+      # --- directed ---
+
+      fun q1_directed($x: entity2) -> { entity2 }:
+        match
+         $x isa entity2; $y isa entity2;
+         { (from: $x, to: $y) isa R1; } or
+         {
+            (from: $x, to: $z) isa R1;
+            $y1 in q1_directed($z);
+            $y is $y1;
+         };
+        return { $y };
+
+      fun q2_directed($x: entity2) -> { entity2 }:
+      match
+        $x isa entity2; $y isa entity2;
+        { (from: $x, to: $y) isa R2; }
+        or {
+            (from: $x, to: $z) isa R2;
+            $y1 in q2_directed($z);
+            $y is $y1;
+        };
+        return { $y };
+
+      fun p_directed($x: entity2) -> { entity2 }:
+      match
+        $y in q1_directed($x);
+      return { $y };
       """
     Given transaction commits
 
@@ -1255,7 +1286,19 @@ Feature: Recursion Resolution
       """
       match $y isa $t; { $t type a-entity; } or { $t type end; }; select $y;
       """
+    Given get answers of typeql read query
+      """
+      match
+        $y in q1_directed($x);
+        $x has index 'a0';
+      select $y;
+      """
+    Then answer size is: 5
 
+    Then verify answer set is equivalent for query
+      """
+      match $y isa $t; { $t type a-entity; } or { $t type end; }; select $y;
+      """
 
   Scenario: tail recursion test
 
