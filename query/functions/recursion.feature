@@ -1334,6 +1334,16 @@ Feature: Recursion Resolution
           $z1, $y1 in p_pairs();
         };
       return { $x, $y };
+
+      fun p_directed($x: entity2) -> {entity2}:
+      match
+        $y in identity($y1);
+        { (from: $x, to: $y1) isa Q; } or
+        {
+          (from: $x, to: $z) isa Q;
+          $y1 in p_directed($z);
+        };
+      return { $y };
       """
     Given transaction commits
 
@@ -1504,6 +1514,19 @@ Feature: Recursion Resolution
       match $y isa b-entity;
       """
 
+    Given get answers of typeql read query
+      """
+      match
+        $y in p_directed($x);
+        $x has index 'a0';
+      select $y;
+      """
+    Then answer size is: 60
+    Then verify answer set is equivalent for query
+      """
+      match $y isa b-entity;
+      """
+
 
   Scenario: linear transitivity matrix test
 
@@ -1522,6 +1545,7 @@ Feature: Recursion Resolution
 
       attribute index, value string;
 
+      # --- pairs ---
       fun p_pairs() -> { entity2, entity2 }:
       match
       $x isa entity2; $y isa entity2;
@@ -1537,6 +1561,23 @@ Feature: Recursion Resolution
       match
         $x, $y in p_pairs();
       return { $x, $y };
+
+      # --- directed ---
+      fun p_directed($x: entity2) -> {entity2 }:
+      match
+      $x isa entity2; $y isa entity2;
+      { (from: $x, to: $y) isa Q; } or
+      {
+        (from: $x, to: $z) isa Q;
+        $y1 in p_directed($z);
+        $y is $y1;
+      };
+      return { $y };
+
+      fun s_directed($x: entity2) -> { entity2 }:
+      match
+        $y in p_directed($x);
+      return { $y };
       """
     Given transaction commits
 
@@ -1638,6 +1679,18 @@ Feature: Recursion Resolution
       """
       match
         $x, $y in p_pairs();
+        $x has index 'a';
+      select $y;
+      """
+    Then answer size is: 25
+    Then verify answer set is equivalent for query
+      """
+      match $y isa a-entity;
+      """
+    Given get answers of typeql read query
+      """
+      match
+        $y in p_directed($x);
         $x has index 'a';
       select $y;
       """
