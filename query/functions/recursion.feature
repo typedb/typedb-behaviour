@@ -2,6 +2,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+# TODO: All tests with directed can be changed to a "Verify answer set is equivalent for" test.
+
 #noinspection CucumberUndefinedStep
 Feature: Recursion Resolution
 
@@ -119,7 +121,7 @@ Feature: Recursion Resolution
     Then answer size is: 1
 
 
-  Scenario: ancestor test in pairs
+  Scenario: ancestor test
   from Bancilhon - An Amateur's Introduction to Recursive Query Processing Strategies p. 25
 
     Given connection open schema transaction for database: typedb
@@ -256,13 +258,29 @@ Feature: Recursion Resolution
       fun ancestor_friendship_pairs() -> { person, person }:
       match
         $x isa person; $y isa person;
-        { (friend: $x, friend: $y) isa friendship; not { $x is $y; }; } or
+        {
+         (friend: $x, friend: $y) isa friendship;
+         not { $x is $y; }; # TODO: 3.0 does not de-duplicate links yet
+          } or
         {
           (parent: $x1, child: $z) isa parentship;
           $z, $y1 in ancestor_friendship_pairs();
           $y is $y1; $x is $x1;
         };
         return { $x, $y };
+
+      fun ancestor_friendship_directed($y: person) -> { person }:
+      match
+        $x isa person; $y isa person;
+        {
+         (friend: $x, friend: $y) isa friendship;
+         $x has name $xn; $y has name $yn; $xn != $yn; # TODO: 3.0 does not de-duplicate symmetric links yet
+          } or
+        {
+          (parent: $x, child: $z) isa parentship;
+          $z in ancestor_friendship_directed($y);
+        };
+        return { $x };
       """
     Given transaction commits
 
@@ -306,6 +324,21 @@ Feature: Recursion Resolution
       """
       match
         $X, $Y in ancestor_friendship_pairs();
+        $Y has name 'd';
+      select $X;
+      """
+    Then answer size is: 3
+    Then verify answer set is equivalent for query
+      """
+      match
+        $X has name $name;
+        {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
+      select $X;
+      """
+    Given get answers of typeql read query
+      """
+      match
+        $X in ancestor_friendship_directed($Y);
         $Y has name 'd';
       select $X;
       """
@@ -522,6 +555,8 @@ Feature: Recursion Resolution
 
       attribute index, value string;
 
+    # --- pairs ---
+
       fun reachable_pairs() -> {traversable, traversable}:
       match
         $x isa traversable; $y isa traversable;
@@ -548,6 +583,34 @@ Feature: Recursion Resolution
              $x is $x1; $y is $y1;
           };
         return { $x, $y };
+
+      # --- directed ---
+      fun reachable_from($x: traversable) -> {traversable}:
+      match
+        $x isa traversable; $y isa traversable;
+        { (from: $x, to: $y) isa link; } or
+        {
+          (from: $x, to: $z) isa link;
+          $y1 in reachable_from($z);
+          $y1 is $y;
+        };
+      return { $y };
+
+      fun indirect_link_from($x: traversable) -> { traversable }:
+        match
+          $y in reachable_from($x);
+          not {(from: $x, to: $y) isa link;};
+        return { $y };
+
+      fun unreachable_from($x: traversable) -> {traversable}:
+        match
+          $x isa vertex;
+          $y isa vertex;
+          not {
+            $y1 in reachable_from($x);
+            $y is $y1;
+          };
+        return { $y };
       """
     Given transaction commits
 
@@ -588,6 +651,27 @@ Feature: Recursion Resolution
         {$indX == 'aa';$indY == 'dd';};
       select $x, $y;
       """
+    Given get answers of typeql read query
+        """
+        match
+        $x isa traversable;
+        $y in reachable_from($x);
+        """
+    Then answer size is: 7
+    Then verify answer set is equivalent for query
+      """
+      match
+        $x has index $indX;
+        $y has index $indY;
+        {$indX == 'aa';$indY == 'bb';} or
+        {$indX == 'bb';$indY == 'cc';} or
+        {$indX == 'cc';$indY == 'cc';} or
+        {$indX == 'cc';$indY == 'dd';} or
+        {$indX == 'aa';$indY == 'cc';} or
+        {$indX == 'bb';$indY == 'dd';} or
+        {$indX == 'aa';$indY == 'dd';};
+      select $x, $y;
+      """
 
   Scenario: given an undirected graph, all vertices connected to a given vertex can be found
 
@@ -609,6 +693,7 @@ Feature: Recursion Resolution
       relation link, relates coordinate @card(1..2);
       attribute index, value string;
 
+      # --- pairs ---
       fun reachable_pairs() -> { vertex, vertex }:
       match
         $x isa vertex; $y isa vertex;
@@ -619,6 +704,19 @@ Feature: Recursion Resolution
           $y is $y1;
         };
       return { $x, $y };
+
+      # --- from ---
+      fun reachable_from($x: vertex) -> { vertex }:
+      match
+        $x isa vertex; $y isa vertex;
+        { ($x, $y) isa link; } or
+        {
+          ($x, $z) isa link;
+          $y1 in reachable_from($z);
+          $y is $y1;
+        };
+      return { $y };
+
 
       """
     Given transaction commits
@@ -657,6 +755,22 @@ Feature: Recursion Resolution
       select $y;
       """
 
+    Given get answers of typeql read query
+      """
+      match
+        $y in reachable_from($x);
+        $x has index 'a';
+      select $y;
+      """
+    Then answer size is: 4
+    Then verify answer set is equivalent for query
+      """
+      match
+        $y has index $indY;
+        {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
+      select $y;
+      """
+
 
   # TODO: re-enable all steps when resolvable (currently takes too long) (#75)
   Scenario: same-generation - Cao test
@@ -681,6 +795,7 @@ Feature: Recursion Resolution
 
       attribute name, value string;
 
+      # --- pairs ---
       fun same_gen_pairs() -> { person, person }:
       match
         $x isa person; $y isa person;
@@ -701,6 +816,28 @@ Feature: Recursion Resolution
           (parent: $z, child: $y) isa parentship;
         };
       return {$x, $y};
+
+      # --- directed ---
+      fun same_gen_directed($x: person) -> { person }:
+      match
+        $x isa person; $y isa person;
+        { $y1 in sibling_directed($x); $y is $y1; } or
+        {
+          (parent: $x, child: $u) isa parentship;
+          $v in same_gen_directed($u);
+          (parent: $y, child: $v) isa parentship;
+        };
+      return { $y };
+
+      fun sibling_directed($x: person) -> { person }:
+      match
+        $x isa person; $y isa person;
+        { (A: $x, B: $y) isa Sibling; } or
+        {
+          (parent: $z, child: $x) isa parentship;
+          (parent: $z, child: $y) isa parentship;
+        };
+      return { $y };
       """
     Given transaction commits
 
@@ -726,6 +863,21 @@ Feature: Recursion Resolution
       match
         $x has name 'ann'; $y isa person;
         $x, $y in same_gen_pairs();
+      select $y;
+      """
+    Then answer size is: 3
+    Then verify answer set is equivalent for query
+      """
+      match
+        $y has name $name;
+        {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
+      select $y;
+      """
+    Given get answers of typeql read query
+      """
+      match
+        $x has name 'ann'; $y isa person;
+        $y in same_gen_directed($x);
       select $y;
       """
     Then answer size is: 3
