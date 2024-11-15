@@ -16,18 +16,18 @@ load("@typedb_dependencies//builder/bazel:deps.bzl", "bazel_toolchain")
 bazel_toolchain()
 
 # Load //builder/java
-load("@typedb_dependencies//builder/java:deps.bzl", java_deps = "deps")
-java_deps()
+load("@typedb_dependencies//builder/java:deps.bzl", "rules_jvm_external")
+rules_jvm_external()
 
 # Load //builder/python
-load("@typedb_dependencies//builder/python:deps.bzl", python_deps = "deps")
-python_deps()
+load("@typedb_dependencies//builder/python:deps.bzl", "rules_python")
+rules_python()
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
 py_repositories()
 
 # Load //builder/kotlin
-load("@typedb_dependencies//builder/kotlin:deps.bzl", kotlin_deps = "deps")
-kotlin_deps()
+load("@typedb_dependencies//builder/kotlin:deps.bzl", "io_bazel_rules_kotlin")
+io_bazel_rules_kotlin()
 load("@io_bazel_rules_kotlin//kotlin:repositories.bzl", "kotlin_repositories")
 kotlin_repositories()
 load("@io_bazel_rules_kotlin//kotlin:core.bzl", "kt_register_toolchains")
