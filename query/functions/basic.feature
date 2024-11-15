@@ -128,3 +128,27 @@ Feature: Relation Inference Resolution
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size is: 10
 
+
+  Scenario: A function can return a value derived from an expression
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun add($x: long, $y: long) -> { long }:
+      match
+        $z = $x + $y;
+      return { $z };
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $z in add(2, 3);
+      """
+    # the (n-1)th triangle number, where n is the number of replies to the first post
+    Then uniquely identify answer concepts
+      | z            |
+      | value:long:5 |
+
+
