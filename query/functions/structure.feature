@@ -17,26 +17,12 @@ Feature: Tests for various shapes of function bodies
       """
       define
       entity person
-        plays friendship:friend,
-        plays employment:employee,
         owns name @card(0..),
         owns age @card(0..),
-        owns ref @key;
-      entity company
-        plays employment:employer,
-        owns name @card(0..),
-        owns ref @key;
-      relation friendship
-        relates friend @card(0..),
-        owns ref @key;
-      relation employment
-        relates employee @card(0..),
-        relates employer @card(0..),
         owns ref @key;
       attribute name value string;
       attribute age @independent, value long;
       attribute ref value long;
-      attribute email value string;
       """
     Given transaction commits
 
@@ -120,10 +106,10 @@ Feature: Tests for various shapes of function bodies
     """
     match $age in second_and_third_largest_ages();
     """
-    Then uniquely identify answer concepts
-      | age           |
-      | value:long:10 |
-      | value:long:11 |
+    Then order of answer concepts is
+      | age         |
+      | attr:age:11 |
+      | attr:age:10 |
 
 
   Scenario: Reduce can be used in function bodies
