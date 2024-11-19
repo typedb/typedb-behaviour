@@ -13,7 +13,6 @@ Feature: Relation Inference Resolution
     Given connection create database: typedb
 
 
-
   Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
     Given connection open schema transaction for database: typedb
     Given typeql schema query

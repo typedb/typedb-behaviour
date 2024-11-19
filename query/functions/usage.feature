@@ -6,11 +6,43 @@
 Feature: Function call positions behaviour
 
   Background: Set up database
-    Given TODO
+    Given typedb starts
+    Given connection opens with default authentication
+    Given connection is open: true
+    Given connection has 0 databases
+    Given connection create database: typedb
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    entity person, owns name;
+    attribute name, value string;
+    """
+    Given transaction commits
 
 
   Scenario: Functions can be called in expressions.
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $six = five() + 1;
+    """
+    Then uniquely identify answer concepts
+      | six          |
+      | value:long:6 |
+    Given transaction closes
 
 
   Scenario: Functions can be called in comparators.

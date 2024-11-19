@@ -217,4 +217,3 @@ Feature: Effects a function signature have on the caller
       $name isa breed;
     """
 
-
