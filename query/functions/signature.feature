@@ -27,7 +27,7 @@ Feature: Effects a function signature have on the caller
 
   Scenario: Functions whose return do not match the signature error
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
     fun i_return_a_stream_of_two() -> { person, person }:
@@ -36,7 +36,7 @@ Feature: Effects a function signature have on the caller
     return { $x };
     """
 
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
     fun i_return_a_stream_of_one() -> { person }:
@@ -45,7 +45,7 @@ Feature: Effects a function signature have on the caller
     return { $x, $y };
     """
 
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
     fun i_return_a_single_person() -> person:
@@ -54,7 +54,7 @@ Feature: Effects a function signature have on the caller
     return { $x };
     """
 
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
     fun i_return_a_stream_of_persons() -> { person }:
@@ -63,7 +63,7 @@ Feature: Effects a function signature have on the caller
     return first $x;
     """
 
-    Then typeql schema query; fails
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
     fun i_return_a_string() -> string:
@@ -76,17 +76,7 @@ Feature: Effects a function signature have on the caller
 
   Scenario: Functions which do not return the specified type fail type-inference
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
-    """
-    define
-    fun name_of_cat($cat: cat) -> { string }:
-    match
-      $name isa name;
-      $cat has $name;
-    return { $name };
-    """
-
-    Then typeql schema query; fails
+    When typeql schema query
     """
     define
     fun cats_of_name($name: name) -> { cat }:
@@ -95,12 +85,24 @@ Feature: Effects a function signature have on the caller
       $cat isa person, has $name;
     return { $cat };
     """
-    Given transaction closes
+    Then transaction commits; fails with a message containing: "The types inferred for the return statement did not those declared in the signature"
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun name_of_cat($cat: cat) -> { string }:
+    match
+      $name isa name;
+      $cat has $name;
+    return { $name };
+    """
+    Then transaction commits; fails with a message containing: "The types inferred for the return statement did not those declared in the signature"
 
 
   Scenario: Functions arguments which are inconsistent with the body fail type-inference
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
+    When typeql schema query; fails
     """
     define
     fun cats_of_name($name: string) -> { cat }:
@@ -109,8 +111,10 @@ Feature: Effects a function signature have on the caller
       $cat isa cat, has $name;
     return { $cat };
     """
+    Given transaction closes
 
-    Then typeql schema query; fails
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
     """
     define
     fun name_of_cat($cat: cat) -> { name }:
@@ -118,7 +122,7 @@ Feature: Effects a function signature have on the caller
       $cat isa person, has name $name;
     return { $name };
     """
-    Given transaction closes
+    Then transaction commits; fails with a message containing: "Type-inference derived an empty-set for some variable"
 
 
   Scenario: Function calls which do not match the arguments in the signature error
@@ -140,7 +144,6 @@ Feature: Effects a function signature have on the caller
       $name = "Socks";
       $cat in cats_of_name($name);
     """
-    Given connection open read transaction for database: typedb
     Then typeql read query; fails
     """
     match
@@ -151,13 +154,13 @@ Feature: Effects a function signature have on the caller
 
   Scenario: If the assignment of the return of the function calls do not match the signature, it is an error
     Given connection open schema transaction for database: typedb
-    Given typeql schema query; fails
+    Given typeql schema query
     """
     define
 
     fun name_string_of_cat($cat: cat) -> { string }:
     match
-      $name isa name;
+      $name_attr isa name;
       $cat isa cat, has $name_attr;
       $name = $name_attr;
     return { $name };
@@ -196,7 +199,7 @@ Feature: Effects a function signature have on the caller
 
   Scenario: Function calls with assigned variable types inconsistent with the signature fail type-inference
     Given connection open schema transaction for database: typedb
-    Given typeql schema query; fails
+    Given typeql schema query
     """
     define
     fun name_attribute_of_cat($cat: cat) -> { name }:
