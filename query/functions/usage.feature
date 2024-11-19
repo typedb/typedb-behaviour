@@ -46,19 +46,88 @@ Feature: Function call positions behaviour
 
 
   Scenario: Functions can be called in comparators.
-    Given TODO: On the left, right, or both-sides.
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
 
-
-  Scenario: Functions can be called in `is` statements.
-    Given TODO
+    fun six() -> long :
+    match
+      $six = 6;
+    return first $six;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      five() < 6;
+    """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """
+    match
+      5 < six();
+    """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """
+    match
+      five() < six();
+    """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """
+    match
+      five() > six();
+    """
+    Then answer size is: 0
 
 
   Scenario: repeated function calls within a query trigger execution from all pattern occurrences
-    Given TODO: Something non-recursive
-
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $ten = five() + five();
+    """
+    Then uniquely identify answer concepts
+      | ten           |
+      | value:long:10 |
+    Given transaction closes
 
   Scenario: The same variable cannot be 'assigned' to twice, either by the same or different functions.
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails
+    """
+    match
+      $five = five();
+      $five = five();
+    """
 
 
   Scenario: Functions are stratified wrt negation
