@@ -1741,15 +1741,15 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as value; fails with a message containing: "Invalid concept conversion"
-    Then answer get row(0) get attribute(a) get boolean; fails with a message containing: "Could not retrieve a `boolean` value"
-    Then answer get row(0) get attribute(a) get double; fails with a message containing: "Could not retrieve a `double` value"
-    Then answer get row(0) get attribute(a) get decimal; fails with a message containing: "Could not retrieve a `decimal` value"
-    Then answer get row(0) get attribute(a) get string; fails with a message containing: "Could not retrieve a `string` value"
-    Then answer get row(0) get attribute(a) get date; fails with a message containing: "Could not retrieve a `date` value"
-    Then answer get row(0) get attribute(a) get datetime; fails with a message containing: "Could not retrieve a `datetime` value"
-    Then answer get row(0) get attribute(a) get datetime-tz; fails with a message containing: "Could not retrieve a `datetime-tz` value"
-    Then answer get row(0) get attribute(a) get duration; fails with a message containing: "Could not retrieve a `duration` value"
-    Then answer get row(0) get attribute(a) get struct; fails with a message containing: "Could not retrieve a `struct` value"
+    Then answer get row(0) get attribute(a) get boolean; fails with a message containing: "Could not retrieve a 'boolean' value"
+    Then answer get row(0) get attribute(a) get double; fails with a message containing: "Could not retrieve a 'double' value"
+    Then answer get row(0) get attribute(a) get decimal; fails with a message containing: "Could not retrieve a 'decimal' value"
+    Then answer get row(0) get attribute(a) get string; fails with a message containing: "Could not retrieve a 'string' value"
+    Then answer get row(0) get attribute(a) get date; fails with a message containing: "Could not retrieve a 'date' value"
+    Then answer get row(0) get attribute(a) get datetime; fails with a message containing: "Could not retrieve a 'datetime' value"
+    Then answer get row(0) get attribute(a) get datetime-tz; fails with a message containing: "Could not retrieve a 'datetime-tz' value"
+    Then answer get row(0) get attribute(a) get duration; fails with a message containing: "Could not retrieve a 'duration' value"
+    Then answer get row(0) get attribute(a) get struct; fails with a message containing: "Could not retrieve a 'struct' value"
 
     When get answers of typeql read query
       """
@@ -1758,7 +1758,7 @@ Feature: TypeDB Driver
     Then answer unwraps as ok; fails
     Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
-    Then answer get row(0) get attribute(n) get long; fails with a message containing: "Could not retrieve a `long` value"
+    Then answer get row(0) get attribute(n) get long; fails with a message containing: "Could not retrieve a 'long' value"
 
 
   Scenario: Driver processes datetime values in different user time-zones identically
