@@ -764,10 +764,6 @@ Feature: TypeDB Driver
     """
 
 
-  # TODO: Implement value groups checks
-  #Scenario: Driver processes concept row query answers with value groups correctly
-
-
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -920,10 +916,27 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is entity: false
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
+    Then answer get row(0) get variable(p) is struct: false
+    Then answer get row(0) get variable(p) is boolean: false
 
     Then answer get row(0) get variable(p) as entity type
+    Then answer get row(0) get variable(p) try get label: person
     Then answer get row(0) get variable(p) get label: person
+    Then answer get row(0) get variable(p) try get iid is none
+    Then answer get row(0) get variable(p) try get value type is none
+    Then answer get row(0) get variable(p) try get value is none
+    Then answer get row(0) get variable(p) try get boolean is none
+    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get double is none
+    Then answer get row(0) get variable(p) try get decimal is none
+    Then answer get row(0) get variable(p) try get string is none
+    Then answer get row(0) get variable(p) try get date is none
+    Then answer get row(0) get variable(p) try get datetime is none
+    Then answer get row(0) get variable(p) try get datetime-tz is none
+    Then answer get row(0) get variable(p) try get duration is none
+    Then answer get row(0) get variable(p) try get struct is none
     Then answer get row(0) get type(p) get label: person
+    Then answer get row(0) get entity type(p) try get label: person
     Then answer get row(0) get entity type(p) get label: person
 
 
@@ -951,9 +964,25 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is entity: false
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
+    Then answer get row(0) get variable(p) is struct: false
+    Then answer get row(0) get variable(p) is long: false
 
     Then answer get row(0) get variable(p) as relation type
+    Then answer get row(0) get variable(p) try get label: parentship
     Then answer get row(0) get variable(p) get label: parentship
+    Then answer get row(0) get variable(p) try get iid is none
+    Then answer get row(0) get variable(p) try get value type is none
+    Then answer get row(0) get variable(p) try get value is none
+    Then answer get row(0) get variable(p) try get boolean is none
+    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get double is none
+    Then answer get row(0) get variable(p) try get decimal is none
+    Then answer get row(0) get variable(p) try get string is none
+    Then answer get row(0) get variable(p) try get date is none
+    Then answer get row(0) get variable(p) try get datetime is none
+    Then answer get row(0) get variable(p) try get datetime-tz is none
+    Then answer get row(0) get variable(p) try get duration is none
+    Then answer get row(0) get variable(p) try get struct is none
     Then answer get row(0) get type(p) get label: parentship
     Then answer get row(0) get relation type(p) get label: parentship
 
@@ -982,9 +1011,25 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is entity: false
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
+    Then answer get row(0) get variable(p) is struct: false
+    Then answer get row(0) get variable(p) is date: false
 
     Then answer get row(0) get variable(p) as role type
+    Then answer get row(0) get variable(p) try get label: parentship:parent
     Then answer get row(0) get variable(p) get label: parentship:parent
+    Then answer get row(0) get variable(p) try get iid is none
+    Then answer get row(0) get variable(p) try get value type is none
+    Then answer get row(0) get variable(p) try get value is none
+    Then answer get row(0) get variable(p) try get boolean is none
+    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get double is none
+    Then answer get row(0) get variable(p) try get decimal is none
+    Then answer get row(0) get variable(p) try get string is none
+    Then answer get row(0) get variable(p) try get date is none
+    Then answer get row(0) get variable(p) try get datetime is none
+    Then answer get row(0) get variable(p) try get datetime-tz is none
+    Then answer get row(0) get variable(p) try get duration is none
+    Then answer get row(0) get variable(p) try get struct is none
     Then answer get row(0) get type(p) get label: parentship:parent
     Then answer get row(0) get role type(p) get label: parentship:parent
 
@@ -1013,14 +1058,27 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) is entity: false
     Then answer get row(0) get variable(a) is relation: false
     Then answer get row(0) get variable(a) is attribute: false
+    Then answer get row(0) get variable(a) is boolean: false
+    Then answer get row(0) get variable(a) is datetime-tz: false
+    Then answer get row(0) get variable(a) try get value type is none
+    Then answer get row(0) get variable(a) try get value is none
+    Then answer get row(0) get variable(a) try get boolean is none
+    Then answer get row(0) get variable(a) try get long is none
+    Then answer get row(0) get variable(a) try get double is none
+    Then answer get row(0) get variable(a) try get decimal is none
+    Then answer get row(0) get variable(a) try get string is none
+    Then answer get row(0) get variable(a) try get date is none
+    Then answer get row(0) get variable(a) try get datetime is none
+    Then answer get row(0) get variable(a) try get datetime-tz is none
+    Then answer get row(0) get variable(a) try get duration is none
+    Then answer get row(0) get variable(a) try get struct is none
 
     Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get variable(a) get label: untyped
     Then answer get row(0) get type(a) get label: untyped
     Then answer get row(0) get attribute type(a) get label: untyped
 
-    Then answer get row(0) get attribute type(a) get value type: none
-    Then answer get row(0) get attribute type(a) is untyped: true
+    Then answer get row(0) get attribute type(a) try get value type is none
     Then answer get row(0) get attribute type(a) is boolean: false
     Then answer get row(0) get attribute type(a) is long: false
     Then answer get row(0) get attribute type(a) is double: false
@@ -1060,11 +1118,21 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get variable(a) as attribute type
     Then answer get row(0) get variable(a) get label: typed
+    Then answer get row(0) get variable(a) try get value is none
+    Then answer get row(0) get variable(a) try get boolean is none
+    Then answer get row(0) get variable(a) try get long is none
+    Then answer get row(0) get variable(a) try get double is none
+    Then answer get row(0) get variable(a) try get decimal is none
+    Then answer get row(0) get variable(a) try get string is none
+    Then answer get row(0) get variable(a) try get date is none
+    Then answer get row(0) get variable(a) try get datetime is none
+    Then answer get row(0) get variable(a) try get datetime-tz is none
+    Then answer get row(0) get variable(a) try get duration is none
+    Then answer get row(0) get variable(a) try get struct is none
     Then answer get row(0) get type(a) get label: typed
     Then answer get row(0) get attribute type(a) get label: typed
 
-    Then answer get row(0) get attribute type(a) get value type: <value-type>
-    Then answer get row(0) get attribute type(a) is untyped: false
+    Then answer get row(0) get attribute type(a) try get value type: <value-type>
     Then answer get row(0) get attribute type(a) is boolean: <is-boolean>
     Then answer get row(0) get attribute type(a) is long: <is-long>
     Then answer get row(0) get attribute type(a) is double: <is-double>
@@ -1133,8 +1201,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get type(a) get label: film
     Then answer get row(0) get attribute type(a) get label: film
 
-    Then answer get row(0) get attribute type(a) get value type: film-properties
-    Then answer get row(0) get attribute type(a) is untyped: false
+    Then answer get row(0) get attribute type(a) try get value type: film-properties
     Then answer get row(0) get attribute type(a) is boolean: false
     Then answer get row(0) get attribute type(a) is long: false
     Then answer get row(0) get attribute type(a) is double: false
@@ -1177,11 +1244,24 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is entity: true
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
+    Then answer get row(0) get variable(p) is struct: false
+    Then answer get row(0) get variable(p) try get value is none
+    Then answer get row(0) get variable(p) try get boolean is none
+    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get double is none
+    Then answer get row(0) get variable(p) try get decimal is none
+    Then answer get row(0) get variable(p) try get string is none
+    Then answer get row(0) get variable(p) try get date is none
+    Then answer get row(0) get variable(p) try get datetime is none
+    Then answer get row(0) get variable(p) try get datetime-tz is none
+    Then answer get row(0) get variable(p) try get duration is none
+    Then answer get row(0) get variable(p) try get struct is none
 
     Then answer get row(0) get variable(p) as entity
     Then answer get row(0) get variable(p) get label: person
     Then answer get row(0) get instance(p) get label: person
     Then answer get row(0) get instance(p) get type get label: person
+    Then answer get row(0) get entity(p) try get iid is not none
     Then answer get row(0) get entity(p) contains iid
     Then answer get row(0) get entity(p) get label: person
     Then answer get row(0) get entity(p) get label: person
@@ -1223,11 +1303,24 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is entity: false
     Then answer get row(0) get variable(p) is relation: true
     Then answer get row(0) get variable(p) is attribute: false
+    Then answer get row(0) get variable(p) is boolean: false
+    Then answer get row(0) get variable(p) try get value is none
+    Then answer get row(0) get variable(p) try get boolean is none
+    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get double is none
+    Then answer get row(0) get variable(p) try get decimal is none
+    Then answer get row(0) get variable(p) try get string is none
+    Then answer get row(0) get variable(p) try get date is none
+    Then answer get row(0) get variable(p) try get datetime is none
+    Then answer get row(0) get variable(p) try get datetime-tz is none
+    Then answer get row(0) get variable(p) try get duration is none
+    Then answer get row(0) get variable(p) try get struct is none
 
     Then answer get row(0) get variable(p) as relation
     Then answer get row(0) get variable(p) get label: parentship
     Then answer get row(0) get instance(p) get label: parentship
     Then answer get row(0) get instance(p) get type get label: parentship
+    Then answer get row(0) get relation(p) try get iid is not none
     Then answer get row(0) get relation(p) contains iid
     Then answer get row(0) get relation(p) get label: parentship
     Then answer get row(0) get relation(p) get type get label: parentship
@@ -1282,7 +1375,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get type is role type: false
 
     Then answer get row(0) get attribute(a) get type get value type: <value-type>
-    Then answer get row(0) get attribute(a) as <value-type>
+    Then answer get row(0) get attribute(a) get <value-type>
     Then answer get row(0) get attribute(a) is boolean: <is-boolean>
     Then answer get row(0) get attribute(a) is long: <is-long>
     Then answer get row(0) get attribute(a) is double: <is-double>
@@ -1293,10 +1386,14 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) is datetime-tz: <is-datetime-tz>
     Then answer get row(0) get attribute(a) is duration: <is-duration>
     Then answer get row(0) get attribute(a) is struct: false
+    Then answer get row(0) get attribute(a) try get value is: <value>
+    Then answer get row(0) get attribute(a) try get <value-type> is: <value>
+    Then answer get row(0) get attribute(a) try get value is not: <not-value>
+    Then answer get row(0) get attribute(a) try get <value-type> is not: <not-value>
     Then answer get row(0) get attribute(a) get value is: <value>
-    Then answer get row(0) get attribute(a) as <value-type> is: <value>
+    Then answer get row(0) get attribute(a) get <value-type> is: <value>
     Then answer get row(0) get attribute(a) get value is not: <not-value>
-    Then answer get row(0) get attribute(a) as <value-type> is not: <not-value>
+    Then answer get row(0) get attribute(a) get <value-type> is not: <not-value>
     Examples:
       | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
       | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
@@ -1404,83 +1501,92 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get attribute(f) is datetime-tz: false
 #    Then answer get row(0) get attribute(f) is duration: false
 #    Then answer get row(0) get attribute(f) is struct: true
+#    Then answer get row(0) get attribute(f) try get value is: <value>
+#    Then answer get row(0) get attribute(f) try get <value-type> is: <value>
+#    Then answer get row(0) get attribute(f) try get value is not: <value>
+#    Then answer get row(0) get attribute(f) try get <value-type> is not: <not-value>
 #    Then answer get row(0) get attribute(f) get value is: <value>
-#    Then answer get row(0) get attribute(f) as <value-type> is: <value>
+#    Then answer get row(0) get attribute(f) get <value-type> is: <value>
 #    Then answer get row(0) get attribute(f) get value is not: <value>
-#    Then answer get row(0) get attribute(f) as <value-type> is not: <not-value>
+#    Then answer get row(0) get attribute(f) get <value-type> is not: <not-value>
 
 
-  # TODO: Implement value variables
-#  Scenario Outline: Driver processes values of type <value-type> correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define entity person, owns typed; attribute typed, value <value-type>;
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query
-#      """
-#      insert $p isa person, has typed <value>;
-#      """
-#    When get answers of typeql read query
-#      """
-#      match $_ isa person, has typed $v;
-#      $value = $v;
-#      """
-#    Then answer type is: concept rows
-#    Then answer query type is: read
-#    Then answer size is: 1
-#
-#    Then answer get row(0) get variable(value) is type: false
-#    Then answer get row(0) get variable(value) is instance: false
-#    Then answer get row(0) get variable(value) is value: true
-#    Then answer get row(0) get variable(value) is entity type: false
-#    Then answer get row(0) get variable(value) is relation type: false
-#    Then answer get row(0) get variable(value) is attribute type: false
-#    Then answer get row(0) get variable(value) is role type: false
-#    Then answer get row(0) get variable(value) is entity: false
-#    Then answer get row(0) get variable(value) is relation: false
-#    Then answer get row(0) get variable(value) is attribute: false
-#
-#    Then answer get row(0) get variable(value) as value
-#    Then answer get row(0) get variable(value) get label: <value-type>
-#    Then answer get row(0) get value(value) get label: <value-type>
-#    Then answer get row(0) get value(value) get value type: <value-type>
-#    Then answer get row(0) get value(value) is boolean: <is-boolean>
-#    Then answer get row(0) get value(value) is long: <is-long>
-#    Then answer get row(0) get value(value) is double: <is-double>
-#    Then answer get row(0) get value(value) is decimal: <is-decimal>
-#    Then answer get row(0) get value(value) is string: <is-string>
-#    Then answer get row(0) get value(value) is date: <is-date>
-#    Then answer get row(0) get value(value) is datetime: <is-datetime>
-#    Then answer get row(0) get value(value) is datetime-tz: <is-datetime-tz>
-#    Then answer get row(0) get value(value) is duration: <is-duration>
-#    Then answer get row(0) get value(value) is struct: false
-#    Then answer get row(0) get value(value) get is: <value>
-#    Then answer get row(0) get value(value) as <value-type> is: <value>
-#    Then answer get row(0) get value(value) get is not: <not-value>
-#    Then answer get row(0) get value(value) as <value-type> is not: <not-value>
-#    Examples:
-#      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-#      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-#      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-#      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-#      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-#      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-#      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-#      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-#      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-#      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-#      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+  Scenario Outline: Driver processes values of type <value-type> correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person, owns typed; attribute typed, value <value-type>;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has typed <value>;
+      """
+    When get answers of typeql read query
+      """
+      match $_ isa person, has typed $v;
+      $value = $v;
+      """
+    Then answer type is: concept rows
+    Then answer query type is: read
+    Then answer size is: 1
+
+    Then answer get row(0) get variable(value) is type: false
+    Then answer get row(0) get variable(value) is instance: false
+    Then answer get row(0) get variable(value) is value: true
+    Then answer get row(0) get variable(value) is entity type: false
+    Then answer get row(0) get variable(value) is relation type: false
+    Then answer get row(0) get variable(value) is attribute type: false
+    Then answer get row(0) get variable(value) is role type: false
+    Then answer get row(0) get variable(value) is entity: false
+    Then answer get row(0) get variable(value) is relation: false
+    Then answer get row(0) get variable(value) is attribute: false
+    Then answer get row(0) get variable(value) try get iid is none
+
+    Then answer get row(0) get variable(value) as value
+    Then answer get row(0) get variable(value) get label: <value-type>
+    Then answer get row(0) get value(value) get label: <value-type>
+    Then answer get row(0) get value(value) try get value type: <value-type>
+    Then answer get row(0) get value(value) get value type: <value-type>
+    Then answer get row(0) get value(value) is boolean: <is-boolean>
+    Then answer get row(0) get value(value) is long: <is-long>
+    Then answer get row(0) get value(value) is double: <is-double>
+    Then answer get row(0) get value(value) is decimal: <is-decimal>
+    Then answer get row(0) get value(value) is string: <is-string>
+    Then answer get row(0) get value(value) is date: <is-date>
+    Then answer get row(0) get value(value) is datetime: <is-datetime>
+    Then answer get row(0) get value(value) is datetime-tz: <is-datetime-tz>
+    Then answer get row(0) get value(value) is duration: <is-duration>
+    Then answer get row(0) get value(value) is struct: false
+    Then answer get row(0) get value(value) try get value is: <value>
+    Then answer get row(0) get value(value) try get <value-type> is: <value>
+    Then answer get row(0) get value(value) try get value is not: <not-value>
+    Then answer get row(0) get value(value) try get <value-type> is not: <not-value>
+    Then answer get row(0) get value(value) get is: <value>
+    Then answer get row(0) get value(value) get <value-type> is: <value>
+    Then answer get row(0) get value(value) get is not: <not-value>
+    Then answer get row(0) get value(value) get <value-type> is not: <not-value>
+    Examples:
+      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
+      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
+      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1651,15 +1757,15 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as value; fails with a message containing: "Invalid concept conversion"
-    Then answer get row(0) get attribute(a) as boolean; fails with a message containing: "Invalid value casting to 'boolean'"
-    Then answer get row(0) get attribute(a) as double; fails with a message containing: "Invalid value casting to 'double'"
-    Then answer get row(0) get attribute(a) as decimal; fails with a message containing: "Invalid value casting to 'decimal'"
-    Then answer get row(0) get attribute(a) as string; fails with a message containing: "Invalid value casting to 'string'"
-    Then answer get row(0) get attribute(a) as date; fails with a message containing: "Invalid value casting to 'date'"
-    Then answer get row(0) get attribute(a) as datetime; fails with a message containing: "Invalid value casting to 'datetime'"
-    Then answer get row(0) get attribute(a) as datetime-tz; fails with a message containing: "Invalid value casting to 'datetime-tz'"
-    Then answer get row(0) get attribute(a) as duration; fails with a message containing: "Invalid value casting to 'duration'"
-    Then answer get row(0) get attribute(a) as struct; fails with a message containing: "Invalid value casting to 'struct'"
+    Then answer get row(0) get attribute(a) get boolean; fails with a message containing: "Could not retrieve a 'boolean' value"
+    Then answer get row(0) get attribute(a) get double; fails with a message containing: "Could not retrieve a 'double' value"
+    Then answer get row(0) get attribute(a) get decimal; fails with a message containing: "Could not retrieve a 'decimal' value"
+    Then answer get row(0) get attribute(a) get string; fails with a message containing: "Could not retrieve a 'string' value"
+    Then answer get row(0) get attribute(a) get date; fails with a message containing: "Could not retrieve a 'date' value"
+    Then answer get row(0) get attribute(a) get datetime; fails with a message containing: "Could not retrieve a 'datetime' value"
+    Then answer get row(0) get attribute(a) get datetime-tz; fails with a message containing: "Could not retrieve a 'datetime-tz' value"
+    Then answer get row(0) get attribute(a) get duration; fails with a message containing: "Could not retrieve a 'duration' value"
+    Then answer get row(0) get attribute(a) get struct; fails with a message containing: "Could not retrieve a 'struct' value"
 
     When get answers of typeql read query
       """
@@ -1668,7 +1774,7 @@ Feature: TypeDB Driver
     Then answer unwraps as ok; fails
     Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
-    Then answer get row(0) get attribute(n) as long; fails with a message containing: "Invalid value casting to 'long'"
+    Then answer get row(0) get attribute(n) get long; fails with a message containing: "Could not retrieve a 'long' value"
 
 
   Scenario: Driver processes datetime values in different user time-zones identically
