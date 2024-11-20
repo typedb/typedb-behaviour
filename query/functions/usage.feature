@@ -131,10 +131,74 @@ Feature: Function call positions behaviour
 
 
   Scenario: Functions are stratified wrt negation
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    attribute nickname, value string;
+    person owns nickname;
+    entity nickname-mapping, owns name, owns nickname;
+
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      $dummy = $nickname;
+      { $p has nickname $nickname; } or
+      { $nickname in default_nickname($p); };
+    return { $nickname };
+
+    fun default_nickname($p: person) -> { nickname }:
+    match
+      not { $ignored in nickname_of($p); }; # $p has no nickname
+      $nickname-mapping isa nickname-mapping;
+      $p has name $name;
+      $nickname-mapping has name $name;
+      $nickname-mapping has nickname $nickname;
+    return { $nickname };
+    """
+    Given transaction commits; fails with a message containing: "StratificationViolation"
+
 
   Scenario: Functions are stratified wrt aggregates
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    relation purchase relates item, relates customer;
+    person plays purchase:customer;
+    attribute price, value double;
+    entity item, plays purchase:item, owns price;
+
+    fun annual_reward($customer: person) -> {double}:
+    match
+      $dummy = $reward;
+      { ($customer, $item) isa purchase; $reward in purchase_reward($item); } or
+      { $reward in special_rewards($customer); };
+    reduce $total_rewards = sum($reward);
+    return { $total_rewards };
+
+    fun purchase_reward($item: item) -> { double }:
+    match
+      $item has price $price;
+      $reward = 1.1 * $price;
+    return { $reward };
+
+    fun special_rewards($customer: person) -> {double}:
+    match
+       $joining_bonus = 1000;
+       $loyalty = loyalty_bonus($customer);
+       $total = $joining + $loyalty;
+    return { $total };
+
+    fun loyalty_bonus($customer: person) ->  { double }:
+    match
+      $customer has joining-year $year;
+      $years-completed = (2024 - $year);
+      $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
+    return { $loyalty-bonus };
+    """
+    Given transaction commits
+    # Given transaction commits; fails with a message containing: "StratificationViolation"
+
 
   Scenario: A function being undefined must not be referenced by a separate function which is not being undefined.
     Given TODO
