@@ -632,16 +632,15 @@ Feature: TypeDB Driver
     Then answer query type is not: schema
     Then answer query type is not: write
     Then answer size is: 3
-    # TODO: "id" will become scalar in the future, be ready for the server's change!
     Then answer contains document:
     """
-    { "all attributes": { "id": [ 1 ] } }
+    { "all attributes": { "id": 1 } }
     """
     Then answer contains document:
     """
     {
       "all attributes": {
-        "id": [ 2 ],
+        "id": 2,
         "name": [ "Yan" ]
       }
     }
@@ -650,7 +649,7 @@ Feature: TypeDB Driver
     """
     {
         "all attributes": {
-            "id": [ 3 ],
+            "id": 3,
             "name": [
                 "Warrior Princess",
                 "Xena"
@@ -660,13 +659,13 @@ Feature: TypeDB Driver
     """
     Then answer does not contain document:
     """
-    { "all attributes": { "id": [ 2 ] } }
+    { "all attributes": { "id": 2 } }
     """
     Then answer does not contain document:
     """
     {
       "all attributes": {
-        "id": [ 2 ],
+        "id": 2,
         "name": [
             "Warrior Princess",
             "Xena"
