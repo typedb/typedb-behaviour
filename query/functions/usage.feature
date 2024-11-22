@@ -395,7 +395,7 @@ Feature: Function call positions behaviour
     undefine
     fun default_nickname;
     """
-    Then transaction commits; fails with a message containing: "TODO: Currently the server panics"
+    Then transaction commits; fails with a message containing: "Could not resolve function with name 'default_nickname'"
 
 
   Scenario: If a modification of a function causes a caller function to become invalid, the modification is blocked.
