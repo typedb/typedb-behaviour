@@ -66,6 +66,8 @@ Feature: TypeDB Driver
   # DATABASES #
   #############
 
+  # TODO: Explicitly test "databases().all()" interfaces. Make sure that "has" uses "contains" in drivers instead.
+
   Scenario: Driver cannot delete non-existing database
     Given connection does not have database: does-not-exist
     Then connection delete database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
@@ -205,22 +207,28 @@ Feature: TypeDB Driver
 #    """
 
 
-  Scenario: Driver can sees databases updates done by other drivers in background
+  Scenario: Driver sees databases updates done by other drivers in background
     Then connection does not have database: newbie
     Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
     # Consider refactoring of how we manage multiple drivers
     # if we use "background" steps more not to duplicate everything
     When in background, connection create database: newbie
-    Then connection has database: newbie
+    Then connection has databases:
+      | newbie |
+      | typedb |
     Then connection open schema transaction for database: newbie
     Then transaction commits
     When connection closes
 
     When connection opens with default authentication
-    Then connection has database: newbie
+    Then connection has databases:
+      | newbie |
+      | typedb |
     Then connection open schema transaction for database: newbie
     When transaction closes
-    Then connection has database: newbie
+    Then connection has databases:
+      | newbie |
+      | typedb |
 
     When in background, connection delete database: newbie
     Then connection does not have database: newbie
