@@ -435,7 +435,7 @@ Feature: Function call positions behaviour
       $nickname_value = $nickname_attr;
     return { $nickname_value };
     """
-    Then transaction commits; fails with a message containing: "TODO: Add message when we support redefine"
+    Then transaction commits; fails with a message containing: "Type checking all functions currently defined failed"
 
   Scenario: If a modification of the schema causes a stored function to become invalid, the modification is blocked at commit time
     Given connection open schema transaction for database: typedb
