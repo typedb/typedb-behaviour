@@ -205,7 +205,7 @@ Feature: TypeDB Driver
 #    """
 
 
-  Scenario: Driver can get databases created by other drivers in parallel
+  Scenario: Driver can sees databases updates done by other drivers in background
     Then connection does not have database: newbie
     Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
     # Consider refactoring of how we manage multiple drivers
@@ -214,6 +214,22 @@ Feature: TypeDB Driver
     Then connection has database: newbie
     Then connection open schema transaction for database: newbie
     Then transaction commits
+    When connection closes
+
+    When connection opens with default authentication
+    Then connection has database: newbie
+    Then connection open schema transaction for database: newbie
+    When transaction closes
+    Then connection has database: newbie
+
+    When in background, connection delete database: newbie
+    Then connection does not have database: newbie
+    Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
+    When connection closes
+
+    When connection opens with default authentication
+    Then connection does not have database: newbie
+    Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
 
 
   Scenario: Driver processes database management errors correctly
