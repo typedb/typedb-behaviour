@@ -68,7 +68,7 @@ Feature: TypeDB Driver
 
   Scenario: Driver cannot delete non-existing database
     Given connection does not have database: does-not-exist
-    Then connection delete database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection delete database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then connection does not have database: does-not-exist
 
   Scenario: Driver can create and delete databases
@@ -207,7 +207,7 @@ Feature: TypeDB Driver
 
   Scenario: Driver can sees databases updates done by other drivers in background
     Then connection does not have database: newbie
-    Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
     # Consider refactoring of how we manage multiple drivers
     # if we use "background" steps more not to duplicate everything
     When in background, connection create database: newbie
@@ -243,11 +243,11 @@ Feature: TypeDB Driver
   Scenario: Driver cannot open transaction to non-existing database
     Given connection does not have database: does-not-exist
     Then transaction is open: false
-    Then connection open schema transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open schema transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
-    Then connection open write transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open write transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
-    Then connection open read transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open read transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
 
 
