@@ -66,9 +66,11 @@ Feature: TypeDB Driver
   # DATABASES #
   #############
 
+  # TODO: Explicitly test "databases().all()" interfaces. Make sure that "has" uses "contains" in drivers instead.
+
   Scenario: Driver cannot delete non-existing database
     Given connection does not have database: does-not-exist
-    Then connection delete database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection delete database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then connection does not have database: does-not-exist
 
   Scenario: Driver can create and delete databases
@@ -205,6 +207,39 @@ Feature: TypeDB Driver
 #    """
 
 
+  Scenario: Driver sees databases updates done by other drivers in background
+    Then connection does not have database: newbie
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
+    # Consider refactoring of how we manage multiple drivers
+    # if we use "background" steps more not to duplicate everything
+    When in background, connection create database: newbie
+    Then connection has databases:
+      | newbie |
+      | typedb |
+    Then connection open schema transaction for database: newbie
+    Then transaction commits
+    When connection closes
+
+    When connection opens with default authentication
+    Then connection has databases:
+      | newbie |
+      | typedb |
+    Then connection open schema transaction for database: newbie
+    When transaction closes
+    Then connection has databases:
+      | newbie |
+      | typedb |
+
+    When in background, connection delete database: newbie
+    Then connection does not have database: newbie
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
+    When connection closes
+
+    When connection opens with default authentication
+    Then connection does not have database: newbie
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
+
+
   Scenario: Driver processes database management errors correctly
     Given connection open schema transaction for database: typedb
     Then connection create database with empty name; fails with a message containing: "is not a valid database name"
@@ -216,11 +251,11 @@ Feature: TypeDB Driver
   Scenario: Driver cannot open transaction to non-existing database
     Given connection does not have database: does-not-exist
     Then transaction is open: false
-    Then connection open schema transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open schema transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
-    Then connection open write transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open write transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
-    Then connection open read transaction for database: does-not-exist; fails with a message containing: "The database 'does-not-exist' does not exist"
+    Then connection open read transaction for database: does-not-exist; fails with a message containing: "Database 'does-not-exist' not found"
     Then transaction is open: false
 
 
