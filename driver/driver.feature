@@ -224,12 +224,12 @@ Feature: TypeDB Driver
 
     When in background, connection delete database: newbie
     Then connection does not have database: newbie
-    Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
     When connection closes
 
     When connection opens with default authentication
     Then connection does not have database: newbie
-    Then connection open schema transaction for database: newbie; fails with a message containing: "The database 'newbie' does not exist"
+    Then connection open schema transaction for database: newbie; fails with a message containing: "Database 'newbie' not found"
 
 
   Scenario: Driver processes database management errors correctly
