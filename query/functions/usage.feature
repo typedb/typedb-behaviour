@@ -67,6 +67,48 @@ Feature: Function call positions behaviour
     match $five = five();
     """
 
+  Scenario: Functions can be redefined
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 4;
+    return first $five;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $five = five();
+    """
+    Then uniquely identify answer concepts
+      | five         |
+      | value:long:4 |
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    redefine
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $five = five();
+    """
+    Then uniquely identify answer concepts
+      | five         |
+      | value:long:5 |
+    Given transaction closes
 
   Scenario: Functions can be called in expressions.
     Given connection open schema transaction for database: typedb
