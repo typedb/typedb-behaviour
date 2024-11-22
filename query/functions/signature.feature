@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Effects a function signature have on the caller
+Feature: Validate Function Signatures Against Definition & Calls
 
   Background: Set up database
     Given typedb starts

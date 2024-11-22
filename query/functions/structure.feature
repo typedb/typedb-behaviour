@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Tests for various shapes of function bodies
+Feature: Function Body Structure
 
   Background: Set up database
     Given typedb starts

@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Relation Inference Resolution
+Feature: Basic Function Execution
 
   Background: Set up database
     Given typedb starts
@@ -13,22 +13,18 @@ Feature: Relation Inference Resolution
     Given connection create database: typedb
 
 
-  Scenario: when matching all possible pairs inferred from n concepts, the answer size is the square of n
+  Scenario: when matching all possible pairs from n concepts, the answer size is the square of n
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
 
       entity person,
-      owns name,
-      plays friendship:friend;
-
-      relation friendship,
-        relates friend;
+      owns name;
 
       attribute name value string;
 
-      fun friends-of($who: person) -> { person } :
+      fun people_pairs_with($who: person) -> { person } :
       match
         $who isa person;
         $friend isa person;
@@ -52,14 +48,14 @@ Feature: Relation Inference Resolution
       """
       match
        $x isa person, has name "Abigail";
-       $friend in friends-of($x);
+       $friend in people_pairs_with($x);
       """
     Then answer size is: 5
     Given get answers of typeql read query
       """
       match
        $x isa person;
-       $friend in friends-of($x);
+       $friend in people_pairs_with($x);
       """
     Then answer size is: 25
 

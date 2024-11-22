@@ -5,7 +5,7 @@
 # TODO: All tests with directed can be changed to a "Verify answer set is equivalent for" test.
 
 #noinspection CucumberUndefinedStep
-Feature: Recursion Resolution
+Feature: Recursive Function Execution
 
   In some cases, the inferences made by a rule are used to trigger further inferences by the same rule.
   This test feature verifies that so-called recursive inference works as intended.
