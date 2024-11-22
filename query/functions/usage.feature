@@ -276,10 +276,108 @@ Feature: Function call positions behaviour
 
 
   Scenario: A function being undefined must not be referenced by a separate function which is not being undefined.
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    attribute nickname, value string;
+    person owns nickname;
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      $nickname in default_nickname($p);
+    return { $nickname };
+
+    fun default_nickname($p: person) -> { nickname }:
+    match
+      $p isa $t; # Avoid unused argument
+      $nickname "Steve" isa nickname;
+    return { $nickname };
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    undefine
+    fun default_nickname;
+    """
+    Then transaction commits; fails with a message containing: "TODO: Currently the server panics"
+
 
   Scenario: If a modification of a function causes a caller function to become invalid, the modification is blocked.
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    attribute nickname, value string;
+    person owns nickname;
+    """
+    Given transaction commits
 
-  Scenario: If a modification of the schema causes a stored function to become invalid, the modification is blocked at commit itme
-    Given TODO
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      $nickname in default_nickname($p);
+    return { $nickname };
+
+    fun default_nickname($p: person) -> { nickname }:
+    match
+      $p isa $t; # Avoid unused argument
+      $nickname "Steve" isa nickname;
+    return { $nickname };
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun default_nickname($p: person) -> { string }:
+    match
+      $p isa $t; # Avoid unused argument
+      $nickname_attr "Steve" isa nickname;
+      $nickname_value = $nickname_attr;
+    return { $nickname_value };
+    """
+    Then transaction commits; fails with a message containing: "TODO: Add message when we support redefine"
+
+  Scenario: If a modification of the schema causes a stored function to become invalid, the modification is blocked at commit time
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    attribute nickname, value string;
+    person owns nickname;
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      $p isa $t; # Avoid unused argument
+      $nickname isa nickname;
+      $nickname == "Steve";
+    return { $nickname };
+
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    undefine
+    nickname;
+    """
+    Then transaction commits; fails with a message containing: "Type label 'nickname' not found."
+    # TODO: This should be an explicit check at query time
+
