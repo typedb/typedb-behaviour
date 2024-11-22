@@ -21,6 +21,52 @@ Feature: Function call positions behaviour
     """
     Given transaction commits
 
+  Scenario: Functions can be defined
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+
+  Scenario: Functions can be undefined
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun five() -> long :
+    match
+      $five = 5;
+    return first $five;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $five = five();
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    undefine
+    fun five;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "Could not resolve function with name 'five'."
+    """
+    match $five = five();
+    """
+
 
   Scenario: Functions can be called in expressions.
     Given connection open schema transaction for database: typedb
@@ -339,7 +385,7 @@ Feature: Function call positions behaviour
     Given connection open schema transaction for database: typedb
     Given typeql schema query
     """
-    define
+    redefine
     fun default_nickname($p: person) -> { string }:
     match
       $p isa $t; # Avoid unused argument
@@ -378,6 +424,6 @@ Feature: Function call positions behaviour
     undefine
     nickname;
     """
-    Then transaction commits; fails with a message containing: "Type label 'nickname' not found."
-    # TODO: This should be an explicit check at query time
+    Then transaction commits; fails
+    # TODO: Add messsage when it's an explicit check at query time
 
