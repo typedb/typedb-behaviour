@@ -7,16 +7,13 @@ package(default_visibility = ["//visibility:public"])
 load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
-    "attribute-attachment.feature",
-    "compound-queries.feature",
-    "concept-inequality.feature",
+    "basic.feature",
+    "movemetoquery-negation.feature",
     "negation.feature",
     "recursion.feature",
-    "relation-inference.feature",
-    "schema-queries.feature",
-    "rule-interaction.feature",
-    "type-hierarchy.feature",
-    "variable-roles.feature",
+    "signature.feature",
+    "structure.feature",
+    "usage.feature",
 ]
 
 filegroup(
