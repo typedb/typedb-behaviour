@@ -12,18 +12,23 @@ Feature: Basic Function Execution
     Given connection has 0 databases
     Given connection create database: typedb
 
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+
+      entity person, owns name, owns ref @key;
+      attribute ref value long;
+      attribute name value string;
+      """
+    Given transaction commits
+
 
   Scenario: when matching all possible pairs from n concepts, the answer size is the square of n
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-
-      entity person,
-      owns name;
-
-      attribute name value string;
-
       fun people_pairs_with($who: person) -> { person } :
       match
         $who isa person;
@@ -35,11 +40,11 @@ Feature: Basic Function Execution
     Given typeql write query
       """
       insert
-      $a isa person, has name "Abigail";
-      $b isa person, has name "Bernadette";
-      $c isa person, has name "Cliff";
-      $d isa person, has name "Damien";
-      $e isa person, has name "Eustace";
+      $a isa person, has ref 0, has name "Abigail";
+      $b isa person, has ref 1, has name "Bernadette";
+      $c isa person, has ref 2, has name "Cliff";
+      $d isa person, has ref 3, has name "Damien";
+      $e isa person, has ref 4, has name "Eustace";
       """
     Given transaction commits
 
@@ -123,6 +128,182 @@ Feature: Basic Function Execution
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size is: 10
 
+  Scenario: Functions can return streams of instances or values.
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+    $p1 isa person, has ref 0, has name "Alice";
+    $p2 isa person, has ref 1, has name "Bob";
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun all_persons() -> { person } :
+    match
+      $p isa person;
+    return { $p };
+
+    fun name_values() -> { string } :
+    match
+      $p isa person, has name $name_attr;
+      $name_value = $name_attr;
+    return { $name_value };
+    """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $p in all_persons();
+    """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+      | key:ref:1 |
+    When get answers of typeql read query
+    """
+    match $name in name_values();
+    """
+    Then uniquely identify answer concepts
+      | name               |
+      | value:string:Alice |
+      | value:string:Bob   |
+    Given transaction closes
+
+
+  Scenario: Functions can return streams of tuples of instances.
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+    $p1 isa person, has ref 0, has name "Alice";
+    $p2 isa person, has ref 1, has name "Bob";
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun name_owners() -> { person, string } :
+    match
+      $p isa person, has name $name_attr;
+      $name_value = $name_attr;
+    return { $p, $name_value };
+    """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $person, $name in name_owners();
+    """
+    Then uniquely identify answer concepts
+      | person    | name               |
+      | key:ref:0 | value:string:Alice |
+      | key:ref:1 | value:string:Bob   |
+    Given transaction closes
+
+  Scenario: Functions can accept arguments
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+    $p1 isa person, has ref 0, has name "Alice";
+    $p2 isa person, has ref 1, has name "Bob";
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun persons_of_name_attribute($name: name) -> { person } :
+    match
+      $p isa person, has name $name;
+    return { $p };
+
+    fun persons_of_name_value($name: string) -> { person } :
+    match
+      $p isa person, has name == $name;
+    return { $p };
+    """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+     $name "Bob" isa name;
+     $person in persons_of_name_attribute($name);
+    """
+    Then uniquely identify answer concepts
+      | person    | name          |
+      | key:ref:1 | attr:name:Bob |
+
+    When get answers of typeql read query
+    """
+    match
+     $name = "Bob";
+     $person in persons_of_name_value($name);
+    """
+    Then uniquely identify answer concepts
+      | person    | name             |
+      | key:ref:1 | value:string:Bob |
+    Given transaction closes
+
+
+  Scenario: Functions can return single instances.
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+    $p1 isa person, has ref 0, has name "Alice";
+    $p2 isa person, has ref 1, has name "Bob";
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun person_of_name($name: name) -> person:
+    match
+      $p isa person, has name $name;
+    return first $p;
+
+    fun name_value_of_person($p: person) -> string:
+    match
+      $p isa person, has name $name_attr;
+      $name_value = $name_attr;
+    return first $name_value;
+
+    """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $name "Bob" isa name;
+      $person = person_of_name($name);
+    """
+    Then uniquely identify answer concepts
+      | person    | name            |
+      | key:ref:1 | attr:name:Bob   |
+
+    When get answers of typeql read query
+    """
+    match
+      $person isa person;
+      $name = name_value_of_person($person);
+    """
+    Then uniquely identify answer concepts
+      | person    | name               |
+      | key:ref:0 | value:string:Alice |
+      | key:ref:1 | value:string:Bob   |
+    Given transaction closes
+
 
   Scenario: A function can return a value derived from an expression
     Given connection open schema transaction for database: typedb
@@ -145,5 +326,4 @@ Feature: Basic Function Execution
     Then uniquely identify answer concepts
       | z            |
       | value:long:5 |
-
 
