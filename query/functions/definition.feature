@@ -145,9 +145,9 @@ Feature: Function Definition
       $nickname-mapping has nickname $nickname;
     return { $nickname };
     """
-    Given transaction commits; fails with a message containing: "StratificationViolation"
+    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
     Given connection open read transaction for database: typedb
-    Given typeql read query; fails with a message containing: "StratificationViolation"
+    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
     """
     with
     fun nickname_of($p: person) -> { nickname }:
@@ -217,7 +217,7 @@ Feature: Function Definition
       $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
     """
-    Then transaction commits; fails with a message containing: "StratificationViolation"
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
 
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "StratificationViolation"
