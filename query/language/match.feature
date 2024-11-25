@@ -856,60 +856,57 @@ Feature: TypeQL Match Clause
       """
 
 
-  # TODO: iids, "each answer satisfies" step
-  # Scenario: 'iid' matches the instance with the specified internal iid
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has ref 0;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $x isa person;
-  #     """
-  #   Then each answer satisfies
-  #     """
-  #     match $x iid <answer.x.iid>;
-  #     """
+  Scenario: 'iid' matches the instance with the specified internal iid
+    Given transaction commits
+  
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has ref 0;
+      """
+    Given transaction commits
+  
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person;
+      """
+    Then each answer satisfies
+      """
+      match $x iid <answer.x.iid>;
+      """
 
 
-  # TODO: iids, "each answer satisfies" step
-  # Scenario: 'iid' for a variable of a different type finds no answers
-  #   Given typeql schema query
-  #     """
-  #     define
-  #     entity shop owns address;
-  #     entity grocery sub shop;
-  #     attribute address value string;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa shop, has address "123 street";
-  #     $y isa grocery, has address "123 street";
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $x isa! shop;
-  #     """
-  #   # here
-  #   Then get answers of templated typeql read query
-  #     """
-  #     match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
-  #     """
-  #   Then answer size is: 0
+  Scenario: 'iid' for a variable of a different type finds no answers
+    Given typeql schema query
+      """
+      define
+      entity shop owns address;
+      entity grocery sub shop;
+      attribute address value string;
+      """
+    Given transaction commits
+  
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa shop, has address "123 street";
+      $y isa grocery, has address "123 street";
+      """
+    Given transaction commits
+  
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa! shop;
+      """
+    Then get answers of templated typeql read query
+      """
+      match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
+      """
+    Then answer size is: 0
 
 
   Scenario: match returns an empty answer if there are no matches
@@ -2443,11 +2440,6 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa $t; { $t label person; } or { $t label company; };
-      """
-    Then answer size is: 0
     When get answers of typeql read query
       """
       match $x isa $t; { $t label person; } or { $t label company; };
