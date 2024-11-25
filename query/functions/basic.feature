@@ -327,3 +327,36 @@ Feature: Basic Function Execution
       | z            |
       | value:long:5 |
 
+
+  Scenario: A function can return a tuple of values derived from a reduce operation
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+    $p1 isa person, has ref 1, has name "Alice";
+    $p2 isa person, has ref 2, has name "Bob";
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun ref_sum_and_sum_squares() -> long, long :
+      match
+        $ref isa ref;
+        $ref_2 = $ref * $ref;
+      return sum($ref), sum($ref_2);
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $sum, $squares in ref_sum_and_sum_squares();
+      """
+    # the (n-1)th triangle number, where n is the number of replies to the first post
+    Then uniquely identify answer concepts
+      | sum          | squares      |
+      | value:long:3 | value:long:5 |
+
