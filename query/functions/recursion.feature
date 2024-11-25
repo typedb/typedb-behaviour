@@ -1284,7 +1284,7 @@ Feature: Recursive Function Execution
 
     Then verify answer set is equivalent for query
       """
-      match $y isa $t; { $t type a-entity; } or { $t type end; }; select $y;
+      match $y isa $t; { $t label a-entity; } or { $t label end; }; select $y;
       """
     Given get answers of typeql read query
       """
@@ -1297,7 +1297,7 @@ Feature: Recursive Function Execution
 
     Then verify answer set is equivalent for query
       """
-      match $y isa $t; { $t type a-entity; } or { $t type end; }; select $y;
+      match $y isa $t; { $t label a-entity; } or { $t label end; }; select $y;
       """
 
   Scenario: tail recursion test
