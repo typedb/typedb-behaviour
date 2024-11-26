@@ -220,7 +220,7 @@ Feature: Function Definition
     Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "StratificationViolation"
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
     """
     with
     fun annual_reward($customer: person) -> {double}:
