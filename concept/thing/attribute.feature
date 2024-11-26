@@ -43,7 +43,7 @@ Feature: Concept Attribute
     Given attribute(email) set annotation: @regex("\S+@\S+\.\S+")
     Given transaction commits
     Given connection open write transaction for database: typedb
-    Given set time zone: Europe/London
+    Given set time-zone: Europe/London
 
   Scenario Outline: Attribute with value type <type> can be created
     When $x = attribute(<attr>) put instance with value: <value>
@@ -143,7 +143,7 @@ Feature: Concept Attribute
     When attribute(email) put instance with value: alice-email-com; fails
 
   Scenario: Datetime attribute can be inserted in one timezone and retrieved in another with no change in the value
-    When set time zone: Asia/Calcutta
+    When set time-zone: Asia/Calcutta
     When $x = attribute(event-datetime) put instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
     Then attribute $x has type: event-datetime
@@ -151,7 +151,7 @@ Feature: Concept Attribute
     Then attribute $x has value: 2001-08-23 08:30:00
     When transaction commits
     When connection open read transaction for database: typedb
-    When set time zone: America/Chicago
+    When set time-zone: America/Chicago
     When $x = attribute(event-datetime) get instance with value: 2001-08-23 08:30:00
     Then attribute $x exists
     Then attribute $x has type: event-datetime
