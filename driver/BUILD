@@ -8,6 +8,7 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
     "driver.feature",
+    "user.feature",
 ]
 
 filegroup(
