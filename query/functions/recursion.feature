@@ -541,13 +541,13 @@ Feature: Recursive Function Execution
        entity indexable, owns index;
 
       entity traversable sub indexable,
-          plays pair:from,
-          plays pair:to;
+          plays pair:start,
+          plays pair:end;
 
       entity vertex sub traversable;
       entity node sub traversable;
 
-      relation pair, relates from, relates to;
+      relation pair, relates start, relates end;
       relation link sub pair;
       relation indirect-link sub pair;
       relation reachable sub pair;
@@ -560,9 +560,9 @@ Feature: Recursive Function Execution
       fun reachable_pairs() -> {traversable, traversable}:
       match
         $x isa traversable; $y isa traversable;
-        { (from: $x, to: $y) isa link; } or
+        { (start: $x, end: $y) isa link; } or
         {
-          (from: $x, to: $z) isa link;
+          (start: $x, end: $z) isa link;
           $z, $y1 in reachable_pairs();
           $y1 is $y;
         };
@@ -571,7 +571,7 @@ Feature: Recursive Function Execution
       fun indirect_link_pairs() -> { traversable, traversable }:
         match
           $x, $y in reachable_pairs();
-          not {(from: $x, to: $y) isa link;};
+          not {(start: $x, end: $y) isa link;};
         return { $x, $y };
 
       fun unreachable_pairs() -> {traversable, traversable}:
@@ -588,9 +588,9 @@ Feature: Recursive Function Execution
       fun reachable_from($x: traversable) -> {traversable}:
       match
         $x isa traversable; $y isa traversable;
-        { (from: $x, to: $y) isa link; } or
+        { (start: $x, end: $y) isa link; } or
         {
-          (from: $x, to: $z) isa link;
+          (start: $x, end: $z) isa link;
           $y1 in reachable_from($z);
           $y1 is $y;
         };
@@ -599,7 +599,7 @@ Feature: Recursive Function Execution
       fun indirect_link_from($x: traversable) -> { traversable }:
         match
           $y in reachable_from($x);
-          not {(from: $x, to: $y) isa link;};
+          not {(start: $x, end: $y) isa link;};
         return { $y };
 
       fun unreachable_from($x: traversable) -> {traversable}:
@@ -624,10 +624,10 @@ Feature: Recursive Function Execution
       $cc isa node, has index "cc";
       $dd isa node, has index "dd";
 
-      (from: $aa, to: $bb) isa link;
-      (from: $bb, to: $cc) isa link;
-      (from: $cc, to: $cc) isa link;
-      (from: $cc, to: $dd) isa link;
+      (start: $aa, end: $bb) isa link;
+      (start: $bb, end: $cc) isa link;
+      (start: $cc, end: $cc) isa link;
+      (start: $cc, end: $dd) isa link;
       """
     Given transaction commits
 
@@ -903,31 +903,31 @@ Feature: Recursive Function Execution
         owns name,
         plays parentship:parent,
         plays parentship:child,
-        plays up:from,
-        plays up:to,
-        plays down:from,
-        plays down:to,
-        plays flat:from,
-        plays flat:to;
+        plays up:start,
+        plays up:end,
+        plays down:start,
+        plays down:end,
+        plays flat:start,
+        plays flat:end;
 
       relation parentship, relates parent, relates child;
 
-      relation up, relates from, relates to;
+      relation up, relates start, relates end;
 
-      relation down, relates from, relates to;
+      relation down, relates start, relates end;
 
-      relation flat, relates to, relates from;
+      relation flat, relates end, relates start;
 
       attribute name, value string;
 
       fun rev_sg_pairs() -> { person, person }:
       match
       $x isa person; $y isa person;
-      { (from: $x, to: $y) isa flat; } or
+      { (start: $x, end: $y) isa flat; } or
       {
-        (from: $x, to: $x1) isa up;
+        (start: $x, end: $x1) isa up;
         $y1, $x1 in rev_sg_pairs();
-        (from: $y1, to: $y) isa down;
+        (start: $y1, end: $y) isa down;
       };
       return {$x, $y};
 
@@ -935,11 +935,11 @@ Feature: Recursive Function Execution
       fun rev_sg_directed_from_bound($x: person) -> { person }:
       match
       $x isa person; $y isa person;
-      { (from: $x, to: $y) isa flat; } or
+      { (start: $x, end: $y) isa flat; } or
       {
-        (from: $x, to: $x1) isa up;
+        (start: $x, end: $x1) isa up;
         $y1 in rev_sg_directed_to_bound($x1);
-        (from: $y1, to: $y) isa down;
+        (start: $y1, end: $y) isa down;
       };
       return {$y};
 
@@ -947,11 +947,11 @@ Feature: Recursive Function Execution
       fun rev_sg_directed_to_bound($y: person) -> { person }:
       match
       $x isa person; $y isa person;
-      { (from: $x, to: $y) isa flat; } or
+      { (start: $x, end: $y) isa flat; } or
       {
-        (from: $x, to: $x1) isa up;
+        (start: $x, end: $x1) isa up;
         $x1 in rev_sg_directed_from_bound($y1);
-        (from: $y1, to: $y) isa down;
+        (start: $y1, end: $y) isa down;
       };
       return {$x};
       """
@@ -979,25 +979,25 @@ Feature: Recursive Function Execution
       $o isa person, has name "o";
       $p isa person, has name "p";
 
-      (from: $a, to: $e) isa up;
-      (from: $a, to: $f) isa up;
-      (from: $f, to: $m) isa up;
-      (from: $g, to: $n) isa up;
-      (from: $h, to: $n) isa up;
-      (from: $i, to: $o) isa up;
-      (from: $j, to: $o) isa up;
+      (start: $a, end: $e) isa up;
+      (start: $a, end: $f) isa up;
+      (start: $f, end: $m) isa up;
+      (start: $g, end: $n) isa up;
+      (start: $h, end: $n) isa up;
+      (start: $i, end: $o) isa up;
+      (start: $j, end: $o) isa up;
 
-      (from: $g, to: $f) isa flat;
-      (from: $m, to: $n) isa flat;
-      (from: $m, to: $o) isa flat;
-      (from: $p, to: $m) isa flat;
+      (start: $g, end: $f) isa flat;
+      (start: $m, end: $n) isa flat;
+      (start: $m, end: $o) isa flat;
+      (start: $p, end: $m) isa flat;
 
-      (from: $l, to: $f) isa down;
-      (from: $m, to: $f) isa down;
-      (from: $g, to: $b) isa down;
-      (from: $h, to: $c) isa down;
-      (from: $i, to: $d) isa down;
-      (from: $p, to: $k) isa down;
+      (start: $l, end: $f) isa down;
+      (start: $m, end: $f) isa down;
+      (start: $g, end: $b) isa down;
+      (start: $h, end: $c) isa down;
+      (start: $i, end: $d) isa down;
+      (start: $p, end: $k) isa down;
       """
     Given transaction commits
 
@@ -1106,18 +1106,18 @@ Feature: Recursive Function Execution
 
       entity entity2,
         owns index @key,
-        plays P:from, plays P:to,
-        plays R1:from, plays R1:to,
-        plays R2:from, plays R2:to;
+        plays P:start, plays P:end,
+        plays R1:start, plays R1:end,
+        plays R2:start, plays R2:end;
 
       entity start sub entity2;
       entity end sub entity2;
       entity a-entity sub entity2;
       entity b-entity sub entity2;
 
-      relation R1, relates from, relates to;
-      relation R2, relates from, relates to;
-      relation P, relates from, relates to;
+      relation R1, relates start, relates end;
+      relation R2, relates start, relates end;
+      relation P, relates start, relates end;
       attribute index, value string;
 
       # --- pairs ---
@@ -1125,9 +1125,9 @@ Feature: Recursive Function Execution
       fun q1_pairs() -> { entity2, entity2 }:
         match
          $x isa entity2; $y isa entity2;
-         { (from: $x, to: $y) isa R1; } or
+         { (start: $x, end: $y) isa R1; } or
          {
-            (from: $x, to: $z) isa R1;
+            (start: $x, end: $z) isa R1;
             $z, $y1 in q1_pairs();
             $y is $y1;
          };
@@ -1136,9 +1136,9 @@ Feature: Recursive Function Execution
       fun q2_pairs() -> { entity2, entity2 }:
       match
         $x isa entity2; $y isa entity2;
-        { (from: $x, to: $y) isa R2; }
+        { (start: $x, end: $y) isa R2; }
         or {
-            (from: $x, to: $z) isa R2;
+            (start: $x, end: $z) isa R2;
             $z, $y1 in q2_pairs();
             $y is $y1;
         };
@@ -1154,9 +1154,9 @@ Feature: Recursive Function Execution
       fun q1_directed($x: entity2) -> { entity2 }:
         match
          $x isa entity2; $y isa entity2;
-         { (from: $x, to: $y) isa R1; } or
+         { (start: $x, end: $y) isa R1; } or
          {
-            (from: $x, to: $z) isa R1;
+            (start: $x, end: $z) isa R1;
             $y1 in q1_directed($z);
             $y is $y1;
          };
@@ -1165,9 +1165,9 @@ Feature: Recursive Function Execution
       fun q2_directed($x: entity2) -> { entity2 }:
       match
         $x isa entity2; $y isa entity2;
-        { (from: $x, to: $y) isa R2; }
+        { (start: $x, end: $y) isa R2; }
         or {
-            (from: $x, to: $z) isa R2;
+            (start: $x, end: $z) isa R2;
             $y1 in q2_directed($z);
             $y is $y1;
         };
@@ -1229,46 +1229,46 @@ Feature: Recursive Function Execution
       $b45 isa b-entity, has index "b45";
 
 
-      # (from: $a{i}, to: $a{i+1} isa R1; for 0 <= i < m
-      (from: $a0, to: $a1) isa R1;
-      (from: $a1, to: $a2) isa R1;
-      (from: $a2, to: $a3) isa R1;
-      (from: $a3, to: $a4) isa R1;
-      (from: $a4, to: $a5) isa R1;
+      # (start: $a{i}, end: $a{i+1} isa R1; for 0 <= i < m
+      (start: $a0, end: $a1) isa R1;
+      (start: $a1, end: $a2) isa R1;
+      (start: $a2, end: $a3) isa R1;
+      (start: $a3, end: $a4) isa R1;
+      (start: $a4, end: $a5) isa R1;
 
 
-      # (from: $a0, to: $b1{j}) isa R2; for 1 <= j <= n
-      # (from: $b{m-1}{j}, to: $a{m}) isa R2; for 1 <= j <= n
-      # (from: $b{i}{j}, to: $b{i+1}{j}) isa R2; for 1 <= j <= n; for 1 <= i < m - 1
-      (from: $a0, to: $b11) isa R2;
-      (from: $b41, to: $a5) isa R2;
-      (from: $b11, to: $b21) isa R2;
-      (from: $b21, to: $b31) isa R2;
-      (from: $b31, to: $b41) isa R2;
+      # (start: $a0, end: $b1{j}) isa R2; for 1 <= j <= n
+      # (start: $b{m-1}{j}, end: $a{m}) isa R2; for 1 <= j <= n
+      # (start: $b{i}{j}, end: $b{i+1}{j}) isa R2; for 1 <= j <= n; for 1 <= i < m - 1
+      (start: $a0, end: $b11) isa R2;
+      (start: $b41, end: $a5) isa R2;
+      (start: $b11, end: $b21) isa R2;
+      (start: $b21, end: $b31) isa R2;
+      (start: $b31, end: $b41) isa R2;
 
-      (from: $a0, to: $b12) isa R2;
-      (from: $b42, to: $a5) isa R2;
-      (from: $b12, to: $b22) isa R2;
-      (from: $b22, to: $b32) isa R2;
-      (from: $b32, to: $b42) isa R2;
+      (start: $a0, end: $b12) isa R2;
+      (start: $b42, end: $a5) isa R2;
+      (start: $b12, end: $b22) isa R2;
+      (start: $b22, end: $b32) isa R2;
+      (start: $b32, end: $b42) isa R2;
 
-      (from: $a0, to: $b13) isa R2;
-      (from: $b43, to: $a5) isa R2;
-      (from: $b13, to: $b23) isa R2;
-      (from: $b23, to: $b33) isa R2;
-      (from: $b33, to: $b43) isa R2;
+      (start: $a0, end: $b13) isa R2;
+      (start: $b43, end: $a5) isa R2;
+      (start: $b13, end: $b23) isa R2;
+      (start: $b23, end: $b33) isa R2;
+      (start: $b33, end: $b43) isa R2;
 
-      (from: $a0, to: $b14) isa R2;
-      (from: $b44, to: $a5) isa R2;
-      (from: $b14, to: $b24) isa R2;
-      (from: $b24, to: $b34) isa R2;
-      (from: $b34, to: $b44) isa R2;
+      (start: $a0, end: $b14) isa R2;
+      (start: $b44, end: $a5) isa R2;
+      (start: $b14, end: $b24) isa R2;
+      (start: $b24, end: $b34) isa R2;
+      (start: $b34, end: $b44) isa R2;
 
-      (from: $a0, to: $b15) isa R2;
-      (from: $b45, to: $a5) isa R2;
-      (from: $b15, to: $b25) isa R2;
-      (from: $b25, to: $b35) isa R2;
-      (from: $b35, to: $b45) isa R2;
+      (start: $a0, end: $b15) isa R2;
+      (start: $b45, end: $a5) isa R2;
+      (start: $b15, end: $b25) isa R2;
+      (start: $b25, end: $b35) isa R2;
+      (start: $b35, end: $b45) isa R2;
       """
     Given transaction commits
 
@@ -1310,13 +1310,13 @@ Feature: Recursive Function Execution
 
       entity entity2,
         owns index @key,
-        plays Q:from,
-        plays Q:to;
+        plays Q:start,
+        plays Q:end;
 
       entity a-entity sub entity2;
       entity b-entity sub entity2;
 
-      relation Q, relates from, relates to;
+      relation Q, relates start, relates end;
 
       attribute index, value string;
 
@@ -1328,9 +1328,9 @@ Feature: Recursive Function Execution
       match
         $x in identity($x1);
         $y in identity($y1);
-        { (from: $x1, to: $y1) isa Q; } or
+        { (start: $x1, end: $y1) isa Q; } or
         {
-          (from: $x1, to: $z1) isa Q;
+          (start: $x1, end: $z1) isa Q;
           $z1, $y1 in p_pairs();
         };
       return { $x, $y };
@@ -1338,9 +1338,9 @@ Feature: Recursive Function Execution
       fun p_directed($x: entity2) -> {entity2}:
       match
         $y in identity($y1);
-        { (from: $x, to: $y1) isa Q; } or
+        { (start: $x, end: $y1) isa Q; } or
         {
-          (from: $x, to: $z) isa Q;
+          (start: $x, end: $z) isa Q;
           $y1 in p_directed($z);
         };
       return { $y };
@@ -1424,79 +1424,79 @@ Feature: Recursive Function Execution
       $b6_10 isa b-entity, has index "b6_10";
 
 
-      # (from: $a0, to: $b1_{j}) isa Q; for 1 <= j <= n
-      (from: $a0, to: $b1_1) isa Q;
-      (from: $a0, to: $b1_2) isa Q;
-      (from: $a0, to: $b1_3) isa Q;
-      (from: $a0, to: $b1_4) isa Q;
-      (from: $a0, to: $b1_5) isa Q;
-      (from: $a0, to: $b1_6) isa Q;
-      (from: $a0, to: $b1_7) isa Q;
-      (from: $a0, to: $b1_8) isa Q;
-      (from: $a0, to: $b1_9) isa Q;
-      (from: $a0, to: $b1_10) isa Q;
+      # (start: $a0, end: $b1_{j}) isa Q; for 1 <= j <= n
+      (start: $a0, end: $b1_1) isa Q;
+      (start: $a0, end: $b1_2) isa Q;
+      (start: $a0, end: $b1_3) isa Q;
+      (start: $a0, end: $b1_4) isa Q;
+      (start: $a0, end: $b1_5) isa Q;
+      (start: $a0, end: $b1_6) isa Q;
+      (start: $a0, end: $b1_7) isa Q;
+      (start: $a0, end: $b1_8) isa Q;
+      (start: $a0, end: $b1_9) isa Q;
+      (start: $a0, end: $b1_10) isa Q;
 
 
-      # (from: $b{i}_{j}, to: $b{i+1}_{j}) isa Q; for 1 <= j <= n; for 1 <= i <= m
-      (from: $b1_1, to: $b2_1) isa Q;
-      (from: $b2_1, to: $b3_1) isa Q;
-      (from: $b3_1, to: $b4_1) isa Q;
-      (from: $b4_1, to: $b5_1) isa Q;
-      (from: $b5_1, to: $b6_1) isa Q;
+      # (start: $b{i}_{j}, end: $b{i+1}_{j}) isa Q; for 1 <= j <= n; for 1 <= i <= m
+      (start: $b1_1, end: $b2_1) isa Q;
+      (start: $b2_1, end: $b3_1) isa Q;
+      (start: $b3_1, end: $b4_1) isa Q;
+      (start: $b4_1, end: $b5_1) isa Q;
+      (start: $b5_1, end: $b6_1) isa Q;
 
-      (from: $b1_2, to: $b2_2) isa Q;
-      (from: $b2_2, to: $b3_2) isa Q;
-      (from: $b3_2, to: $b4_2) isa Q;
-      (from: $b4_2, to: $b5_2) isa Q;
-      (from: $b5_2, to: $b6_2) isa Q;
+      (start: $b1_2, end: $b2_2) isa Q;
+      (start: $b2_2, end: $b3_2) isa Q;
+      (start: $b3_2, end: $b4_2) isa Q;
+      (start: $b4_2, end: $b5_2) isa Q;
+      (start: $b5_2, end: $b6_2) isa Q;
 
-      (from: $b1_3, to: $b2_3) isa Q;
-      (from: $b2_3, to: $b3_3) isa Q;
-      (from: $b3_3, to: $b4_3) isa Q;
-      (from: $b4_3, to: $b5_3) isa Q;
-      (from: $b5_3, to: $b6_3) isa Q;
+      (start: $b1_3, end: $b2_3) isa Q;
+      (start: $b2_3, end: $b3_3) isa Q;
+      (start: $b3_3, end: $b4_3) isa Q;
+      (start: $b4_3, end: $b5_3) isa Q;
+      (start: $b5_3, end: $b6_3) isa Q;
 
-      (from: $b1_4, to: $b2_4) isa Q;
-      (from: $b2_4, to: $b3_4) isa Q;
-      (from: $b3_4, to: $b4_4) isa Q;
-      (from: $b4_4, to: $b5_4) isa Q;
-      (from: $b5_4, to: $b6_4) isa Q;
+      (start: $b1_4, end: $b2_4) isa Q;
+      (start: $b2_4, end: $b3_4) isa Q;
+      (start: $b3_4, end: $b4_4) isa Q;
+      (start: $b4_4, end: $b5_4) isa Q;
+      (start: $b5_4, end: $b6_4) isa Q;
 
-      (from: $b1_5, to: $b2_5) isa Q;
-      (from: $b2_5, to: $b3_5) isa Q;
-      (from: $b3_5, to: $b4_5) isa Q;
-      (from: $b4_5, to: $b5_5) isa Q;
-      (from: $b5_5, to: $b6_5) isa Q;
+      (start: $b1_5, end: $b2_5) isa Q;
+      (start: $b2_5, end: $b3_5) isa Q;
+      (start: $b3_5, end: $b4_5) isa Q;
+      (start: $b4_5, end: $b5_5) isa Q;
+      (start: $b5_5, end: $b6_5) isa Q;
 
-      (from: $b1_6, to: $b2_6) isa Q;
-      (from: $b2_6, to: $b3_6) isa Q;
-      (from: $b3_6, to: $b4_6) isa Q;
-      (from: $b4_6, to: $b5_6) isa Q;
-      (from: $b5_6, to: $b6_6) isa Q;
+      (start: $b1_6, end: $b2_6) isa Q;
+      (start: $b2_6, end: $b3_6) isa Q;
+      (start: $b3_6, end: $b4_6) isa Q;
+      (start: $b4_6, end: $b5_6) isa Q;
+      (start: $b5_6, end: $b6_6) isa Q;
 
-      (from: $b1_7, to: $b2_7) isa Q;
-      (from: $b2_7, to: $b3_7) isa Q;
-      (from: $b3_7, to: $b4_7) isa Q;
-      (from: $b4_7, to: $b5_7) isa Q;
-      (from: $b5_7, to: $b6_7) isa Q;
+      (start: $b1_7, end: $b2_7) isa Q;
+      (start: $b2_7, end: $b3_7) isa Q;
+      (start: $b3_7, end: $b4_7) isa Q;
+      (start: $b4_7, end: $b5_7) isa Q;
+      (start: $b5_7, end: $b6_7) isa Q;
 
-      (from: $b1_8, to: $b2_8) isa Q;
-      (from: $b2_8, to: $b3_8) isa Q;
-      (from: $b3_8, to: $b4_8) isa Q;
-      (from: $b4_8, to: $b5_8) isa Q;
-      (from: $b5_8, to: $b6_8) isa Q;
+      (start: $b1_8, end: $b2_8) isa Q;
+      (start: $b2_8, end: $b3_8) isa Q;
+      (start: $b3_8, end: $b4_8) isa Q;
+      (start: $b4_8, end: $b5_8) isa Q;
+      (start: $b5_8, end: $b6_8) isa Q;
 
-      (from: $b1_9, to: $b2_9) isa Q;
-      (from: $b2_9, to: $b3_9) isa Q;
-      (from: $b3_9, to: $b4_9) isa Q;
-      (from: $b4_9, to: $b5_9) isa Q;
-      (from: $b5_9, to: $b6_9) isa Q;
+      (start: $b1_9, end: $b2_9) isa Q;
+      (start: $b2_9, end: $b3_9) isa Q;
+      (start: $b3_9, end: $b4_9) isa Q;
+      (start: $b4_9, end: $b5_9) isa Q;
+      (start: $b5_9, end: $b6_9) isa Q;
 
-      (from: $b1_10, to: $b2_10) isa Q;
-      (from: $b2_10, to: $b3_10) isa Q;
-      (from: $b3_10, to: $b4_10) isa Q;
-      (from: $b4_10, to: $b5_10) isa Q;
-      (from: $b5_10, to: $b6_10) isa Q;
+      (start: $b1_10, end: $b2_10) isa Q;
+      (start: $b2_10, end: $b3_10) isa Q;
+      (start: $b3_10, end: $b4_10) isa Q;
+      (start: $b4_10, end: $b5_10) isa Q;
+      (start: $b5_10, end: $b6_10) isa Q;
       """
     Given transaction commits
 
@@ -1540,8 +1540,8 @@ Feature: Recursive Function Execution
       entity entity2, owns index @key;
       entity a-entity sub entity2;
 
-      relation Q, relates from, relates to;
-      entity2 plays Q:from, plays Q:to;
+      relation Q, relates start, relates end;
+      entity2 plays Q:start, plays Q:end;
 
       attribute index, value string;
 
@@ -1549,9 +1549,9 @@ Feature: Recursive Function Execution
       fun p_pairs() -> { entity2, entity2 }:
       match
       $x isa entity2; $y isa entity2;
-      { (from: $x, to: $y) isa Q; } or
+      { (start: $x, end: $y) isa Q; } or
       {
-        (from: $x, to: $z) isa Q;
+        (start: $x, end: $z) isa Q;
         $z, $y1 in p_pairs();
         $y is $y1;
       };
@@ -1566,9 +1566,9 @@ Feature: Recursive Function Execution
       fun p_directed($x: entity2) -> {entity2 }:
       match
       $x isa entity2; $y isa entity2;
-      { (from: $x, to: $y) isa Q; } or
+      { (start: $x, end: $y) isa Q; } or
       {
-        (from: $x, to: $z) isa Q;
+        (start: $x, end: $z) isa Q;
         $y1 in p_directed($z);
         $y is $y1;
       };
@@ -1619,58 +1619,58 @@ Feature: Recursive Function Execution
       $a5_4 isa a-entity, has index "a5_4";
       $a5_5 isa a-entity, has index "a5_5";
 
-      (from: $a, to: $a1_1) isa Q;
+      (start: $a, end: $a1_1) isa Q;
 
-      # (from: $a{i}_{j}, to: $a{i+1}_{j}) isa Q; for 1 <= i < n; for 1 <= j <= m
-      (from: $a1_1, to: $a2_1) isa Q;
-      (from: $a1_2, to: $a2_2) isa Q;
-      (from: $a1_3, to: $a2_3) isa Q;
-      (from: $a1_4, to: $a2_4) isa Q;
-      (from: $a1_5, to: $a2_5) isa Q;
+      # (start: $a{i}_{j}, end: $a{i+1}_{j}) isa Q; for 1 <= i < n; for 1 <= j <= m
+      (start: $a1_1, end: $a2_1) isa Q;
+      (start: $a1_2, end: $a2_2) isa Q;
+      (start: $a1_3, end: $a2_3) isa Q;
+      (start: $a1_4, end: $a2_4) isa Q;
+      (start: $a1_5, end: $a2_5) isa Q;
 
-      (from: $a2_1, to: $a3_1) isa Q;
-      (from: $a2_2, to: $a3_2) isa Q;
-      (from: $a2_3, to: $a3_3) isa Q;
-      (from: $a2_4, to: $a3_4) isa Q;
-      (from: $a2_5, to: $a3_5) isa Q;
+      (start: $a2_1, end: $a3_1) isa Q;
+      (start: $a2_2, end: $a3_2) isa Q;
+      (start: $a2_3, end: $a3_3) isa Q;
+      (start: $a2_4, end: $a3_4) isa Q;
+      (start: $a2_5, end: $a3_5) isa Q;
 
-      (from: $a3_1, to: $a4_1) isa Q;
-      (from: $a3_2, to: $a4_2) isa Q;
-      (from: $a3_3, to: $a4_3) isa Q;
-      (from: $a3_4, to: $a4_4) isa Q;
-      (from: $a3_5, to: $a4_5) isa Q;
+      (start: $a3_1, end: $a4_1) isa Q;
+      (start: $a3_2, end: $a4_2) isa Q;
+      (start: $a3_3, end: $a4_3) isa Q;
+      (start: $a3_4, end: $a4_4) isa Q;
+      (start: $a3_5, end: $a4_5) isa Q;
 
-      (from: $a4_1, to: $a5_1) isa Q;
-      (from: $a4_2, to: $a5_2) isa Q;
-      (from: $a4_3, to: $a5_3) isa Q;
-      (from: $a4_4, to: $a5_4) isa Q;
-      (from: $a4_5, to: $a5_5) isa Q;
+      (start: $a4_1, end: $a5_1) isa Q;
+      (start: $a4_2, end: $a5_2) isa Q;
+      (start: $a4_3, end: $a5_3) isa Q;
+      (start: $a4_4, end: $a5_4) isa Q;
+      (start: $a4_5, end: $a5_5) isa Q;
 
-      # (from: $a{i}_{j}, to: $a{i}_{j+1}) isa Q; for 1 <= i <= n; for 1 <= j < m
-      (from: $a1_1, to: $a1_2) isa Q;
-      (from: $a1_2, to: $a1_3) isa Q;
-      (from: $a1_3, to: $a1_4) isa Q;
-      (from: $a1_4, to: $a1_5) isa Q;
+      # (start: $a{i}_{j}, end: $a{i}_{j+1}) isa Q; for 1 <= i <= n; for 1 <= j < m
+      (start: $a1_1, end: $a1_2) isa Q;
+      (start: $a1_2, end: $a1_3) isa Q;
+      (start: $a1_3, end: $a1_4) isa Q;
+      (start: $a1_4, end: $a1_5) isa Q;
 
-      (from: $a2_1, to: $a2_2) isa Q;
-      (from: $a2_2, to: $a2_3) isa Q;
-      (from: $a2_3, to: $a2_4) isa Q;
-      (from: $a2_4, to: $a2_5) isa Q;
+      (start: $a2_1, end: $a2_2) isa Q;
+      (start: $a2_2, end: $a2_3) isa Q;
+      (start: $a2_3, end: $a2_4) isa Q;
+      (start: $a2_4, end: $a2_5) isa Q;
 
-      (from: $a3_1, to: $a3_2) isa Q;
-      (from: $a3_2, to: $a3_3) isa Q;
-      (from: $a3_3, to: $a3_4) isa Q;
-      (from: $a3_4, to: $a3_5) isa Q;
+      (start: $a3_1, end: $a3_2) isa Q;
+      (start: $a3_2, end: $a3_3) isa Q;
+      (start: $a3_3, end: $a3_4) isa Q;
+      (start: $a3_4, end: $a3_5) isa Q;
 
-      (from: $a4_1, to: $a4_2) isa Q;
-      (from: $a4_2, to: $a4_3) isa Q;
-      (from: $a4_3, to: $a4_4) isa Q;
-      (from: $a4_4, to: $a4_5) isa Q;
+      (start: $a4_1, end: $a4_2) isa Q;
+      (start: $a4_2, end: $a4_3) isa Q;
+      (start: $a4_3, end: $a4_4) isa Q;
+      (start: $a4_4, end: $a4_5) isa Q;
 
-      (from: $a5_1, to: $a5_2) isa Q;
-      (from: $a5_2, to: $a5_3) isa Q;
-      (from: $a5_3, to: $a5_4) isa Q;
-      (from: $a5_4, to: $a5_5) isa Q;
+      (start: $a5_1, end: $a5_2) isa Q;
+      (start: $a5_2, end: $a5_3) isa Q;
+      (start: $a5_3, end: $a5_4) isa Q;
+      (start: $a5_4, end: $a5_5) isa Q;
       """
     Given transaction commits
 
