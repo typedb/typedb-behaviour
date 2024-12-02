@@ -224,6 +224,7 @@ Feature: Driver User
     Then get all users:
       | admin |
       | user  |
+      | user2 |
       | user3 |
 
 
