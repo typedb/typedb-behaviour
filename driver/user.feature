@@ -161,7 +161,7 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user2', password 'password'
-    Then delete user: admin; fails with a message containing: "Default user cannot be deleted"
+    Then delete user: admin; fails with a message containing: "The user is not permitted to execute the operation"
 
 
   Scenario: User can be created multiple times
