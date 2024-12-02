@@ -203,7 +203,7 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then get all users; fails with a message containing: "Invalid credential supplied"
+    Then get all users; fails with a message containing: "The user is not permitted to execute the operation"
 
 
   Scenario: Users can be created only by admin
@@ -214,9 +214,9 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then create user with username 'user3', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'user2', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
+    Then create user with username 'user3', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then create user with username 'user2', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then create user with username 'user', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
     When connection closes
 
     When connection opens with username 'admin', password 'password'
@@ -239,8 +239,8 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then delete user: user5; fails with a message containing: "Invalid credential supplied"
-    Then delete user: user4; fails with a message containing: "Invalid credential supplied"
+    Then delete user: user5; fails with a message containing: "The user is not permitted to execute the operation"
+    Then delete user: user4; fails with a message containing: "The user is not permitted to execute the operation"
     When connection closes
 
     When connection opens with username 'admin', password 'password'
