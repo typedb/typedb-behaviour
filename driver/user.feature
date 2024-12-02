@@ -187,8 +187,8 @@ Feature: Driver User
 
     When connection opens with username 'user', password 'password'
     Then get user(user) get name: user
-    Then get user: user2; fails with a message containing: "Invalid credential supplied"
-    Then get user: admin; fails with a message containing: "Invalid credential supplied"
+    Then get user: user2; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user: admin; fails with a message containing: "The user is not permitted to execute the operation"
 
 
   Scenario: All users are retrievable only by admin
