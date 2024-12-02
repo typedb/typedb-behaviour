@@ -164,15 +164,14 @@ Feature: Driver User
     Then delete user: admin; fails with a message containing: "The user is not permitted to execute the operation"
 
 
-  Scenario: User can be created multiple times
+  Scenario: User cannot be deleted multiple times
     Given typedb starts
     Given connection opens with username 'admin', password 'password'
     When create user with username 'user', password 'password'
     When delete user: user
-    Then delete user: user
-    Then delete user: user2
-    Then delete user: surely-non-existing-user
-
+    Then delete user: user; fails with a message containing: "User does not exist"
+    Then delete user: user2; fails with a message containing: "User does not exist"
+    Then delete user: surely-non-existing-user; fails with a message containing: "User does not exist"
 
     # TODO: Not sure if it's correct, may be implemented differently
   Scenario: User's name is retrievable only by admin
