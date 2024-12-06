@@ -161,18 +161,17 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user2', password 'password'
-    Then delete user: admin; fails with a message containing: "Default user cannot be deleted"
+    Then delete user: admin; fails with a message containing: "The user is not permitted to execute the operation"
 
 
-  Scenario: User can be created multiple times
+  Scenario: User cannot be deleted multiple times
     Given typedb starts
     Given connection opens with username 'admin', password 'password'
     When create user with username 'user', password 'password'
     When delete user: user
-    Then delete user: user
-    Then delete user: user2
-    Then delete user: surely-non-existing-user
-
+    Then delete user: user; fails with a message containing: "User does not exist"
+    Then delete user: user2; fails with a message containing: "User does not exist"
+    Then delete user: surely-non-existing-user; fails with a message containing: "User does not exist"
 
     # TODO: Not sure if it's correct, may be implemented differently
   Scenario: User's name is retrievable only by admin
@@ -187,8 +186,8 @@ Feature: Driver User
 
     When connection opens with username 'user', password 'password'
     Then get user(user) get name: user
-    Then get user: user2; fails with a message containing: "Invalid credential supplied"
-    Then get user: admin; fails with a message containing: "Invalid credential supplied"
+    Then get user: user2; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user: admin; fails with a message containing: "The user is not permitted to execute the operation"
 
 
   Scenario: All users are retrievable only by admin
@@ -203,7 +202,7 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then get all users; fails with a message containing: "Invalid credential supplied"
+    Then get all users; fails with a message containing: "The user is not permitted to execute the operation"
 
 
   Scenario: Users can be created only by admin
@@ -214,9 +213,9 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then create user with username 'user3', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'user2', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
+    Then create user with username 'user3', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then create user with username 'user2', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then create user with username 'user', password 'password'; fails with a message containing: "The user is not permitted to execute the operation"
     When connection closes
 
     When connection opens with username 'admin', password 'password'
@@ -224,6 +223,7 @@ Feature: Driver User
     Then get all users:
       | admin |
       | user  |
+      | user2 |
       | user3 |
 
 
@@ -239,50 +239,14 @@ Feature: Driver User
     When connection closes
 
     When connection opens with username 'user', password 'password'
-    Then delete user: user5; fails with a message containing: "Invalid credential supplied"
-    Then delete user: user4; fails with a message containing: "Invalid credential supplied"
+    Then delete user: user5; fails with a message containing: "The user is not permitted to execute the operation"
+    Then delete user: user4; fails with a message containing: "The user is not permitted to execute the operation"
     When connection closes
 
     When connection opens with username 'admin', password 'password'
     Then delete user: user5
 
-
-  Scenario: User's password can be changed without specifying the old password only by admin
-    Given typedb starts
-    Given connection opens with username 'admin', password 'password'
-    Then create user with username 'user', password 'password'
-    Then create user with username 'user2', password 'password'
-    Then get user(user) set password: new-password
-    When connection closes
-    Then connection opens with username 'admin', password 'new-password'; fails with a message containing: "Invalid credential supplied"
-    Then connection opens with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
-
-    Then connection opens with username 'user', password 'new-password'
-    Then get user: admin; fails with a message containing: "Invalid credential supplied"
-    Then get user: user2; fails with a message containing: "Invalid credential supplied"
-    Then get user(user) set password: new-password; fails with a message containing: "Invalid credential supplied"
-    When connection closes
-
-    When connection opens with username 'admin', password 'password'
-    Then get user(user) set password: new-password
-    Then get user(user) set password: password2
-    Then get user(admin) set password: password2
-    When connection closes
-
-    Then connection opens with username 'admin', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then connection opens with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then connection opens with username 'user', password 'new-password'; fails with a message containing: "Invalid credential supplied"
-
-    Then connection opens with username 'admin', password 'password2'
-    When connection closes
-    Then connection opens with username 'user', password 'password2'
-    Then get user: admin; fails with a message containing: "Invalid credential supplied"
-    Then get user: user2; fails with a message containing: "Invalid credential supplied"
-    Then get user(user) set password: new-password; fails with a message containing: "Invalid credential supplied"
-
-
-    # TODO: Describe what happens to already connected users. Use 'in background' for testing (maybe for driver.feature)
-    # TODO: Implement (maybe move to driver.feature)
+  # TODO: Describe what happens to already connected users. Use 'in background' for testing (maybe for driver.feature)
   Scenario: User's password can be changed through user only by admin or by this user
     Given typedb starts
 
@@ -290,25 +254,24 @@ Feature: Driver User
     Given create user with username 'user', password 'password'
     Given create user with username 'user2', password 'password2'
 
-    When get user(user) update password from 'password' to 'password'
+    When get user(user) update password to 'password'
     When connection closes
     Then connection opens with username 'user', password 'password'
     When connection closes
 
     When connection opens with username 'admin', password 'password'
-    Then get user(user) update password from 'new-password' to 'password'; fails with a message containing: "Invalid credential supplied"
-    When get user(user) update password from 'password' to 'new-password'
+    When get user(user) update password to 'new-password'
     When connection closes
     Then connection opens with username 'admin', password 'new-password'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
 
     Then connection opens with username 'user', password 'new-password'
-    Then get user(admin) update password from 'new-password' to 'password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(admin) update password from 'password' to 'new-password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(admin) update password from 'new-password' to 'password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(user2) update password from 'password' to 'new-password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(user2) update password from 'new-password' to 'password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(user) update password from 'new-password' to 'password'
+    Then get user(admin) update password to 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user(admin) update password to 'new-password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user(admin) update password to 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user(user2) update password to 'new-password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user(user2) update password to 'password'; fails with a message containing: "The user is not permitted to execute the operation"
+    Then get user(user) update password to 'password'
     Then connection closes
 
     Then connection opens with username 'admin', password 'new-password'; fails with a message containing: "Invalid credential supplied"
@@ -318,12 +281,12 @@ Feature: Driver User
     Then connection closes
 
     When connection opens with username 'admin', password 'password'
-    Then get user(admin) update password from 'new-password' to 'password'; fails with a message containing: "Invalid credential supplied"
-    Then get user(admin) update password from 'password' to 'new-password'
-    Then get user(user2) update password from 'password' to 'new-password'
+    Then get user(admin) update password to 'new-password'
     Then connection closes
     Then connection opens with username 'admin', password 'password'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username 'admin', password 'new-password'
+    Then connection opens with username 'admin', password 'new-password'
+    Then get user(admin) update password to 'password'
 
 
   Scenario: Connected username is retrievable
