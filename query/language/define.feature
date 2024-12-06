@@ -862,7 +862,7 @@ Feature: TypeQL Define Query
   Scenario: an abstract relation type can be defined with both abstract and concrete role types
     When typeql schema query
       """
-      define relation connection @abstract, relates from, relates to @abstract;
+      define relation connection @abstract, relates source, relates to @abstract;
       """
     Then transaction commits
 
@@ -879,7 +879,7 @@ Feature: TypeQL Define Query
   Scenario: a concrete relation type can be defined with abstract role types
     When typeql schema query
       """
-      define relation connection relates from, relates to @abstract;
+      define relation connection relates source, relates to @abstract;
       """
     Then transaction commits
 
