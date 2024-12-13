@@ -812,7 +812,7 @@ Feature: TypeDB Driver
       """
       match relation $r;
       """
-    Then typeql schema query; fails with a message containing: "Query parsing failed"
+    Then typeql schema query; fails with a message containing: "Failed to execute define query"
       """
       define entity entity;
       """
