@@ -928,7 +928,7 @@ Feature: TypeQL Match Clause
   Scenario: when matching by a relation type whose label doesn't exist, an error is thrown
     Then typeql read query; fails
       """
-      match ($x, $y) isa $type; $type label jakas-relacja;
+      match $r isa $type ($x, $y); $type label jakas-relacja;
       """
     Then transaction is open: true
 
@@ -1074,7 +1074,7 @@ Feature: TypeQL Match Clause
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
+      insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
       """
     Given transaction commits
 
@@ -1100,7 +1100,7 @@ Feature: TypeQL Match Clause
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $x isa some-entity, has ref 0; (player: $x, player: $x) isa symmetric, has ref 1;
+      insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
       """
     Given transaction commits
 
@@ -1151,14 +1151,14 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $rlinks (compared:$r), isa comparator;
+      $rlinks isa comparator (compared:$r);
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $rlinks (compared:$r), isa comparator;
+      match $rlinks isa comparator (compared:$r);
       """
     Then answer size is: 1
 
@@ -1179,7 +1179,7 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $rlinks (compared: $v, compared:$r), isa comparator;
+      $rlinks isa comparator (compared: $v, compared:$r);
       $v isa variable;
       """
     Given transaction commits
@@ -1187,7 +1187,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $rlinks (compared: $v, compared:$r), isa comparator;
+      match $rlinks isa comparator (compared: $v, compared:$r);
       """
     Then answer size is: 1
 
@@ -1238,10 +1238,10 @@ Feature: TypeQL Match Clause
       $x2b isa person, has name "Patricia", has ref 2;
       $x2c isa person, has name "Lily", has ref 3;
 
-      (sender: $x1, recipient: $x2a) isa gift-delivery;
-      (sender: $x1, recipient: $x2b) isa gift-delivery;
-      (sender: $x1, recipient: $x2c) isa gift-delivery;
-      (sender: $x2a, recipient: $x2b) isa gift-delivery;
+      gift-delivery (sender: $x1, recipient: $x2a);
+      gift-delivery (sender: $x1, recipient: $x2b);
+      gift-delivery (sender: $x1, recipient: $x2c);
+      gift-delivery (sender: $x2a, recipient: $x2b);
       """
     Given transaction commits
 
@@ -1249,8 +1249,8 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        (sender: $a, recipient: $b) isa gift-delivery;
-        (sender: $b, recipient: $c) isa gift-delivery;
+        gift-delivery (sender: $a, recipient: $b);
+        gift-delivery (sender: $b, recipient: $c);
       """
     Then uniquely identify answer concepts
       | a         | b         | c         |
@@ -1258,9 +1258,9 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        (sender: $a, recipient: $b) isa gift-delivery;
-        (sender: $b, recipient: $c) isa gift-delivery;
-        (sender: $c, recipient: $d) isa gift-delivery;
+        gift-delivery (sender: $a, recipient: $b);
+        gift-delivery (sender: $b, recipient: $c);
+        gift-delivery (sender: $c, recipient: $d);
       """
     Then answer size is: 0
 
@@ -1326,7 +1326,7 @@ Feature: TypeQL Match Clause
   Scenario: an error is thrown when matching an entity type as if it were a relation type
     Then typeql read query; fails
       """
-      match ($x) isa person;
+      match person ($x);
       """
     Then transaction is open: true
 
@@ -1334,7 +1334,7 @@ Feature: TypeQL Match Clause
   Scenario: an error is thrown when matching a non-existent type label as if it were a relation type
     Then typeql read query; fails
       """
-      match ($x) isa bottle-of-rum;
+      match bottle-of-rum ($x);
       """
     Then transaction is open: true
 
@@ -1350,7 +1350,7 @@ Feature: TypeQL Match Clause
   Scenario: when matching a role in a relation type that doesn't have that role, an error is thrown
     Then typeql read query; fails
       """
-      match (friend: $x) isa employment;
+      match employment (friend: $x);
       """
     Then transaction is open: true
 
@@ -1360,7 +1360,7 @@ Feature: TypeQL Match Clause
       """
       match
       $x isa company;
-      ($x) isa friendship;
+      friendship ($x);
       """
     Then transaction is open: true
 
@@ -1467,7 +1467,7 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      (owned: $c1, owner: $company) isa ownership, has is-insured true;
+      ownership (owned: $c1, owner: $company), has is-insured true;
       $c1 isa car, has ref 0; $company isa company, has ref 1;
       """
     Given transaction commits
@@ -1475,7 +1475,7 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      (owned: $c2, owner: $person) isa ownership, has is-insured true;
+      ownership (owned: $c2, owner: $person), has is-insured true;
       $c2 isa car, has ref 2; $person isa person, has ref 3;
       """
     Given transaction commits
@@ -1775,14 +1775,14 @@ Feature: TypeQL Match Clause
     Given connection open write transaction for database: typedb
     Given typeql write query
        """
-       insert $n <value> isa <attr>;
+       insert $n isa <attr> <value>;
        """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
        """
-       match $a <value> isa <attr>;
+       match $a isa <attr> <value>;
        """
     Then uniquely identify answer concepts
       | a                   |
@@ -1816,7 +1816,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a <value> isa <attr>;
+      match $a isa <attr> <value>;
       """
     Then answer size is: 0
 
@@ -2228,8 +2228,8 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $x 1 isa house-number;
-      $y 2.0 isa length;
+      $x isa house-number 1;
+      $y isa length 2.0;
       """
     Given transaction commits
 
@@ -2353,10 +2353,10 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $a 24 isa age;
-      $b 19 isa age;
-      $c 20.9 isa length;
-      $d 19.9 isa length;
+      $a isa age 24;
+      $b isa age 19;
+      $c isa length 20.9;
+      $d isa length 19.9;
       """
     Given transaction commits
 
