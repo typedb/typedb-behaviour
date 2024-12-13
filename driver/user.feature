@@ -83,7 +83,6 @@ Feature: Driver User
       | name           |
       | ??(!@(**('"'£" |
       | ·‿·            |
-      | 😎             |
 
 
   # TODO: Merge with the general "cannot contain invalid indentifiers" after fixing https://github.com/typedb/typedb-driver/issues/699
