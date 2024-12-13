@@ -848,7 +848,7 @@ Feature: TypeQL Undefine Query
     When connection open write transaction for database: typedb
     When typeql write query
       """
-      insert $x "not-email-regex" isa email;
+      insert $x isa email "not-email-regex";
       """
     Then transaction commits
 
@@ -895,7 +895,7 @@ Feature: TypeQL Undefine Query
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $x "Colette" isa name;
+      insert $x isa name "Colette";
       """
     Given transaction commits
 

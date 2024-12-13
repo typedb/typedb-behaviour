@@ -54,7 +54,7 @@ Feature: Function Body Structure
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
     """
-    match $p in alice_or_bob();
+    match let $p in alice_or_bob();
     """
     Then uniquely identify answer concepts
      | p         |
@@ -78,7 +78,7 @@ Feature: Function Body Structure
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
     """
-    match $p in not_alice_or_bob();
+    match let $p in not_alice_or_bob();
     """
     Then uniquely identify answer concepts
       | p         |
@@ -104,7 +104,7 @@ Feature: Function Body Structure
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
     """
-    match $age in second_and_third_largest_ages();
+    match let $age in second_and_third_largest_ages();
     """
     Then order of answer concepts is
       | age         |
@@ -128,7 +128,7 @@ Feature: Function Body Structure
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
     """
-    match $sum_ages in sum_all_ages();
+    match let $sum_ages in sum_all_ages();
     """
     Then uniquely identify answer concepts
       | sum_ages      |

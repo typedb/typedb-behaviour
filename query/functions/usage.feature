@@ -29,7 +29,7 @@ Feature: Function Usage
     define
     fun five() -> long :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -37,7 +37,7 @@ Feature: Function Usage
     When get answers of typeql read query
     """
     match
-      $six = five() + 1;
+      let $six = five() + 1;
     """
     Then uniquely identify answer concepts
       | six          |
@@ -52,12 +52,12 @@ Feature: Function Usage
     define
     fun five() -> long :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
 
     fun six() -> long :
     match
-      $six = 6;
+      let $six = 6;
     return first $six;
     """
     Given transaction commits
@@ -95,7 +95,7 @@ Feature: Function Usage
     define
     fun five() -> long :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -103,7 +103,7 @@ Feature: Function Usage
     When get answers of typeql read query
     """
     match
-      $ten = five() + five();
+      let $ten = five() + five();
     """
     Then uniquely identify answer concepts
       | ten           |
@@ -118,7 +118,7 @@ Feature: Function Usage
     define
     fun five() -> long :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -126,7 +126,7 @@ Feature: Function Usage
     When typeql read query; fails
     """
     match
-      $five = five();
-      $five = five();
+      let $five = five();
+      let $five = five();
     """
 

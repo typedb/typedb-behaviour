@@ -2514,8 +2514,8 @@ Feature: TypeQL Define Query
       insert
       $x isa product, has name "Cheese", has barcode "10001";
       $y isa product, has name "Ham", has barcode "10011";
-      $a "Milk" isa name;
-      $b "11111" isa barcode;
+      $a isa name "Milk";
+      $b isa barcode "11111";
       """
     Given transaction commits
 
