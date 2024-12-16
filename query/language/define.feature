@@ -944,7 +944,7 @@ Feature: TypeQL Define Query
     Then answer size is: 1
     Examples:
       | value-type  | label              |
-      | long        | number-of-cows     |
+      | integer        | number-of-cows     |
       | string      | favourite-food     |
       | boolean     | can-fly            |
       | double      | density            |
@@ -966,7 +966,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      number-of value long;
+      number-of value integer;
       number-of @abstract;
       number-of-cows @abstract;
       number-of-cows sub number-of;
@@ -1080,21 +1080,21 @@ Feature: TypeQL Define Query
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
-      define attribute code-name sub name, value long;
+      define attribute code-name sub name, value integer;
       """
     When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
       """
-      define attribute code-name sub name; attribute code-name-2 value long;
+      define attribute code-name sub name; attribute code-name-2 value integer;
       """
     When transaction commits
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
-      define attribute code-name value long;
+      define attribute code-name value integer;
       """
     When transaction closes
 
@@ -1125,7 +1125,7 @@ Feature: TypeQL Define Query
     Examples:
       | value_type | label             |
       | boolean    | is-sleeping       |
-      | long       | number-of-fingers |
+      | integer       | number-of-fingers |
       | double     | height            |
       | string     | first-word        |
       | datetime   | graduation-date   |
@@ -1134,7 +1134,7 @@ Feature: TypeQL Define Query
   Scenario: defining an attribute type value when a different value is already defined errors
     Then typeql schema query; fails with a message containing: "different 'name value string' is already defined"
       """
-      define name value long;
+      define name value integer;
       """
 
   ###########
@@ -1453,7 +1453,7 @@ Feature: TypeQL Define Query
     Examples:
       | annotation                                            | value-type          |
       | regex("A")                                            | , value bool        |
-      | regex("A")                                            | , value long        |
+      | regex("A")                                            | , value integer        |
       | regex("A")                                            | , value double      |
       | regex("A")                                            | , value decimal     |
       | regex("A")                                            | , value date        |
@@ -1464,8 +1464,8 @@ Feature: TypeQL Define Query
 
       | range("A".."B")                                       |                     |
       | range(1..2)                                           |                     |
-      | range("A".."B")                                       | , value long        |
-      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value long        |
+      | range("A".."B")                                       | , value integer        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value integer        |
       | range("A".."B")                                       | , value datetime    |
       | range(1..2)                                           | , value datetime    |
       | range(1..2)                                           | , value string      |
@@ -1479,13 +1479,13 @@ Feature: TypeQL Define Query
       | values("A")                                           |                     |
       | values(false)                                         |                     |
       | values(0)                                             |                     |
-      | values("A", 2)                                        | , value long        |
-      | values("A", "B")                                      | , value long        |
-      | values(0.1)                                           | , value long        |
-      | values("string")                                      | , value long        |
-      | values(true)                                          | , value long        |
-      | values(2024-06-04)                                    | , value long        |
-      | values(2024-06-04T00:00:00+0010)                      | , value long        |
+      | values("A", 2)                                        | , value integer        |
+      | values("A", "B")                                      | , value integer        |
+      | values(0.1)                                           | , value integer        |
+      | values("string")                                      | , value integer        |
+      | values(true)                                          | , value integer        |
+      | values(2024-06-04)                                    | , value integer        |
+      | values(2024-06-04T00:00:00+0010)                      | , value integer        |
       | values("string")                                      | , value double      |
       | values(true)                                          | , value double      |
       | values(2024-06-04)                                    | , value double      |
@@ -1540,7 +1540,7 @@ Feature: TypeQL Define Query
       """
     Examples:
       | arg0                     | arg1                     | value-type  |
-      | 1                        | 2                        | long        |
+      | 1                        | 2                        | integer        |
       | 112.2                    | 134.3                    | double      |
       | 124.4                    | 124.0                    | decimal     |
       | false                    | true                     | boolean     |
@@ -1671,7 +1671,7 @@ Feature: TypeQL Define Query
     Examples:
       | annotation                                            | value-type  |
       | regex("A")                                            | bool        |
-      | regex("A")                                            | long        |
+      | regex("A")                                            | integer        |
       | regex("A")                                            | double      |
       | regex("A")                                            | decimal     |
       | regex("A")                                            | date        |
@@ -1679,8 +1679,8 @@ Feature: TypeQL Define Query
       | regex("A")                                            | datetime-tz |
       | regex("A")                                            | duration    |
 
-      | range("A".."B")                                       | long        |
-      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | long        |
+      | range("A".."B")                                       | integer        |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | integer        |
       | range("A".."B")                                       | datetime    |
       | range(1..2)                                           | datetime    |
       | range(1..2)                                           | string      |
@@ -1690,13 +1690,13 @@ Feature: TypeQL Define Query
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | date        |
       | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | date        |
 
-      | values("A", 2)                                        | long        |
-      | values("A", "B")                                      | long        |
-      | values(0.1)                                           | long        |
-      | values("string")                                      | long        |
-      | values(true)                                          | long        |
-      | values(2024-06-04)                                    | long        |
-      | values(2024-06-04T00:00:00+0010)                      | long        |
+      | values("A", 2)                                        | integer        |
+      | values("A", "B")                                      | integer        |
+      | values(0.1)                                           | integer        |
+      | values("string")                                      | integer        |
+      | values(true)                                          | integer        |
+      | values(2024-06-04)                                    | integer        |
+      | values(2024-06-04T00:00:00+0010)                      | integer        |
       | values("string")                                      | double      |
       | values(true)                                          | double      |
       | values(2024-06-04)                                    | double      |
@@ -1761,7 +1761,7 @@ Feature: TypeQL Define Query
       """
     Examples:
       | arg0                     | arg1                     | value-type  |
-      | 1                        | 2                        | long        |
+      | 1                        | 2                        | integer        |
       | 112.2                    | 134.3                    | double      |
       | 124.4                    | 124.0                    | decimal     |
       | false                    | true                     | boolean     |
@@ -2276,7 +2276,7 @@ Feature: TypeQL Define Query
   Scenario: an abstract attribute type can be defined
     When typeql schema query
       """
-      define attribute number-of-limbs @abstract, value long;
+      define attribute number-of-limbs @abstract, value integer;
       """
     Then transaction commits
 
@@ -2295,7 +2295,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      attribute number-of-limbs @abstract, value long;
+      attribute number-of-limbs @abstract, value integer;
       attribute number-of-legs sub number-of-limbs;
       """
     Then transaction commits
@@ -2315,7 +2315,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      attribute number-of-limbs @abstract, value long;
+      attribute number-of-limbs @abstract, value integer;
       attribute number-of-artificial-limbs @abstract, sub number-of-limbs;
       """
     Then transaction commits
@@ -2612,7 +2612,7 @@ Feature: TypeQL Define Query
   Scenario: Defining an attribute type multiple times succeeds if and only if the value type remains unchanged
     Then typeql schema query; fails
       """
-      define attribute name value long;
+      define attribute name value integer;
       """
     Given transaction closes
     Given connection open schema transaction for database: typedb
@@ -2671,7 +2671,7 @@ Feature: TypeQL Define Query
   Scenario: a regex constraint can not be added to an existing attribute type whose value type isn't 'string'
     Given typeql schema query
       """
-      define attribute house-number value long;
+      define attribute house-number value integer;
       """
     Given transaction commits
 
@@ -2699,13 +2699,13 @@ Feature: TypeQL Define Query
   Scenario: the value type of an existing attribute type is not modifiable through define
     Then typeql schema query; fails
       """
-      define name value long;
+      define name value integer;
       """
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
-      define attribute name value long;
+      define attribute name value integer;
       """
 
   Scenario: an attribute ownership can be converted to a key ownership
@@ -2952,7 +2952,7 @@ Feature: TypeQL Define Query
   Scenario: a concrete attribute type can be converted to an abstract attribute type
     When typeql schema query
       """
-      define attribute age value long;
+      define attribute age value integer;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
@@ -3217,7 +3217,7 @@ Feature: TypeQL Define Query
     """
        define
        entity person owns mobile;
-       attribute mobile value long;
+       attribute mobile value integer;
        entity child sub person;
       """
     Given transaction commits
@@ -3240,7 +3240,7 @@ Feature: TypeQL Define Query
       """
       define
       entity child sub person;
-      attribute phone-number value long;
+      attribute phone-number value integer;
       entity person owns phone-number @key;
       """
     Given transaction commits

@@ -27,7 +27,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
@@ -41,7 +41,7 @@ Feature: Function Usage
     """
     Then uniquely identify answer concepts
       | six          |
-      | value:long:6 |
+      | value:integer:6 |
     Given transaction closes
 
 
@@ -50,12 +50,12 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
 
-    fun six() -> long :
+    fun six() -> integer :
     match
       let $six = 6;
     return first $six;
@@ -93,7 +93,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
@@ -107,7 +107,7 @@ Feature: Function Usage
     """
     Then uniquely identify answer concepts
       | ten           |
-      | value:long:10 |
+      | value:integer:10 |
     Given transaction closes
 
 
@@ -116,7 +116,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;

@@ -322,7 +322,7 @@ Feature: TypeQL Rule Validation
     Given typeql schema query; throws exception
       """
       define
-      age sub attribute, value long;
+      age sub attribute, value integer;
       rule boudicca-is-1960-years-old: when {
         $person isa person, has name "Boudicca";
       } then {
@@ -343,7 +343,7 @@ Feature: TypeQL Rule Validation
       """
 
 
-  Scenario: a rule can materialise a long attribute for a double attribute type
+  Scenario: a rule can materialise a integer attribute for a double attribute type
     Then typeql schema query
       """
       define
@@ -358,12 +358,12 @@ Feature: TypeQL Rule Validation
       """
 
 
-  Scenario: when a rule creates double attribute for a long attribute type, an error is thrown
+  Scenario: when a rule creates double attribute for a integer attribute type, an error is thrown
     Then typeql schema query; throws exception
       """
       define
       person owns weight;
-      grade sub attribute, value long;
+      grade sub attribute, value integer;
 
       rule may-has-grade-5: when {
         $p has name "May";
@@ -420,7 +420,7 @@ Feature: TypeQL Rule Validation
     Then typeql schema query; throws exception
       """
       define
-      number-of-devices sub attribute, value long, abstract;
+      number-of-devices sub attribute, value integer, abstract;
       person owns number-of-devices;
       rule karl-is-allergic-to-technology: when {
         $karl isa person, has name "Karl";
@@ -686,7 +686,7 @@ Feature: TypeQL Rule Validation
     Then transaction commits
 
 
-  Scenario: rules with cyclic inferences are allowed as long as there is no negation
+  Scenario: rules with cyclic inferences are allowed as integer as there is no negation
     When typeql schema query
       """
       define
@@ -749,7 +749,7 @@ Feature: TypeQL Rule Validation
 
       person owns age;
 
-      age sub attribute, value long;
+      age sub attribute, value integer;
 
       man sub person;
       boy sub person;

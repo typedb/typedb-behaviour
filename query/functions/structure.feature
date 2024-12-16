@@ -21,8 +21,8 @@ Feature: Function Body Structure
         owns age @card(0..),
         owns ref @key;
       attribute name value string;
-      attribute age @independent, value long;
-      attribute ref value long;
+      attribute age @independent, value integer;
+      attribute ref value integer;
       """
     Given transaction commits
 
@@ -117,7 +117,7 @@ Feature: Function Body Structure
     Given typeql schema query
       """
       define
-      fun sum_all_ages() -> { long }:
+      fun sum_all_ages() -> { integer }:
       match
         $p isa person, has age $age;
       reduce $sum_ages = sum($age);
@@ -132,7 +132,7 @@ Feature: Function Body Structure
     """
     Then uniquely identify answer concepts
       | sum_ages      |
-      | value:long:42 |
+      | value:integer:42 |
 
 
   Scenario: A function may not have write stages in the body

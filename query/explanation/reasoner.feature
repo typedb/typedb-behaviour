@@ -21,7 +21,7 @@ Feature: TypeQL Reasoning Explanation
       define
 
       name sub attribute, value string;
-      company-id sub attribute, value long;
+      company-id sub attribute, value integer;
 
       company sub entity,
         owns name,
@@ -76,7 +76,7 @@ Feature: TypeQL Reasoning Explanation
           value boolean;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,
@@ -215,7 +215,7 @@ Feature: TypeQL Reasoning Explanation
 
       name sub attribute, value string;
 
-      person-id sub attribute, value long;
+      person-id sub attribute, value integer;
 
       person sub entity,
           owns person-id @key,
@@ -314,7 +314,7 @@ Feature: TypeQL Reasoning Explanation
           value boolean;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,
@@ -377,7 +377,7 @@ Feature: TypeQL Reasoning Explanation
           value boolean;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,
@@ -443,7 +443,7 @@ Feature: TypeQL Reasoning Explanation
           value boolean;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,

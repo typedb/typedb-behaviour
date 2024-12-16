@@ -30,7 +30,7 @@ Feature: TypeQL Update Query
         relates parent,
         relates child;
       name sub attribute, value string;
-      ref sub attribute, value long;
+      ref sub attribute, value integer;
       """
     Given transaction commits
 

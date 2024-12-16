@@ -173,7 +173,7 @@ Feature: TypeQL Reasoning Explanation
           value string;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,
@@ -222,7 +222,7 @@ Feature: TypeQL Reasoning Explanation
           value string;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,
@@ -271,7 +271,7 @@ Feature: TypeQL Reasoning Explanation
           value string;
 
       company-id sub attribute,
-          value long;
+          value integer;
 
       company sub entity,
           owns company-id @key,

@@ -35,8 +35,8 @@ Feature: TypeQL Match Clause
         relates employer @card(0..),
         owns ref @key;
       attribute name value string;
-      attribute age @independent, value long;
-      attribute ref value long;
+      attribute age @independent, value integer;
+      attribute ref value integer;
       attribute email value string;
       """
     Given transaction commits
@@ -1690,7 +1690,7 @@ Feature: TypeQL Match Clause
       """
       define
       attribute root @abstract;
-      attribute age, value long;
+      attribute age, value integer;
       attribute name, value string;
       attribute is-new, value boolean;
       attribute success, value double;
@@ -1706,7 +1706,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-      $lo value long;
+      $lo value integer;
       $st value string;
       $bo value boolean;
       $do value double;
@@ -1791,7 +1791,7 @@ Feature: TypeQL Match Clause
     Examples:
       | attr              | type        | value                              |
       | is-alive          | boolean     | true                               |
-      | age               | long        | 21                                 |
+      | age               | integer        | 21                                 |
       | score             | double      | 123.456                            |
       | balance           | decimal     | 123.456                            |
       | name              | string      | "alice"                            |
@@ -1823,7 +1823,7 @@ Feature: TypeQL Match Clause
     Examples:
       | attr        | type        | value                    |
       | colour      | string      | "Green"                  |
-      | calories    | long        | 1761                     |
+      | calories    | integer        | 1761                     |
       | grams       | double      | 9.6                      |
       | gluten-free | boolean     | false                    |
       | use-by-date | datetime    | 2020-06-16               |
@@ -1977,7 +1977,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute shoe-size value long;
+      attribute shoe-size value integer;
       person owns shoe-size;
       """
     Given transaction commits
@@ -2037,7 +2037,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute lucky-number value long;
+      attribute lucky-number value integer;
       person owns lucky-number @card(0..);
       """
     Given transaction commits
@@ -2215,11 +2215,11 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
-  Scenario: value comparisons can be performed between a 'double' and a 'long'
+  Scenario: value comparisons can be performed between a 'double' and a 'integer'
     Given typeql schema query
       """
       define
-      attribute house-number @independent, value long;
+      attribute house-number @independent, value integer;
       attribute length @independent, value double;
       """
     Given transaction commits
@@ -2291,7 +2291,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute lucky-number value long;
+      attribute lucky-number value integer;
       person owns lucky-number @card(0..);
       """
     Given transaction commits
@@ -2341,7 +2341,7 @@ Feature: TypeQL Match Clause
       | key:ref:2 |
 
 
-  Scenario: when the answers of a value comparison include both a 'double' and a 'long', both answers are returned
+  Scenario: when the answers of a value comparison include both a 'double' and a 'integer', both answers are returned
     Given typeql schema query
       """
       define
@@ -2667,7 +2667,7 @@ Feature: TypeQL Match Clause
   #     """
   #   Then transaction is open: false
 
-  Scenario: the first variable in a negation can be unbound, as long as it is connected to a bound variable
+  Scenario: the first variable in a negation can be unbound, as integer as it is connected to a bound variable
     Then get answers of typeql read query
       """
       match

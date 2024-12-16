@@ -22,9 +22,9 @@ Feature: TypeQL Get Query with Expressions
         owns height,
         owns weight;
       name sub attribute, value string;
-      age sub attribute, value long;
-      height sub attribute, value long;
-      weight sub attribute, value long;
+      age sub attribute, value integer;
+      height sub attribute, value integer;
+      weight sub attribute, value integer;
 
       limit-double sub attribute, value double;
       """
@@ -171,7 +171,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Then uniquely identify answer concepts
       | x            | const           | plus-negative  | minus-negative  |
-      | attr:age:16  | value:long:-10  | value:long:6   | value:long:26   |
+      | attr:age:16  | value:integer:-10  | value:integer:6   | value:integer:26   |
 
 
   Scenario: Test operator definitions
@@ -202,7 +202,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Then uniquely identify answer concepts
       | a             | b            | c             | d                  |
-      | value:long: 9 | value:long:3 | value:long:18 | value:double: 2.0  |
+      | value:integer: 9 | value:integer:3 | value:integer:18 | value:double: 2.0  |
 
     When get answers of typeql read query
     """
@@ -247,7 +247,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Then uniquely identify answer concepts
       | a             | b             |
-      | value:long: 1 | value:long: 2 |
+      | value:integer: 1 | value:integer: 2 |
 
     When get answers of typeql read query
     """
@@ -259,7 +259,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Then uniquely identify answer concepts
       | a             | b                 |
-      | value:long: 1 | value:double: 0.5 |
+      | value:integer: 1 | value:double: 0.5 |
 
     When get answers of typeql read query
     """
@@ -271,7 +271,7 @@ Feature: TypeQL Get Query with Expressions
       """
     Then uniquely identify answer concepts
       | a             | b              |
-      | value:long: 2 | value:long: -5 |
+      | value:integer: 2 | value:integer: -5 |
 
 
 

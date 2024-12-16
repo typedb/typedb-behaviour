@@ -38,10 +38,10 @@ Feature: TypeQL Insert Query
         value string;
 
       attribute age
-        value long;
+        value integer;
 
       attribute ref
-        value long;
+        value integer;
 
       attribute email
         value string;
@@ -411,7 +411,7 @@ Feature: TypeQL Insert Query
     Examples:
       | attr              | type     | val1       | val2       |
       | subject-taken     | string   | "Maths"    | "Physics"  |
-      | lucky-number      | long     | 10         | 3          |
+      | lucky-number      | integer     | 10         | 3          |
       | recite-pi-attempt | double   | 3.146      | 3.14158    |
       | is-alive          | boolean  | true       | false      |
       | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
@@ -527,7 +527,7 @@ Parker";
         owns ref @key;
       person plays residence:resident;
       attribute address value string, plays residence:place;
-      attribute tenure-days value long;
+      attribute tenure-days value integer;
       """
     Given transaction commits
 
@@ -1011,7 +1011,7 @@ Parker";
     Examples:
       | attr           | type     | value      |
       | title          | string   | "Prologue" |
-      | page-number    | long     | 233        |
+      | page-number    | integer     | 233        |
       | price          | double   | 15.99      |
       | purchased      | boolean  | true       |
       | published-date | datetime | 2020-01-01 |
@@ -1051,7 +1051,7 @@ Parker";
     Examples:
       | attr           | type     | value      |
       | title          | string   | "Prologue" |
-      | page-number    | long     | 233        |
+      | page-number    | integer     | 233        |
       | price          | double   | 15.99      |
       | purchased      | boolean  | true       |
       | published-date | datetime | 2020-01-01 |
@@ -1252,8 +1252,8 @@ Parker";
 
     Examples:
       | type     | attr       | insert           | match            |
-      | long     | shoe-size  | 92               | 92               |
-      | long     | shoe-size  | 92               | 92.00            |
+      | integer     | shoe-size  | 92               | 92               |
+      | integer     | shoe-size  | 92               | 92.00            |
       | double   | length     | 52               | 52               |
       | double   | length     | 52               | 52.00            |
       | double   | length     | 52.0             | 52               |
@@ -1286,11 +1286,11 @@ Parker";
       | string   | colour     | 92.8         |
       | string   | colour     | false        |
       | string   | colour     | 2019-12-26   |
-      | long     | shoe-size  | 28.5         |
-      | long     | shoe-size  | "28"         |
-      | long     | shoe-size  | true         |
-      | long     | shoe-size  | 2019-12-26   |
-      | long     | shoe-size  | 28.0         |
+      | integer     | shoe-size  | 28.5         |
+      | integer     | shoe-size  | "28"         |
+      | integer     | shoe-size  | true         |
+      | integer     | shoe-size  | 2019-12-26   |
+      | integer     | shoe-size  | 28.0         |
       | double   | length     | "28.0"       |
       | double   | length     | false        |
       | double   | length     | 2019-12-26   |
@@ -1391,7 +1391,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute ref value long;
+      attribute ref value integer;
       entity base owns ref @key;
       entity derived sub base;
       """
@@ -1426,7 +1426,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute ref value long;
+      attribute ref value integer;
       entity base owns ref @key;
       entity derived-a sub base;
       entity derived-b sub base;
@@ -1688,7 +1688,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute height value long;
+      attribute height value integer;
       person owns height;
       """
     Given transaction commits
@@ -2485,7 +2485,7 @@ Parker";
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    # After deleting all the links to 'c', our rules no longer infer that 'd' is reachable from 'a'. But in fact we
+    # After deleting all the links to 'c', our rules no integerer infer that 'd' is reachable from 'a'. But in fact we
     # materialised this reachable link when we did our match-insert, because it played a role in our road-proposal,
     # which itself plays a role in the road-construction that we explicitly inserted:
     When get answers of typeql read query
@@ -2645,7 +2645,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute capacity value long;
+      attribute capacity value integer;
       """
     Given transaction commits
 

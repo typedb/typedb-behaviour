@@ -186,7 +186,7 @@ Feature: Data validation
     When transaction commits
     Examples:
       | value-type  | value           |
-      | long        | 1               |
+      | integer        | 1               |
       | double      | 1.0             |
       | decimal     | 1.0             |
       | string      | "alice"         |
@@ -223,7 +223,7 @@ Feature: Data validation
     When transaction commits
     Examples:
       | value-type  | value           |
-      | long        | 1               |
+      | integer        | 1               |
       | double      | 1.0             |
       | decimal     | 1.0             |
       | string      | "alice"         |
@@ -794,7 +794,7 @@ Feature: Data validation
     When relation(parentship) create role: child
     When relation(parentship) get role(child) set ordering: ordered
     When create attribute type: id
-    When attribute(id) set value type: long
+    When attribute(id) set value type: integer
     When relation(parentship) set owns: id
     When relation(parentship) get owns(id) set annotation: @key
     When create entity type: person
@@ -854,7 +854,7 @@ Feature: Data validation
 
   Scenario: Owns cannot change ordering if it has role instances for entity type
     When create attribute type: id
-    When attribute(id) set value type: long
+    When attribute(id) set value type: integer
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: email
@@ -904,7 +904,7 @@ Feature: Data validation
     When attribute(name) put instance with value: "bob"
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) set value type: long; fails
+    Then attribute(name) set value type: integer; fails
     Then attribute(name) set value type: double; fails
     Then attribute(name) set value type: decimal; fails
     Then attribute(name) set value type: datetime; fails

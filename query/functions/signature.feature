@@ -19,7 +19,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     entity person, owns name, owns nationality;
     entity cat, owns name, owns breed;
     attribute name, value string;
-    attribute nationality, value long;
+    attribute nationality, value integer;
     attribute breed, value string;
     """
     Given transaction commits

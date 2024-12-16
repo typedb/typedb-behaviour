@@ -39,7 +39,7 @@ Feature: Negation Resolution
         relates superior;
 
       name sub attribute, value string;
-      age sub attribute, value long;
+      age sub attribute, value integer;
       """
     # each scenario specialises the schema further
 

@@ -18,7 +18,7 @@ Feature: Basic Function Execution
       define
 
       entity person, owns name, owns ref @key;
-      attribute ref value long;
+      attribute ref value integer;
       attribute name value string;
       """
     Given transaction commits
@@ -310,7 +310,7 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun add($x: long, $y: long) -> { long }:
+      fun add($x: integer, $y: integer) -> { integer }:
       match
         let $z = $x + $y;
       return { $z };
@@ -325,7 +325,7 @@ Feature: Basic Function Execution
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then uniquely identify answer concepts
       | z            |
-      | value:long:5 |
+      | value:integer:5 |
 
 
   Scenario: A function can return a tuple of values derived from a reduce operation
@@ -342,7 +342,7 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun ref_sum_and_sum_squares() -> long, long :
+      fun ref_sum_and_sum_squares() -> integer, integer :
       match
         $ref isa ref;
         let $ref_2 = $ref * $ref;
@@ -358,5 +358,5 @@ Feature: Basic Function Execution
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then uniquely identify answer concepts
       | sum          | squares      |
-      | value:long:3 | value:long:5 |
+      | value:integer:3 | value:integer:5 |
 

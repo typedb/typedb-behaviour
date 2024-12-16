@@ -757,7 +757,7 @@ Feature: TypeQL Undefine Query
     Examples:
       | value_type | attr       |
       | string     | colour     |
-      | long       | age        |
+      | integer       | age        |
       | double     | height     |
       | boolean    | is-awake   |
       | datetime   | birth-date |
@@ -863,7 +863,7 @@ Feature: TypeQL Undefine Query
   Scenario: undefining the value type of an attribute type is possible
     Then typeql schema query; fails with a message containing: "defined 'value' is 'string'"
       """
-      undefine value long from name;
+      undefine value integer from name;
       """
 
     Then typeql schema query; fails with a message containing: "should be abstract"

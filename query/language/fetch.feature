@@ -45,9 +45,9 @@ Feature: TypeQL Fetch Query
       attribute person-name sub name;
       attribute company-name sub name;
       attribute description, value string;
-      attribute age value long;
+      attribute age value integer;
       attribute karma value double;
-      attribute ref value long;
+      attribute ref value integer;
       attribute start-date value datetime;
       attribute end-date value datetime;
       attribute achievement @abstract;
@@ -811,7 +811,7 @@ Feature: TypeQL Fetch Query
     Examples:
       | value-type  | value                                       | expected                                      | not-expected                                 |
       | boolean     | true                                        | true                                          | false                                        |
-      | long        | 12345090                                    | 12345090                                      | 0                                            |
+      | integer        | 12345090                                    | 12345090                                      | 0                                            |
       | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
       | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
       | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
@@ -1688,7 +1688,7 @@ Feature: TypeQL Fetch Query
     Given get answers of typeql read query
       """
         with
-        fun get_age($p_arg: person) -> { long }:
+        fun get_age($p_arg: person) -> { integer }:
         match
           $p_arg has age $age;
           let $value = $age;
@@ -1701,7 +1701,7 @@ Feature: TypeQL Fetch Query
     Given answer size is: 1
     Given uniquely identify answer concepts
       | z             |
-      | value:long:10 |
+      | value:integer:10 |
 
     When get answers of typeql read query
       """
@@ -1744,7 +1744,7 @@ Feature: TypeQL Fetch Query
         return last $value;
 
         with
-        fun get_age($p_arg: person) -> long:
+        fun get_age($p_arg: person) -> integer:
         match
           $p_arg has age $age;
           let $value = $age;
@@ -1776,7 +1776,7 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         with
-        fun get_age($p_arg: person) -> long:
+        fun get_age($p_arg: person) -> integer:
         match
           $p_arg has age $age;
           let $value = $age;
@@ -2051,7 +2051,7 @@ Feature: TypeQL Fetch Query
   Scenario: fetch can have a subquery returning a list of aggregations
     Given get answers of typeql read query
       """
-        with fun get_info($p_arg: person) -> long, long, long:
+        with fun get_info($p_arg: person) -> integer, integer, integer:
           match
             $p_arg has person-name $name, has age $age;
             return count($name), sum($age), count($age);
@@ -2063,8 +2063,8 @@ Feature: TypeQL Fetch Query
     Given answer size is: 2
     Given uniquely identify answer concepts
       | x            | y             | z            |
-      | value:long:2 | value:long:20 | value:long:2 |
-      | value:long:0 | value:long:0  | value:long:0 |
+      | value:integer:2 | value:integer:20 | value:integer:2 |
+      | value:integer:0 | value:integer:0  | value:integer:0 |
     When get answers of typeql read query
       """
         match
@@ -2413,7 +2413,7 @@ Feature: TypeQL Fetch Query
     Given get answers of typeql read query
       """
         with
-        fun get_ages($p_arg: person) -> { long }:
+        fun get_ages($p_arg: person) -> { integer }:
         match
           $p_arg has age $age;
           let $v = $age;
@@ -2426,7 +2426,7 @@ Feature: TypeQL Fetch Query
     Given answer size is: 1
     Given uniquely identify answer concepts
       | z             |
-      | value:long:10 |
+      | value:integer:10 |
 
     When get answers of typeql read query
       """
@@ -2460,7 +2460,7 @@ Feature: TypeQL Fetch Query
     When get answers of typeql read query
       """
         with
-        fun get_ages($p_arg: person) -> { long }:
+        fun get_ages($p_arg: person) -> { integer }:
         match
           $p_arg has age $age;
           let $v = $age;

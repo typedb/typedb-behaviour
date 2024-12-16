@@ -27,7 +27,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
@@ -40,7 +40,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
@@ -75,7 +75,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 4;
     return first $five;
@@ -89,14 +89,14 @@ Feature: Function Definition
     """
     Then uniquely identify answer concepts
       | five         |
-      | value:long:4 |
+      | value:integer:4 |
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When typeql schema query
     """
     redefine
-    fun five() -> long :
+    fun five() -> integer :
     match
       let $five = 5;
     return first $five;
@@ -110,7 +110,7 @@ Feature: Function Definition
     """
     Then uniquely identify answer concepts
       | five         |
-      | value:long:5 |
+      | value:integer:5 |
     Given transaction closes
 
 

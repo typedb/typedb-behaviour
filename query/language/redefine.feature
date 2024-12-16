@@ -32,7 +32,7 @@ Feature: TypeQL Redefine Query
       attribute phone-nr value string;
       attribute empty-data @abstract;
       attribute abstract-decimal-data @abstract, value decimal;
-      attribute long-data sub empty-data, value long @values(1, 2, 3, 4, 5, 6, 7, 8, 9);
+      attribute integer-data sub empty-data, value integer @values(1, 2, 3, 4, 5, 6, 7, 8, 9);
       attribute empty-sub-data @abstract, sub empty-data;
       """
     Given transaction commits
@@ -763,13 +763,13 @@ Feature: TypeQL Redefine Query
 
     Examples:
       | value-type-1 | value-type-2 | label              |
-      | date         | long         | number-of-cows     |
+      | date         | integer         | number-of-cows     |
       | decimal      | string       | favourite-food     |
       | duration     | boolean      | can-fly            |
       | datetime-tz  | double       | density            |
       | double       | decimal      | savings            |
       | datetime     | date         | flight-date        |
-      | long         | datetime     | flight-time        |
+      | integer         | datetime     | flight-time        |
       | boolean      | datetime-tz  | flight-time-tz     |
       | string       | duration     | procedure-duration |
 
@@ -781,7 +781,7 @@ Feature: TypeQL Redefine Query
       """
     When typeql schema query
       """
-      redefine attribute long-data sub data;
+      redefine attribute integer-data sub data;
       """
     Then transaction commits
 
@@ -793,7 +793,7 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x               |
       | label:data      |
-      | label:long-data |
+      | label:integer-data |
 
 
   Scenario: a redefined attribute subtype inherits the value type of its parent
@@ -817,7 +817,7 @@ Feature: TypeQL Redefine Query
   Scenario: redefining an attribute subtype throws if it is given a different value type to what its parent has
     Then typeql schema query; fails
       """
-      redefine attribute long-data sub abstract-decimal-data;
+      redefine attribute integer-data sub abstract-decimal-data;
       """
 
 
@@ -828,7 +828,7 @@ Feature: TypeQL Redefine Query
       """
     Then typeql schema query
       """
-      redefine attribute id value long;
+      redefine attribute id value integer;
       """
     Then transaction commits
 
@@ -840,7 +840,7 @@ Feature: TypeQL Redefine Query
       """
     Then typeql schema query
       """
-      redefine id value long;
+      redefine id value integer;
       """
     Then transaction commits
 
@@ -855,7 +855,7 @@ Feature: TypeQL Redefine Query
   Scenario: the value type of an existing attribute type is modifiable through redefine
     Then typeql schema query
       """
-      redefine phone-nr value long;
+      redefine phone-nr value integer;
       """
     Then transaction commits
     Given connection open schema transaction for database: typedb
