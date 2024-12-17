@@ -812,7 +812,7 @@ Feature: TypeDB Driver
       """
       match relation $r;
       """
-    Then typeql schema query; fails with a message containing: "Failed to execute define query"
+    Then typeql schema query; fails with a message containing: "The reserved keyword "entity" cannot be used as an identifier"
       """
       define entity entity;
       """
@@ -1561,7 +1561,7 @@ Feature: TypeDB Driver
     When get answers of typeql read query
       """
       match $_ isa person, has typed $v;
-      $value = $v;
+      let $value = $v;
       """
     Then answer type is: concept rows
     Then answer query type is: read
@@ -1735,7 +1735,7 @@ Feature: TypeDB Driver
       """
     When get answers of typeql read query
       """
-      match $_ isa person, has $a; $v = $a;
+      match $_ isa person, has $a; let $v = $a;
       fetch { "v": $v };
       """
     Then answer type is: concept documents
@@ -1778,7 +1778,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $a 25 isa age;  $n "John" isa name;
+      insert $a isa age 25;  $n isa name "John";
       """
 
     When get answers of typeql read query
@@ -1823,7 +1823,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $dt 2023-05-01T00:00:00 isa dt;
+      insert $dt isa dt 2023-05-01T00:00:00;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00
@@ -1860,7 +1860,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $dt 2023-05-01T00:00:00 Asia/Calcutta isa dt;
+      insert $dt isa dt 2023-05-01T00:00:00 Asia/Calcutta;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00 Asia/Calcutta
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 Asia/Calcutta
