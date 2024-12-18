@@ -18,7 +18,7 @@ Feature: Basic Function Execution
       define
 
       entity person, owns name, owns ref @key;
-      attribute ref value long;
+      attribute ref value integer;
       attribute name value string;
       """
     Given transaction commits
@@ -53,14 +53,14 @@ Feature: Basic Function Execution
       """
       match
        $x isa person, has name "Abigail";
-       $friend in people_pairs_with($x);
+       let $friend in people_pairs_with($x);
       """
     Then answer size is: 5
     Given get answers of typeql read query
       """
       match
        $x isa person;
-       $friend in people_pairs_with($x);
+       let $friend in people_pairs_with($x);
       """
     Then answer size is: 25
 
@@ -123,7 +123,7 @@ Feature: Basic Function Execution
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x1, $x2 in message-successor-pairs();
+      match let $x1, $x2 in message-successor-pairs();
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size is: 10
@@ -150,14 +150,14 @@ Feature: Basic Function Execution
     fun name_values() -> { string } :
     match
       $p isa person, has name $name_attr;
-      $name_value = $name_attr;
+      let $name_value = $name_attr;
     return { $name_value };
     """
     Given transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $p in all_persons();
+    match let $p in all_persons();
     """
     Then uniquely identify answer concepts
       | p         |
@@ -165,7 +165,7 @@ Feature: Basic Function Execution
       | key:ref:1 |
     When get answers of typeql read query
     """
-    match $name in name_values();
+    match let $name in name_values();
     """
     Then uniquely identify answer concepts
       | name               |
@@ -191,14 +191,14 @@ Feature: Basic Function Execution
     fun name_owners() -> { person, string } :
     match
       $p isa person, has name $name_attr;
-      $name_value = $name_attr;
+      let $name_value = $name_attr;
     return { $p, $name_value };
     """
     Given transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $person, $name in name_owners();
+    match let $person, $name in name_owners();
     """
     Then uniquely identify answer concepts
       | person    | name               |
@@ -235,8 +235,8 @@ Feature: Basic Function Execution
     When get answers of typeql read query
     """
     match
-     $name "Bob" isa name;
-     $person in persons_of_name_attribute($name);
+     $name isa name "Bob";
+     let $person in persons_of_name_attribute($name);
     """
     Then uniquely identify answer concepts
       | person    | name          |
@@ -245,8 +245,8 @@ Feature: Basic Function Execution
     When get answers of typeql read query
     """
     match
-     $name = "Bob";
-     $person in persons_of_name_value($name);
+     let $name = "Bob";
+     let $person in persons_of_name_value($name);
     """
     Then uniquely identify answer concepts
       | person    | name             |
@@ -276,7 +276,7 @@ Feature: Basic Function Execution
     fun name_value_of_person($p: person) -> string:
     match
       $p isa person, has name $name_attr;
-      $name_value = $name_attr;
+      let $name_value = $name_attr;
     return first $name_value;
 
     """
@@ -285,8 +285,8 @@ Feature: Basic Function Execution
     When get answers of typeql read query
     """
     match
-      $name "Bob" isa name;
-      $person = person_of_name($name);
+      $name isa name "Bob";
+      let $person = person_of_name($name);
     """
     Then uniquely identify answer concepts
       | person    | name            |
@@ -296,7 +296,7 @@ Feature: Basic Function Execution
     """
     match
       $person isa person;
-      $name = name_value_of_person($person);
+      let $name = name_value_of_person($person);
     """
     Then uniquely identify answer concepts
       | person    | name               |
@@ -310,9 +310,9 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun add($x: long, $y: long) -> { long }:
+      fun add($x: integer, $y: integer) -> { integer }:
       match
-        $z = $x + $y;
+        let $z = $x + $y;
       return { $z };
       """
     Given transaction commits
@@ -320,12 +320,12 @@ Feature: Basic Function Execution
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $z in add(2, 3);
+      match let $z in add(2, 3);
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then uniquely identify answer concepts
       | z            |
-      | value:long:5 |
+      | value:integer:5 |
 
 
   Scenario: A function can return a tuple of values derived from a reduce operation
@@ -342,10 +342,10 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun ref_sum_and_sum_squares() -> long, long :
+      fun ref_sum_and_sum_squares() -> integer, integer :
       match
         $ref isa ref;
-        $ref_2 = $ref * $ref;
+        let $ref_2 = $ref * $ref;
       return sum($ref), sum($ref_2);
       """
     Given transaction commits
@@ -353,10 +353,10 @@ Feature: Basic Function Execution
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $sum, $squares in ref_sum_and_sum_squares();
+      match let $sum, $squares in ref_sum_and_sum_squares();
       """
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then uniquely identify answer concepts
       | sum          | squares      |
-      | value:long:3 | value:long:5 |
+      | value:integer:3 | value:integer:5 |
 

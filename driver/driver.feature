@@ -144,7 +144,7 @@ Feature: TypeDB Driver
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1);
-#    attribute age, value long @range(0..150);
+#    attribute age, value integer @range(0..150);
 #    """
 #    Then connection get database(typedb) has schema:
 #    """
@@ -157,20 +157,20 @@ Feature: TypeDB Driver
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1);
-#    attribute age, value long @range(0..150);
+#    attribute age, value integer @range(0..150);
 #    """
 #    Then connection get database(typedb) has type schema:
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1);
-#    attribute age, value long @range(0..150);
+#    attribute age, value integer @range(0..150);
 #    """
 #
 #    When connection open schema transaction for database: typedb
 #    When typeql schema query
 #    """
 #    redefine
-#    attribute age, value long @range(0..);
+#    attribute age, value integer @range(0..);
 #    """
 #    When typeql schema query
 #    """
@@ -182,13 +182,13 @@ Feature: TypeDB Driver
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1);
-#    attribute age, value long @range(0..150);
+#    attribute age, value integer @range(0..150);
 #    """
 #    Then connection get database(typedb) has type schema:
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1);
-#    attribute age, value long @range(0..150);
+#    attribute age, value integer @range(0..150);
 #    """
 #    When transaction commits
 #    Then connection get database(typedb) has schema:
@@ -196,14 +196,14 @@ Feature: TypeDB Driver
 #    define
 #    entity person @abstract, owns age @card(1..1) @range(0..150);
 #    entity fictional-character owns age;
-#    attribute age, value long @range(0..);
+#    attribute age, value integer @range(0..);
 #    """
 #    Then connection get database(typedb) has type schema:
 #    """
 #    define
 #    entity person @abstract, owns age @card(1..1) @range(0..150);
 #    entity fictional-character owns age;
-#    attribute age, value long @range(0..);
+#    attribute age, value integer @range(0..);
 #    """
 
 
@@ -497,7 +497,7 @@ Feature: TypeDB Driver
 
     When typeql schema query
       """
-      define attribute age, value long;
+      define attribute age, value integer;
       """
     When get answers of typeql read query
       """
@@ -620,7 +620,7 @@ Feature: TypeDB Driver
       entity person owns id @key, owns name @card(0..);
       entity empty-person;
       entity nameless-person, owns name;
-      attribute id, value long;
+      attribute id, value integer;
       attribute name, value string;
       """
     When get answers of typeql read query
@@ -747,7 +747,7 @@ Feature: TypeDB Driver
         "single attribute type": {
             "kind": "attribute",
             "label": "id",
-            "value_type": "long"
+            "value_type": "integer"
         }
     }
     """
@@ -812,7 +812,7 @@ Feature: TypeDB Driver
       """
       match relation $r;
       """
-    Then typeql schema query; fails with a message containing: "Failed to execute define query"
+    Then typeql schema query; fails with a message containing: "The reserved keyword "entity" cannot be used as an identifier"
       """
       define entity entity;
       """
@@ -961,7 +961,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) try get value type is none
     Then answer get row(0) get variable(p) try get value is none
     Then answer get row(0) get variable(p) try get boolean is none
-    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get integer is none
     Then answer get row(0) get variable(p) try get double is none
     Then answer get row(0) get variable(p) try get decimal is none
     Then answer get row(0) get variable(p) try get string is none
@@ -1000,7 +1000,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is relation: false
     Then answer get row(0) get variable(p) is attribute: false
     Then answer get row(0) get variable(p) is struct: false
-    Then answer get row(0) get variable(p) is long: false
+    Then answer get row(0) get variable(p) is integer: false
 
     Then answer get row(0) get variable(p) as relation type
     Then answer get row(0) get variable(p) try get label: parentship
@@ -1009,7 +1009,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) try get value type is none
     Then answer get row(0) get variable(p) try get value is none
     Then answer get row(0) get variable(p) try get boolean is none
-    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get integer is none
     Then answer get row(0) get variable(p) try get double is none
     Then answer get row(0) get variable(p) try get decimal is none
     Then answer get row(0) get variable(p) try get string is none
@@ -1056,7 +1056,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) try get value type is none
     Then answer get row(0) get variable(p) try get value is none
     Then answer get row(0) get variable(p) try get boolean is none
-    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get integer is none
     Then answer get row(0) get variable(p) try get double is none
     Then answer get row(0) get variable(p) try get decimal is none
     Then answer get row(0) get variable(p) try get string is none
@@ -1098,7 +1098,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) try get value type is none
     Then answer get row(0) get variable(a) try get value is none
     Then answer get row(0) get variable(a) try get boolean is none
-    Then answer get row(0) get variable(a) try get long is none
+    Then answer get row(0) get variable(a) try get integer is none
     Then answer get row(0) get variable(a) try get double is none
     Then answer get row(0) get variable(a) try get decimal is none
     Then answer get row(0) get variable(a) try get string is none
@@ -1115,7 +1115,7 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get attribute type(a) try get value type is none
     Then answer get row(0) get attribute type(a) is boolean: false
-    Then answer get row(0) get attribute type(a) is long: false
+    Then answer get row(0) get attribute type(a) is integer: false
     Then answer get row(0) get attribute type(a) is double: false
     Then answer get row(0) get attribute type(a) is decimal: false
     Then answer get row(0) get attribute type(a) is string: false
@@ -1155,7 +1155,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(a) get label: typed
     Then answer get row(0) get variable(a) try get value is none
     Then answer get row(0) get variable(a) try get boolean is none
-    Then answer get row(0) get variable(a) try get long is none
+    Then answer get row(0) get variable(a) try get integer is none
     Then answer get row(0) get variable(a) try get double is none
     Then answer get row(0) get variable(a) try get decimal is none
     Then answer get row(0) get variable(a) try get string is none
@@ -1169,7 +1169,7 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get attribute type(a) try get value type: <value-type>
     Then answer get row(0) get attribute type(a) is boolean: <is-boolean>
-    Then answer get row(0) get attribute type(a) is long: <is-long>
+    Then answer get row(0) get attribute type(a) is integer: <is-integer>
     Then answer get row(0) get attribute type(a) is double: <is-double>
     Then answer get row(0) get attribute type(a) is decimal: <is-decimal>
     Then answer get row(0) get attribute type(a) is string: <is-string>
@@ -1179,9 +1179,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute type(a) is duration: <is-duration>
     Then answer get row(0) get attribute type(a) is struct: <is-struct>
     Examples:
-      | value-type  | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
+      | value-type  | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
       | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-      | long        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | integer        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
       | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
       | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
       | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
@@ -1205,7 +1205,7 @@ Feature: TypeDB Driver
         name value string,
         genre value film-genre,
         duration value duration,
-        reviews value long,
+        reviews value integer,
         score value double,
         revenue value decimal,
         premier value datetime,
@@ -1238,7 +1238,7 @@ Feature: TypeDB Driver
 
     Then answer get row(0) get attribute type(a) try get value type: film-properties
     Then answer get row(0) get attribute type(a) is boolean: false
-    Then answer get row(0) get attribute type(a) is long: false
+    Then answer get row(0) get attribute type(a) is integer: false
     Then answer get row(0) get attribute type(a) is double: false
     Then answer get row(0) get attribute type(a) is decimal: false
     Then answer get row(0) get attribute type(a) is string: false
@@ -1282,7 +1282,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is struct: false
     Then answer get row(0) get variable(p) try get value is none
     Then answer get row(0) get variable(p) try get boolean is none
-    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get integer is none
     Then answer get row(0) get variable(p) try get double is none
     Then answer get row(0) get variable(p) try get decimal is none
     Then answer get row(0) get variable(p) try get string is none
@@ -1341,7 +1341,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get variable(p) is boolean: false
     Then answer get row(0) get variable(p) try get value is none
     Then answer get row(0) get variable(p) try get boolean is none
-    Then answer get row(0) get variable(p) try get long is none
+    Then answer get row(0) get variable(p) try get integer is none
     Then answer get row(0) get variable(p) try get double is none
     Then answer get row(0) get variable(p) try get decimal is none
     Then answer get row(0) get variable(p) try get string is none
@@ -1412,7 +1412,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get type get value type: <value-type>
     Then answer get row(0) get attribute(a) get <value-type>
     Then answer get row(0) get attribute(a) is boolean: <is-boolean>
-    Then answer get row(0) get attribute(a) is long: <is-long>
+    Then answer get row(0) get attribute(a) is integer: <is-integer>
     Then answer get row(0) get attribute(a) is double: <is-double>
     Then answer get row(0) get attribute(a) is decimal: <is-decimal>
     Then answer get row(0) get attribute(a) is string: <is-string>
@@ -1430,9 +1430,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get value is not: <not-value>
     Then answer get row(0) get attribute(a) get <value-type> is not: <not-value>
     Examples:
-      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
       | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | integer        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
       | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
@@ -1467,7 +1467,7 @@ Feature: TypeDB Driver
 #        name value string,
 #        genre value film-genre,
 #        duration value duration,
-#        reviews value long,
+#        reviews value integer,
 #        score value double,
 #        revenue value decimal,
 #        premier value datetime,
@@ -1527,7 +1527,7 @@ Feature: TypeDB Driver
 #
 #    Then answer get row(0) get attribute(f) get type get value type: film-properties
 #    Then answer get row(0) get attribute(f) is boolean: false
-#    Then answer get row(0) get attribute(f) is long: false
+#    Then answer get row(0) get attribute(f) is integer: false
 #    Then answer get row(0) get attribute(f) is double: false
 #    Then answer get row(0) get attribute(f) is decimal: false
 #    Then answer get row(0) get attribute(f) is string: false
@@ -1561,7 +1561,7 @@ Feature: TypeDB Driver
     When get answers of typeql read query
       """
       match $_ isa person, has typed $v;
-      $value = $v;
+      let $value = $v;
       """
     Then answer type is: concept rows
     Then answer query type is: read
@@ -1585,7 +1585,7 @@ Feature: TypeDB Driver
     Then answer get row(0) get value(value) try get value type: <value-type>
     Then answer get row(0) get value(value) get value type: <value-type>
     Then answer get row(0) get value(value) is boolean: <is-boolean>
-    Then answer get row(0) get value(value) is long: <is-long>
+    Then answer get row(0) get value(value) is integer: <is-integer>
     Then answer get row(0) get value(value) is double: <is-double>
     Then answer get row(0) get value(value) is decimal: <is-decimal>
     Then answer get row(0) get value(value) is string: <is-string>
@@ -1603,9 +1603,9 @@ Feature: TypeDB Driver
     Then answer get row(0) get value(value) get is not: <not-value>
     Then answer get row(0) get value(value) get <value-type> is not: <not-value>
     Examples:
-      | value-type  | value                                        | not-value                            | is-boolean | is-long | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
+      | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
       | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | long        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | integer        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
       | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
@@ -1640,7 +1640,7 @@ Feature: TypeDB Driver
 #        name value string,
 #        genre value film-genre,
 #        duration value duration,
-#        reviews value long,
+#        reviews value integer,
 #        score value double,
 #        revenue value decimal,
 #        premier value datetime,
@@ -1690,7 +1690,7 @@ Feature: TypeDB Driver
 #    Then answer get row(0) get variable(v) as value
 #    Then answer get row(0) get value(v) get value type: film-properties
 #    Then answer get row(0) get value(v) is boolean: <is-boolean>
-#    Then answer get row(0) get value(v) is long: <is-long>
+#    Then answer get row(0) get value(v) is integer: <is-integer>
 #    Then answer get row(0) get value(v) is double: <is-double>
 #    Then answer get row(0) get value(v) is decimal: <is-decimal>
 #    Then answer get row(0) get value(v) is string: <is-string>
@@ -1735,7 +1735,7 @@ Feature: TypeDB Driver
       """
     When get answers of typeql read query
       """
-      match $_ isa person, has $a; $v = $a;
+      match $_ isa person, has $a; let $v = $a;
       fetch { "v": $v };
       """
     Then answer type is: concept documents
@@ -1752,7 +1752,7 @@ Feature: TypeDB Driver
     Examples:
       | value-type  | value                                       | expected                                      | not-expected                                 |
       | boolean     | true                                        | true                                          | false                                        |
-      | long        | 12345090                                    | 12345090                                      | 0                                            |
+      | integer        | 12345090                                    | 12345090                                      | 0                                            |
       | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
       | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
       | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
@@ -1772,13 +1772,13 @@ Feature: TypeDB Driver
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define attribute age @independent, value long; attribute name @independent, value string;
+      define attribute age @independent, value integer; attribute name @independent, value string;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $a 25 isa age;  $n "John" isa name;
+      insert $a isa age 25;  $n isa name "John";
       """
 
     When get answers of typeql read query
@@ -1809,7 +1809,7 @@ Feature: TypeDB Driver
     Then answer unwraps as ok; fails
     Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
-    Then answer get row(0) get attribute(n) get long; fails with a message containing: "Could not retrieve a 'long' value"
+    Then answer get row(0) get attribute(n) get integer; fails with a message containing: "Could not retrieve a 'integer' value"
 
 
   Scenario: Driver processes datetime values in different user time-zones identically
@@ -1823,7 +1823,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $dt 2023-05-01T00:00:00 isa dt;
+      insert $dt isa dt 2023-05-01T00:00:00;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00
@@ -1860,7 +1860,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $dt 2023-05-01T00:00:00 Asia/Calcutta isa dt;
+      insert $dt isa dt 2023-05-01T00:00:00 Asia/Calcutta;
       """
     Then answer get row(0) get attribute(dt) get value is: 2023-05-01T00:00:00 Asia/Calcutta
     Then answer get row(0) get attribute(dt) get value is not: 2023-04-30T13:30:00 Asia/Calcutta

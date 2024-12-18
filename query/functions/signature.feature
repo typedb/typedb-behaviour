@@ -19,7 +19,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     entity person, owns name, owns nationality;
     entity cat, owns name, owns breed;
     attribute name, value string;
-    attribute nationality, value long;
+    attribute nationality, value integer;
     attribute breed, value string;
     """
     Given transaction commits
@@ -141,14 +141,14 @@ Feature: Validate Function Signatures Against Definition & Calls
     Then typeql read query; fails
     """
     match
-      $name = "Socks";
-      $cat in cats_of_name($name);
+      let $name = "Socks";
+      let $cat in cats_of_name($name);
     """
     Then typeql read query; fails
     """
     match
       $name isa breed;
-      $cat in cats_of_name($name);
+      let $cat in cats_of_name($name);
     """
 
 
@@ -162,7 +162,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     match
       $name_attr isa name;
       $cat isa cat, has $name_attr;
-      $name = $name_attr;
+      let $name = $name_attr;
     return { $name };
     """
     Given transaction commits
@@ -170,7 +170,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     Then typeql read query; fails
     """
     match
-      $name in name_string_of_cat($cat);
+      let $name in name_string_of_cat($cat);
       $name isa name;
       $other-cat has $name;
     """
@@ -193,7 +193,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
     match
       $name isa breed;
-      $cat in cats_of_name($name);
+      let $cat in cats_of_name($name);
     """
 
 
@@ -213,7 +213,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     Then typeql read query; fails
     """
     match
-      $name in name_attribute_of_cat($cat);
+      let $name in name_attribute_of_cat($cat);
       $name isa breed;
     """
 

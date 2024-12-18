@@ -27,9 +27,9 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -37,11 +37,11 @@ Feature: Function Usage
     When get answers of typeql read query
     """
     match
-      $six = five() + 1;
+      let $six = five() + 1;
     """
     Then uniquely identify answer concepts
       | six          |
-      | value:long:6 |
+      | value:integer:6 |
     Given transaction closes
 
 
@@ -50,14 +50,14 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
 
-    fun six() -> long :
+    fun six() -> integer :
     match
-      $six = 6;
+      let $six = 6;
     return first $six;
     """
     Given transaction commits
@@ -93,9 +93,9 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -103,11 +103,11 @@ Feature: Function Usage
     When get answers of typeql read query
     """
     match
-      $ten = five() + five();
+      let $ten = five() + five();
     """
     Then uniquely identify answer concepts
       | ten           |
-      | value:long:10 |
+      | value:integer:10 |
     Given transaction closes
 
 
@@ -116,9 +116,9 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -126,7 +126,7 @@ Feature: Function Usage
     When typeql read query; fails
     """
     match
-      $five = five();
-      $five = five();
+      let $five = five();
+      let $five = five();
     """
 

@@ -68,13 +68,13 @@ Feature: Recursive Function Execution
 
       fun transitive_location_hierarchy_pairs() -> { place, place }:
       match
-        (subordinate: $x, superior: $y) isa location-hierarchy;
-        (subordinate: $y, superior: $z) isa location-hierarchy;
+        location-hierarchy (subordinate: $x, superior: $y);
+        location-hierarchy (subordinate: $y, superior: $z);
       return {$x, $z};
 
       fun big_location_hierarchy_pairs() -> { place, place }:
       match
-        $x, $y in transitive_location_hierarchy_pairs();
+        let $x, $y in transitive_location_hierarchy_pairs();
         $x isa big-place;
         $y isa big-place;
       return {$x, $y};
@@ -82,13 +82,13 @@ Feature: Recursive Function Execution
 
       fun transitive_location_hierarchy_directed($x: place) -> { place }:
       match
-        (subordinate: $x, superior: $y) isa location-hierarchy;
-        (subordinate: $y, superior: $z) isa location-hierarchy;
+        location-hierarchy (subordinate: $x, superior: $y);
+        location-hierarchy (subordinate: $y, superior: $z);
       return {$z};
 
       fun big_location_hierarchy_directed($x: big-place) -> { big-place }:
       match
-        $y in transitive_location_hierarchy_directed($x);
+        let $y in transitive_location_hierarchy_directed($x);
         $y isa big-place;
       return {$y};
       """
@@ -102,21 +102,21 @@ Feature: Recursive Function Execution
       $y isa place, has name "Tanzania";
       $z isa big-place, has name "Africa";
 
-      (subordinate: $x, superior: $y) isa location-hierarchy;
-      (subordinate: $y, superior: $z) isa location-hierarchy;
+      location-hierarchy (subordinate: $x, superior: $y);
+      location-hierarchy (subordinate: $y, superior: $z);
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x, $y in big_location_hierarchy_pairs();
+      match let $x, $y in big_location_hierarchy_pairs();
       """
     Then answer size is: 1
 
     Given get answers of typeql read query
       """
-      match $x isa big-place; $y in big_location_hierarchy_directed($x);
+      match $x isa big-place; let $y in big_location_hierarchy_directed($x);
       """
     Then answer size is: 1
 
@@ -138,10 +138,10 @@ Feature: Recursive Function Execution
       fun ancestor_pairs() -> { person, person } :
         match
          $x isa person; $y isa person;
-         { (parent: $x, child: $y) isa parentship; } or
+         { parentship (parent: $x, child: $y); } or
          {
-            (parent: $x, child: $z) isa parentship;
-            $z, $y1 in ancestor_pairs();
+            parentship (parent: $x, child: $z);
+            let $z, $y1 in ancestor_pairs();
             $y is $y1;
           };
         return { $x, $y };
@@ -149,10 +149,10 @@ Feature: Recursive Function Execution
       fun ancestors_directed($x: person) -> { person } :
         match
          $y isa person;
-         { (parent: $x, child: $y) isa parentship; } or
+         { parentship (parent: $x, child: $y); } or
          {
-            (parent: $x, child: $z) isa parentship;
-            $y1 in ancestors_directed($z);
+            parentship (parent: $x, child: $z);
+            let $y1 in ancestors_directed($z);
             $y is $y1;
           };
         return { $y };
@@ -174,12 +174,12 @@ Feature: Recursive Function Execution
       $c isa person, has name 'c';
       $ca isa person, has name 'ca';
 
-      (parent: $a, child: $aa) isa parentship;
-      (parent: $a, child: $ab) isa parentship;
-      (parent: $aa, child: $aaa) isa parentship;
-      (parent: $aa, child: $aab) isa parentship;
-      (parent: $aaa, child: $aaaa) isa parentship;
-      (parent: $c, child: $ca) isa parentship;
+      parentship (parent: $a, child: $aa);
+      parentship (parent: $a, child: $ab);
+      parentship (parent: $aa, child: $aaa);
+      parentship (parent: $aa, child: $aab);
+      parentship (parent: $aaa, child: $aaaa);
+      parentship (parent: $c, child: $ca);
       """
     Given transaction commits
 
@@ -187,7 +187,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $X, $Y in ancestor_pairs();
+        let $X, $Y in ancestor_pairs();
         $X has name 'aa';
         $Y has name $name;
       select $Y, $name;
@@ -204,7 +204,7 @@ Feature: Recursive Function Execution
       """
       match
         $X isa person, has name 'aa';
-        $Y in ancestors_directed($X);
+        let $Y in ancestors_directed($X);
         $Y has name $name;
       select $Y, $name;
       """
@@ -219,7 +219,7 @@ Feature: Recursive Function Execution
 
     Given get answers of typeql read query
       """
-      match $X, $Y in ancestor_pairs();
+      match let $X, $Y in ancestor_pairs();
       """
     Then answer size is: 10
     Then verify answer set is equivalent for query
@@ -259,12 +259,12 @@ Feature: Recursive Function Execution
       match
         $x isa person; $y isa person;
         {
-         (friend: $x, friend: $y) isa friendship;
+         friendship (friend: $x, friend: $y);
          not { $x is $y; }; # TODO: 3.0 does not de-duplicate links yet
           } or
         {
-          (parent: $x1, child: $z) isa parentship;
-          $z, $y1 in ancestor_friendship_pairs();
+          parentship (parent: $x1, child: $z);
+          let $z, $y1 in ancestor_friendship_pairs();
           $y is $y1; $x is $x1;
         };
         return { $x, $y };
@@ -273,12 +273,12 @@ Feature: Recursive Function Execution
       match
         $x isa person; $y isa person;
         {
-         (friend: $x, friend: $y) isa friendship;
+         friendship (friend: $x, friend: $y);
          $x has name $xn; $y has name $yn; $xn != $yn; # TODO: 3.0 does not de-duplicate symmetric links yet
           } or
         {
-          (parent: $x, child: $z) isa parentship;
-          $z in ancestor_friendship_directed($y);
+          parentship (parent: $x, child: $z);
+          let $z in ancestor_friendship_directed($y);
         };
         return { $x };
       """
@@ -295,10 +295,10 @@ Feature: Recursive Function Execution
       $d isa person, has name "d";
       $g isa person, has name "g";
 
-      (parent: $a, child: $b) isa parentship;
-      (parent: $b, child: $c) isa parentship;
-      (friend: $a, friend: $g) isa friendship;
-      (friend: $c, friend: $d) isa friendship;
+      parentship (parent: $a, child: $b);
+      parentship (parent: $b, child: $c);
+      friendship (friend: $a, friend: $g);
+      friendship (friend: $c, friend: $d);
       """
     Given transaction commits
 
@@ -306,7 +306,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $X, $Y in ancestor_friendship_pairs();
+        let $X, $Y in ancestor_friendship_pairs();
         $X has name 'a';
         $Y has name $name;
       select $Y;
@@ -323,7 +323,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $X, $Y in ancestor_friendship_pairs();
+        let $X, $Y in ancestor_friendship_pairs();
         $Y has name 'd';
       select $X;
       """
@@ -338,7 +338,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $X in ancestor_friendship_directed($Y);
+        let $X in ancestor_friendship_directed($Y);
         $Y has name 'd';
       select $X;
       """
@@ -374,9 +374,9 @@ Feature: Recursive Function Execution
       {
         $x isa Human; $y is $x;
       } or {
-        (parent: $x1, child: $u) isa parentship;
-        (parent: $y1, child: $v) isa parentship;
-        $u, $v in same_gen_pairs();
+        parentship (parent: $x1, child: $u);
+        parentship (parent: $y1, child: $v);
+        let $u, $v in same_gen_pairs();
         $x is $x1; $y is $y1;
       };
       return { $x, $y };
@@ -388,9 +388,9 @@ Feature: Recursive Function Execution
         # $x is $y; # is unimplemented when $x is input. So we workaround with names
         $x has name $name; $y has name $name;
       } or {
-        (parent: $x, child: $u) isa parentship;
-        (parent: $y1, child: $v) isa parentship;
-        $u in same_gen_directed($v);
+        parentship (parent: $x, child: $u);
+        parentship (parent: $y1, child: $v);
+        let $u in same_gen_directed($v);
         $y is $y1;
       };
       return { $y };
@@ -411,16 +411,16 @@ Feature: Recursive Function Execution
       $g isa entity2, has name "g";
       $h isa entity2, has name "h";
 
-      (parent: $a, child: $b) isa parentship;
-      (parent: $a, child: $c) isa parentship;
-      (parent: $b, child: $d) isa parentship;
-      (parent: $c, child: $d) isa parentship;
-      (parent: $e, child: $d) isa parentship;
-      (parent: $f, child: $e) isa parentship;
+      parentship (parent: $a, child: $b);
+      parentship (parent: $a, child: $c);
+      parentship (parent: $b, child: $d);
+      parentship (parent: $c, child: $d);
+      parentship (parent: $e, child: $d);
+      parentship (parent: $f, child: $e);
 
       #Extra data
-      (parent: $g, child: $f) isa parentship;
-      (parent: $h, child: $g) isa parentship;
+      parentship (parent: $g, child: $f);
+      parentship (parent: $h, child: $g);
       """
     Given transaction commits
 
@@ -428,7 +428,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in same_gen_pairs();
+        let $x, $y in same_gen_pairs();
         $x has name 'a';
       select $y;
       """
@@ -444,7 +444,7 @@ Feature: Recursive Function Execution
       """
       match
         $x has name 'a';
-        $y in same_gen_directed($x);
+        let $y in same_gen_directed($x);
       select $y;
       """
     Then answer size is: 2
@@ -477,16 +477,16 @@ Feature: Recursive Function Execution
       fun ntc_pairs() -> { entity2, entity2 } :
       match
         $x isa q;
-        $x, $y in tc_pairs();
+        let $x, $y in tc_pairs();
       return { $x, $y };
 
       fun tc_pairs() -> { entity2, entity2 } :
       match
         $x isa entity2; $y isa entity2;
-        { (roleA: $x, roleB: $y) isa P; } or
+        { P (roleA: $x, roleB: $y); } or
         {
-          (roleA: $x, roleB: $z) isa P;
-          $z, $y1 in tc_pairs();
+          P (roleA: $x, roleB: $z);
+          let $z, $y1 in tc_pairs();
           $y is $y1;
         };
       return { $x, $y };
@@ -503,8 +503,8 @@ Feature: Recursive Function Execution
       $a1 isa entity2, has index "a1";
       $a2 isa q, has index "a2";
 
-      (roleA: $a1, roleB: $a) isa P;
-      (roleA: $a2, roleB: $a1) isa P;
+      P (roleA: $a1, roleB: $a);
+      P (roleA: $a2, roleB: $a1);
       """
     Given transaction commits
 
@@ -512,7 +512,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
     """
       match
-        $x, $y in ntc_pairs();
+        let $x, $y in ntc_pairs();
         $y has index 'a';
       select $x;
       """
@@ -560,18 +560,18 @@ Feature: Recursive Function Execution
       fun reachable_pairs() -> {traversable, traversable}:
       match
         $x isa traversable; $y isa traversable;
-        { (start: $x, end: $y) isa link; } or
+        { link (start: $x, end: $y); } or
         {
-          (start: $x, end: $z) isa link;
-          $z, $y1 in reachable_pairs();
+          link (start: $x, end: $z);
+          let $z, $y1 in reachable_pairs();
           $y1 is $y;
         };
       return {$x, $y};
 
       fun indirect_link_pairs() -> { traversable, traversable }:
         match
-          $x, $y in reachable_pairs();
-          not {(start: $x, end: $y) isa link;};
+          let $x, $y in reachable_pairs();
+          not { link (start: $x, end: $y);};
         return { $x, $y };
 
       fun unreachable_pairs() -> {traversable, traversable}:
@@ -579,7 +579,7 @@ Feature: Recursive Function Execution
           $x isa vertex;
           $y isa vertex;
           not {
-            $x1, $y1 in reachable_pairs();
+            let $x1, $y1 in reachable_pairs();
              $x is $x1; $y is $y1;
           };
         return { $x, $y };
@@ -588,18 +588,18 @@ Feature: Recursive Function Execution
       fun reachable_from($x: traversable) -> {traversable}:
       match
         $x isa traversable; $y isa traversable;
-        { (start: $x, end: $y) isa link; } or
+        { link (start: $x, end: $y); } or
         {
-          (start: $x, end: $z) isa link;
-          $y1 in reachable_from($z);
+          link (start: $x, end: $z);
+          let $y1 in reachable_from($z);
           $y1 is $y;
         };
       return { $y };
 
       fun indirect_link_from($x: traversable) -> { traversable }:
         match
-          $y in reachable_from($x);
-          not {(start: $x, end: $y) isa link;};
+          let $y in reachable_from($x);
+          not {link (start: $x, end: $y); };
         return { $y };
 
       fun unreachable_from($x: traversable) -> {traversable}:
@@ -607,7 +607,7 @@ Feature: Recursive Function Execution
           $x isa vertex;
           $y isa vertex;
           not {
-            $y1 in reachable_from($x);
+            let $y1 in reachable_from($x);
             $y is $y1;
           };
         return { $y };
@@ -624,17 +624,17 @@ Feature: Recursive Function Execution
       $cc isa node, has index "cc";
       $dd isa node, has index "dd";
 
-      (start: $aa, end: $bb) isa link;
-      (start: $bb, end: $cc) isa link;
-      (start: $cc, end: $cc) isa link;
-      (start: $cc, end: $dd) isa link;
+      link (start: $aa, end: $bb);
+      link (start: $bb, end: $cc);
+      link (start: $cc, end: $cc);
+      link (start: $cc, end: $dd);
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x, $y in reachable_pairs();
+      match let $x, $y in reachable_pairs();
       """
     Then answer size is: 7
     Then verify answer set is equivalent for query
@@ -655,7 +655,7 @@ Feature: Recursive Function Execution
         """
         match
         $x isa traversable;
-        $y in reachable_from($x);
+        let $y in reachable_from($x);
         """
     Then answer size is: 7
     Then verify answer set is equivalent for query
@@ -697,10 +697,10 @@ Feature: Recursive Function Execution
       fun reachable_pairs() -> { vertex, vertex }:
       match
         $x isa vertex; $y isa vertex;
-        { ($x, $y) isa link; } or
+        { link ($x, $y); } or
         {
-          ($x, $z) isa link;
-          $z, $y1 in reachable_pairs();
+          link ($x, $z);
+          let $z, $y1 in reachable_pairs();
           $y is $y1;
         };
       return { $x, $y };
@@ -709,10 +709,10 @@ Feature: Recursive Function Execution
       fun reachable_from($x: vertex) -> { vertex }:
       match
         $x isa vertex; $y isa vertex;
-        { ($x, $y) isa link; } or
+        { link ($x, $y); } or
         {
-          ($x, $z) isa link;
-          $y1 in reachable_from($z);
+          link ($x, $z);
+          let $y1 in reachable_from($z);
           $y is $y1;
         };
       return { $y };
@@ -731,10 +731,10 @@ Feature: Recursive Function Execution
       $c isa vertex, has index "c";
       $d isa vertex, has index "d";
 
-      (coordinate: $a, coordinate: $b) isa link;
-      (coordinate: $b, coordinate: $c) isa link;
-      (coordinate: $c, coordinate: $c) isa link;
-      (coordinate: $c, coordinate: $d) isa link;
+      link (coordinate: $a, coordinate: $b);
+      link (coordinate: $b, coordinate: $c);
+      link (coordinate: $c, coordinate: $c);
+      link (coordinate: $c, coordinate: $d);
       """
     Given transaction commits
 
@@ -742,7 +742,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in reachable_pairs();
+        let $x, $y in reachable_pairs();
         $x has index 'a';
       select $y;
       """
@@ -758,7 +758,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $y in reachable_from($x);
+        let $y in reachable_from($x);
         $x has index 'a';
       select $y;
       """
@@ -799,21 +799,21 @@ Feature: Recursive Function Execution
       fun same_gen_pairs() -> { person, person }:
       match
         $x isa person; $y isa person;
-        { $x1, $y1 in sibling_pairs(); $x1 is $x; $y1 is $y; } or
+        { let $x1, $y1 in sibling_pairs(); $x1 is $x; $y1 is $y; } or
         {
-          (parent: $x, child: $u) isa parentship;
-          $u, $v in same_gen_pairs();
-          (parent: $y, child: $v) isa parentship;
+          parentship (parent: $x, child: $u);
+          let $u, $v in same_gen_pairs();
+          parentship (parent: $y, child: $v);
         };
       return { $x, $y };
 
       fun sibling_pairs() -> { person, person }:
       match
         $x isa person; $y isa person;
-        { (A: $x, B: $y) isa Sibling; } or
+        { Sibling (A: $x, B: $y); } or
         {
-          (parent: $z, child: $x) isa parentship;
-          (parent: $z, child: $y) isa parentship;
+          parentship (parent: $z, child: $x);
+          parentship (parent: $z, child: $y);
         };
       return {$x, $y};
 
@@ -821,21 +821,21 @@ Feature: Recursive Function Execution
       fun same_gen_directed($x: person) -> { person }:
       match
         $x isa person; $y isa person;
-        { $y1 in sibling_directed($x); $y is $y1; } or
+        { let $y1 in sibling_directed($x); $y is $y1; } or
         {
-          (parent: $x, child: $u) isa parentship;
-          $v in same_gen_directed($u);
-          (parent: $y, child: $v) isa parentship;
+          parentship (parent: $x, child: $u);
+          let $v in same_gen_directed($u);
+          parentship (parent: $y, child: $v);
         };
       return { $y };
 
       fun sibling_directed($x: person) -> { person }:
       match
         $x isa person; $y isa person;
-        { (A: $x, B: $y) isa Sibling; } or
+        { Sibling (A: $x, B: $y); } or
         {
-          (parent: $z, child: $x) isa parentship;
-          (parent: $z, child: $y) isa parentship;
+          parentship (parent: $z, child: $x);
+          parentship (parent: $z, child: $y);
         };
       return { $y };
       """
@@ -851,9 +851,9 @@ Feature: Recursive Function Execution
       $john isa person, has name "john";
       $peter isa person, has name "peter";
 
-      (parent: $john, child: $ann) isa parentship;
-      (parent: $john, child: $peter) isa parentship;
-      (parent: $john, child: $bill) isa parentship;
+      parentship (parent: $john, child: $ann);
+      parentship (parent: $john, child: $peter);
+      parentship (parent: $john, child: $bill);
       """
     Given transaction commits
 
@@ -862,7 +862,7 @@ Feature: Recursive Function Execution
       """
       match
         $x has name 'ann'; $y isa person;
-        $x, $y in same_gen_pairs();
+        let $x, $y in same_gen_pairs();
       select $y;
       """
     Then answer size is: 3
@@ -877,7 +877,7 @@ Feature: Recursive Function Execution
       """
       match
         $x has name 'ann'; $y isa person;
-        $y in same_gen_directed($x);
+        let $y in same_gen_directed($x);
       select $y;
       """
     Then answer size is: 3
@@ -923,11 +923,11 @@ Feature: Recursive Function Execution
       fun rev_sg_pairs() -> { person, person }:
       match
       $x isa person; $y isa person;
-      { (start: $x, end: $y) isa flat; } or
+      { flat (start: $x, end: $y); } or
       {
-        (start: $x, end: $x1) isa up;
-        $y1, $x1 in rev_sg_pairs();
-        (start: $y1, end: $y) isa down;
+        up (start: $x, end: $x1);
+        let $y1, $x1 in rev_sg_pairs();
+        down (start: $y1, end: $y);
       };
       return {$x, $y};
 
@@ -935,11 +935,11 @@ Feature: Recursive Function Execution
       fun rev_sg_directed_from_bound($x: person) -> { person }:
       match
       $x isa person; $y isa person;
-      { (start: $x, end: $y) isa flat; } or
+      { flat (start: $x, end: $y); } or
       {
-        (start: $x, end: $x1) isa up;
-        $y1 in rev_sg_directed_to_bound($x1);
-        (start: $y1, end: $y) isa down;
+        up (start: $x, end: $x1);
+        let $y1 in rev_sg_directed_to_bound($x1);
+        down (start: $y1, end: $y);
       };
       return {$y};
 
@@ -947,11 +947,11 @@ Feature: Recursive Function Execution
       fun rev_sg_directed_to_bound($y: person) -> { person }:
       match
       $x isa person; $y isa person;
-      { (start: $x, end: $y) isa flat; } or
+      { flat (start: $x, end: $y); } or
       {
-        (start: $x, end: $x1) isa up;
-        $x1 in rev_sg_directed_from_bound($y1);
-        (start: $y1, end: $y) isa down;
+        up (start: $x, end: $x1);
+        let $x1 in rev_sg_directed_from_bound($y1);
+        down (start: $y1, end: $y);
       };
       return {$x};
       """
@@ -979,25 +979,25 @@ Feature: Recursive Function Execution
       $o isa person, has name "o";
       $p isa person, has name "p";
 
-      (start: $a, end: $e) isa up;
-      (start: $a, end: $f) isa up;
-      (start: $f, end: $m) isa up;
-      (start: $g, end: $n) isa up;
-      (start: $h, end: $n) isa up;
-      (start: $i, end: $o) isa up;
-      (start: $j, end: $o) isa up;
+      up (start: $a, end: $e);
+      up (start: $a, end: $f);
+      up (start: $f, end: $m);
+      up (start: $g, end: $n);
+      up (start: $h, end: $n);
+      up (start: $i, end: $o);
+      up (start: $j, end: $o);
 
-      (start: $g, end: $f) isa flat;
-      (start: $m, end: $n) isa flat;
-      (start: $m, end: $o) isa flat;
-      (start: $p, end: $m) isa flat;
+      flat (start: $g, end: $f);
+      flat (start: $m, end: $n);
+      flat (start: $m, end: $o);
+      flat (start: $p, end: $m);
 
-      (start: $l, end: $f) isa down;
-      (start: $m, end: $f) isa down;
-      (start: $g, end: $b) isa down;
-      (start: $h, end: $c) isa down;
-      (start: $i, end: $d) isa down;
-      (start: $p, end: $k) isa down;
+      down (start: $l, end: $f);
+      down (start: $m, end: $f);
+      down (start: $g, end: $b);
+      down (start: $h, end: $c);
+      down (start: $i, end: $d);
+      down (start: $p, end: $k);
       """
     Given transaction commits
 
@@ -1005,7 +1005,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in rev_sg_pairs();
+        let $x, $y in rev_sg_pairs();
         $x has name 'a';
       select $y;
       """
@@ -1019,7 +1019,7 @@ Feature: Recursive Function Execution
       """
     Given get answers of typeql read query
       """
-      match $x, $y in rev_sg_pairs();
+      match let $x, $y in rev_sg_pairs();
       """
     Then answer size is: 11
     Then verify answer set is equivalent for query
@@ -1039,7 +1039,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $y in rev_sg_directed_from_bound($x);
+        let $y in rev_sg_directed_from_bound($x);
         $x has name 'a';
       select $y;
       """
@@ -1055,7 +1055,7 @@ Feature: Recursive Function Execution
       """
       match
       $x isa person;
-      $y in rev_sg_directed_from_bound($x);
+      let $y in rev_sg_directed_from_bound($x);
       """
     Then answer size is: 11
     Then verify answer set is equivalent for query
@@ -1075,7 +1075,7 @@ Feature: Recursive Function Execution
       """
       match
       $y isa person;
-      $x in rev_sg_directed_to_bound($y);
+      let $x in rev_sg_directed_to_bound($y);
       """
     Then answer size is: 11
     Then verify answer set is equivalent for query
@@ -1125,10 +1125,10 @@ Feature: Recursive Function Execution
       fun q1_pairs() -> { entity2, entity2 }:
         match
          $x isa entity2; $y isa entity2;
-         { (start: $x, end: $y) isa R1; } or
+         { R1 (start: $x, end: $y); } or
          {
-            (start: $x, end: $z) isa R1;
-            $z, $y1 in q1_pairs();
+            R1 (start: $x, end: $z);
+            let $z, $y1 in q1_pairs();
             $y is $y1;
          };
         return { $x, $y };
@@ -1136,17 +1136,17 @@ Feature: Recursive Function Execution
       fun q2_pairs() -> { entity2, entity2 }:
       match
         $x isa entity2; $y isa entity2;
-        { (start: $x, end: $y) isa R2; }
+        { R2 (start: $x, end: $y); }
         or {
-            (start: $x, end: $z) isa R2;
-            $z, $y1 in q2_pairs();
+            R2 (start: $x, end: $z);
+            let $z, $y1 in q2_pairs();
             $y is $y1;
         };
         return { $x, $y };
 
       fun p_pairs() -> { entity2, entity2 }:
       match
-        $x, $y in q1_pairs();
+        let $x, $y in q1_pairs();
       return { $x, $y };
 
       # --- directed ---
@@ -1154,10 +1154,10 @@ Feature: Recursive Function Execution
       fun q1_directed($x: entity2) -> { entity2 }:
         match
          $x isa entity2; $y isa entity2;
-         { (start: $x, end: $y) isa R1; } or
+         { R1 (start: $x, end: $y); } or
          {
-            (start: $x, end: $z) isa R1;
-            $y1 in q1_directed($z);
+            R1 (start: $x, end: $z);
+            let $y1 in q1_directed($z);
             $y is $y1;
          };
         return { $y };
@@ -1165,17 +1165,17 @@ Feature: Recursive Function Execution
       fun q2_directed($x: entity2) -> { entity2 }:
       match
         $x isa entity2; $y isa entity2;
-        { (start: $x, end: $y) isa R2; }
+        { R2 (start: $x, end: $y); }
         or {
-            (start: $x, end: $z) isa R2;
-            $y1 in q2_directed($z);
+            R2 (start: $x, end: $z);
+            let $y1 in q2_directed($z);
             $y is $y1;
         };
         return { $y };
 
       fun p_directed($x: entity2) -> { entity2 }:
       match
-        $y in q1_directed($x);
+        let $y in q1_directed($x);
       return { $y };
       """
     Given transaction commits
@@ -1230,45 +1230,45 @@ Feature: Recursive Function Execution
 
 
       # (start: $a{i}, end: $a{i+1} isa R1; for 0 <= i < m
-      (start: $a0, end: $a1) isa R1;
-      (start: $a1, end: $a2) isa R1;
-      (start: $a2, end: $a3) isa R1;
-      (start: $a3, end: $a4) isa R1;
-      (start: $a4, end: $a5) isa R1;
+      R1 (start: $a0, end: $a1);
+      R1 (start: $a1, end: $a2);
+      R1 (start: $a2, end: $a3);
+      R1 (start: $a3, end: $a4);
+      R1 (start: $a4, end: $a5);
 
 
       # (start: $a0, end: $b1{j}) isa R2; for 1 <= j <= n
       # (start: $b{m-1}{j}, end: $a{m}) isa R2; for 1 <= j <= n
       # (start: $b{i}{j}, end: $b{i+1}{j}) isa R2; for 1 <= j <= n; for 1 <= i < m - 1
-      (start: $a0, end: $b11) isa R2;
-      (start: $b41, end: $a5) isa R2;
-      (start: $b11, end: $b21) isa R2;
-      (start: $b21, end: $b31) isa R2;
-      (start: $b31, end: $b41) isa R2;
+      R2 (start: $a0, end: $b11);
+      R2 (start: $b41, end: $a5);
+      R2 (start: $b11, end: $b21);
+      R2 (start: $b21, end: $b31);
+      R2 (start: $b31, end: $b41);
 
-      (start: $a0, end: $b12) isa R2;
-      (start: $b42, end: $a5) isa R2;
-      (start: $b12, end: $b22) isa R2;
-      (start: $b22, end: $b32) isa R2;
-      (start: $b32, end: $b42) isa R2;
+      R2 (start: $a0, end: $b12);
+      R2 (start: $b42, end: $a5);
+      R2 (start: $b12, end: $b22);
+      R2 (start: $b22, end: $b32);
+      R2 (start: $b32, end: $b42);
 
-      (start: $a0, end: $b13) isa R2;
-      (start: $b43, end: $a5) isa R2;
-      (start: $b13, end: $b23) isa R2;
-      (start: $b23, end: $b33) isa R2;
-      (start: $b33, end: $b43) isa R2;
+      R2 (start: $a0, end: $b13);
+      R2 (start: $b43, end: $a5);
+      R2 (start: $b13, end: $b23);
+      R2 (start: $b23, end: $b33);
+      R2 (start: $b33, end: $b43);
 
-      (start: $a0, end: $b14) isa R2;
-      (start: $b44, end: $a5) isa R2;
-      (start: $b14, end: $b24) isa R2;
-      (start: $b24, end: $b34) isa R2;
-      (start: $b34, end: $b44) isa R2;
+      R2 (start: $a0, end: $b14);
+      R2 (start: $b44, end: $a5);
+      R2 (start: $b14, end: $b24);
+      R2 (start: $b24, end: $b34);
+      R2 (start: $b34, end: $b44);
 
-      (start: $a0, end: $b15) isa R2;
-      (start: $b45, end: $a5) isa R2;
-      (start: $b15, end: $b25) isa R2;
-      (start: $b25, end: $b35) isa R2;
-      (start: $b35, end: $b45) isa R2;
+      R2 (start: $a0, end: $b15);
+      R2 (start: $b45, end: $a5);
+      R2 (start: $b15, end: $b25);
+      R2 (start: $b25, end: $b35);
+      R2 (start: $b35, end: $b45);
       """
     Given transaction commits
 
@@ -1276,7 +1276,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in q1_pairs();
+        let $x, $y in q1_pairs();
         $x has index 'a0';
       select $y;
       """
@@ -1289,7 +1289,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $y in q1_directed($x);
+        let $y in q1_directed($x);
         $x has index 'a0';
       select $y;
       """
@@ -1326,22 +1326,22 @@ Feature: Recursive Function Execution
 
       fun p_pairs() -> {entity2, entity2}:
       match
-        $x in identity($x1);
-        $y in identity($y1);
-        { (start: $x1, end: $y1) isa Q; } or
+        let $x in identity($x1);
+        let $y in identity($y1);
+        { Q (start: $x1, end: $y1); } or
         {
-          (start: $x1, end: $z1) isa Q;
-          $z1, $y1 in p_pairs();
+          Q (start: $x1, end: $z1);
+          let $z1, $y1 in p_pairs();
         };
       return { $x, $y };
 
       fun p_directed($x: entity2) -> {entity2}:
       match
-        $y in identity($y1);
-        { (start: $x, end: $y1) isa Q; } or
+        let $y in identity($y1);
+        { Q (start: $x, end: $y1); } or
         {
-          (start: $x, end: $z) isa Q;
-          $y1 in p_directed($z);
+          Q (start: $x, end: $z);
+          let $y1 in p_directed($z);
         };
       return { $y };
       """
@@ -1425,78 +1425,78 @@ Feature: Recursive Function Execution
 
 
       # (start: $a0, end: $b1_{j}) isa Q; for 1 <= j <= n
-      (start: $a0, end: $b1_1) isa Q;
-      (start: $a0, end: $b1_2) isa Q;
-      (start: $a0, end: $b1_3) isa Q;
-      (start: $a0, end: $b1_4) isa Q;
-      (start: $a0, end: $b1_5) isa Q;
-      (start: $a0, end: $b1_6) isa Q;
-      (start: $a0, end: $b1_7) isa Q;
-      (start: $a0, end: $b1_8) isa Q;
-      (start: $a0, end: $b1_9) isa Q;
-      (start: $a0, end: $b1_10) isa Q;
+      Q (start: $a0, end: $b1_1);
+      Q (start: $a0, end: $b1_2);
+      Q (start: $a0, end: $b1_3);
+      Q (start: $a0, end: $b1_4);
+      Q (start: $a0, end: $b1_5);
+      Q (start: $a0, end: $b1_6);
+      Q (start: $a0, end: $b1_7);
+      Q (start: $a0, end: $b1_8);
+      Q (start: $a0, end: $b1_9);
+      Q (start: $a0, end: $b1_10);
 
 
       # (start: $b{i}_{j}, end: $b{i+1}_{j}) isa Q; for 1 <= j <= n; for 1 <= i <= m
-      (start: $b1_1, end: $b2_1) isa Q;
-      (start: $b2_1, end: $b3_1) isa Q;
-      (start: $b3_1, end: $b4_1) isa Q;
-      (start: $b4_1, end: $b5_1) isa Q;
-      (start: $b5_1, end: $b6_1) isa Q;
+      Q (start: $b1_1, end: $b2_1);
+      Q (start: $b2_1, end: $b3_1);
+      Q (start: $b3_1, end: $b4_1);
+      Q (start: $b4_1, end: $b5_1);
+      Q (start: $b5_1, end: $b6_1);
 
-      (start: $b1_2, end: $b2_2) isa Q;
-      (start: $b2_2, end: $b3_2) isa Q;
-      (start: $b3_2, end: $b4_2) isa Q;
-      (start: $b4_2, end: $b5_2) isa Q;
-      (start: $b5_2, end: $b6_2) isa Q;
+      Q (start: $b1_2, end: $b2_2);
+      Q (start: $b2_2, end: $b3_2);
+      Q (start: $b3_2, end: $b4_2);
+      Q (start: $b4_2, end: $b5_2);
+      Q (start: $b5_2, end: $b6_2);
 
-      (start: $b1_3, end: $b2_3) isa Q;
-      (start: $b2_3, end: $b3_3) isa Q;
-      (start: $b3_3, end: $b4_3) isa Q;
-      (start: $b4_3, end: $b5_3) isa Q;
-      (start: $b5_3, end: $b6_3) isa Q;
+      Q (start: $b1_3, end: $b2_3);
+      Q (start: $b2_3, end: $b3_3);
+      Q (start: $b3_3, end: $b4_3);
+      Q (start: $b4_3, end: $b5_3);
+      Q (start: $b5_3, end: $b6_3);
 
-      (start: $b1_4, end: $b2_4) isa Q;
-      (start: $b2_4, end: $b3_4) isa Q;
-      (start: $b3_4, end: $b4_4) isa Q;
-      (start: $b4_4, end: $b5_4) isa Q;
-      (start: $b5_4, end: $b6_4) isa Q;
+      Q (start: $b1_4, end: $b2_4);
+      Q (start: $b2_4, end: $b3_4);
+      Q (start: $b3_4, end: $b4_4);
+      Q (start: $b4_4, end: $b5_4);
+      Q (start: $b5_4, end: $b6_4);
 
-      (start: $b1_5, end: $b2_5) isa Q;
-      (start: $b2_5, end: $b3_5) isa Q;
-      (start: $b3_5, end: $b4_5) isa Q;
-      (start: $b4_5, end: $b5_5) isa Q;
-      (start: $b5_5, end: $b6_5) isa Q;
+      Q (start: $b1_5, end: $b2_5);
+      Q (start: $b2_5, end: $b3_5);
+      Q (start: $b3_5, end: $b4_5);
+      Q (start: $b4_5, end: $b5_5);
+      Q (start: $b5_5, end: $b6_5);
 
-      (start: $b1_6, end: $b2_6) isa Q;
-      (start: $b2_6, end: $b3_6) isa Q;
-      (start: $b3_6, end: $b4_6) isa Q;
-      (start: $b4_6, end: $b5_6) isa Q;
-      (start: $b5_6, end: $b6_6) isa Q;
+      Q (start: $b1_6, end: $b2_6);
+      Q (start: $b2_6, end: $b3_6);
+      Q (start: $b3_6, end: $b4_6);
+      Q (start: $b4_6, end: $b5_6);
+      Q (start: $b5_6, end: $b6_6);
 
-      (start: $b1_7, end: $b2_7) isa Q;
-      (start: $b2_7, end: $b3_7) isa Q;
-      (start: $b3_7, end: $b4_7) isa Q;
-      (start: $b4_7, end: $b5_7) isa Q;
-      (start: $b5_7, end: $b6_7) isa Q;
+      Q (start: $b1_7, end: $b2_7);
+      Q (start: $b2_7, end: $b3_7);
+      Q (start: $b3_7, end: $b4_7);
+      Q (start: $b4_7, end: $b5_7);
+      Q (start: $b5_7, end: $b6_7);
 
-      (start: $b1_8, end: $b2_8) isa Q;
-      (start: $b2_8, end: $b3_8) isa Q;
-      (start: $b3_8, end: $b4_8) isa Q;
-      (start: $b4_8, end: $b5_8) isa Q;
-      (start: $b5_8, end: $b6_8) isa Q;
+      Q (start: $b1_8, end: $b2_8);
+      Q (start: $b2_8, end: $b3_8);
+      Q (start: $b3_8, end: $b4_8);
+      Q (start: $b4_8, end: $b5_8);
+      Q (start: $b5_8, end: $b6_8);
 
-      (start: $b1_9, end: $b2_9) isa Q;
-      (start: $b2_9, end: $b3_9) isa Q;
-      (start: $b3_9, end: $b4_9) isa Q;
-      (start: $b4_9, end: $b5_9) isa Q;
-      (start: $b5_9, end: $b6_9) isa Q;
+      Q (start: $b1_9, end: $b2_9);
+      Q (start: $b2_9, end: $b3_9);
+      Q (start: $b3_9, end: $b4_9);
+      Q (start: $b4_9, end: $b5_9);
+      Q (start: $b5_9, end: $b6_9);
 
-      (start: $b1_10, end: $b2_10) isa Q;
-      (start: $b2_10, end: $b3_10) isa Q;
-      (start: $b3_10, end: $b4_10) isa Q;
-      (start: $b4_10, end: $b5_10) isa Q;
-      (start: $b5_10, end: $b6_10) isa Q;
+      Q (start: $b1_10, end: $b2_10);
+      Q (start: $b2_10, end: $b3_10);
+      Q (start: $b3_10, end: $b4_10);
+      Q (start: $b4_10, end: $b5_10);
+      Q (start: $b5_10, end: $b6_10);
       """
     Given transaction commits
 
@@ -1504,7 +1504,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in p_pairs();
+        let $x, $y in p_pairs();
         $x has index 'a0';
       select $y;
       """
@@ -1517,7 +1517,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $y in p_directed($x);
+        let $y in p_directed($x);
         $x has index 'a0';
       select $y;
       """
@@ -1549,34 +1549,34 @@ Feature: Recursive Function Execution
       fun p_pairs() -> { entity2, entity2 }:
       match
       $x isa entity2; $y isa entity2;
-      { (start: $x, end: $y) isa Q; } or
+      { Q (start: $x, end: $y); } or
       {
-        (start: $x, end: $z) isa Q;
-        $z, $y1 in p_pairs();
+        Q (start: $x, end: $z);
+        let $z, $y1 in p_pairs();
         $y is $y1;
       };
       return { $x, $y };
 
       fun s_pairs() -> { entity2, entity2 }:
       match
-        $x, $y in p_pairs();
+        let $x, $y in p_pairs();
       return { $x, $y };
 
       # --- directed ---
       fun p_directed($x: entity2) -> {entity2 }:
       match
       $x isa entity2; $y isa entity2;
-      { (start: $x, end: $y) isa Q; } or
+      { Q (start: $x, end: $y); } or
       {
-        (start: $x, end: $z) isa Q;
-        $y1 in p_directed($z);
+        Q (start: $x, end: $z);
+        let $y1 in p_directed($z);
         $y is $y1;
       };
       return { $y };
 
       fun s_directed($x: entity2) -> { entity2 }:
       match
-        $y in p_directed($x);
+        let $y in p_directed($x);
       return { $y };
       """
     Given transaction commits
@@ -1619,58 +1619,58 @@ Feature: Recursive Function Execution
       $a5_4 isa a-entity, has index "a5_4";
       $a5_5 isa a-entity, has index "a5_5";
 
-      (start: $a, end: $a1_1) isa Q;
+      Q (start: $a, end: $a1_1);
 
       # (start: $a{i}_{j}, end: $a{i+1}_{j}) isa Q; for 1 <= i < n; for 1 <= j <= m
-      (start: $a1_1, end: $a2_1) isa Q;
-      (start: $a1_2, end: $a2_2) isa Q;
-      (start: $a1_3, end: $a2_3) isa Q;
-      (start: $a1_4, end: $a2_4) isa Q;
-      (start: $a1_5, end: $a2_5) isa Q;
+      Q (start: $a1_1, end: $a2_1);
+      Q (start: $a1_2, end: $a2_2);
+      Q (start: $a1_3, end: $a2_3);
+      Q (start: $a1_4, end: $a2_4);
+      Q (start: $a1_5, end: $a2_5);
 
-      (start: $a2_1, end: $a3_1) isa Q;
-      (start: $a2_2, end: $a3_2) isa Q;
-      (start: $a2_3, end: $a3_3) isa Q;
-      (start: $a2_4, end: $a3_4) isa Q;
-      (start: $a2_5, end: $a3_5) isa Q;
+      Q (start: $a2_1, end: $a3_1);
+      Q (start: $a2_2, end: $a3_2);
+      Q (start: $a2_3, end: $a3_3);
+      Q (start: $a2_4, end: $a3_4);
+      Q (start: $a2_5, end: $a3_5);
 
-      (start: $a3_1, end: $a4_1) isa Q;
-      (start: $a3_2, end: $a4_2) isa Q;
-      (start: $a3_3, end: $a4_3) isa Q;
-      (start: $a3_4, end: $a4_4) isa Q;
-      (start: $a3_5, end: $a4_5) isa Q;
+      Q (start: $a3_1, end: $a4_1);
+      Q (start: $a3_2, end: $a4_2);
+      Q (start: $a3_3, end: $a4_3);
+      Q (start: $a3_4, end: $a4_4);
+      Q (start: $a3_5, end: $a4_5);
 
-      (start: $a4_1, end: $a5_1) isa Q;
-      (start: $a4_2, end: $a5_2) isa Q;
-      (start: $a4_3, end: $a5_3) isa Q;
-      (start: $a4_4, end: $a5_4) isa Q;
-      (start: $a4_5, end: $a5_5) isa Q;
+      Q (start: $a4_1, end: $a5_1);
+      Q (start: $a4_2, end: $a5_2);
+      Q (start: $a4_3, end: $a5_3);
+      Q (start: $a4_4, end: $a5_4);
+      Q (start: $a4_5, end: $a5_5);
 
       # (start: $a{i}_{j}, end: $a{i}_{j+1}) isa Q; for 1 <= i <= n; for 1 <= j < m
-      (start: $a1_1, end: $a1_2) isa Q;
-      (start: $a1_2, end: $a1_3) isa Q;
-      (start: $a1_3, end: $a1_4) isa Q;
-      (start: $a1_4, end: $a1_5) isa Q;
+      Q (start: $a1_1, end: $a1_2);
+      Q (start: $a1_2, end: $a1_3);
+      Q (start: $a1_3, end: $a1_4);
+      Q (start: $a1_4, end: $a1_5);
 
-      (start: $a2_1, end: $a2_2) isa Q;
-      (start: $a2_2, end: $a2_3) isa Q;
-      (start: $a2_3, end: $a2_4) isa Q;
-      (start: $a2_4, end: $a2_5) isa Q;
+      Q (start: $a2_1, end: $a2_2);
+      Q (start: $a2_2, end: $a2_3);
+      Q (start: $a2_3, end: $a2_4);
+      Q (start: $a2_4, end: $a2_5);
 
-      (start: $a3_1, end: $a3_2) isa Q;
-      (start: $a3_2, end: $a3_3) isa Q;
-      (start: $a3_3, end: $a3_4) isa Q;
-      (start: $a3_4, end: $a3_5) isa Q;
+      Q (start: $a3_1, end: $a3_2);
+      Q (start: $a3_2, end: $a3_3);
+      Q (start: $a3_3, end: $a3_4);
+      Q (start: $a3_4, end: $a3_5);
 
-      (start: $a4_1, end: $a4_2) isa Q;
-      (start: $a4_2, end: $a4_3) isa Q;
-      (start: $a4_3, end: $a4_4) isa Q;
-      (start: $a4_4, end: $a4_5) isa Q;
+      Q (start: $a4_1, end: $a4_2);
+      Q (start: $a4_2, end: $a4_3);
+      Q (start: $a4_3, end: $a4_4);
+      Q (start: $a4_4, end: $a4_5);
 
-      (start: $a5_1, end: $a5_2) isa Q;
-      (start: $a5_2, end: $a5_3) isa Q;
-      (start: $a5_3, end: $a5_4) isa Q;
-      (start: $a5_4, end: $a5_5) isa Q;
+      Q (start: $a5_1, end: $a5_2);
+      Q (start: $a5_2, end: $a5_3);
+      Q (start: $a5_3, end: $a5_4);
+      Q (start: $a5_4, end: $a5_5);
       """
     Given transaction commits
 
@@ -1678,7 +1678,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $x, $y in p_pairs();
+        let $x, $y in p_pairs();
         $x has index 'a';
       select $y;
       """
@@ -1690,7 +1690,7 @@ Feature: Recursive Function Execution
     Given get answers of typeql read query
       """
       match
-        $y in p_directed($x);
+        let $y in p_directed($x);
         $x has index 'a';
       select $y;
       """

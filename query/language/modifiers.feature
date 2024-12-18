@@ -33,8 +33,8 @@ Feature: TypeQL Query Modifiers
         relates employer,
         owns ref @key;
       attribute name @independent, value string;
-      attribute age, value long;
-      attribute ref, value long;
+      attribute age, value integer;
+      attribute ref, value integer;
       attribute email, value string;
       """
     Given transaction commits
@@ -81,7 +81,7 @@ Feature: TypeQL Query Modifiers
     Examples:
       | attr          | type     | val4       | val2             | val3             | val1       |
       | colour        | string   | "blue"     | "green"          | "red"            | "yellow"   |
-      | score         | long     | -38        | -4               | 18               | 152        |
+      | score         | integer     | -38        | -4               | 18               | 152        |
       | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
 #      | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
 
@@ -172,10 +172,10 @@ Feature: TypeQL Query Modifiers
       """
     Then order of answer concepts is
       | x         | to20         |
-      | key:ref:1 | value:long:6 |
-      | key:ref:3 | value:long:4 |
-      | key:ref:0 | value:long:2 |
-      | key:ref:2 | value:long:0 |
+      | key:ref:1 | value:integer:6 |
+      | key:ref:3 | value:integer:4 |
+      | key:ref:0 | value:integer:2 |
+      | key:ref:2 | value:integer:0 |
 
 
   Scenario: multiple sort variables may be used to sort ascending
@@ -558,7 +558,7 @@ Feature: TypeQL Query Modifiers
     Examples:
       | attr          | type     | pivot      | lesser       | greater          |
       | colour        | string   | "green"    | "blue"       | "red"            |
-      | score         | long     | -4         | -38          | 18               |
+      | score         | integer     | -4         | -38          | 18               |
       | correlation   | double   | -0.9       | -1.2         | 0.01             |
       | date-of-birth | datetime | 1970-02-01 |  1970-01-01  | 1999-12-31T23:01 |
 
@@ -721,10 +721,10 @@ Feature: TypeQL Query Modifiers
       # NOTE: fourthValuePivot is expected to be the middle of the sort order (pivot)
       | firstAttr   | firstType | firstValue1 | firstValue2 | secondAttr | secondType | secondValue | thirdAttr | thirdType | thirdValue | fourthAttr | fourthType | fourthValuePivot |
       | colour      | string    | "green"     | "blue"      | name       | string     | "alice"     | shape     | string    | "square"   | street     | string     | "carnaby"        |
-      | score       | long      | 4           | -38         | quantity   | long       | -50         | area      | long      | 100        | length     | long       | 0                |
+      | score       | integer      | 4           | -38         | quantity   | integer       | -50         | area      | integer      | 100        | length     | integer       | 0                |
       | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
-      # mixed double-long data
-      | score       | long      | 4           | -38         | quantity   | double     | -55.123     | area      | long      | 100        | length     | double     | 0.5              |
+      # mixed double-integer data
+      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
 
 
@@ -760,7 +760,7 @@ Feature: TypeQL Query Modifiers
             ],
             "email": [ { "type": { "label": "email", "root": "attribute", "value_type": "string" }, "value": "frederick@gmail.com" } ]
           },
-          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "long" }, "value": 2 }
+          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "integer" }, "value": 2 }
         },
         {
           "person": {
@@ -768,7 +768,7 @@ Feature: TypeQL Query Modifiers
             "name": [ { "type": { "label": "name", "root": "attribute", "value_type": "string" }, "value": "Jemima" } ],
             "email": [ ]
           },
-          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "long" }, "value" : 1 }
+          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "integer" }, "value" : 1 }
         }
       ]
       """
@@ -932,7 +932,7 @@ Feature: TypeQL Query Modifiers
       """
     Then uniquely identify answer concepts
       | z         | x              | b                |
-      | key:ref:0 | attr:name:Lisa | value:long:2001  |
+      | key:ref:0 | attr:name:Lisa | value:integer:2001  |
 
 
   # Guards against regression of #6967

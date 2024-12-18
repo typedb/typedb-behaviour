@@ -28,8 +28,8 @@ Feature: TypeQL pipelines
         relates employee,
         relates employer;
       attribute name @independent, value string;
-      attribute age @independent, value long;
-      attribute ref value long;
+      attribute age @independent, value integer;
+      attribute ref value integer;
       """
     Given transaction commits
 
@@ -216,6 +216,6 @@ Feature: TypeQL pipelines
     """
     Then uniquely identify answer concepts
       | name             | sum_age        |
-      | attr:name:Alice  | value:long:23  |
-      | attr:name:Bob    | value:long:47  |
+      | attr:name:Alice  | value:integer:23  |
+      | attr:name:Bob    | value:integer:47  |
 

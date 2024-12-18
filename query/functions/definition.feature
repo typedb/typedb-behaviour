@@ -27,9 +27,9 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -40,9 +40,9 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -50,7 +50,7 @@ Feature: Function Definition
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $five = five();
+    match let $five = five();
     """
     Then answer size is: 1
     Given transaction closes
@@ -66,7 +66,7 @@ Feature: Function Definition
     Given connection open read transaction for database: typedb
     When typeql read query; fails with a message containing: "Could not resolve function with name 'five'."
     """
-    match $five = five();
+    match let $five = five();
     """
 
 
@@ -75,9 +75,9 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 4;
+      let $five = 4;
     return first $five;
     """
     Given transaction commits
@@ -85,20 +85,20 @@ Feature: Function Definition
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $five = five();
+    match let $five = five();
     """
     Then uniquely identify answer concepts
       | five         |
-      | value:long:4 |
+      | value:integer:4 |
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When typeql schema query
     """
     redefine
-    fun five() -> long :
+    fun five() -> integer :
     match
-      $five = 5;
+      let $five = 5;
     return first $five;
     """
     Given transaction commits
@@ -106,11 +106,11 @@ Feature: Function Definition
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $five = five();
+    match let $five = five();
     """
     Then uniquely identify answer concepts
       | five         |
-      | value:long:5 |
+      | value:integer:5 |
     Given transaction closes
 
 
@@ -131,14 +131,14 @@ Feature: Function Definition
     define
     fun nickname_of($p: person) -> { nickname }:
     match
-      $dummy = $nickname;
+      let $dummy = $nickname;
       { $p has nickname $nickname; } or
-      { $nickname in default_nickname($p); };
+      { let $nickname in default_nickname($p); };
     return { $nickname };
 
     fun default_nickname($p: person) -> { nickname }:
     match
-      not { $ignored in nickname_of($p); }; # $p has no nickname
+      not { let $ignored in nickname_of($p); }; # $p has no nickname
       $nickname-mapping isa nickname-mapping;
       $p has name $name;
       $nickname-mapping has name $name;
@@ -152,15 +152,15 @@ Feature: Function Definition
     with
     fun nickname_of($p: person) -> { nickname }:
     match
-      $dummy = $nickname;
+      let $dummy = $nickname;
       { $p has nickname $nickname; } or
-      { $nickname in default_nickname($p); };
+      { let $nickname in default_nickname($p); };
     return { $nickname };
 
     with
     fun default_nickname($p: person) -> { nickname }:
     match
-      not { $ignored in nickname_of($p); }; # $p has no nickname
+      not { let $ignored in nickname_of($p); }; # $p has no nickname
       $nickname-mapping isa nickname-mapping;
       $p has name $name;
       $nickname-mapping has name $name;
@@ -169,7 +169,7 @@ Feature: Function Definition
 
     match
       $p isa person;
-      $nickname in nickname_of($p);
+      let $nickname in nickname_of($p);
     """
 
 
@@ -191,30 +191,30 @@ Feature: Function Definition
     define
     fun annual_reward($customer: person) -> {double}:
     match
-      $dummy = $reward;
-      { ($customer, $item) isa purchase; $reward in purchase_reward($item); } or
-      { $reward in special_rewards($customer); };
+      let $dummy = $reward;
+      { $purchase isa purchase ($customer, $item); let $reward in purchase_reward($item); } or
+      { let $reward in special_rewards($customer); };
     reduce $total_rewards = sum($reward);
     return { $total_rewards };
 
     fun purchase_reward($item: item) -> { double }:
     match
       $item has price $price;
-      $reward = 1.1 * $price;
+      let $reward = 1.1 * $price;
     return { $reward };
 
     fun special_rewards($customer: person) -> {double}:
     match
-       $joining_bonus = 1000;
-       $loyalty = loyalty_bonus($customer);
-       $total = $joining + $loyalty;
+       let $joining_bonus = 1000;
+       let $loyalty = loyalty_bonus($customer);
+       let $total = $joining + $loyalty;
     return { $total };
 
     fun loyalty_bonus($customer: person) ->  { double }:
     match
       $customer has joining-year $year;
-      $years-completed = (2024 - $year);
-      $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
+      let $years-completed = (2024 - $year);
+      let $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
     """
     Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
@@ -225,9 +225,9 @@ Feature: Function Definition
     with
     fun annual_reward($customer: person) -> {double}:
     match
-      $dummy = $reward;
-      { ($customer, $item) isa purchase; $reward in purchase_reward($item); } or
-      { $reward in special_rewards($customer); };
+      let $dummy = $reward;
+      { $purchase isa purchase ($customer, $item); let $reward in purchase_reward($item); } or
+      { let $reward in special_rewards($customer); };
     reduce $total_rewards = sum($reward);
     return { $total_rewards };
 
@@ -235,28 +235,28 @@ Feature: Function Definition
     fun purchase_reward($item: item) -> { double }:
     match
       $item has price $price;
-      $reward = 1.1 * $price;
+      let $reward = 1.1 * $price;
     return { $reward };
 
     with
     fun special_rewards($customer: person) -> {double}:
     match
-       $joining_bonus = 1000;
-       $loyalty = loyalty_bonus($customer);
-       $total = $joining + $loyalty;
+       let $joining_bonus = 1000;
+       let $loyalty = loyalty_bonus($customer);
+       let $total = $joining + $loyalty;
     return { $total };
 
     with
     fun loyalty_bonus($customer: person) ->  { double }:
     match
       $customer has joining-year $year;
-      $years-completed = (2024 - $year);
-      $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
+      let $years-completed = (2024 - $year);
+      let $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
 
     match
       $p isa person;
-      $reward in annual_reward($p);
+      let $reward in annual_reward($p);
     """
 
 
@@ -276,13 +276,13 @@ Feature: Function Definition
     define
     fun nickname_of($p: person) -> { nickname }:
     match
-      $nickname in default_nickname($p);
+      let $nickname in default_nickname($p);
     return { $nickname };
 
     fun default_nickname($p: person) -> { nickname }:
     match
       $p isa $t; # Avoid unused argument
-      $nickname "Steve" isa nickname;
+      $nickname isa nickname "Steve";
     return { $nickname };
     """
     Given transaction commits
@@ -311,13 +311,13 @@ Feature: Function Definition
     define
     fun nickname_of($p: person) -> { nickname }:
     match
-      $nickname in default_nickname($p);
+      let $nickname in default_nickname($p);
     return { $nickname };
 
     fun default_nickname($p: person) -> { nickname }:
     match
       $p isa $t; # Avoid unused argument
-      $nickname "Steve" isa nickname;
+      $nickname isa nickname "Steve";
     return { $nickname };
     """
     Given transaction commits
@@ -328,8 +328,8 @@ Feature: Function Definition
     fun default_nickname($p: person) -> { string }:
     match
       $p isa $t; # Avoid unused argument
-      $nickname_attr "Steve" isa nickname;
-      $nickname_value = $nickname_attr;
+      $nickname_attr isa nickname "Steve";
+      let $nickname_value = $nickname_attr;
     return { $nickname_value };
     """
     Then transaction commits; fails with a message containing: "Type checking all functions currently defined failed"

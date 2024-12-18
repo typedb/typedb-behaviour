@@ -17,7 +17,7 @@ Feature: Concept Attribute
     Given attribute(is-alive) set value type: boolean
     Given attribute(is-alive) set annotation: @independent
     Given create attribute type: age
-    Given attribute(age) set value type: long
+    Given attribute(age) set value type: integer
     Given attribute(age) set annotation: @independent
     Given create attribute type: score
     Given attribute(score) set value type: double
@@ -61,7 +61,7 @@ Feature: Concept Attribute
     Examples:
       | attr              | type        | value                                                                              |
       | is-alive          | boolean     | true                                                                               |
-      | age               | long        | 21                                                                                 |
+      | age               | integer        | 21                                                                                 |
       | score             | double      | 123.456                                                                            |
       | name              | string      | alice                                                                              |
       | name              | string      | very-long-string-with_@strangESymßo¬s¡2)*(()˚¬ª#08uj!@%@£^%*&%(*@!_++±§≥≤<>?:😎資料庫 |
@@ -81,7 +81,7 @@ Feature: Concept Attribute
     Examples:
       | attr              | type        | value                                                                              |
       | is-alive          | boolean     | true                                                                               |
-      | age               | long        | 21                                                                                 |
+      | age               | integer        | 21                                                                                 |
       | score             | double      | 123.456                                                                            |
       | name              | string      | alice                                                                              |
       | name              | string      | very-long-string-with_@strangESymßo¬s¡2)*(()˚¬ª#08uj!@%@£^%*&%(*@!_++±§≥≤<>?:😎資料庫 |
@@ -116,7 +116,7 @@ Feature: Concept Attribute
     Examples:
       | attr              | type        | value                              |
       | is-alive          | boolean     | true                               |
-      | age               | long        | 21                                 |
+      | age               | integer        | 21                                 |
       | score             | double      | 123.456                            |
       | name              | string      | alice                              |
       | birth-date        | date        | 1990-01-01                         |
@@ -163,7 +163,7 @@ Feature: Concept Attribute
 
     When connection open schema transaction for database: typedb
     When create attribute type: ephemeral
-    When attribute(ephemeral) set value type: long
+    When attribute(ephemeral) set value type: integer
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -223,8 +223,8 @@ Feature: Concept Attribute
     Then attribute $fail does not exist
     Examples:
       | value-type  | values-args                               | fail-val                      | suc-val                       |
-      | long        | 1, 5, 4                                   | 2                             | 1                             |
-      | long        | 1                                         | 2                             | 1                             |
+      | integer        | 1, 5, 4                                   | 2                             | 1                             |
+      | integer        | 1                                         | 2                             | 1                             |
       | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
       | double      | 0.01                                      | 0.1                           | 0.01                          |
       | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
@@ -272,11 +272,11 @@ Feature: Concept Attribute
     Then attribute $fail does not exist
     Examples:
       | value-type  | range-args                                                           | fail-val                          | suc-val                           |
-      | long        | 1..3                                                                 | 0                                 | 1                                 |
-      | long        | 1..3                                                                 | -1                                | 2                                 |
-      | long        | 1..3                                                                 | 4                                 | 3                                 |
-      | long        | -1..1                                                                | -2                                | 0                                 |
-      | long        | -1..1                                                                | 2                                 | -1                                |
+      | integer        | 1..3                                                                 | 0                                 | 1                                 |
+      | integer        | 1..3                                                                 | -1                                | 2                                 |
+      | integer        | 1..3                                                                 | 4                                 | 3                                 |
+      | integer        | -1..1                                                                | -2                                | 0                                 |
+      | integer        | -1..1                                                                | 2                                 | -1                                |
       | double      | 0.01..0.1                                                            | 0.001                             | 0.01                              |
       | double      | 0.01..0.1                                                            | 0.11                              | 0.0111111                         |
       | double      | -0.01..0.1                                                           | -0.011                            | 0.01                              |

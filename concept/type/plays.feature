@@ -319,7 +319,7 @@ Feature: Concept Plays
 #    When create entity type: car
 #    When create relation type: credit
 #    When create attribute type: id
-#    When attribute(id) set value type: long
+#    When attribute(id) set value type: integer
 #    When relation(credit) create role: creditor
 #    When create relation type: marriage
 #    When relation(marriage) create role: spouse

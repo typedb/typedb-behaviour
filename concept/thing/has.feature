@@ -216,8 +216,8 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | values-args                               | fail-val                      | suc-val                       |
-      | long        | 1, 5, 4                                   | 2                             | 1                             |
-      | long        | 1                                         | 2                             | 1                             |
+      | integer        | 1, 5, 4                                   | 2                             | 1                             |
+      | integer        | 1                                         | 2                             | 1                             |
       | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
       | double      | 0.01                                      | 0.1                           | 0.01                          |
       | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
@@ -269,11 +269,11 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | range-args                                                           | fail-val                          | suc-val                           |
-      | long        | 1..3                                                                 | 0                                 | 1                                 |
-      | long        | 1..3                                                                 | -1                                | 2                                 |
-      | long        | 1..3                                                                 | 4                                 | 3                                 |
-      | long        | -1..1                                                                | -2                                | 0                                 |
-      | long        | -1..1                                                                | 2                                 | -1                                |
+      | integer        | 1..3                                                                 | 0                                 | 1                                 |
+      | integer        | 1..3                                                                 | -1                                | 2                                 |
+      | integer        | 1..3                                                                 | 4                                 | 3                                 |
+      | integer        | -1..1                                                                | -2                                | 0                                 |
+      | integer        | -1..1                                                                | 2                                 | -1                                |
       | double      | 0.01..0.1                                                            | 0.001                             | 0.01                              |
       | double      | 0.01..0.1                                                            | 0.11                              | 0.0111111                         |
       | double      | -0.01..0.1                                                           | -0.011                            | 0.01                              |

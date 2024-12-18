@@ -109,7 +109,7 @@ Feature: Concept Owns Annotations
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: age
-    When attribute(age) set value type: long
+    When attribute(age) set value type: integer
     When <root-type>(<type-name>) set owns: email
     When <root-type>(<type-name>) get owns(email) set annotation: @<annotation>
     When <root-type>(<type-name>) set owns: username
@@ -1172,7 +1172,7 @@ Feature: Concept Owns Annotations
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
     When create attribute type: age
-    When attribute(age) set value type: long
+    When attribute(age) set value type: integer
     When create attribute type: reference
     When attribute(reference) set value type: string
     When attribute(reference) set annotation: @abstract
@@ -1475,7 +1475,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns is empty
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -1499,7 +1499,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) is key: true
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -1579,7 +1579,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) is key: true
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -1725,7 +1725,7 @@ Feature: Concept Owns Annotations
 #    Then entity(person) get owns is empty
 #    Examples:
 #      | value-type | arg                            |
-#      | long       | LABEL                          |
+#      | integer       | LABEL                          |
 #      | decimal    | 1.5                            |
 #      | string     | label                          |
 #      | boolean    | lAbEl_Of_FoRmaT                |
@@ -1733,7 +1733,7 @@ Feature: Concept Owns Annotations
 #      | datetime   | l                              |
 #      | datetime-tz | l2                             |
 #      | duration   | trydigits2723andafter          |
-#      | long       | LABEL, LABEL2                  |
+#      | integer       | LABEL, LABEL2                  |
 #      | string     | label, label2                  |
 #      | boolean    | lAbEl_Of_FoRmaT, another_label |
 #      | datetime   | l, m, b, k, r, e2, ss, s, sss  |
@@ -1753,7 +1753,7 @@ Feature: Concept Owns Annotations
 #    When create attribute type: progress
 #    When attribute(progress) set value type: double
 #    When create attribute type: age
-#    When attribute(age) set value type: long
+#    When attribute(age) set value type: integer
 #    When <root-type>(<type-name>) set owns: first-name
 #    When <root-type>(<type-name>) get owns(first-name) set annotation: @subkey(primary)
 #    Then <root-type>(<type-name>) get owns(first-name) get constraints contain: @subkey(primary)
@@ -1806,7 +1806,7 @@ Feature: Concept Owns Annotations
 #    Then entity(person) get owns(custom-attribute) get constraints contain: @subkey(LABEL)
 #    Examples:
 #      | value-type |
-#      | long       |
+#      | integer       |
 #      | decimal    |
 #      | string     |
 #      | boolean    |
@@ -1821,7 +1821,7 @@ Feature: Concept Owns Annotations
 #    When create attribute type: surname
 #    When attribute(surname) set value type: string
 #    When create attribute type: age
-#    When attribute(age) set value type: long
+#    When attribute(age) set value type: integer
 #    When entity(person) set owns: name
 #    When entity(person) get owns(name) set annotation: @subkey(NAME-AGE)
 #    When entity(person) get owns(name) set annotation: @subkey(FULL-NAME)
@@ -1858,7 +1858,7 @@ Feature: Concept Owns Annotations
 #
 #  Scenario: Owns cannot set @subkey annotation for incorrect arguments
 #    When create attribute type: custom-attribute
-#    When attribute(custom-attribute) set value type: long
+#    When attribute(custom-attribute) set value type: integer
 #    When entity(person) set owns: custom-attribute
 #    Then entity(person) get owns(custom-attribute) set annotation: @subkey("LABEL"); fails
 #    Then entity(person) get owns(custom-attribute) set annotation: @subkey(福); fails
@@ -1884,7 +1884,7 @@ Feature: Concept Owns Annotations
 #    Then entity(person) get owns(custom-attribute) get constraints contain: @subkey(LABEL)
 #    Examples:
 #      | value-type |
-#      | long       |
+#      | integer       |
 #      | string     |
 #      | boolean    |
 #      | decimal    |
@@ -1923,7 +1923,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns is empty
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -1947,7 +1947,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @unique
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -2039,7 +2039,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns is empty
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | decimal     |
       | string      |
       | boolean     |
@@ -2075,13 +2075,13 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns is empty
     Examples:
       | value-type  | args                                                                                                                                                                                                                                                                                                                                                                                                 |
-      | long        | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | long        | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | long        | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
-      | long        | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
-      | long        | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
-      | long        | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
-      | long        | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
+      | integer        | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | integer        | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | integer        | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
+      | integer        | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | integer        | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
+      | integer        | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
+      | integer        | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
       | string      | ""                                                                                                                                                                                                                                                                                                                                                                                                   |
       | string      | "1"                                                                                                                                                                                                                                                                                                                                                                                                  |
       | string      | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -2196,7 +2196,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args>)
     Examples:
       | value-type  | args                             |
-      | long        | 1, 2                             |
+      | integer        | 1, 2                             |
       | double      | 1.0, 2.0                         |
       | decimal     | 1.0, 2.0                         |
       | string      | "str", "str another"             |
@@ -2220,7 +2220,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
     Examples:
       | value-type  | args            | reset-args      |
-      | long        | 1, 5            | 7, 9            |
+      | integer        | 1, 5            | 7, 9            |
       | double      | 1.1, 1.5        | -8.0, 88.3      |
       | decimal     | -8.0, 88.3      | 1.1, 1.5        |
       | string      | "s"             | "not s"         |
@@ -2344,7 +2344,7 @@ Feature: Concept Owns Annotations
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise                            |
-      | long        | 1, 10, 20, 30                                                                | 10, 30                                     |
+      | integer        | 1, 10, 20, 30                                                                | 10, 30                                     |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
       | decimal     | 0.0, 1.0                                                                     | 0.0                                        |
       | string      | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
@@ -2434,7 +2434,7 @@ Feature: Concept Owns Annotations
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise          |
-      | long        | 1, 10, 20, 30                                                                | 10, 31                   |
+      | integer        | 1, 10, 20, 30                                                                | 10, 31                   |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
       | decimal     | 0.0, 1.0                                                                     | 0.01                     |
       | string      | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
@@ -2446,7 +2446,7 @@ Feature: Concept Owns Annotations
 
   Scenario Outline: Values can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
-    When attribute(name) set value type: long
+    When attribute(name) set value type: integer
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set annotation: @values(0, 1, 2, 3, 4, 5)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
@@ -2577,18 +2577,18 @@ Feature: Concept Owns Annotations
     When entity(customer) get owns(surname) set annotation: @values("only this string is allowed")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) set value type: long; fails
-    Then attribute(surname) set value type: long; fails
+    Then attribute(name) set value type: integer; fails
+    Then attribute(surname) set value type: integer; fails
     When entity(customer) get owns(surname) unset annotation: @values
     Then attribute(surname) unset value type; fails
-    When attribute(surname) set value type: long
-    When attribute(name) set value type: long
+    When attribute(surname) set value type: integer
+    When attribute(name) set value type: integer
     When attribute(surname) unset value type
     When entity(customer) get owns(surname) set annotation: @values(1, 2, 3)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(customer) get owns(surname) get constraints contain: @values(1, 2, 3)
-    Then attribute(surname) get value type: long
+    Then attribute(surname) get value type: integer
     When entity(person) get owns(name) set annotation: @values(1, 2, 3)
     When entity(customer) get owns(surname) unset annotation: @values
     Then entity(customer) get constraints for owned attribute(surname) contain: @values(1, 2, 3)
@@ -2598,7 +2598,7 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(customer) get constraints for owned attribute(surname) contain: @values(1, 2, 3)
     Then entity(customer) get owns(surname) get constraints do not contain: @values(1, 2, 3)
-    Then attribute(surname) get value type: long
+    Then attribute(surname) get value type: integer
 
 ########################
 # @range
@@ -2663,11 +2663,11 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @range
     Examples:
       | value-type  | arg0                              | arg1                                                  |
-      | long        | 0                                 | 1                                                     |
-      | long        | 1                                 | 2                                                     |
-      | long        | 0                                 | 2                                                     |
-      | long        | -1                                | 1                                                     |
-      | long        | -9223372036854775808              | 9223372036854775807                                   |
+      | integer        | 0                                 | 1                                                     |
+      | integer        | 1                                 | 2                                                     |
+      | integer        | 0                                 | 2                                                     |
+      | integer        | -1                                | 1                                                     |
+      | integer        | -9223372036854775808              | 9223372036854775807                                   |
       | string      | "A"                               | "a"                                                   |
       | string      | "a"                               | "z"                                                   |
       | string      | "A"                               | "福"                                                   |
@@ -2781,7 +2781,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args>)
     Examples:
       | value-type  | args                             |
-      | long        | 1..2                             |
+      | integer        | 1..2                             |
       | double      | 1.0..2.0                         |
       | decimal     | 1.0..2.0                         |
       | string      | "str".."str another"             |
@@ -2813,7 +2813,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<reset-args>)
     Examples:
       | value-type  | args                             | reset-args                       |
-      | long        | 1..5                             | 7..9                             |
+      | integer        | 1..5                             | 7..9                             |
       | double      | 1.1..1.5                         | -8.0..88.3                       |
       | decimal     | -8.0..88.3                       | 1.1..1.5                         |
       | string      | "S".."s"                         | "not s".."xxxxxxxxx"             |
@@ -2832,7 +2832,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @range
     Examples:
       | value-type  | arg0                     | args                     |
-      | long        | 1                        | 1                        |
+      | integer        | 1                        | 1                        |
       | double      | 1.0                      | 1.0                      |
       | decimal     | 1.0                      | 1.0                      |
       | string      | "123"                    | "123"                    |
@@ -2955,7 +2955,7 @@ Feature: Concept Owns Annotations
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
-      | long        | 1..10                            | 1..5                                      |
+      | integer        | 1..10                            | 1..5                                      |
       | double      | 1.0..10.0                        | 2.0..10.0                                 |
       | decimal     | 0.0..1.0                         | 0.0..0.999999                             |
       | string      | "A".."Z"                         | "J".."Z"                                  |
@@ -3043,7 +3043,7 @@ Feature: Concept Owns Annotations
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
-      | long        | 1..10                            | -1..5                                     |
+      | integer        | 1..10                            | -1..5                                     |
       | double      | 1.0..10.0                        | 0.0..150.0                                |
       | decimal     | 0.0..1.0                         | -0.0001..0.999999                         |
       | string      | "A".."Z"                         | "A".."z"                                  |
@@ -3053,7 +3053,7 @@ Feature: Concept Owns Annotations
 
   Scenario Outline: Range can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
-    When attribute(name) set value type: long
+    When attribute(name) set value type: integer
     When <root-type>(<supertype-name>) set owns: name
     When <root-type>(<supertype-name>) get owns(name) set annotation: @range(0..5)
     When <root-type>(<subtype-name>) set supertype: <supertype-name>
@@ -3184,18 +3184,18 @@ Feature: Concept Owns Annotations
     When entity(customer) get owns(surname) set annotation: @range("a start".."finish line")
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then attribute(name) set value type: long; fails
-    Then attribute(surname) set value type: long; fails
+    Then attribute(name) set value type: integer; fails
+    Then attribute(surname) set value type: integer; fails
     When entity(customer) get owns(surname) unset annotation: @range
     Then attribute(surname) unset value type; fails
-    When attribute(surname) set value type: long
-    When attribute(name) set value type: long
+    When attribute(surname) set value type: integer
+    When attribute(name) set value type: integer
     When attribute(surname) unset value type
     When entity(customer) get owns(surname) set annotation: @range(1..3)
     When transaction commits
     When connection open schema transaction for database: typedb
     Then entity(customer) get owns(surname) get constraints contain: @range(1..3)
-    Then attribute(surname) get value type: long
+    Then attribute(surname) get value type: integer
     When entity(person) get owns(name) set annotation: @range(1..3)
     When entity(customer) get owns(surname) unset annotation: @range
     Then entity(customer) get owns(surname) get constraints do not contain: @range(1..3)
@@ -3205,7 +3205,7 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(customer) get owns(surname) get constraints do not contain: @range(1..3)
     Then entity(customer) get constraints for owned attribute(surname) contain: @range(1..3)
-    Then attribute(surname) get value type: long
+    Then attribute(surname) get value type: integer
 
 ########################
 # @card
@@ -3233,7 +3233,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute-2) get cardinality: @card(0..)
     Examples:
       | value-type  |
-      | long        |
+      | integer        |
       | double      |
       | decimal     |
       | string      |
@@ -3321,7 +3321,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns is empty
     Examples:
       | value-type    | arg0                | arg1                |
-      | long          | 0                   | 1                   |
+      | integer          | 0                   | 1                   |
       | string        | 0                   | 10                  |
       | boolean       | 0                   | 9223372036854775807 |
       | double        | 1                   | 10                  |
@@ -3342,8 +3342,8 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<arg>..<arg>)
     Examples:
       | value-type    | arg  |
-      | long          | 1    |
-      | long          | 9999 |
+      | integer          | 1    |
+      | integer          | 9999 |
       | string        | 8888 |
       | boolean       | 7777 |
       | double        | 666  |
@@ -3366,7 +3366,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get declared annotation categories do not contain: @card
     Examples:
       | value-type |
-      | long       |
+      | integer       |
 
   Scenario: Owns can have @card annotation for none value type
     When create attribute type: custom-attribute
@@ -3397,7 +3397,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<args>)
     Examples:
       | value-type | args |
-      | long       | 1..2 |
+      | integer       | 1..2 |
       | duration   | 0..9 |
 
   Scenario Outline: Owns can reset @card annotations
@@ -3444,7 +3444,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @card(<args>)
     Examples:
       | value-type  | args | reset-args |
-      | long        | 2..5 | 7..9       |
+      | integer        | 2..5 | 7..9       |
       | double      | 2..5 | 0..1       |
       | decimal     | 2..5 | 0..        |
       | string      | 2..5 | 4..        |
@@ -3592,7 +3592,7 @@ Feature: Concept Owns Annotations
     Then relation(description) get owns(second-custom-attribute) get declared annotations do not contain: @card(<args-specialise>)
     Examples:
       | value-type  | args       | args-specialise |
-      | long        | 0..        | 0..10000        |
+      | integer        | 0..        | 0..10000        |
       | double      | 0..10      | 0..2            |
       | decimal     | 0..2       | 1..2            |
       | string      | 1..        | 1..1            |
@@ -3677,7 +3677,7 @@ Feature: Concept Owns Annotations
     Then relation(description) get constraints for owned attribute(second-custom-attribute) do not contain: @card(<args-specialise>)
     Examples:
       | value-type  | args       | args-specialise |
-      | long        | 0..10000   | 0..10001        |
+      | integer        | 0..10000   | 0..10001        |
       | double      | 0..10      | 1..11           |
       | string      | 1..        | 0..2            |
       | decimal     | 2..2       | 1..1            |
@@ -3995,7 +3995,7 @@ Feature: Concept Owns Annotations
 #    Then <root-type>(<supertype-name>) get owns(ordered-custom-attribute-2) get cardinality: @card(0..)
 #    Examples:
 #      | root-type | supertype-name | subtype-name | value-type |
-#      | entity    | person         | customer     | long       |
+#      | entity    | person         | customer     | integer       |
 #      | relation  | description    | registration | string     |
 
     # TODO: We (temporarily) don't revalidate cardinality narrowing in schema!
@@ -4617,7 +4617,7 @@ Feature: Concept Owns Annotations
     Then <root-type>(<type-name>) get constraints for owned attribute(custom-attribute-ordered) do not contain: @distinct
     Examples:
       | root-type | type-name   | value-type |
-      | entity    | person      | long       |
+      | entity    | person      | integer       |
       | relation  | description | string     |
 
   Scenario Outline: Ordered owns for <root-type> can set @distinct annotation for <value-type> value type and unset it
@@ -4647,7 +4647,7 @@ Feature: Concept Owns Annotations
     Then <root-type>(<type-name>) get owns is empty
     Examples:
       | root-type | type-name   | value-type    |
-      | entity    | person      | long          |
+      | entity    | person      | integer          |
       | entity    | person      | string        |
       | entity    | person      | boolean       |
       | entity    | person      | double        |
@@ -4657,7 +4657,7 @@ Feature: Concept Owns Annotations
       | entity    | person      | datetime-tz   |
       | entity    | person      | duration      |
       | entity    | person      | custom-struct |
-      | relation  | description | long          |
+      | relation  | description | integer          |
       | relation  | description | string        |
       | relation  | description | boolean       |
       | relation  | description | double        |
@@ -4698,7 +4698,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @distinct
     Examples:
       | value-type |
-      | long       |
+      | integer       |
       | decimal    |
 
   Scenario Outline: <root-type> types can redeclare owns as owns with @distinct
@@ -4747,7 +4747,7 @@ Feature: Concept Owns Annotations
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
-      | entity    | person      | long       |
+      | entity    | person      | integer       |
       | relation  | description | datetime   |
       | relation  | description | duration   |
 
@@ -4783,7 +4783,7 @@ Feature: Concept Owns Annotations
     Examples:
       | root-type | type-name   | value-type |
       | entity    | person      | string     |
-      | entity    | person      | long       |
+      | entity    | person      | integer       |
       | relation  | description | datetime   |
       | relation  | description | duration   |
 
@@ -4910,7 +4910,7 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @regex
     Examples:
       | value-type    |
-      | long          |
+      | integer          |
       | boolean       |
       | double        |
       | decimal       |
@@ -5078,7 +5078,7 @@ Feature: Concept Owns Annotations
     When entity(person) set owns: custom-attribute
     When entity(person) get owns(custom-attribute) set annotation: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
-    Then attribute(custom-attribute) set value type: long; fails
+    Then attribute(custom-attribute) set value type: integer; fails
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
@@ -5098,7 +5098,7 @@ Feature: Concept Owns Annotations
     When connection open schema transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraints contain: @regex("\S+")
     Then attribute(custom-attribute) unset value type; fails
-    Then attribute(custom-attribute) set value type: long; fails
+    Then attribute(custom-attribute) set value type: integer; fails
     Then attribute(custom-attribute) set value type: boolean; fails
     Then attribute(custom-attribute) set value type: double; fails
     Then attribute(custom-attribute) set value type: decimal; fails
@@ -5156,13 +5156,13 @@ Feature: Concept Owns Annotations
       | key                           | regex("s")      | key                   | regex                 | string      |
       | key                           | regex("s")      | key                   | regex                 | string      |
       # TODO: subkey is not implemented
-#      | key                               | subkey(L)          | key                   | subkey                | long        |
+#      | key                               | subkey(L)          | key                   | subkey                | integer        |
 #      | subkey(L)                         | unique             | subkey                | unique                | duration    |
-#      | subkey(L)                         | values(1, 2)       | subkey                | values                | long        |
+#      | subkey(L)                         | values(1, 2)       | subkey                | values                | integer        |
 #      | subkey(L)                         | range(false..true) | subkey                | range                 | boolean     |
-#      | subkey(L)                         | card(0..1)         | subkey                | card                  | long        |
+#      | subkey(L)                         | card(0..1)         | subkey                | card                  | integer        |
 #      | subkey(L)                         | regex("s")         | subkey                | regex                 | string      |
-      | unique                        | values(1, 2)    | unique                | values                | long        |
+      | unique                        | values(1, 2)    | unique                | values                | integer        |
       | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
       | unique                        | card(0..1)      | unique                | card                  | decimal     |
       | unique                        | regex("s")      | unique                | regex                 | string      |
@@ -5210,19 +5210,19 @@ Feature: Concept Owns Annotations
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
       | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
-      | unique                        | values(1, 2)    | unique                | values                | long        |
+      | unique                        | values(1, 2)    | unique                | values                | integer        |
       | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
-      | unique                        | card(0..1)      | unique                | card                  | long        |
+      | unique                        | card(0..1)      | unique                | card                  | integer        |
       | unique                        | regex("s")      | unique                | regex                 | string      |
       | unique                        | distinct        | unique                | distinct              | string      |
       | values(2024-05-06+0100)       | card(0..1)      | values                | card                  | datetime-tz |
-      | values(1, 2)                  | distinct        | values                | distinct              | long        |
+      | values(1, 2)                  | distinct        | values                | distinct              | integer        |
       | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
       | values("str")                 | regex("s")      | values                | regex                 | string      |
       | range(2020-05-05..2025-05-05) | card(0..1)      | range                 | card                  | datetime    |
       | range(2020-05-05..2025-05-05) | distinct        | range                 | distinct              | date        |
       | card(0..1)                    | regex("s")      | card                  | regex                 | string      |
-      | card(0..1)                    | distinct        | card                  | distinct              | long        |
+      | card(0..1)                    | distinct        | card                  | distinct              | integer        |
       | regex("s")                    | distinct        | regex                 | distinct              | string      |
       | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
 
@@ -5245,11 +5245,11 @@ Feature: Concept Owns Annotations
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-1>
     Examples:
       | annotation-1 | annotation-2 | value-type |
-      | key          | unique       | long       |
-      | key          | card(0..1)   | long       |
-      | key          | card(0..)    | long       |
-      | key          | card(1..1)   | long       |
-      | key          | card(2..5)   | long       |
+      | key          | unique       | integer       |
+      | key          | card(0..1)   | integer       |
+      | key          | card(0..)    | integer       |
+      | key          | card(1..1)   | integer       |
+      | key          | card(2..5)   | integer       |
 
   Scenario Outline: Ordered ownership cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
     When create attribute type: custom-attribute
@@ -5272,11 +5272,11 @@ Feature: Concept Owns Annotations
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-1>
     Examples:
       | annotation-1 | annotation-2 | value-type |
-      | key          | unique       | long       |
-      | key          | card(0..1)   | long       |
-      | key          | card(0..)    | long       |
-      | key          | card(1..1)   | long       |
-      | key          | card(2..5)   | long       |
+      | key          | unique       | integer       |
+      | key          | card(0..1)   | integer       |
+      | key          | card(0..)    | integer       |
+      | key          | card(1..1)   | integer       |
+      | key          | card(2..5)   | integer       |
 
   Scenario Outline: Annotation @key can be set if type has inherited cardinality that can be narrowed
     When create attribute type: name

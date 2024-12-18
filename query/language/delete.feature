@@ -32,7 +32,7 @@ Feature: TypeQL Delete Query
         owns ref @key;
       attribute name, value string;
       attribute email, value string;
-      attribute ref, value long;
+      attribute ref, value integer;
       """
     Given transaction commits
 
@@ -893,7 +893,7 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      attribute age, value long;
+      attribute age, value integer;
       person owns age;
       """
     Given transaction commits
@@ -1023,7 +1023,7 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      attribute duration, value long;
+      attribute duration, value integer;
       friendship owns duration;
       """
     Given transaction commits
@@ -1069,7 +1069,7 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      attribute duration, value long;
+      attribute duration, value integer;
       friendship owns duration;
       """
     Given transaction commits

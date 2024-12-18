@@ -34,8 +34,8 @@ Feature: TypeQL Reduce Queries
         relates employer @card(0..),
         owns ref @key;
       attribute name value string;
-      attribute age value long;
-      attribute ref value long;
+      attribute age value integer;
+      attribute ref value integer;
       attribute email value string;
       """
     Given transaction commits
@@ -74,7 +74,7 @@ Feature: TypeQL Reduce Queries
         $f isa friendship;
       reduce $count = count($x);
       """
-    Then result is a single row with variable 'count': value:long:9
+    Then result is a single row with variable 'count': value:integer:9
     When get answers of typeql read query
       """
       match
@@ -91,7 +91,7 @@ Feature: TypeQL Reduce Queries
         $f isa friendship, links (friend: $x);
       reduce $count = count($x);
       """
-    Then result is a single row with variable 'count': value:long:6
+    Then result is a single row with variable 'count': value:integer:6
     When get answers of typeql read query
       """
       match
@@ -100,7 +100,7 @@ Feature: TypeQL Reduce Queries
         $f isa friendship, links (friend: $x);
       reduce $count = count;
       """
-    Then result is a single row with variable 'count': value:long:6
+    Then result is a single row with variable 'count': value:integer:6
 
 
   Scenario: the 'count' of an empty answer set is zero
@@ -110,7 +110,7 @@ Feature: TypeQL Reduce Queries
       match $x isa person, has name "Voldemort";
       reduce $count = count($x);
       """
-    Then result is a single row with variable 'count': value:long:0
+    Then result is a single row with variable 'count': value:integer:0
 
 
   Scenario Outline: the <reduction> of an answer set of '<type>' values can be retrieved
@@ -143,7 +143,7 @@ Feature: TypeQL Reduce Queries
 
     Examples:
       | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
-      | age    | long   | 6    | 30   | 14   | sum       | long     | 50      |
+      | age    | integer   | 6    | 30   | 14   | sum       | integer     | 50      |
       | weight | double | 61.8 | 86.5 | 24.8 | sum       | double   | 173.1   |
 
 
@@ -177,10 +177,10 @@ Feature: TypeQL Reduce Queries
 
     Examples:
       | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
-      | age    | long   | 6    | 30   | 14   | max       | long     | 30      |
-      | age    | long   | 6    | 30   | 14   | min       | long     | 6       |
-      | age    | long   | 6    | 30   | 14   | mean      | double   | 16.6667 |
-      | age    | long   | 6    | 30   | 14   | median    | double   | 14      |
+      | age    | integer   | 6    | 30   | 14   | max       | integer     | 30      |
+      | age    | integer   | 6    | 30   | 14   | min       | integer     | 6       |
+      | age    | integer   | 6    | 30   | 14   | mean      | double   | 16.6667 |
+      | age    | integer   | 6    | 30   | 14   | median    | double   | 14      |
       | weight | double | 61.8 | 86.5 | 24.8 | max       | double   | 86.5    |
       | weight | double | 61.8 | 86.5 | 24.8 | min       | double   | 24.8    |
       | weight | double | 61.8 | 86.5 | 24.8 | mean      | double   | 57.7    |
@@ -234,14 +234,14 @@ Feature: TypeQL Reduce Queries
       match $x isa person, has name $y, has age $z;
       reduce $sum = sum($z);
       """
-    Then result is a single row with variable 'sum': value:long:65
+    Then result is a single row with variable 'sum': value:integer:65
     Then get answers of typeql read query
       """
       match $x isa person, has name $y, has age $z;
       select $y, $z;
       reduce $sum = sum($z);
       """
-    Then result is a single row with variable 'sum': value:long:65
+    Then result is a single row with variable 'sum': value:integer:65
 
 
   Scenario Outline: duplicate attribute values are included in a '<reduction>'
@@ -487,10 +487,10 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | x         | count        |
-      | key:ref:0 | value:long:3 |
-      | key:ref:1 | value:long:3 |
-      | key:ref:2 | value:long:3 |
-      | key:ref:3 | value:long:3 |
+      | key:ref:0 | value:integer:3 |
+      | key:ref:1 | value:integer:3 |
+      | key:ref:2 | value:integer:3 |
+      | key:ref:3 | value:integer:3 |
 
     When get answers of typeql read query
       """
@@ -499,10 +499,10 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | x         | count        |
-      | key:ref:0 | value:long:3 |
-      | key:ref:1 | value:long:3 |
-      | key:ref:2 | value:long:3 |
-      | key:ref:3 | value:long:3 |
+      | key:ref:0 | value:integer:3 |
+      | key:ref:1 | value:integer:3 |
+      | key:ref:2 | value:integer:3 |
+      | key:ref:3 | value:integer:3 |
 
 
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'select'
@@ -552,8 +552,8 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | $x        | cy           | cz           |
-      | key:ref:0 | value:long:4 | value:long:4 |
-      | key:ref:1 | value:long:2 | value:long:2 |
+      | key:ref:0 | value:integer:4 | value:integer:4 |
+      | key:ref:1 | value:integer:2 | value:integer:2 |
 
 
   Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
@@ -583,8 +583,8 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | x         | max           |
-      | key:ref:0 | value:long:57 |
-      | key:ref:1 | value:long:45 |
+      | key:ref:0 | value:integer:57 |
+      | key:ref:1 | value:integer:45 |
 
 
   Scenario: Grouped reductions can be performed on value variables
@@ -610,8 +610,8 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | n                  | sum           |
-      | value:string:Alice | value:long:10 |
-      | value:string:Bob   | value:long:5  |
+      | value:string:Alice | value:integer:10 |
+      | value:string:Bob   | value:integer:5  |
 
 
   Scenario: Grouped standard deviation of one value returns an empty group value

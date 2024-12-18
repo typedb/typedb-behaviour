@@ -617,7 +617,7 @@ Feature: Schema migration
 
   Scenario: Unowned attribute data is cleaned up if @independent is unset and is persistent if @independent exists
     When create attribute type: attr0
-    When attribute(attr0) set value type: long
+    When attribute(attr0) set value type: integer
     When attribute(attr0) set annotation: @abstract
     When create attribute type: attr1
     When attribute(attr1) set supertype: attr0
@@ -691,7 +691,7 @@ Feature: Schema migration
 
     When connection open schema transaction for database: typedb
     When create attribute type: attr01
-    When attribute(attr01) set value type: long
+    When attribute(attr01) set value type: integer
     When attribute(attr01) set annotation: @abstract
     Then attribute(attr1) set supertype: attr01; fails
     Then attribute(attr2) set supertype: attr01; fails
