@@ -612,7 +612,7 @@ Feature: TypeDB Driver
     Then transaction commits
 
 
-  Scenario: Driver processes concept document query answers correctly
+  Scenario: Driver processes concept document query answers from read queries correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -795,6 +795,44 @@ Feature: TypeDB Driver
     """
     {
         "null-result": null
+    }
+    """
+
+
+  Scenario: Driver processes concept document query answers from write queries correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person owns name @key; attribute name, value string;
+      """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert $p isa person, has name "John";
+      fetch {
+        "name": $p.name,
+        "sub fetch": {
+          "all attributes": { $p.* },
+        }
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer query type is: write
+    Then answer query type is not: schema
+    Then answer query type is not: read
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+      "name": "John",
+      "sub fetch": {
+        "all attributes": {
+          "name": "John"
+        }
+      }
     }
     """
 
