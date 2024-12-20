@@ -803,7 +803,7 @@ Feature: TypeDB Driver
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define entity person owns name @key; attribute name, value string;
+      define entity person owns name @card(1); attribute name, value string; attribute age @abstract;
       """
     Given transaction commits
     When connection open write transaction for database: typedb
@@ -831,6 +831,49 @@ Feature: TypeDB Driver
       "sub fetch": {
         "all attributes": {
           "name": "John"
+        }
+      }
+    }
+    """
+    When get answers of typeql write query
+      """
+      match
+      attribute $a;
+      insert
+      $p1 isa person, has name "Alice";
+      $p2 isa person, has name "Bob";
+      fetch {
+        "Alice's name": $p1.name,
+        "sub fetch": {
+          "Bob's all": { $p2.* },
+        }
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer query type is: write
+    Then answer query type is not: schema
+    Then answer query type is not: read
+    Then answer size is: 2
+    Then answer contains document:
+    """
+    {
+      "Alice's name": "Alice",
+      "sub fetch": {
+        "Bob's all": {
+          "name": "Bob"
+        }
+      }
+    }
+    """
+    Then answer does not contain document:
+    """
+    {
+      "Alice's name": "Bob",
+      "sub fetch": {
+        "Bob's all": {
+          "name": "Alice"
         }
       }
     }
