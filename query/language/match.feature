@@ -1062,30 +1062,31 @@ Feature: TypeQL Match Clause
   #     | key:ref:2 | key:ref:1 | key:ref:3 |
 
 
-  Scenario: repeated role players are retrieved singly when queried doubly
-    Given typeql schema query
-      """
-      define
-      entity some-entity plays symmetric:player, owns ref @key;
-      relation symmetric relates player, owns ref @key;
-      """
-    Given transaction commits
+  # TODO: this should only be possible with ordered role players?
+  # Scenario: repeated role players are retrieved singly when queried doubly
+  #   Given typeql schema query
+  #     """
+  #     define
+  #     entity some-entity plays symmetric:player, owns ref @key;
+  #     relation symmetric relates player, owns ref @key;
+  #     """
+  #   Given transaction commits
 
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
-      """
-    Given transaction commits
+  #   Given connection open write transaction for database: typedb
+  #   Given typeql write query
+  #     """
+  #     insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
+  #     """
+  #   Given transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $r links (player: $x, player: $x);
-      """
-    Then uniquely identify answer concepts
-      | x         | r         |
-      | key:ref:0 | key:ref:1 |
+  #   Given connection open read transaction for database: typedb
+  #   When get answers of typeql read query
+  #     """
+  #     match $r links (player: $x, player: $x);
+  #     """
+  #   Then uniquely identify answer concepts
+  #     | x         | r         |
+  #     | key:ref:0 | key:ref:1 |
 
 
   Scenario: repeated role players are retrieved singly when queried singly
@@ -1221,8 +1222,8 @@ Feature: TypeQL Match Clause
       define
 
       relation gift-delivery
-        relates sender,
-        relates recipient;
+        relates sender @card(0..),
+        relates recipient @card(0..);
 
       person plays gift-delivery:sender,
         plays gift-delivery:recipient;
