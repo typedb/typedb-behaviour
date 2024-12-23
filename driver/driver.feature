@@ -300,25 +300,26 @@ Feature: TypeDB Driver
     Then transaction is open: false
 
 
-  # TODO: Fix rollbacks on the server side
-#  Scenario: Driver can rollback transactions of schema and write types, cannot rollback transaction of type read
-#    When connection open schema transaction for database: typedb
-#    Then transaction has type: schema
-#    Then transaction is open: true
-#    When transaction rollbacks
-#    Then transaction is open: false
-#
-#    When connection open write transaction for database: typedb
-#    Then transaction has type: write
-#    Then transaction is open: true
-#    When transaction rollbacks
-#    Then transaction is open: false
-#
-#    When connection open read transaction for database: typedb
-#    Then transaction has type: read
-#    Then transaction is open: true
-#    Then transaction rollbacks; fails with a message containing: "todo"
-#    Then transaction is open: false
+  Scenario: Driver can rollback transactions of schema and write types, cannot rollback transaction of type read
+    When connection open schema transaction for database: typedb
+    Then transaction has type: schema
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: true
+
+    When transaction closes
+    When connection open write transaction for database: typedb
+    Then transaction has type: write
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: true
+
+    When transaction closes
+    When connection open read transaction for database: typedb
+    Then transaction has type: read
+    Then transaction is open: true
+    Then transaction rollbacks; fails with a message containing: "Read transactions cannot be rolled back"
+    Then transaction is open: false
 
 
   # TODO: Check options setting and retrieval
