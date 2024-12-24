@@ -19,7 +19,7 @@ Feature: TypeQL Insert Query
 
       entity person
         plays employment:employee,
-        owns name  @card(0..),
+        owns name @card(0..),
         owns age,
         owns ref @key,
         owns email @unique @card(0..);
@@ -30,14 +30,14 @@ Feature: TypeQL Insert Query
         owns ref @key;
 
       relation employment
-        relates employee,
+        relates employee @card(0..),
         relates employer,
         owns ref @key;
 
       attribute name
         value string;
 
-      attribute age
+      attribute age @independent,
         value integer;
 
       attribute ref
@@ -51,9 +51,9 @@ Feature: TypeQL Insert Query
     Given connection open write transaction for database: typedb
     Given set time-zone: Europe/London
 
-  ####################
-  # INSERTING THINGS #
-  ####################
+  #######################
+  # INSERTING INSTANCES #
+  #######################
 
   Scenario: new entities can be inserted
     When typeql write query
@@ -72,7 +72,7 @@ Feature: TypeQL Insert Query
       | key:ref:0 |
 
 
-  Scenario: one query can insert multiple things
+  Scenario: one query can insert multiple instances
     When typeql write query
       """
       insert
@@ -92,7 +92,7 @@ Feature: TypeQL Insert Query
       | key:ref:1 |
 
 
-  Scenario: when an insert has multiple statements with the same variable name, they refer to the same thing
+  Scenario: when an insert has multiple statements with the same variable name, they refer to the same instance
     When typeql write query
       """
       insert
@@ -126,7 +126,7 @@ Feature: TypeQL Insert Query
       | key:ref:0 |
 
 
-  Scenario: when running multiple identical insert queries in series, new things get created each time
+  Scenario: when running multiple identical insert queries in series, new instances get created each time
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -208,21 +208,19 @@ Feature: TypeQL Insert Query
       insert $x isa factory;
       """
 
-
-  Scenario: attempting to insert an instance of type 'thing' errors
-    Then typeql write query; fails
-      """
-      insert $x isa thing;
-      """
-
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################
 
-  Scenario: when inserting a new thing that owns new attributes, both the thing and the attributes get created
+  Scenario: when inserting a new instance that owns new attributes, both the instance and the attributes get created
     Given get answers of typeql read query
       """
-      match $x isa thing;
+      match entity $t; $x isa $t; select $x;
+      """
+    Given answer size is: 0
+    Given get answers of typeql read query
+      """
+      match attribute $t; $x isa $t; select $x;
       """
     Given answer size is: 0
     When typeql write query
@@ -234,45 +232,62 @@ Feature: TypeQL Insert Query
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa thing;
+      match entity $t; $x isa $t; select $x;
       """
     Then uniquely identify answer concepts
-      | x                     |
-      | key:ref:0             |
-      | attr:name:Wilhelmina  |
-      | attr:age:25           |
-      | attr:ref:0            |
+      | x         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match attribute $t; $x isa $t; select $x;
+      """
+    Then uniquely identify answer concepts
+      | x                    |
+      | attr:name:Wilhelmina |
+      | attr:age:25          |
+      | attr:ref:0           |
 
-  Scenario: when inserting a new thing that owns new attributes via a value variable, both the thing and the attributes get created
+
+  Scenario: when inserting a new instance that owns new attributes via a value variable, both the instance and the attributes get created
     Given get answers of typeql read query
       """
-      match $x isa thing;
+      match entity $t; $x isa $t; select $x;
+      """
+    Given answer size is: 0
+    Given get answers of typeql read query
+      """
+      match attribute $t; $x isa $t; select $x;
       """
     Given answer size is: 0
     When typeql write query
       """
-      match $a = 25;
-      insert $x isa person, has name "Wilhelmina", has age $a, has ref 0;
+      insert $a isa age 25; $x isa person, has name "Wilhelmina", has age $a, has ref 0;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa thing;
+      match entity $t; $x isa $t; select $x;
       """
     Then uniquely identify answer concepts
-      | x                     |
-      | key:ref:0             |
-      | attr:name:Wilhelmina  |
-      | attr:age:25           |
-      | attr:ref:0            |
+      | x         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match attribute $t; $x isa $t; select $x;
+      """
+    Then uniquely identify answer concepts
+      | x                    |
+      | attr:name:Wilhelmina |
+      | attr:age:25          |
+      | attr:ref:0           |
 
 
   Scenario: a freshly inserted attribute has no owners
     Given typeql write query
       """
-      insert $name "John" isa name;
+      insert $name isa name "John";
       """
     Given transaction commits
 
@@ -284,10 +299,10 @@ Feature: TypeQL Insert Query
     Then answer size is: 0
 
 
-  Scenario: given an attribute with no owners, inserting a thing that owns it results in it having an owner
+  Scenario: given an attribute with no owners, inserting a instance that owns it results in it having an owner
     Given typeql write query
       """
-      insert $name "Kyle" isa name;
+      insert $name isa name "Kyle";
       """
     Given transaction commits
 
@@ -308,7 +323,7 @@ Feature: TypeQL Insert Query
       | key:ref:0 |
 
 
-  Scenario: after inserting two things that own the same attribute, the attribute has two owners
+  Scenario: after inserting two instances that own the same attribute, the attribute has two owners
     When typeql write query
       """
       insert
@@ -360,6 +375,7 @@ Feature: TypeQL Insert Query
       match $p isa dog;
       """
     Then answer size is: 5
+    # TODO: error "IsaStatementForInputVariable { variable: $1 })"
     When typeql write query
       """
       match
@@ -384,7 +400,7 @@ Feature: TypeQL Insert Query
       """
       define
       attribute <attr> value <type>;
-      person owns <attr>;
+      person owns <attr> @card(0..2);
       """
     Given transaction commits
 
@@ -392,8 +408,8 @@ Feature: TypeQL Insert Query
     When typeql write query
       """
       insert
-      $x <val1> isa <attr>;
-      $y <val2> isa <attr>;
+      $x isa <attr> <val1>;
+      $y isa <attr> <val2>;
       $p isa person, has name "Imogen", has ref 2, has <attr> <val1>, has <attr> <val2>;
       """
     Then transaction commits
@@ -401,23 +417,23 @@ Feature: TypeQL Insert Query
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $p isa person, has <attr> $x; select $x;
+      match $p isa person, has $x; $x isa <attr>; select $x;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
+      | x                  |
+      | attr:<attr>:<val1> |
+      | attr:<attr>:<val2> |
 
     Examples:
       | attr              | type     | val1       | val2       |
       | subject-taken     | string   | "Maths"    | "Physics"  |
-      | lucky-number      | integer     | 10         | 3          |
+      | lucky-number      | integer  | 10         | 3          |
       | recite-pi-attempt | double   | 3.146      | 3.14158    |
       | is-alive          | boolean  | true       | false      |
       | work-start-date   | datetime | 2018-01-01 | 2020-01-01 |
 
 
-  Scenario: inserting an attribute onto a thing that can't have that attribute errors
+  Scenario: inserting an attribute onto a instance that can't have that attribute errors
     Then typeql write query; fails
       """
       insert
@@ -445,7 +461,7 @@ Parker";
       | key:ref:0 |
 
   ########################################
-  # ADDING ATTRIBUTES TO EXISTING THINGS #
+  # ADDING ATTRIBUTES TO EXISTING instanceS #
   ########################################
 
   Scenario: when an entity owns an attribute, an additional value can be inserted on it
@@ -495,6 +511,7 @@ Parker";
       match $p has name "Spiderman";
       """
     Given answer size is: 0
+    # TODO: error "IsaStatementForInputVariable"
     When typeql write query
       """
       match
@@ -522,11 +539,9 @@ Parker";
       define
       relation residence
         relates resident,
-        relates place,
         owns tenure-days,
         owns ref @key;
       person plays residence:resident;
-      attribute address value string, plays residence:place;
       attribute tenure-days value integer;
       """
     Given transaction commits
@@ -536,8 +551,7 @@ Parker";
       """
       insert
       $p isa person, has name "Homer", has ref 0;
-      $addr "742 Evergreen Terrace" isa address;
-      $r (resident: $p, place: $addr) isa residence, has ref 0;
+      $r  isa residence, links (resident: $p), has ref 0;
       """
     Then transaction commits
 
@@ -562,60 +576,8 @@ Parker";
       match $r isa residence, has tenure-days $a; select $a;
       """
     Then uniquely identify answer concepts
-      | a                     |
+      | a                    |
       | attr:tenure-days:365 |
-
-
-  #TODO: Reenable when reasoning can run in a write transaction
-  @ignore
-  Scenario: an attribute ownership currently inferred by a rule can be explicitly inserted
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      rule lucy-is-aged-32:
-      when {
-        $p isa person, has name "Lucy";
-      } then {
-        $p has age 32;
-      };
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert $p isa person, has name "Lucy", has ref 0;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given get answers of typeql read query
-      """
-      match $p has age 32;
-      """
-    Given uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-    Given typeql write query
-      """
-      match
-        $p has name "Lucy";
-      insert
-        $p has age 32;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $p has age 32;
-      """
-    Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-
 
   #############
   # RELATIONS #
@@ -626,56 +588,18 @@ Parker";
       """
       insert
       $p isa person, has ref 0;
-      $r (employee: $p) isa employment, has ref 1;
+      $r isa employment, links (employee: $p), has ref 1;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (employee: $p) isa employment;
+      match $r isa employment, links (employee: $p);
       """
     Then uniquely identify answer concepts
       | p         | r         |
       | key:ref:0 | key:ref:1 |
-
-
-  Scenario: when inserting a relation that owns an attribute and has an attribute roleplayer, both attributes are created
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      relation residence
-        relates resident,
-        relates place,
-        owns is-permanent,
-        owns ref @key;
-      person plays residence:resident;
-      attribute address value string, plays residence:place;
-      attribute is-permanent value boolean;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    When typeql write query
-      """
-      insert
-      $p isa person, has name "Homer", has ref 0;
-      $perm true isa is-permanent;
-      $r (resident: $p, place: $addr) isa residence, has is-permanent $perm, has ref 0;
-      $addr "742 Evergreen Terrace" isa address;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $r (place: $addr) isa residence, has is-permanent $perm;
-      """
-    Then uniquely identify answer concepts
-      | r         | addr                                | perm                    |
-      | key:ref:0 | attr:address:742 Evergreen Terrace  | attr:is-permanent:true  |
 
 
   Scenario: relations can be inserted with multiple role players
@@ -685,7 +609,7 @@ Parker";
       $p1 isa person, has name "Gordon", has ref 0;
       $p2 isa person, has name "Helen", has ref 1;
       $c isa company, has name "Morrisons", has ref 2;
-      $r (employer: $c, employee: $p1, employee: $p2) isa employment, has ref 3;
+      $r isa employment, links (employer: $c, employee: $p1, employee: $p2), has ref 3;
       """
     Then transaction commits
 
@@ -693,17 +617,17 @@ Parker";
     When get answers of typeql read query
       """
       match
-        $r (employer: $c) isa employment;
+        (employer: $c) isa employment;
         $c has name $cname;
       select $cname;
       """
     Then uniquely identify answer concepts
-      | cname                |
-      | attr:name:Morrisons  |
+      | cname               |
+      | attr:name:Morrisons |
     When get answers of typeql read query
       """
       match
-        $r (employee: $p) isa employment;
+        (employee: $p) isa employment;
         $p has name $pname;
       select $pname;
       """
@@ -713,7 +637,7 @@ Parker";
   Scenario: an additional role player can be inserted onto an existing relation
     Given typeql write query
       """
-      insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
+      insert $p isa person, has ref 0; $r isa employment, links (employee: $p), has ref 1;
       """
     Given transaction commits
 
@@ -723,7 +647,7 @@ Parker";
       match
         $r isa employment;
       insert
-        $r (employer: $c);
+        $r links (employer: $c);
         $c isa company, has ref 2;
       """
     Then transaction commits
@@ -731,7 +655,7 @@ Parker";
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (employer: $c, employee: $p) isa employment;
+      match $r isa employment, links (employer: $c, employee: $p);
       """
     Then uniquely identify answer concepts
       | p         | c         | r         |
@@ -743,8 +667,8 @@ Parker";
       """
       insert
       $p isa person, has name "Ruth", has ref 0;
-      $r (employee: $p) isa employment, has ref 1;
-      $s (employee: $p) isa employment, has ref 2;
+      $r isa employment, links (employee: $p), has ref 1;
+      $s isa employment, links (employee: $p), has ref 2;
       $c isa company, has name "The Boring Company", has ref 3;
       """
     Given transaction commits
@@ -756,14 +680,14 @@ Parker";
         $r isa employment, has ref $ref;
         $c isa company;
       insert
-        $r (employer: $c) isa employment;
+        $r isa employment, links (employer: $c);
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (employer: $c, employee: $p) isa employment;
+      match $r isa employment, links (employer: $c, employee: $p);
       """
     Then uniquely identify answer concepts
       | p         | c         | r         |
@@ -774,7 +698,7 @@ Parker";
   Scenario: an additional repeated role player can be inserted into an existing relation
     Given typeql write query
       """
-      insert $p isa person, has ref 0; $r (employee: $p) isa employment, has ref 1;
+      insert $p isa person, has ref 0; $r isa employment, links (employee: $p), has ref 1;
       """
     Given transaction commits
 
@@ -785,14 +709,14 @@ Parker";
         $r isa employment;
         $p isa person;
       insert
-        $r (employee: $p) isa employment;
+        $r links (employee: $p);
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (employee: $p, employee: $p) isa employment;
+      match $r isa employment, links (employee: $p, employee: $p);
       """
     Then uniquely identify answer concepts
       | p         | r         |
@@ -800,10 +724,11 @@ Parker";
 
 
   Scenario: a roleplayer can be inserted without explicitly specifying a role
+    # TODO: error "unwrap() None"
     Given typeql write query
       """
       insert
-      $r ($p) isa employment, has ref 0;
+      $r isa employment, links ($p), has ref 0;
       $p isa person, has ref 1;
       """
     Then transaction commits
@@ -820,10 +745,11 @@ Parker";
     Given transaction commits
 
     Given connection open write transaction for database: typedb
+    # TODO: error "unwrap() None"
     Then typeql write query
       """
       insert
-      $r ($p) isa part-time-employment, has ref 0;
+      $r isa part-time-employment, links ($p), has ref 0;
       $p isa person, has ref 1;
       """
     Then transaction commits
@@ -840,10 +766,11 @@ Parker";
     Given transaction commits
 
     Given connection open write transaction for database: typedb
+    # TODO: error "unwrap() None"
     Then typeql write query; fails
       """
       insert
-      $r ($p) isa employment, has ref 0;
+      $r isa employment, links ($p), has ref 0;
       $p isa person, has ref 1;
       """
 
@@ -851,7 +778,7 @@ Parker";
     Then typeql write query; fails
       """
       insert
-      $r (employer: $p) isa employment, has ref 0;
+      $r isa employment, links (employer: $p), has ref 0;
       $p isa person, has ref 1;
       """
 
@@ -873,7 +800,7 @@ Parker";
     Then typeql write query; fails
       """
       insert
-      $r (model: $x, builder: $y) isa sphinx-production;
+      $r isa sphinx-production, links (model: $x, builder: $y);
       $x isa animal;
       $y isa person, has ref 0;
       """
@@ -909,70 +836,13 @@ Parker";
       """
     Then answer size is: 0
 
-
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is returned
     Then typeql write query; fails
       """
       insert
-      $r (employee: $x, employer: $y) isa employment, has ref 0;
+      $r isa employment, links (employee: $x, employer: $y), has ref 0;
       $y isa company, has name "Sports Direct", has ref 1;
       """
-
-
-  #TODO: Reenable when rules actually do something
-  @ignore
-  Scenario: a relation currently inferred by a rule can be explicitly inserted
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      relation gym-membership relates member;
-      person plays gym-membership:member;
-      rule jennifer-has-a-gym-membership:
-      when {
-        $p isa person, has name "Jennifer";
-      } then {
-        (member: $p) isa gym-membership;
-      };
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    When typeql write query
-      """
-      insert $p isa person, has name "Jennifer", has ref 0;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match (member: $p) isa gym-membership; select $p;
-      """
-    Then typeql write query
-      """
-      match
-        $p has name "Jennifer";
-      insert
-        $r (member: $p) isa gym-membership;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match (member: $p) isa gym-membership; select $p;
-      """
-    Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-    When get answers of typeql read query
-      """
-      match $r isa gym-membership; select $r;
-      """
-    Then answer size is: 1
-
 
   #######################
   # ATTRIBUTE INSERTION #
@@ -983,35 +853,32 @@ Parker";
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x <value> isa <attr>;
+      match $x isa <attr> <value>;
       """
     Given answer size is: 0
     When typeql write query
       """
-      insert $x <value> isa <attr>;
+      insert $x isa <attr> <value>;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x <value> isa <attr>;
+      match $x isa <attr> <value>;
       """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-
+    Then answer size is: 1
     Examples:
       | attr           | type     | value      |
       | title          | string   | "Prologue" |
-      | page-number    | integer     | 233        |
+      | page-number    | integer  | 233        |
       | price          | double   | 15.99      |
       | purchased      | boolean  | true       |
       | published-date | datetime | 2020-01-01 |
@@ -1022,36 +889,34 @@ Parker";
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $x <value> isa <attr>;
+      match $x isa <attr> <value>;
       """
     Given answer size is: 0
+    # TODO: error "Invalid query containing unbound concept variable x"
     When typeql write query
       """
-      match $x = <value>;
-      insert $a isa <attr>, has ref 0; $a == $x;
+      match $x == <value>;
+      insert $a isa <attr> == $x;
       """
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x <value> isa <attr>;
+      match $x isa <attr> <value>;
       """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-
+    Then answer size is: 1
     Examples:
       | attr           | type     | value      |
       | title          | string   | "Prologue" |
-      | page-number    | integer     | 233        |
+      | page-number    | integer  | 233        |
       | price          | double   | 15.99      |
       | purchased      | boolean  | true       |
       | published-date | datetime | 2020-01-01 |
@@ -1064,10 +929,9 @@ Parker";
       """
       define
       entity person
-        owns value;
-      attribute value
-        value string,
-        regex "\d{2}\.[true][false]";
+        owns description;
+      attribute description
+        value string @regex("\d{2}\.[true][false]");
       """
     Given transaction commits
 
@@ -1075,8 +939,7 @@ Parker";
     Then typeql write query; fails
       """
       insert
-        $x isa person, has value $a, has ref 0;
-        $a "10.maybe";
+        $x isa person, has description "10.maybe", has ref 0;
       """
 
 
@@ -1087,7 +950,7 @@ Parker";
     Given typeql schema query
     """
     define
-    attribute test_date value datetime;
+    attribute test_date @independent, value datetime;
     """
     Given transaction commits
 
@@ -1095,7 +958,7 @@ Parker";
     Then typeql write query
       """
       insert
-      $time_date 2023-05-01T00:00:00 isa test_date;
+      $time_date isa test_date 2023-05-01T00:00:00;
       """
 
     Given set time-zone: America/Chicago
@@ -1113,8 +976,8 @@ Parker";
     When typeql write query
       """
       insert
-      $x 2 isa age;
-      $y 2 isa age;
+      $x isa age 2;
+      $y isa age 2;
       """
     Then transaction commits
 
@@ -1124,8 +987,8 @@ Parker";
       match $x isa age;
       """
     Then uniquely identify answer concepts
-      | x           |
-      | attr:age:2  |
+      | x          |
+      | attr:age:2 |
 
 
   Scenario: inserting two 'double' attribute values with the same integer value creates a single concept
@@ -1134,7 +997,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute length value double;
+      attribute length @independent, value double;
       """
     Given transaction commits
 
@@ -1142,8 +1005,8 @@ Parker";
     When typeql write query
       """
       insert
-      $x 2 isa length;
-      $y 2 isa length;
+      $x isa length 2;
+      $y isa length 2;
       """
     Then transaction commits
 
@@ -1154,8 +1017,8 @@ Parker";
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x                |
-      | attr:length:2.0  |
+      | x               |
+      | attr:length:2.0 |
 
 
   Scenario: inserting the same integer twice as a 'double' in separate transactions creates a single concept
@@ -1164,7 +1027,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute length value double;
+      attribute length @independent, value double;
       """
     Given transaction commits
 
@@ -1172,7 +1035,7 @@ Parker";
     When typeql write query
       """
       insert
-      $x 2 isa length;
+      $x isa length 2;
       """
     Then transaction commits
 
@@ -1180,7 +1043,7 @@ Parker";
     When typeql write query
       """
       insert
-      $y 2 isa length;
+      $y isa length 2;
       """
     Then transaction commits
 
@@ -1191,8 +1054,8 @@ Parker";
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | x                |
-      | attr:length:2.0  |
+      | x               |
+      | attr:length:2.0 |
 
 
   Scenario: inserting attribute values [2] and [2.0] with the same attribute type creates a single concept
@@ -1201,7 +1064,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute length value double;
+      attribute length @independent, value double;
       """
     Given transaction commits
 
@@ -1209,8 +1072,8 @@ Parker";
     When typeql write query
       """
       insert
-      $x 2 isa length;
-      $y 2.0 isa length;
+      $x isa length 2;
+      $y isa length 2.0;
       """
     Then transaction commits
 
@@ -1222,38 +1085,37 @@ Parker";
     Then answer size is: 1
 
 
-  Scenario Outline: a '<type>' inserted as [<insert>] is retrieved when matching [<match>]
+  Scenario Outline: a '<type>' inserted as [<value>] is retrieved when matching [<match>]
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $x <insert> isa <attr>, has ref 0;
+      insert $x isa <attr> <value>;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
+      | x                   |
+      | attr:<attr>:<value> |
     Then transaction commits
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x <match> isa <attr>;
+      match $x isa <attr> <match>;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-
+      | x                   |
+      | attr:<attr>:<value> |
     Examples:
-      | type     | attr       | insert           | match            |
-      | integer     | shoe-size  | 92               | 92               |
-      | integer     | shoe-size  | 92               | 92.00            |
+      | type     | attr       | value            | match            |
+      | integer  | shoe-size  | 92               | 92               |
+      | integer  | shoe-size  | 92               | 92.00            |
       | double   | length     | 52               | 52               |
       | double   | length     | 52               | 52.00            |
       | double   | length     | 52.0             | 52               |
@@ -1269,28 +1131,26 @@ Parker";
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
-      define attribute <attr> value <type>;
+      define attribute <attr> @independent, value <type>;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Then typeql write query; fails
       """
-      insert $x <value> isa <attr>;
+      insert $x isa <attr> <value>;
       """
-
-
     Examples:
       | type     | attr       | value        |
       | string   | colour     | 92           |
       | string   | colour     | 92.8         |
       | string   | colour     | false        |
       | string   | colour     | 2019-12-26   |
-      | integer     | shoe-size  | 28.5         |
-      | integer     | shoe-size  | "28"         |
-      | integer     | shoe-size  | true         |
-      | integer     | shoe-size  | 2019-12-26   |
-      | integer     | shoe-size  | 28.0         |
+      | integer  | shoe-size  | 28.5         |
+      | integer  | shoe-size  | "28"         |
+      | integer  | shoe-size  | true         |
+      | integer  | shoe-size  | 2019-12-26   |
+      | integer  | shoe-size  | 28.0         |
       | double   | length     | "28.0"       |
       | double   | length     | false        |
       | double   | length     | 2019-12-26   |
@@ -1315,8 +1175,8 @@ Parker";
       $x 10;
       """
     Then uniquely identify answer concepts
-      | x            |
-      | attr:age:10  |
+      | x           |
+      | attr:age:10 |
     Then transaction commits
 
 
@@ -1344,7 +1204,7 @@ Parker";
   # KEY OWNERSHIP #
   #################
 
-  Scenario: a thing can be inserted with a key attribute
+  Scenario: a instance can be inserted with a key attribute
     When typeql write query
       """
       insert $x isa person, has ref 0;
@@ -1369,11 +1229,12 @@ Parker";
     Then transaction commits; fails
 
 
-  Scenario: inserting two distinct values of the same key attribute on a thing errors
-    Then typeql write query; fails
+  Scenario: inserting two distinct values of the same key attribute on a instance errors
+    When typeql write query
       """
       insert $x isa person, has ref 0, has ref 1;
       """
+    Then transaction commits; fails
 
 
   Scenario: instances of a key attribute must be unique among all instances of a type
@@ -1403,12 +1264,13 @@ Parker";
       """
       insert $x isa base, has ref 0;
       """
-    Then typeql write query; fails with a message containing "'@unique' has been violated"
+    Then typeql write query; fails with a message containing: "'@unique' has been violated"
       """
       insert $y isa derived, has ref 0;
       """
 
-    Given connection open write transaction for database: typedb
+    When transaction closes
+    When connection open write transaction for database: typedb
 
     When typeql write query
       """
@@ -1463,17 +1325,18 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails
+    Then typeql write query
       """
       insert $p2 isa person, has name "john", has ref 1;
       """
+    Then transaction commits
 
 
   ####################
   # UNIQUE OWNERSHIP #
   ####################
 
-  Scenario: a thing can be inserted with a unique attribute(s)
+  Scenario: a instance can be inserted with a unique attribute(s)
     When typeql write query
       """
       insert $x isa person, has ref 0, has email "abc@gmail.com";
@@ -1601,7 +1464,7 @@ Parker";
   # ANSWERS OF INSERT QUERY #
   ###########################
 
-  Scenario: an insert with multiple thing variables returns a single answer that contains them all
+  Scenario: an insert with multiple instance variables returns a single answer that contains them all
     When get answers of typeql write query
       """
       insert
@@ -1661,7 +1524,7 @@ Parker";
       insert
       $x isa person, has name "Eric", has ref 0;
       $y isa company, has name "Microsoft", has ref 1;
-      $r (employee: $x, employer: $y) isa employment, has ref 2;
+      $r isa employment, links (employee: $x, employer: $y), has ref 2;
       $z isa person, has name "Tarja", has ref 3;
       """
     Given transaction commits
@@ -1747,7 +1610,7 @@ Parker";
       match
         $p isa person;
       insert
-        $r (holder: $p) isa season-ticket-ownership;
+        $r isa season-ticket-ownership, links (holder: $p);
       """
     Then transaction commits
 
@@ -1811,9 +1674,9 @@ Parker";
       $y isa person, has name "Burns", has ref 1;
       $z isa person, has name "Smithers", has ref 2;
       $c isa company, has name "Springfield Nuclear Power Plant", has ref 3;
-      $xr (employee: $x, employer: $c) isa employment, has ref 4;
-      $yr (employee: $y, employer: $c) isa employment, has ref 5;
-      $zr (employee: $z, employer: $c) isa employment, has ref 6;
+      $xr isa employment, links (employee: $x, employer: $c), has ref 4;
+      $yr isa employment, links (employee: $y, employer: $c), has ref 5;
+      $zr isa employment, links (employee: $z, employer: $c), has ref 6;
       """
     Given uniquely identify answer concepts
       | x         | y         | z         | c         | xr        | yr        | zr        |
@@ -1823,7 +1686,7 @@ Parker";
     Given connection open write transaction for database: typedb
     Given get answers of typeql read query
       """
-      match $r (employee: $x, employer: $c) isa employment;
+      match $r isa employment, links (employee: $x, employer: $c);
       """
     Given uniquely identify answer concepts
       | r         | x         | c         |
@@ -1842,7 +1705,7 @@ Parker";
     When connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (employee: $x, employer: $c) isa employment;
+      match $r isa employment, links (employee: $x, employer: $c);
       """
     Then uniquely identify answer concepts
       | r         | x         | c         |
@@ -1860,8 +1723,8 @@ Parker";
       $z "Brock" isa name;
       """
     Given uniquely identify answer concepts
-      | x              | y                | z                |
-      | attr:name:Ash  | attr:name:Misty  | attr:name:Brock  |
+      | x             | y               | z               |
+      | attr:name:Ash | attr:name:Misty | attr:name:Brock |
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -1870,10 +1733,10 @@ Parker";
       match $x isa name;
       """
     Given uniquely identify answer concepts
-      | x                |
-      | attr:name:Ash    |
-      | attr:name:Misty  |
-      | attr:name:Brock  |
+      | x               |
+      | attr:name:Ash   |
+      | attr:name:Misty |
+      | attr:name:Brock |
     When typeql write query
       """
       match
@@ -1889,10 +1752,10 @@ Parker";
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x                |
-      | attr:name:Ash    |
-      | attr:name:Misty  |
-      | attr:name:Brock  |
+      | x               |
+      | attr:name:Ash   |
+      | attr:name:Misty |
+      | attr:name:Brock |
 
 
   Scenario: re-inserting a matched instance does nothing
@@ -2020,8 +1883,8 @@ Parker";
     Given typeql write query
       """
       match
-      $p type person;
-      $r type employment;
+      $p label person;
+      $r label employment;
       insert
       $x isa $p, has ref 0;
       (employee: $x) isa $r, has ref 1;
@@ -2032,9 +1895,9 @@ Parker";
     Given typeql write query
       """
       match
-      $p type person;
-      $r type employment;
-      $rt type employment:employee;
+      $p label person;
+      $r label employment;
+      $rt label employment:employee;
       insert
       $x isa $p, has ref 2;
       ($rt: $x) isa $r, has ref 3;
@@ -2046,8 +1909,7 @@ Parker";
       """
       match
       $x isa person;
-      $r ($x) isa employment;
-
+      $r isa employment, links ($x);
       """
     Then uniquely identify answer concepts
       | x         | r         |
@@ -2098,7 +1960,7 @@ Parker";
   # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
-  Scenario: when inserting a thing that has inferred concepts, those concepts are not automatically materialised
+  Scenario: when inserting a instance that has inferred concepts, those concepts are not automatically materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -2130,8 +1992,8 @@ Parker";
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x                 |
-      | attr:name:Ganesh  |
+      | x                |
+      | attr:name:Ganesh |
     When typeql delete
       """
       match
@@ -2151,7 +2013,7 @@ Parker";
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
-  Scenario: when inserting a thing with an inferred attribute ownership, the ownership is not automatically persisted
+  Scenario: when inserting a instance with an inferred attribute ownership, the ownership is not automatically persisted
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -2185,9 +2047,9 @@ Parker";
       match $x isa person, has score $score;
       """
     Then uniquely identify answer concepts
-      | x         | score            |
-      | key:ref:0 | attr:score:10.0  |
-      | key:ref:1 | attr:score:10.0  |
+      | x         | score           |
+      | key:ref:0 | attr:score:10.0 |
+      | key:ref:1 | attr:score:10.0 |
     When typeql delete
       """
       match
@@ -2204,8 +2066,8 @@ Parker";
       """
     # The score '10.0' still exists, we never deleted it
     Then uniquely identify answer concepts
-      | x                |
-      | attr:score:10.0  |
+      | x               |
+      | attr:score:10.0 |
     When get answers of typeql read query
       """
       match $x isa person, has score $score;
@@ -2213,9 +2075,9 @@ Parker";
     # But Freya's ownership of score 10.0 was never materialised and is now gone
     Then answer size is: 0
 
-  #TODO: Reenable when rules actually do something
+  #TODO: Reenable when rules actually do someinstance
   @ignore
-  Scenario: when inserting things connected to an inferred attribute, the inferred attribute gets materialised
+  Scenario: when inserting instances connected to an inferred attribute, the inferred attribute gets materialised
 
   By explicitly inserting (x,y) is a relation, we are making explicit the fact that x and y both exist.
 
@@ -2261,8 +2123,8 @@ Parker";
       match $x isa name;
       """
     Then uniquely identify answer concepts
-      | x                 |
-      | attr:name:Ganesh  |
+      | x                |
+      | attr:name:Ganesh |
     # At this step we materialise the inferred name 'Ganesh' because the material name-initial relation depends on it.
     When typeql write query
       """
@@ -2297,20 +2159,20 @@ Parker";
       """
     # We deleted the person called 'Ganesh', but the name still exists because it was materialised on match-insert
     Then uniquely identify answer concepts
-      | x                 |
-      | attr:name:Ganesh  |
+      | x                |
+      | attr:name:Ganesh |
     When get answers of typeql read query
       """
       match (lettered-name: $x, initial: $y) isa name-initial;
       """
     # And the inserted relation still exists too
     Then uniquely identify answer concepts
-      | x                 | y              |
-      | attr:name:Ganesh  | attr:letter:G  |
+      | x                | y             |
+      | attr:name:Ganesh | attr:letter:G |
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
-  Scenario: when inserting things connected to an inferred relation, the inferred relation gets materialised
+  Scenario: when inserting instances connected to an inferred relation, the inferred relation gets materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -2393,7 +2255,7 @@ Parker";
 
   #TODO: Reenable when reasoning can run in a write transaction
   @ignore
-  Scenario: when inserting things connected to a chain of inferred concepts, the whole chain is materialised
+  Scenario: when inserting instances connected to a chain of inferred concepts, the whole chain is materialised
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -2515,9 +2377,9 @@ Parker";
     Given typeql schema query
       """
       undefine
-      person owns ref;
-      company owns ref;
-      employment owns ref;
+      owns ref from person;
+      owns ref from company;
+      owns ref from employment;
       """
     Given transaction commits
 
@@ -2712,4 +2574,3 @@ Parker";
       $x isa bird;
       $x iid V123;
       """
-
