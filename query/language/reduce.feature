@@ -459,7 +459,7 @@ Feature: TypeQL Reduce Queries
 
 
   ###################
-  #  reduce-within  #
+  #  reduce-groupby  #
   ###################
 
   Scenario: the size of each answer group can be retrieved using a group 'count'
@@ -483,7 +483,7 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match ($x, $y) isa friendship;
-      reduce $count = count($y) within $x;
+      reduce $count = count($y) groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | count        |
@@ -495,7 +495,7 @@ Feature: TypeQL Reduce Queries
     When get answers of typeql read query
       """
       match ($x, $y) isa friendship;
-      reduce $count = count within $x;
+      reduce $count = count groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | count        |
@@ -548,7 +548,7 @@ Feature: TypeQL Reduce Queries
         not { $y is $z; };
         $r links ($x, $y);
       select $x, $y, $z;
-      reduce $cy = count($y), $cz = count($z) within $x;
+      reduce $cy = count($y), $cz = count($z) groupby $x;
       """
     Then uniquely identify answer concepts
       | $x        | cy           | cz           |
@@ -556,7 +556,7 @@ Feature: TypeQL Reduce Queries
       | key:ref:1 | value:integer:2 | value:integer:2 |
 
 
-  Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
+  Scenario: the maximum value for a particular variable grouped by each answer group can be retrieved using a group 'max'
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
@@ -579,7 +579,7 @@ Feature: TypeQL Reduce Queries
         $x isa company;
         $y isa person, has age $z;
         $r isa employment, links ($x, $y);
-      reduce $max? = max($z) within $x;
+      reduce $max? = max($z) groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | max           |
@@ -606,7 +606,7 @@ Feature: TypeQL Reduce Queries
        $p isa person, has name $name, has age $a;
        $n = $name;
        $to25 = 25 - $a;
-      reduce $sum = sum($to25) within $n;
+      reduce $sum = sum($to25) groupby $n;
       """
     Then uniquely identify answer concepts
       | n                  | sum           |
@@ -636,7 +636,7 @@ Feature: TypeQL Reduce Queries
       """
       match $x isa person, has income $y;
       select $x, $y;
-      reduce $std? = std($y) within $x;
+      reduce $std? = std($y) groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | std   |

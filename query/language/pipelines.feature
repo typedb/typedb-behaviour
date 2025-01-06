@@ -212,7 +212,7 @@ Feature: TypeQL pipelines
     """
     match
       $p isa person, has name $name, has age $age;
-    reduce $sum_age = sum($age) within $name;
+    reduce $sum_age = sum($age) groupby $name;
     """
     Then uniquely identify answer concepts
       | name             | sum_age        |
