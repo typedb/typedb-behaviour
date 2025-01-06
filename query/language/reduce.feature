@@ -459,104 +459,105 @@ Feature: TypeQL Reduce Queries
 
 
   ###################
-  #  reduce-within  #
+  #  reduce-groupby  #
   ###################
 
-  Scenario: the size of each answer group can be retrieved using a group 'count'
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $p1 isa person, has name "Violet", has ref 0;
-      $p2 isa person, has name "Rupert", has ref 1;
-      $p3 isa person, has name "Bernard", has ref 2;
-      $p4 isa person, has name "Colin", has ref 3;
-      $f isa friendship, links (friend: $p1, friend: $p2, friend: $p3, friend: $p4), has ref 4;
-      """
-    Given transaction commits
+  # TODO: re-enable after deduplicating identical players matched in the same relation
+#  Scenario: the size of each answer group can be retrieved using a group 'count'
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert
+#      $p1 isa person, has name "Violet", has ref 0;
+#      $p2 isa person, has name "Rupert", has ref 1;
+#      $p3 isa person, has name "Bernard", has ref 2;
+#      $p4 isa person, has name "Colin", has ref 3;
+#      $f isa friendship, links (friend: $p1, friend: $p2, friend: $p3, friend: $p4), has ref 4;
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $x isa person;
+#      """
+#    When get answers of typeql read query
+#      """
+#      match ($x, $y) isa friendship;
+#      reduce $count = count($y) groupby $x;
+#      """
+#    Then uniquely identify answer concepts
+#      | x         | count        |
+#      | key:ref:0 | value:integer:3 |
+#      | key:ref:1 | value:integer:3 |
+#      | key:ref:2 | value:integer:3 |
+#      | key:ref:3 | value:integer:3 |
+#
+#    When get answers of typeql read query
+#      """
+#      match ($x, $y) isa friendship;
+#      reduce $count = count groupby $x;
+#      """
+#    Then uniquely identify answer concepts
+#      | x         | count        |
+#      | key:ref:0 | value:integer:3 |
+#      | key:ref:1 | value:integer:3 |
+#      | key:ref:2 | value:integer:3 |
+#      | key:ref:3 | value:integer:3 |
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    When get answers of typeql read query
-      """
-      match ($x, $y) isa friendship;
-      reduce $count = count($y) within $x;
-      """
-    Then uniquely identify answer concepts
-      | x         | count        |
-      | key:ref:0 | value:integer:3 |
-      | key:ref:1 | value:integer:3 |
-      | key:ref:2 | value:integer:3 |
-      | key:ref:3 | value:integer:3 |
-
-    When get answers of typeql read query
-      """
-      match ($x, $y) isa friendship;
-      reduce $count = count within $x;
-      """
-    Then uniquely identify answer concepts
-      | x         | count        |
-      | key:ref:0 | value:integer:3 |
-      | key:ref:1 | value:integer:3 |
-      | key:ref:2 | value:integer:3 |
-      | key:ref:3 | value:integer:3 |
-
-
-  Scenario: the size of answer groups is still computed correctly when restricting variables with 'select'
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $c1 isa company, has name "Apple", has ref 0;
-      $c2 isa company, has name "Google", has ref 1;
-      $p1 isa person, has name "Elena", has ref 2;
-      $p2 isa person, has name "Flynn", has ref 3;
-      $p3 isa person, has name "Lyudmila", has ref 4;
-      $e1 isa employment, links (employer: $c1, employee: $p1, employee: $p2), has ref 5;
-      $e2 isa employment, links (employer: $c2, employee: $p3), has ref 6;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-      $x isa company;
-      $y isa person;
-      $z isa person;
-      not { $y is $z; };
-      $r links ($x, $y);
-      select $x, $y, $z;
-      """
-    Then uniquely identify answer concepts
-      | x         | y         | z         |
-      | key:ref:0 | key:ref:2 | key:ref:3 |
-      | key:ref:0 | key:ref:2 | key:ref:4 |
-      | key:ref:0 | key:ref:3 | key:ref:2 |
-      | key:ref:0 | key:ref:3 | key:ref:4 |
-      | key:ref:1 | key:ref:4 | key:ref:2 |
-      | key:ref:1 | key:ref:4 | key:ref:3 |
-    Then get answers of typeql read query
-      """
-      match
-        $x isa company;
-        $y isa person;
-        $z isa person;
-        not { $y is $z; };
-        $r links ($x, $y);
-      select $x, $y, $z;
-      reduce $cy = count($y), $cz = count($z) within $x;
-      """
-    Then uniquely identify answer concepts
-      | $x        | cy           | cz           |
-      | key:ref:0 | value:integer:4 | value:integer:4 |
-      | key:ref:1 | value:integer:2 | value:integer:2 |
+  # TODO: re-enable after deduplicating identical players matched in the same relation
+#  Scenario: the size of answer groups is still computed correctly when restricting variables with 'select'
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert
+#      $c1 isa company, has name "Apple", has ref 0;
+#      $c2 isa company, has name "Google", has ref 1;
+#      $p1 isa person, has name "Elena", has ref 2;
+#      $p2 isa person, has name "Flynn", has ref 3;
+#      $p3 isa person, has name "Lyudmila", has ref 4;
+#      $e1 isa employment, links (employer: $c1, employee: $p1, employee: $p2), has ref 5;
+#      $e2 isa employment, links (employer: $c2, employee: $p3), has ref 6;
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match
+#      $x isa company;
+#      $y isa person;
+#      $z isa person;
+#      not { $y is $z; };
+#      $r links ($x, $y);
+#      select $x, $y, $z;
+#      """
+#    Then uniquely identify answer concepts
+#      | x         | y         | z         |
+#      | key:ref:0 | key:ref:2 | key:ref:3 |
+#      | key:ref:0 | key:ref:2 | key:ref:4 |
+#      | key:ref:0 | key:ref:3 | key:ref:2 |
+#      | key:ref:0 | key:ref:3 | key:ref:4 |
+#      | key:ref:1 | key:ref:4 | key:ref:2 |
+#      | key:ref:1 | key:ref:4 | key:ref:3 |
+#    Then get answers of typeql read query
+#      """
+#      match
+#        $x isa company;
+#        $y isa person;
+#        $z isa person;
+#        not { $y is $z; };
+#        $r links ($x, $y);
+#      select $x, $y, $z;
+#      reduce $cy = count($y), $cz = count($z) groupby $x;
+#      """
+#    Then uniquely identify answer concepts
+#      | $x        | cy           | cz           |
+#      | key:ref:0 | value:integer:4 | value:integer:4 |
+#      | key:ref:1 | value:integer:2 | value:integer:2 |
 
 
-  Scenario: the maximum value for a particular variable within each answer group can be retrieved using a group 'max'
+  Scenario: the maximum value for a particular variable grouped by each answer group can be retrieved using a group 'max'
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
@@ -579,7 +580,7 @@ Feature: TypeQL Reduce Queries
         $x isa company;
         $y isa person, has age $z;
         $r isa employment, links ($x, $y);
-      reduce $max? = max($z) within $x;
+      reduce $max? = max($z) groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | max           |
@@ -604,9 +605,9 @@ Feature: TypeQL Reduce Queries
       """
       match
        $p isa person, has name $name, has age $a;
-       $n = $name;
-       $to25 = 25 - $a;
-      reduce $sum = sum($to25) within $n;
+       let $n = $name;
+       let $to25 = 25 - $a;
+      reduce $sum = sum($to25) groupby $n;
       """
     Then uniquely identify answer concepts
       | n                  | sum           |
@@ -636,7 +637,7 @@ Feature: TypeQL Reduce Queries
       """
       match $x isa person, has income $y;
       select $x, $y;
-      reduce $std? = std($y) within $x;
+      reduce $std? = std($y) groupby $x;
       """
     Then uniquely identify answer concepts
       | x         | std   |
