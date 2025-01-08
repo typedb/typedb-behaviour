@@ -300,25 +300,26 @@ Feature: TypeDB Driver
     Then transaction is open: false
 
 
-  # TODO: Fix rollbacks on the server side
-#  Scenario: Driver can rollback transactions of schema and write types, cannot rollback transaction of type read
-#    When connection open schema transaction for database: typedb
-#    Then transaction has type: schema
-#    Then transaction is open: true
-#    When transaction rollbacks
-#    Then transaction is open: false
-#
-#    When connection open write transaction for database: typedb
-#    Then transaction has type: write
-#    Then transaction is open: true
-#    When transaction rollbacks
-#    Then transaction is open: false
-#
-#    When connection open read transaction for database: typedb
-#    Then transaction has type: read
-#    Then transaction is open: true
-#    Then transaction rollbacks; fails with a message containing: "todo"
-#    Then transaction is open: false
+  Scenario: Driver can rollback transactions of schema and write types, cannot rollback transaction of type read
+    When connection open schema transaction for database: typedb
+    Then transaction has type: schema
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: true
+
+    When transaction closes
+    When connection open write transaction for database: typedb
+    Then transaction has type: write
+    Then transaction is open: true
+    When transaction rollbacks
+    Then transaction is open: true
+
+    When transaction closes
+    When connection open read transaction for database: typedb
+    Then transaction has type: read
+    Then transaction is open: true
+    Then transaction rollbacks; fails with a message containing: "Read transactions cannot be rolled back"
+    Then transaction is open: false
 
 
   # TODO: Check options setting and retrieval
@@ -612,7 +613,7 @@ Feature: TypeDB Driver
     Then transaction commits
 
 
-  Scenario: Driver processes concept document query answers correctly
+  Scenario: Driver processes concept document query answers from read queries correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -795,6 +796,87 @@ Feature: TypeDB Driver
     """
     {
         "null-result": null
+    }
+    """
+
+
+  Scenario: Driver processes concept document query answers from write queries correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person owns name @card(1); attribute name, value string; attribute age @abstract;
+      """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert $p isa person, has name "John";
+      fetch {
+        "name": $p.name,
+        "sub fetch": {
+          "all attributes": { $p.* },
+        }
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer query type is: write
+    Then answer query type is not: schema
+    Then answer query type is not: read
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+      "name": "John",
+      "sub fetch": {
+        "all attributes": {
+          "name": "John"
+        }
+      }
+    }
+    """
+    When get answers of typeql write query
+      """
+      match
+      attribute $a;
+      insert
+      $p1 isa person, has name "Alice";
+      $p2 isa person, has name "Bob";
+      fetch {
+        "Alice's name": $p1.name,
+        "sub fetch": {
+          "Bob's all": { $p2.* },
+        }
+      };
+      """
+    Then answer type is: concept documents
+    Then answer type is not: ok
+    Then answer type is not: concept rows
+    Then answer query type is: write
+    Then answer query type is not: schema
+    Then answer query type is not: read
+    Then answer size is: 2
+    Then answer contains document:
+    """
+    {
+      "Alice's name": "Alice",
+      "sub fetch": {
+        "Bob's all": {
+          "name": "Bob"
+        }
+      }
+    }
+    """
+    Then answer does not contain document:
+    """
+    {
+      "Alice's name": "Bob",
+      "sub fetch": {
+        "Bob's all": {
+          "name": "Alice"
+        }
+      }
     }
     """
 

@@ -48,16 +48,15 @@ Feature: Connection Transaction
       | write  |
       | schema |
 
-    # TODO: Fix rollback
-#  Scenario Outline: one database, <type> transaction rollback
-#    When connection create database: typedb
-#    Given connection open <type> transaction for database: typedb
-#    Then transaction rollbacks
-#    Then transaction is open: true
-#    Examples:
-#      | type   |
-#      | write  |
-#      | schema |
+  Scenario Outline: one database, <type> transaction rollback
+    When connection create database: typedb
+    Given connection open <type> transaction for database: typedb
+    Then transaction rollbacks
+    Then transaction is open: true
+    Examples:
+      | type   |
+      | write  |
+      | schema |
 
   Scenario: read transaction cannot be rollbacked
     When connection create database: typedb
@@ -302,45 +301,70 @@ Feature: Connection Transaction
       """
     Then transaction commits
 
-    # TODO: Fix rollback
-#  Scenario: commit after a schema transaction rollback does nothing
-#    Given connection create database: typedb
-#    Given connection open schema transaction for database: typedb
-#    When typeql schema query
-#      """
-#      define entity person;
-#      """
-#    When transaction rollbacks
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    When typeql read query
-#      """
-#      match entity $x;
-#      """
-#    Then answer size is: 0
+  Scenario: commit after a schema transaction rollback does nothing
+    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define entity person;
+      """
+    Then get answers of typeql read query
+      """
+      match entity $x;
+      """
+    Then answer size is: 1
+    Then get answers of typeql read query
+      """
+      match entity $x;
+      """
+    Then answer size is: 1
 
-    # TODO: Fix rollback
-#  Scenario: commit after a write transaction rollback does nothing
-#    Given connection create database: typedb
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define entity person;
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    When typeql write query
-#      """
-#      insert $x isa person;
-#      """
-#    When transaction rollbacks
-#    When transaction commits
-#    When connection open read transaction for database: typedb
-#    When typeql read query
-#      """
-#      match $x isa person;
-#      """
-#    Then answer size is: 0
+    When transaction rollbacks
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match entity $x;
+      """
+
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match entity $x;
+      """
+
+  Scenario: commit after a write transaction rollback does nothing
+    Given connection create database: typedb
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert $x isa person;
+      """
+    When get answers of typeql read query
+      """
+      match $x isa person;
+      """
+    Then answer size is: 1
+
+    When transaction rollbacks
+    When get answers of typeql read query
+      """
+      match $x isa person;
+      """
+    Then answer size is: 0
+
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person;
+      """
+    Then answer size is: 0
 
   # TODO: Uncomment when options are implemented. Decide if it needs the following tag.
 #  @ignore-typedb
