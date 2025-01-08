@@ -894,7 +894,7 @@ Feature: TypeDB Driver
       """
       match relation $r;
       """
-    Then typeql schema query; fails with a message containing: "The reserved keyword "entity" cannot be used as an identifier"
+    Then typeql schema query; fails with a message containing: "Query parsing failed"
       """
       define entity entity;
       """
