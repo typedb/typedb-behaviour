@@ -207,7 +207,7 @@ Feature: Function Definition
     match
        let $joining_bonus = 1000;
        let $loyalty = loyalty_bonus($customer);
-       let $total = $joining + $loyalty;
+       let $total = $joining_bonus + $loyalty;
     return { $total };
 
     fun loyalty_bonus($customer: person) ->  { double }:
@@ -243,7 +243,7 @@ Feature: Function Definition
     match
        let $joining_bonus = 1000;
        let $loyalty = loyalty_bonus($customer);
-       let $total = $joining + $loyalty;
+       let $total = $joining_bonus + $loyalty;
     return { $total };
 
     with
