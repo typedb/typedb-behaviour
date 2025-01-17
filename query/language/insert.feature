@@ -1226,7 +1226,7 @@ Parker";
       """
       insert $y isa derived, has ref 0;
       """
-    Then typeql write query
+    Then typeql write query; fails with a message containing: "'@unique' has been violated"
       """
       insert $x isa base, has ref 0;
       """
@@ -1371,8 +1371,8 @@ Parker";
       define
       entity person @abstract;
       attribute email @abstract, value string;
-      attribute email-outlook sub email, value string;
-      entity child sub person, owns email-outlook;
+      attribute email-outlook sub email;
+      entity child sub person, owns email-outlook @card(0..2);
       """
     Given transaction commits
 
@@ -1383,10 +1383,9 @@ Parker";
       """
     Then transaction commits
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails
-    # TODO: Looks like it errors because of "email-outlOKO", not as expected...
+    Then typeql write query; fails with a message containing: "'@unique' has been violated"
       """
-      insert $x isa child, has email-outloko "abc@outlook.com", has ref 1;
+      insert $x isa child, has email-outlook "abc@outlook.com", has ref 1;
       """
 
 
@@ -1570,7 +1569,7 @@ Parker";
       match $r isa season-ticket-ownership;
       """
     Then answer size is: 0
-
+    Given transaction closes
 
     When connection open write transaction for database: typedb
     When get answers of typeql read query
