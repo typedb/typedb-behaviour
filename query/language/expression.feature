@@ -16,101 +16,103 @@ Feature: TypeQL Get Query with Expressions
     Given typeql schema query
       """
       define
-      person sub entity,
+      entity person,
         owns name @key,
         owns age,
         owns height,
         owns weight;
-      name sub attribute, value string;
-      age sub attribute, value integer;
-      height sub attribute, value integer;
-      weight sub attribute, value integer;
+      attribute name, value string;
+      attribute age, value integer;
+      attribute height, value integer;
+      attribute weight, value integer;
 
-      limit-double sub attribute, value double;
+      attribute limit-double, value double;
       """
     Given transaction commits
 
 
   Scenario: A value variable must have exactly one assignment constraint in the same scope
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "value variable '?v' is never assigned to"
+    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable v"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?v == $a;
-        ?v > $h;
-      get
-        $x, ?v;
+        $v == $a;
+        $v > $h;
+      select
+        $x, $v;
       """
+    Given transaction closes
 
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    Then typeql read query; fails with a message containing: "MultipleAssignmentsForSingleVariable"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?v = $a * 2;
-        ?v = $h / 2;
-      get
-        $x, ?v;
+        let $v = $a * 2;
+        let $v = $h / 2;
+      select
+        $x, $v;
       """
 
 
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    Then typeql read query; fails with a message containing: "MultipleAssignmentsForSingleVariable"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?v  = $a + $h;
-        not { $a > 10; not { ?v = 10; }; };
-      get
-        $x, ?v;
+        let $v = $a + $h;
+        not { $a > 10; not { let $v = 10; }; };
+      select
+        $x, $v;
       """
 
 
   Scenario: A value variable's assignment must be in the highest scope
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "value variable '?v' can only have one assignment in the first scope"
+    Then typeql read query; fails with a message containing: "TODO"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?v > $h;
-        not { ?v = $a / 2;};
-      get
-        $x, ?v;
+        $v > $h;
+        not { let $v = $a / 2;};
+      select
+        $x, $v;
       """
 
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "cyclic assignment between value variables was detected"
+    Then typeql read query; fails with a message containing: "CircularDependencyInExpressions"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?v = $a + ?v;
-      get
-        $x, ?v;
+        let $v = $a + $v;
+      select
+        $x, $v;
       """
+    Given transaction closes
 
     Given connection open read transaction for database: typedb
-    When typeql throws exception containing "cyclic assignment between value variables was detected"
+    Then typeql read query; fails with a message containing: "CircularDependencyInExpressions"
     """
       match
         $x isa person, has age $a, has age $h;
-        ?u = $a + ?v;
-        ?v = $h + ?u;
-      get
-        $x, ?u, ?v;
+        let $u = $a + $v;
+        let $v = $h + $u;
+      select
+        $x, $u, $v;
       """
 
 
   Scenario: Value variables can cross over into negations
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
-      $x "Lisa" isa name;
-      $y 16 isa age;
+      $x isa name "Lisa";
+      $y isa age 16;
       $z isa person, has name $x, has age $y;
       """
     Given transaction commits
@@ -120,9 +122,9 @@ Feature: TypeQL Get Query with Expressions
       """
       match
         $z isa person, has name $x, has age $y;
-        ?y2 = $y * 2;
-        not { $y > ?y2; };
-      get $x, $y;
+        let $y2 = $y * 2;
+        not { $y > $y2; };
+      select $x, $y;
       """
     Then uniquely identify answer concepts
       | x               |
@@ -131,31 +133,31 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: Value variables and concept variables may not share name
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
-      $x "Lisa" isa name;
-      $y 16 isa age;
+      $x isa name "Lisa";
+      $y isa age 16;
       $z isa person, has name $x, has age $y;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql throws exception containing "The variable(s) named 'y' cannot be used for both concept variables and a value variables"
+    Then typeql read query; fails with a message containing: " The variable 'y' cannot be declared as both a 'Value' and as a 'Attribute'"
       """
       match
         $z isa person, has age $y;
-        ?y = $y;
-      get $z, $y, ?y;
+        let $y = $y;
+      select $z, $y, $y;
       """
 
 
   Scenario: Test unary minus sign
     Given connection open write transaction for database: typedb
-    Given typeql insert
+    Given typeql write query
       """
       insert
-      $x 16 isa age;
+      $x isa age 16;
       """
     Given transaction commits
 
@@ -164,9 +166,9 @@ Feature: TypeQL Get Query with Expressions
       """
       match
         $x isa age;
-        ?const = -10;
-        ?plus-negative = $x + -10;
-        ?minus-negative = $x - -10;
+        let $const = -10;
+        let $plus-negative = $x + -10;
+        let $minus-negative = $x - -10;
 
       """
     Then uniquely identify answer concepts
@@ -179,12 +181,12 @@ Feature: TypeQL Get Query with Expressions
     When get answers of typeql read query
     """
       match
-        ?a = 6.0 + 3.0;
-        ?b = 6.0 - 3.0;
-        ?c = 6.0 * 3.0;
-        ?d = 6.0 / 3.0;
-      get
-        ?a, ?b, ?c, ?d;
+        let $a = 6.0 + 3.0;
+        let $b = 6.0 - 3.0;
+        let $c = 6.0 * 3.0;
+        let $d = 6.0 / 3.0;
+      select
+        $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
       | a                 | b                 | c                  | d                  |
@@ -193,12 +195,12 @@ Feature: TypeQL Get Query with Expressions
     When get answers of typeql read query
     """
       match
-        ?a = 6 + 3;
-        ?b = 6 - 3;
-        ?c = 6 * 3;
-        ?d = 6 / 3;
-      get
-        ?a, ?b, ?c, ?d;
+        let $a = 6 + 3;
+        let $b = 6 - 3;
+        let $c = 6 * 3;
+        let $d = 6 / 3;
+      select
+        $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
       | a             | b            | c             | d                  |
@@ -207,12 +209,12 @@ Feature: TypeQL Get Query with Expressions
     When get answers of typeql read query
     """
       match
-        ?a = 6.0 + 3;
-        ?b = 6.0 - 3;
-        ?c = 6.0 * 3;
-        ?d = 6.0 / 3;
-      get
-        ?a, ?b, ?c, ?d;
+        let $a = 6.0 + 3;
+        let $b = 6.0 - 3;
+        let $c = 6.0 * 3;
+        let $d = 6.0 / 3;
+      select
+        $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
       | a                 | b                 | c                  | d                  |
@@ -221,12 +223,12 @@ Feature: TypeQL Get Query with Expressions
     When get answers of typeql read query
     """
       match
-        ?a = 6 + 3.0;
-        ?b = 6 - 3.0;
-        ?c = 6 * 3.0;
-        ?d = 6 / 3.0;
-      get
-        ?a, ?b, ?c, ?d;
+        let $a = 6 + 3.0;
+        let $b = 6 - 3.0;
+        let $c = 6 * 3.0;
+        let $d = 6 / 3.0;
+      select
+        $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
       | a                 | b                 | c                  | d                  |
@@ -234,51 +236,48 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test functions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = floor(3/2);
+        let $b = ceil(3/2);
+      select
+        $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a               | b               |
+      | value:integer:1 | value:integer:2 |
 
     When get answers of typeql read query
     """
       match
-        ?a = floor(3/2);
-        ?b = ceil(3/2);
-      get
-        ?a, ?b;
+        let $a = round(2/3);
+        let $b = abs(-1/2);
+      select
+        $a, $b;
       """
     Then uniquely identify answer concepts
-      | a             | b             |
-      | value:integer: 1 | value:integer: 2 |
+      | a               | b                |
+      | value:integer:1 | value:double:0.5 |
 
     When get answers of typeql read query
     """
       match
-        ?a = round(2/3);
-        ?b = abs(-1/2);
-      get
-        ?a, ?b;
+        let $a = max(2, -3);
+        let $b = min(2, -3, -5);
+      select
+        $a, $b;
       """
     Then uniquely identify answer concepts
-      | a             | b                 |
-      | value:integer: 1 | value:double: 0.5 |
-
-    When get answers of typeql read query
-    """
-      match
-        ?a = max(2, -3);
-        ?b = min(2, -3, -5);
-      get
-        ?a, ?b;
-      """
-    Then uniquely identify answer concepts
-      | a             | b              |
-      | value:integer: 2 | value:integer: -5 |
+      | a               | b                |
+      | value:integer:2 | value:integer:-5 |
 
 
 
   Scenario: Test operators on variables
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert $x isa person,
           has name 'Steve',
@@ -288,20 +287,20 @@ Feature: TypeQL Get Query with Expressions
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name,
          has age $a, has weight $w, has height $h;
 
-        ?bmi = $w/($h/100 * $h/100);
+        let $bmi = $w/($h/100 * $h/100);
 
-        ?days-since-18 = ($a - 18) * 365.25;
-        ?hours-per-day = 24;
-        ?hours-since-18 = ?hours-per-day * ?days-since-18;
-      get
-        $name, ?hours-since-18, ?bmi;
+        let $days-since-18 = ($a - 18) * 365.25;
+        let $hours-per-day = 24;
+        let $hours-since-18 = $hours-per-day * $days-since-18;
+      select
+        $name, $hours-since-18, $bmi;
       """
 
     Then uniquely identify answer concepts
@@ -310,26 +309,25 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test predicates between value variables and constants
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $x isa person, has name "b25.0", has height 160, has weight 64;
         $y isa person, has name "b22.2", has height 180, has weight 72;
         $z isa person, has name "b26.1", has height 175, has weight 80;
-        $l 25 isa limit-double;
+        $l isa limit-double 25;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
-        ?bmi < 25;
-      get
+        let $bmi = $w/($h/100 * $h/100);
+        $bmi < 25;
+      select
         $name;
       """
 
@@ -337,14 +335,13 @@ Feature: TypeQL Get Query with Expressions
       | name             |
       | attr:name:b22.2 |
 
-    Given session opens transaction of type: read
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
-        ?bmi <= 25;
-      get
+        let $bmi = $w/($h/100 * $h/100);
+        $bmi <= 25;
+      select
         $name;
       """
 
@@ -355,27 +352,26 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test predicates between value variables and value variables
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $x isa person, has name "b25.0", has height 160, has weight 64;
         $y isa person, has name "b22.2", has height 180, has weight 72;
         $z isa person, has name "b26.1", has height 175, has weight 80;
-        $l 25 isa limit-double;
+        $l isa limit-double 25;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
-        ?lim = 25;
-        ?bmi < ?lim;
-      get
+        let $bmi = $w/($h/100 * $h/100);
+        let $lim = 25;
+        $bmi < $lim;
+      select
         $name;
       """
 
@@ -383,15 +379,14 @@ Feature: TypeQL Get Query with Expressions
       | name             |
       | attr:name:b22.2 |
 
-    Given session opens transaction of type: read
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
-        ?lim = 25;
-        ?bmi <= ?lim;
-      get
+        let $bmi = $w/($h/100 * $h/100);
+        let $lim = 25;
+        $bmi <= $lim;
+      select
         $name;
       """
 
@@ -402,27 +397,26 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test predicates between value variables and thing variables
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $x isa person, has name "b25.0", has height 160, has weight 64;
         $y isa person, has name "b22.2", has height 180, has weight 72;
         $z isa person, has name "b26.1", has height 175, has weight 80;
-        $l 25 isa limit-double;
+        $l isa limit-double 25;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
+        let $bmi = $w/($h/100 * $h/100);
         $lim isa limit-double;
-        ?bmi < $lim;
-      get
+        $bmi < $lim;
+      select
         $name;
       """
 
@@ -430,15 +424,14 @@ Feature: TypeQL Get Query with Expressions
       | name             |
       | attr:name:b22.2 |
 
-    Given session opens transaction of type: read
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
+        let $bmi = $w/($h/100 * $h/100);
         $lim isa limit-double;
-        ?bmi <= $lim;
-      get
+        $bmi <= $lim;
+      select
         $name;
       """
 
@@ -449,27 +442,26 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Test predicates between thing variables and value variables
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
         $x isa person, has name "b25.0", has height 160, has weight 64;
         $y isa person, has name "b22.2", has height 180, has weight 72;
         $z isa person, has name "b26.1", has height 175, has weight 80;
-        $l 25 isa limit-double;
+        $l isa limit-double 25;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
+        let $bmi = $w/($h/100 * $h/100);
         $lim isa limit-double;
-        $lim > ?bmi;
-      get
+        $lim > $bmi;
+      select
         $name;
       """
 
@@ -477,15 +469,14 @@ Feature: TypeQL Get Query with Expressions
       | name             |
       | attr:name:b22.2 |
 
-    Given session opens transaction of type: read
     When get answers of typeql read query
       """
       match
         $p isa person, has name $name, has height $h, has weight $w;
-        ?bmi = $w/($h/100 * $h/100);
+        let $bmi = $w/($h/100 * $h/100);
         $lim isa limit-double;
-        $lim >= ?bmi;
-      get
+        $lim >= $bmi;
+      select
         $name;
       """
 
@@ -496,22 +487,21 @@ Feature: TypeQL Get Query with Expressions
 
 
   Scenario: Division by zero throws a useful error
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    Given typeql insert
+    Given connection open write transaction for database: typedb
+    Given typeql write query
       """
       insert
-      $n "Baby" isa name;
-      $a 20 isa age;
+      $n isa name "Baby";
+      $a isa age 20;
       $p isa person, has name $n, has age $a;
       """
     Given transaction commits
 
-    Given session opens transaction of type: read
-    Then typeql throws exception containing "division by zero"
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "division by zero"
       """
       match
         $p isa person, has age $a;
-        ?div-zero = $a / 0.0;
-      get $p;
+        let $div-zero = $a / 0.0;
+      select $p;
       """
