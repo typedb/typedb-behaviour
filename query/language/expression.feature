@@ -21,12 +21,12 @@ Feature: TypeQL Get Query with Expressions
         owns age,
         owns height,
         owns weight;
-      attribute name, value string;
-      attribute age, value integer;
-      attribute height, value integer;
-      attribute weight, value integer;
+      attribute name @independent, value string;
+      attribute age @independent, value integer;
+      attribute height @independent, value integer;
+      attribute weight @independent, value integer;
 
-      attribute limit-double, value double;
+      attribute limit-double @independent, value double;
       """
     Given transaction commits
 
@@ -169,7 +169,6 @@ Feature: TypeQL Get Query with Expressions
         let $const = -10;
         let $plus-negative = $x + -10;
         let $minus-negative = $x - -10;
-
       """
     Then uniquely identify answer concepts
       | x            | const           | plus-negative  | minus-negative  |
