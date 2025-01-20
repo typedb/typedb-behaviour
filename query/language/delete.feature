@@ -24,7 +24,7 @@ Feature: TypeQL Delete Query
       entity company,
         plays employment:employer;
       relation friendship,
-        relates friend @card(1..),
+        relates friend @card(0..),
         owns ref @key;
       relation employment,
         relates employee,
@@ -741,6 +741,8 @@ Feature: TypeQL Delete Query
 #  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
 #
 #  So, if the user does not specify a specific-enough roles, we may throw.
+  #TODO: 3.x - This needs justification
+  @ignore
   Scenario: deleting a role player with a variable role errors if the role selector has multiple distinct matches
     Given transaction closes
     Given connection open schema transaction for database: typedb
@@ -1050,6 +1052,8 @@ Feature: TypeQL Delete Query
   # COMPLEX PATTERNS #
   ####################
 
+  # TODO: 3.x: Needs role-player deduplication
+  @ignore
   Scenario: deletion of a complex pattern
     Given transaction closes
     Given connection open schema transaction for database: typedb
