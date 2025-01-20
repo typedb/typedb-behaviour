@@ -728,54 +728,6 @@ Feature: TypeQL Delete Query
       """
 
 
-
-#  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
-#  We only delete role player edges until the 'match' is no longer satisfied
-#
-#  For example
-#
-#  match $r links ($role1: $x, director: $y), isa directed-by; // concrete instance matches: $r isa directed-by (production: $x, director: $y);
-#  delete links ($role1: $x) of $r
-#
-#  We will match '$role1' = ROLE meta type. Using this first answer we will remove $x from $r via the 'production role'.
-#  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
-#
-#  So, if the user does not specify a specific-enough roles, we may throw.
-  #TODO: 3.x - This needs justification
-  @ignore
-  Scenario: deleting a role player with a variable role errors if the role selector has multiple distinct matches
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      relation ship-crew, relates captain, relates navigator, relates chef;
-      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Cook";
-      $y isa person, has name "Drake";
-      $z isa person, has name "Joshua";
-      $r isa ship-crew (captain: $x, navigator: $y, chef: $z);
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $r isa ship-crew ($role1: $x, captain: $y);
-      delete
-        links ($role1: $x) of $r;
-      """
-
-
-
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
 #  We only delete role player edges until the 'match' is no longer satisfied.
 #
