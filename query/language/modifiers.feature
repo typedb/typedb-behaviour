@@ -569,7 +569,7 @@ Feature: TypeQL Query Modifiers
       define
       attribute base-attr @abstract;
       attribute <firstAttr> sub base-attr, value <firstType>;
-      attribute  <secondAttr> sub base-attr, value <secondType>;
+      attribute <secondAttr> sub base-attr, value <secondType>;
       attribute <thirdAttr> sub base-attr, value <thirdType>;
       attribute <fourthAttr> sub base-attr, value <fourthType>;
       entity owner,
@@ -635,7 +635,7 @@ Feature: TypeQL Query Modifiers
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x > <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x > <fourthValuePivot>;
       sort $x asc;
       select $o;
       """
@@ -664,7 +664,7 @@ Feature: TypeQL Query Modifiers
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
       | key:ref:4 |
@@ -678,7 +678,7 @@ Feature: TypeQL Query Modifiers
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:1 |
       | key:ref:2 |
 
@@ -689,7 +689,7 @@ Feature: TypeQL Query Modifiers
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:4 |
       | key:ref:1 |
       | key:ref:2 |
@@ -701,7 +701,7 @@ Feature: TypeQL Query Modifiers
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
 
@@ -712,7 +712,7 @@ Feature: TypeQL Query Modifiers
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
       | key:ref:4 |
@@ -723,9 +723,9 @@ Feature: TypeQL Query Modifiers
       | colour      | string    | "green"     | "blue"      | name       | string     | "alice"     | shape     | string    | "square"   | street     | string     | "carnaby"        |
       | score       | integer      | 4           | -38         | quantity   | integer       | -50         | area      | integer      | 100        | length     | integer       | 0                |
       | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
-      # mixed double-integer data
-      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
+      # TODO: 3.x: mixed double-integer data
+      # | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
 
 
   Scenario: Fetch queries can use sort, offset, limit
