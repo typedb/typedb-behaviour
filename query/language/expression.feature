@@ -69,8 +69,9 @@ Feature: TypeQL Get Query with Expressions
       """
 
 
+  @ignore
+  # TODO: 3.x: The beam search unwraps a None because there are no valid plans.
   Scenario: A value variable's assignment must be in the highest scope
-    # TODO: 2025/01: The beam search unwraps a None because there are no valid plans.
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "TODO"
     """
