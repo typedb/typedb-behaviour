@@ -173,11 +173,11 @@ Feature: TypeQL Get Query with Expressions
         let $minus-negative = $x - -10;
       """
     Then uniquely identify answer concepts
-      | x            | const           | plus-negative  | minus-negative  |
-      | attr:age:16  | value:integer:-10  | value:integer:6   | value:integer:26   |
+      | x            | const              | plus-negative    | minus-negative    |
+      | attr:age:16  | value:integer:-10  | value:integer:6  | value:integer:26  |
 
 
-  Scenario: Test operator definitions
+  Scenario: Test operator definitions - double double
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
@@ -190,8 +190,12 @@ Feature: TypeQL Get Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                | b                | c                 | d                 |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - integer integer
+    Given connection open read transaction for database: typedb
 
     When get answers of typeql read query
     """
@@ -204,8 +208,12 @@ Feature: TypeQL Get Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a             | b            | c             | d                  |
-      | value:integer: 9 | value:integer:3 | value:integer:18 | value:double: 2.0  |
+      | a               | b               | c                | d                 |
+      | value:integer:9 | value:integer:3 | value:integer:18 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - double integer
+    Given connection open read transaction for database: typedb
 
     When get answers of typeql read query
     """
@@ -218,8 +226,12 @@ Feature: TypeQL Get Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                | b                | c                 | d                 |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - integer double
+    Given connection open read transaction for database: typedb
 
     When get answers of typeql read query
     """
@@ -232,8 +244,8 @@ Feature: TypeQL Get Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                  |
-      | value:double: 9.0 | value:double: 3.0 | value:double: 18.0 | value:double: 2.0  |
+      | a                | b                | c                 | d                 |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
 
 
   Scenario: Test functions
@@ -261,18 +273,18 @@ Feature: TypeQL Get Query with Expressions
     Then uniquely identify answer concepts
       | a               | b                |
       | value:integer:1 | value:double:0.5 |
-
-    When get answers of typeql read query
-    """
-      match
-        let $a = max(2, -3);
-        let $b = min(2, -3, -5);
-      select
-        $a, $b;
-      """
-    Then uniquely identify answer concepts
-      | a               | b                |
-      | value:integer:2 | value:integer:-5 |
+#    # TODO: 3.x: Re-enable once implemented
+#    When get answers of typeql read query
+#    """
+#      match
+#        let $a = max(2, -3);
+#        let $b = min(2, -3, -5);
+#      select
+#        $a, $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | a               | b                |
+#      | value:integer:2 | value:integer:-5 |
 
 
 
@@ -499,7 +511,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "division by zero"
+    Then typeql read query; fails with a message containing: "DivisionFailed"
       """
       match
         $p isa person, has age $a;
