@@ -737,7 +737,7 @@ Feature: TypeQL Delete Query
 #
 #  // concrete instance:  $r isa directed-by (production: $x, production: $x, production: $x, director: $y);
 #  match $r isa directed-by ($role1: $x, director: $y); $type sub work;
-#  delete $r links ($role1: $x);
+#  delete links ($role1: $x) of $r;
 #
 #  First, we will match '$role1' = ROLE meta role. Using this answer we will remove a single $x from $r via the 'production'.
 #  Next, we will match '$role1' = WORK role, and we delete another 'production' player. This repeats again for $role='production'.
@@ -775,7 +775,7 @@ Feature: TypeQL Delete Query
       match
         $r isa ship-crew ($role1: $x, captain: $y);
       delete
-        $r links ($role1: $x);
+        links ($role1: $x) of $r;
       """
     Then transaction commits
 

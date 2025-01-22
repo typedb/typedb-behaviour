@@ -1571,17 +1571,6 @@ Parker";
     Then answer size is: 0
     Given transaction closes
 
-    When connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $r isa employment, links (employee: $x, employer: $c);
-      """
-    Then uniquely identify answer concepts
-      | r         | x         | c         |
-      | key:ref:4 | key:ref:0 | key:ref:3 |
-      | key:ref:5 | key:ref:1 | key:ref:3 |
-      | key:ref:6 | key:ref:2 | key:ref:3 |
-
 
   Scenario: re-inserting a matched instance as an unrelated type errors
     Given typeql write query

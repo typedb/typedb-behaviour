@@ -130,7 +130,7 @@ Feature: TypeQL Update Query
     When get answers of typeql read query
       """
       match
-      (named: $p, name: $nc) isa naming;
+      $r isa naming (named: $p, name: $nc);
       $nc has name $n;
 
       """
