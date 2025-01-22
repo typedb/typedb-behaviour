@@ -248,6 +248,92 @@ Feature: TypeQL Get Query with Expressions
       | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
 
 
+  Scenario: Test operator definitions - decimal decimal
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 6.0dec + 3.0dec;
+        let $b = 6.0dec - 3.0dec;
+        let $c = 6.0dec * 3.0dec;
+        let $d = 6.0dec / 3.0dec;
+      select
+        $a, $b, $c, $d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                 |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - integer decimal
+    Given connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+    """
+      match
+        let $a = 6 + 3.0dec;
+        let $b = 6 - 3.0dec;
+        let $c = 6 * 3.0dec;
+        let $d = 6 / 3.0dec;
+      select
+        $a, $b, $c, $d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                 |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - decimal integer
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 6.0dec + 3;
+        let $b = 6.0dec - 3;
+        let $c = 6.0dec * 3;
+        let $d = 6.0dec / 3;
+      select
+        $a, $b, $c, $d;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 | c                  | d                 |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - double decimal
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 6.0 + 3.0dec;
+        let $b = 6.0 - 3.0dec;
+        let $c = 6.0 * 3.0dec;
+        let $d = 6.0 / 3.0dec;
+      select
+        $a, $b, $c, $d;
+      """
+    Then uniquely identify answer concepts
+      | a                | b                | c                 | d                 |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+
+
+  Scenario: Test operator definitions - decimal double
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 6.0dec + 3.0;
+        let $b = 6.0dec - 3.0;
+        let $c = 6.0dec * 3.0;
+        let $d = 6.0dec / 3.0;
+      select
+        $a, $b, $c, $d;
+      """
+    Then uniquely identify answer concepts
+      | a                | b                | c                 | d                 |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+
+
   Scenario: Test functions
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
