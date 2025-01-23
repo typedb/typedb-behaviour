@@ -724,8 +724,7 @@ Feature: TypeQL Query Modifiers
       | score       | integer      | 4           | -38         | quantity   | integer       | -50         | area      | integer      | 100        | length     | integer       | 0                |
       | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
-      # TODO: 3.x: mixed double-integer data
-      # | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
+      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
 
 
   Scenario: Fetch queries can use sort, offset, limit
