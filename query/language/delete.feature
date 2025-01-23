@@ -232,7 +232,7 @@ Feature: TypeQL Delete Query
       """
       match
       $p isa person, has name $n0; $n0 == "John";
-      $r isa! $r-type ($rp: $p), has ref $r0; $r0 == 0;
+      $r isa! $r-type ($p), has ref $r0; $r0 == 0;
       $p-type label person;
       delete
       $p;
