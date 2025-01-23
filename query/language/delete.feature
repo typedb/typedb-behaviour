@@ -627,8 +627,6 @@ Feature: TypeQL Delete Query
       """
 
 
-  # TODO: 3.x: Needs cascade
-  @ignore
   Scenario: when all instances that play roles in a relation are deleted, the relation instance gets cleaned up
     Given get answers of typeql write query
       """
@@ -661,8 +659,6 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  # TODO: 3.x: Needs cascade
-  @ignore
   Scenario: when the last role player is disassociated from a relation instance, the relation instance gets cleaned up
     Given get answers of typeql write query
       """
