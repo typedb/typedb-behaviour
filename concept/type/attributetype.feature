@@ -1895,7 +1895,7 @@ Feature: Concept Attribute Type
       | integer     | 1                           | 1                            | 2                            |
       | integer     | 1                           | 2                            | 1                            |
       | integer     | 1                           | 2                            | 2                            |
-      | double      | 0.1dec                      | 0.0001dec                    | 0.0001dec                    |
+      | double      | 0.1                         | 0.0001                       | 0.0001                       |
       | decimal     | 0.1dec                      | 0.0001dec                    | 0.0001dec                    |
       | string      | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
       | string      | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
