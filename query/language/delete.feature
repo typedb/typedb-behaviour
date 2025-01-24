@@ -20,19 +20,19 @@ Feature: TypeQL Delete Query
         plays friendship:friend,
         plays employment:employee,
         owns name @key,
-        owns email;
+        owns email @card(0..);
       entity company,
         plays employment:employer;
       relation friendship,
-        relates friend @card(1..),
+        relates friend @card(0..),
         owns ref @key;
       relation employment,
         relates employee,
         relates employer,
         owns ref @key;
-      attribute name, value string;
-      attribute email, value string;
-      attribute ref, value integer;
+      attribute name @independent, value string;
+      attribute email @independent, value string;
+      attribute ref @independent, value integer;
       """
     Given transaction commits
 
@@ -50,7 +50,7 @@ Feature: TypeQL Delete Query
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $r isa friendship, links (friend: $x, friend: $y), has ref 0;
-      $n "John" isa name;
+      $n isa name "John";
       """
     Given uniquely identify answer concepts
       | x             | y            | r         | n              |
@@ -62,13 +62,13 @@ Feature: TypeQL Delete Query
       match
         $x isa person, has name "Alex";
         $r isa friendship, has ref 0;
-        $n "John" isa name;
+        $n isa name "John";
       delete
         $x; $r; $n;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person;
@@ -99,7 +99,7 @@ Feature: TypeQL Delete Query
       $y isa person, has name "Bob";
       $r isa friendship, links (friend: $x, friend: $y),
          has ref 0;
-      $n "John" isa name;
+      $n isa name "John";
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n              |
@@ -115,7 +115,7 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person;
@@ -133,7 +133,7 @@ Feature: TypeQL Delete Query
       $y isa person, has name "Bob";
       $r isa friendship, links (friend: $x, friend: $y),
          has ref 0;
-      $n "John" isa name;
+      $n isa name "John";
       """
     Then uniquely identify answer concepts
       | x             | y            | r         | n              |
@@ -145,11 +145,11 @@ Feature: TypeQL Delete Query
       match
         $r isa friendship, has ref 0;
       delete
-        $r isa relation;
+        $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa friendship;
@@ -161,7 +161,7 @@ Feature: TypeQL Delete Query
     Given get answers of typeql write query
       """
       insert
-      $n "John" isa name;
+      $n isa name "John";
       """
     Then uniquely identify answer concepts
       | n              |
@@ -171,13 +171,13 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $r "John" isa name;
+        $r isa name "John";
       delete
         $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa name;
@@ -206,7 +206,7 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person;
@@ -214,74 +214,8 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: deleting an instance using an unrelated type label errors
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Alex";
-      $n "John" isa name;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $x isa person;
-        $r isa name; $r "John";
-      delete
-        $r isa person;
-      """
-
-
-  Scenario: deleting an instance using a non-existing type label errors
-    Given typeql write query
-      """
-      insert
-      $n "John" isa name;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $r isa name; $r "John";
-      delete
-        $r isa heffalump;
-      """
-
-
-  Scenario: deleting a relation instance using a too-specific (downcasting) type errors
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      special-friendship sub friendship;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $r isa friendship, links (friend: $x, friend: $y), has ref 0;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $r ($x, $y) isa friendship;
-      delete
-        $r isa special-friendship;
-      """
-
-
+  # TODO: 3.x: Needs finer insert validation.
+  @ignore
   Scenario: variable types can be used in deletes
     Given typeql write query
       """
@@ -297,12 +231,14 @@ Feature: TypeQL Delete Query
     Given typeql write query
       """
       match
-      $p isa person, has name $n0; $n0 "John";
-      $r ($p) isa! $r-type, has ref $r0; $r0 0;
-      $p-type type person;
+      $p isa person, has name $n0; $n0 == "John";
+      $r isa! $r-type ($p), has ref $r0; $r0 == 0;
+      $p-type label person;
       delete
-      $p isa $p-type, has $n0;
-      $r ($p) isa $r-type, has $r0;
+      $p;
+      has $n0 of $p;
+      $r;
+      links ($p) of $r;
       """
     Given transaction commits
 
@@ -315,17 +251,20 @@ Feature: TypeQL Delete Query
       $p-type type person;
       $r-type type friendship, relates $role-type;
       delete
-      $p isa $p-type, has $n0;
-      $r ($role-type: $p) isa $r-type, has $r0;
+      $p has $n0;
+      $p;
+      links ($role-type: $p) of $r;
+      $r has $r0;
+      $r;
       """
     Given transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
       $x isa person;
-      $r ($x) isa friendship;
+      $r isa friendship ($x);
 
       """
     Then answer size is: 0
@@ -335,7 +274,7 @@ Feature: TypeQL Delete Query
   # ROLEPLAYERS #
   ###############
 
-  #TODO: This is flaky
+  # TODO: 3.x: Needs role-player deduplication
   @ignore
   Scenario: deleting a role player from a relation using its role keeps the relation and removes the role player from it
     Given get answers of typeql write query
@@ -344,7 +283,7 @@ Feature: TypeQL Delete Query
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $z isa person, has name "Carrie";
-      $r (friend: $x, friend: $y, friend: $z) isa friendship,
+      $r isa friendship (friend: $x, friend: $y, friend: $z),
          has ref 0;
       """
     Then uniquely identify answer concepts
@@ -355,19 +294,20 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $r isa friendship (friend: $x, friend: $y, friend: $z);
         $x isa person, has name "Alex";
         $y isa person, has name "Bob";
         $z isa person, has name "Carrie";
       delete
-        $r (friend: $x);
+        links (friend: $x) of $r;
       """
     Then transaction commits
 
     When connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match isa friendship, links (friend: $x, friend: $y);
+      match $r isa friendship, links (friend: $x, friend: $y);
+      select $x, $y;
       """
     Then uniquely identify answer concepts
       | x               | y               |
@@ -395,11 +335,11 @@ Feature: TypeQL Delete Query
       match
         $x isa person, has name "Alex";
       delete
-        $x isa person;
+        $x;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person;
@@ -410,7 +350,7 @@ Feature: TypeQL Delete Query
       | key:name:Carrie |
     When get answers of typeql read query
       """
-      match $r (friend: $x) isa friendship;
+      match $r isa friendship (friend: $x);
       """
     Then uniquely identify answer concepts
       | r         | x               |
@@ -418,13 +358,15 @@ Feature: TypeQL Delete Query
       | key:ref:2 | key:name:Carrie |
 
 
+  @ignore
+  # TODO: 3.x: Bring back when we have lists
   Scenario: repeated role players can be deleted from a relation
     Given get answers of typeql write query
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
-      $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
+      $r isa friendship (friend: $x, friend: $x, friend: $y), has ref 0;
       """
     Then uniquely identify answer concepts
       | x             | y            | r         |
@@ -434,29 +376,31 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $r (friend: $x, friend: $x) isa friendship;
+        $r isa friendship (friend: $x, friend: $x);
       delete
-        $r (friend: $x, friend: $x);
+        links (friend: $x, friend: $x) of $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r (friend: $x) isa friendship;
+      match $r isa friendship (friend: $x);
       """
     Then uniquely identify answer concepts
       | r         | x            |
       | key:ref:0 | key:name:Bob |
 
 
+  @ignore
+  # TODO: 3.x: Bring back when we have lists ( this also fails because we don't have role-player de-duplication?)
   Scenario: when deleting multiple repeated role players from a relation, it removes the number you asked to delete
     Given get answers of typeql write query
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
-      $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
+      $r isa friendship (friend: $x, friend: $x, friend: $x, friend: $y), has ref 0;
       """
     Then uniquely identify answer concepts
       | x             | y            | r         |
@@ -466,81 +410,13 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $r (friend: $x, friend: $x, friend: $x) isa friendship;
+        $r isa friendship (friend: $x, friend: $x, friend: $x);
       delete
-        $r (friend: $x, friend: $x);
+        links (friend: $x, friend: $x) of $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $r isa friendship, links (friend: $x, friend: $y);
-      """
-    Then uniquely identify answer concepts
-      | r         | x             | y             |
-      | key:ref:0 | key:name:Bob  | key:name:Alex |
-      | key:ref:0 | key:name:Alex | key:name:Bob  |
-
-
-  Scenario: when deleting repeated role players in multiple statements, it removes the total number you asked to delete
-    Given get answers of typeql write query
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $r (friend: $x, friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
-      """
-    Then uniquely identify answer concepts
-      | x             | y            | r         |
-      | key:name:Alex | key:name:Bob | key:ref:0 |
-    Given transaction commits
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $r (friend: $x, friend: $x, friend: $x) isa friendship;
-      delete
-        $r (friend: $x, friend: $x);
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
-    When get answers of typeql read query
-      """
-      match $r isa friendship, links (friend: $x, friend: $y);
-      """
-    Then uniquely identify answer concepts
-      | r         | x             | y             |
-      | key:ref:0 | key:name:Bob  | key:name:Alex |
-      | key:ref:0 | key:name:Alex | key:name:Bob  |
-
-
-  Scenario: when deleting one of the repeated role players from a relation, only one duplicate is removed
-    Given get answers of typeql write query
-      """
-      insert
-      $x isa person, has name "Alex";
-      $y isa person, has name "Bob";
-      $r (friend: $x, friend: $x, friend: $y) isa friendship, has ref 0;
-      """
-    Then uniquely identify answer concepts
-      | x             | y            | r         |
-      | key:name:Alex | key:name:Bob | key:ref:0 |
-    Given transaction commits
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $r (friend: $x) isa friendship;
-        $x isa person, has name "Alex";
-      delete
-        $r (friend: $x);
-      """
-    Then transaction commits
-
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $r isa friendship, links (friend: $x, friend: $y);
@@ -552,31 +428,103 @@ Feature: TypeQL Delete Query
 
 
   @ignore
-  Scenario: deleting role players in multiple statements errors
+  # TODO: 3.x: Bring back when we have lists
+  Scenario: when deleting repeated role players in multiple statements, it removes the total number you asked to delete
+    Given get answers of typeql write query
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r isa friendship (friend: $x, friend: $x, friend: $x, friend: $y), has ref 0;
+      """
+    Then uniquely identify answer concepts
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $x isa person;
+        $r isa friendship (friend: $x, friend: $x, friend: $x);
+      delete
+        links (friend: $x, friend: $x) of $r;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r isa friendship, links (friend: $x, friend: $y);
+      """
+    Then uniquely identify answer concepts
+      | r         | x             | y             |
+      | key:ref:0 | key:name:Bob  | key:name:Alex |
+      | key:ref:0 | key:name:Alex | key:name:Bob  |
+
+
+  @ignore
+  # TODO: 3.x: Bring back when we have lists
+  Scenario: when deleting one of the repeated role players from a relation, only one duplicate is removed
+    Given get answers of typeql write query
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r isa friendship (friend: $x, friend: $x, friend: $y), has ref 0;
+      """
+    Then uniquely identify answer concepts
+      | x             | y            | r         |
+      | key:name:Alex | key:name:Bob | key:ref:0 |
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $r isa friendship (friend: $x);
+        $x isa person, has name "Alex";
+      delete
+        links (friend: $x) of $r;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r isa friendship, links (friend: $x, friend: $y);
+      """
+    Then uniquely identify answer concepts
+      | r         | x             | y             |
+      | key:ref:0 | key:name:Bob  | key:name:Alex |
+      | key:ref:0 | key:name:Alex | key:name:Bob  |
+
+
+  Scenario: deleting role players in multiple statements is allowed
     Given get answers of typeql write query
       """
       insert
       $x isa person, has name "Alex";
       $y isa person, has name "Bob";
       $z isa person, has name "Carrie";
-      $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
+      $r isa friendship (friend: $x, friend: $y, friend: $z), has ref 0;
       """
     Then uniquely identify answer concepts
       | x             | y            | z               | r         |
       | key:name:Alex | key:name:Bob | key:name:Carrie | key:ref:0 |
     Given transaction commits
     When connection open write transaction for database: typedb
-    When typeql write query; fails
+    When typeql write query
       """
       match
-        $r (friend: $x, friend: $y, friend: $z) isa friendship;
+        $r isa friendship (friend: $x, friend: $y, friend: $z);
         $x isa person, has name "Alex";
         $y isa person, has name "Bob";
         $z isa person, has name "Carrie";
       delete
-        $r (friend: $x);
-        $r (friend: $y);
+        links (friend: $x) of $r;
+        links (friend: $y) of $r;
       """
+    Then transaction commits
 
 
   Scenario: when deleting overlapping answers, deletes are idempotent
@@ -586,7 +534,7 @@ Feature: TypeQL Delete Query
       $x isa person, has name "Alex", has email "alex@email.com", has email "al@email.com", has email "a@email.com";
       $y isa person, has name "Bob";
       $z isa person, has name "Charlie";
-      $r (friend: $x, friend: $y, friend: $z) isa friendship, has ref 0;
+      $r isa friendship (friend: $x, friend: $y, friend: $z), has ref 0;
       """
     Given transaction commits
 
@@ -596,7 +544,7 @@ Feature: TypeQL Delete Query
       match
         $r isa friendship, links (friend: $x, friend: $y);
       delete
-        $r (friend: $x, friend: $y);
+        links (friend: $x, friend: $y) of $r;
       """
     Given transaction commits
     When connection open write transaction for database: typedb
@@ -611,7 +559,8 @@ Feature: TypeQL Delete Query
       match
         $x has email $a, has email $b;
       delete
-        $x has $a, has $b;
+        has $a of $x;
+        has $b of $x;
       """
     Given transaction commits
     When connection open write transaction for database: typedb
@@ -627,8 +576,8 @@ Feature: TypeQL Delete Query
         $x isa person;
         $y isa person;
       delete
-        $x isa person;
-        $y isa person;
+        $x;
+        $y;
       """
     Given transaction commits
     When connection open write transaction for database: typedb
@@ -647,7 +596,7 @@ Feature: TypeQL Delete Query
       $y isa person, has name "Bob";
       $c isa company;
       $r isa friendship, links (friend: $x, friend: $y), has ref 0;
-      $e (employee: $x, employer: $c) isa employment, has ref 1;
+      $e isa employment (employee: $x, employer: $c), has ref 1;
       """
     Given transaction commits
 
@@ -658,15 +607,15 @@ Feature: TypeQL Delete Query
         $x isa person;
         $a isa ref;
       delete
-        $x has $a;
+        has $a of $x;
       """
     Then typeql write query; fails
       """
       match
         $x isa person;
-        $r ($x) isa friendship;
+        $r isa friendship ($x);
       delete
-        $r (employee: $x);
+        links (employee: $x) of $r;
       """
     Then typeql write query; fails
       """
@@ -674,7 +623,7 @@ Feature: TypeQL Delete Query
         $x isa company;
         $r isa friendship;
       delete
-        $r (friend: $x);
+        links (friend: $x) of $r;
       """
 
 
@@ -702,7 +651,7 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $r isa friendship;
@@ -728,13 +677,13 @@ Feature: TypeQL Delete Query
       match
         $x isa person, has name "Alex";
         $y isa person, has name "Bob";
-        $r ($x, $y) isa friendship;
+        $r isa friendship ($x, $y);
       delete
         links (friend: $x, friend: $y) of $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $r isa friendship;
@@ -748,7 +697,7 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      special-friendship sub friendship,
+      relation special-friendship sub friendship,
         relates special-friend as friend;
       """
     Given transaction commits
@@ -775,52 +724,6 @@ Feature: TypeQL Delete Query
       """
 
 
-
-#  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
-#  We only delete role player edges until the 'match' is no longer satisfied
-#
-#  For example
-#
-#  match $r links ($role1: $x, director: $y), isa directed-by; // concrete instance matches: $r (production: $x, director: $y) isa directed-by;
-#  delete links ($role1: $x) of $r
-#
-#  We will match '$role1' = ROLE meta type. Using this first answer we will remove $x from $r via the 'production role'.
-#  This means the match clause is no longer satisfiable, and should throw the next (identical, up to role type) answer that is matched.
-#
-#  So, if the user does not specify a specific-enough roles, we may throw.
-  Scenario: deleting a role player with a variable role errors if the role selector has multiple distinct matches
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      relation ship-crew, relates captain, relates navigator, relates chef;
-      person plays ship-crew:captain, plays ship-crew:navigator, plays ship-crew:chef;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Cook";
-      $y isa person, has name "Drake";
-      $z isa person, has name "Joshua";
-      $r (captain: $x, navigator: $y, chef: $z) isa ship-crew;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $r ($role1: $x, captain: $y) isa ship-crew;
-      delete
-        $r links ($role1: $x);
-      """
-
-
-
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
 #  We only delete role player edges until the 'match' is no longer satisfied.
 #
@@ -828,15 +731,12 @@ Feature: TypeQL Delete Query
 #
 #  For example
 #
-#  // concrete instance:  $r (production: $x, production: $x, production: $x, director: $y) isa directed-by;
-#  match $r ($role1: $x, director: $y) isa directed-by; $type sub work;
-#  delete $r links ($role1: $x);
+#  // concrete instance:  $r isa directed-by (production: $x, production: $x, production: $x, director: $y);
+#  match $r isa directed-by ($role1: $x, director: $y); $type sub work;
+#  delete links ($role1: $x) of $r;
 #
 #  First, we will match '$role1' = ROLE meta role. Using this answer we will remove a single $x from $r via the 'production'.
 #  Next, we will match '$role1' = WORK role, and we delete another 'production' player. This repeats again for $role='production'.
-
-# TODO: This behaviour was possible in 1.8 but is not implemented yet in 2.0, reimplement when type variables are allowed in insert and delete again
-  @ignore
   Scenario: when deleting repeated role players with a single variable role, both repetitions are removed
     Given transaction closes
     Given connection open schema transaction for database: typedb
@@ -854,14 +754,14 @@ Feature: TypeQL Delete Query
       insert
       $x isa person, has name "Cook";
       $y isa person, has name "Joshua";
-      $r (captain: $x, chef: $y, chef: $y) isa ship-crew, has ref 0;
+      $r isa ship-crew (captain: $x, chef: $y, chef: $y), has ref 0;
       """
     Given transaction commits
 
     When connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match $rel (chef: $p) isa ship-crew;
+      match $rel isa ship-crew (chef: $p);
       """
     Then uniquely identify answer concepts
       | rel       | p               |
@@ -869,16 +769,16 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $r ($role1: $x, captain: $y) isa ship-crew;
+        $r isa ship-crew ($role1: $x, captain: $y);
       delete
-        $r links ($role1: $x);
+        links ($role1: $x) of $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $rel (chef: $p) isa ship-crew;
+      match $rel isa ship-crew (chef: $p);
       """
     Then answer size is: 0
 
@@ -917,13 +817,13 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match
-        $x 18 isa age;
+        $x isa age 18;
       delete
         $x;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x has age 18;
@@ -958,13 +858,13 @@ Feature: TypeQL Delete Query
       | key:name:Alex | key:name:John |
     Given transaction commits
     When connection open write transaction for database: typedb
-    When typeql write query; fails
+    When typeql write query; parsing fails
       """
       match
         $x isa person, has lastname $n, has name "Alex";
-        $n "Smith";
+        $n == "Smith";
       delete
-        has $n of $x;
+        has lastname $n of $x;
       """
 
 
@@ -978,42 +878,12 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
     When connection open write transaction for database: typedb
-    When typeql write query; fails containing "Illegal anonymous delete variable"
+    When typeql write query; parsing fails
       """
       match
         $x isa person, has email "alex@abc.com";
       delete
         has name "Alex" of $x;
-      """
-
-
-  Scenario: deleting an attribute ownership using 'thing' as a label errors
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      attribute address, value string, abstract;
-      postcode sub address;
-      person owns postcode;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Sherlock", has postcode "W1U8ED";
-      """
-    Given transaction commits
-
-    When connection open write transaction for database: typedb
-    Then typeql write query; fails
-      """
-      match
-        $x isa person, has address $a;
-      delete
-        has $a of $x;
       """
 
 
@@ -1023,8 +893,8 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      attribute duration, value integer;
-      friendship owns duration;
+      attribute timespan, value integer;
+      friendship owns timespan;
       """
     Given transaction commits
 
@@ -1034,18 +904,18 @@ Feature: TypeQL Delete Query
       insert
       $x isa person, has name "Tom";
       $y isa person, has name "Jerry";
-      $r isa friendship, links (friend: $x, friend: $y), has ref 0, has duration 1000;
+      $r isa friendship, links (friend: $x, friend: $y), has ref 0, has timespan 1000;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x has duration $d;
+      match $x has timespan $d;
       """
     Then uniquely identify answer concepts
       | x         | d                  |
-      | key:ref:0 | attr:duration:1000 |
+      | key:ref:0 | attr:timespan:1000 |
     When typeql write query
       """
       match
@@ -1055,10 +925,10 @@ Feature: TypeQL Delete Query
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x has duration $d;
+      match $x has timespan $d;
       """
     Then answer size is: 0
 
@@ -1069,8 +939,8 @@ Feature: TypeQL Delete Query
     Given typeql schema query
       """
       define
-      attribute duration, value integer;
-      friendship owns duration;
+      attribute timespan, value integer;
+      friendship owns timespan;
       """
     Given transaction commits
 
@@ -1079,31 +949,31 @@ Feature: TypeQL Delete Query
       """
       insert
       $x isa person, has name "Emma";
-      $r (friend: $x) isa friendship, has ref 0, has duration 1000;
+      $r isa friendship (friend: $x), has ref 0, has timespan 1000;
       """
     Given transaction commits
 
     When connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x has duration $d;
+      match $x has timespan $d;
       """
     Then uniquely identify answer concepts
       | x         | d                  |
-      | key:ref:0 | attr:duration:1000 |
+      | key:ref:0 | attr:timespan:1000 |
     When typeql write query
       """
       match
-        $r (friend: $x) isa friendship;
+        $r isa friendship (friend: $x);
       delete
         links (friend: $x) of $r;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x has duration $d;
+      match $x has timespan $d;
       """
     Then answer size is: 0
     When get answers of typeql read query
@@ -1119,7 +989,7 @@ Feature: TypeQL Delete Query
       match
         $x has diameter $val;
       delete
-        has diameter $val of $x;
+        has $val of $x;
       """
 
 
@@ -1127,6 +997,8 @@ Feature: TypeQL Delete Query
   # COMPLEX PATTERNS #
   ####################
 
+  # TODO: 3.x: Needs role-player deduplication
+  @ignore
   Scenario: deletion of a complex pattern
     Given transaction closes
     Given connection open schema transaction for database: typedb
@@ -1150,7 +1022,7 @@ Feature: TypeQL Delete Query
         has name "John";
       $r isa friendship, links (friend: $x, friend: $y), has ref 1;
       $r1 isa friendship, links (friend: $x, friend: $y), has ref 2;
-      $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
+      $reflexive isa friendship (friend: $x, friend: $x), has ref 3;
       """
     Given transaction commits
 
@@ -1160,19 +1032,19 @@ Feature: TypeQL Delete Query
       match
         $x isa person, has name "Alex", has lastname $n;
         $y isa person, has name "John", has lastname $n;
-        $refl (friend: $x, friend: $x) isa friendship, has ref 3;
+        $refl isa friendship (friend: $x, friend: $x), has ref 3;
         $f1 isa friendship, links (friend: $x, friend: $y), has ref 1;
       delete
-        $x has $n;
-        $refl (friend: $x);
-        $f1 isa friendship;
+        has $n of $x;
+        links (friend: $x) of $refl;
+        $f1;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $f (friend: $x) isa friendship;
+      match $f isa friendship (friend: $x);
       """
     Then uniquely identify answer concepts
       | f         | x             |
@@ -1219,7 +1091,7 @@ Feature: TypeQL Delete Query
         has name "John";
       $r isa friendship, links (friend: $x, friend: $y), has ref 1;
       $r1 isa friendship, links (friend: $x, friend: $y), has ref 2;
-      $reflexive (friend: $x, friend: $x) isa friendship, has ref 3;
+      $reflexive isa friendship (friend: $x, friend: $x), has ref 3;
       """
     Given transaction commits
 
@@ -1229,17 +1101,20 @@ Feature: TypeQL Delete Query
       match
         $x isa person, has name "Alex", has lastname $n;
         $y isa person, has name "John", has lastname $n;
-        $refl (friend: $x, friend: $x) isa friendship, has ref $r1; $r1 3;
-        $f1 isa friendship, links (friend: $x, friend: $y), has ref $r2; $r2 1;
+        $refl isa friendship (friend: $x, friend: $x), has ref $r1; $r1 == 3;
+        $f1 isa friendship, links (friend: $x, friend: $y), has ref $r2; $r2 == 1;
       delete
-        $x isa person, has $n;
-        $y isa person, has $n;
-        $refl (friend: $x, friend: $x) isa friendship, has $r1;
-        $f1 isa friendship, links (friend: $x, friend: $y), has $r2;
+        $x; $y; $refl; $f1;
+        has $n of $x;
+        has $n of $y;
+        links (friend: $x, friend: $x) of $refl;
+        has $r1 of $refl;
+        links (friend: $x, friend: $y) of $f1;
+        has $r2 of $f1;
       """
     Then transaction commits
 
-    When session opens transaction of type: read
+    When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person, has lastname $n;
@@ -1271,7 +1146,7 @@ Feature: TypeQL Delete Query
       """
       match
         $x isa person, has name $n;
-        $n "Alex";
+        $n == "Alex";
       delete
         has $n of $x;
       """
@@ -1297,7 +1172,7 @@ Feature: TypeQL Delete Query
     Then typeql write query
       """
       match
-        $x "Tatyana" isa name;
+        $x isa name "Tatyana";
       delete
         $x;
       """

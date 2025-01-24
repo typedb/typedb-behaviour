@@ -1792,9 +1792,9 @@ Feature: TypeQL Match Clause
     Examples:
       | attr              | type        | value                              |
       | is-alive          | boolean     | true                               |
-      | age               | integer        | 21                                 |
+      | age               | integer     | 21                                 |
       | score             | double      | 123.456                            |
-      | balance           | decimal     | 123.456                            |
+      | balance           | decimal     | 123.456dec                         |
       | name              | string      | "alice"                            |
       | birth-date        | date        | 1990-01-01                         |
       | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      |

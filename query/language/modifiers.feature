@@ -17,7 +17,7 @@ Feature: TypeQL Query Modifiers
       entity person,
         plays friendship:friend,
         plays employment:employee,
-        owns name,
+        owns name @card(0..),
         owns age,
         owns ref @key,
         owns email;
@@ -58,10 +58,10 @@ Feature: TypeQL Query Modifiers
     Given typeql write query
       """
       insert
-      $a <val1> isa <attr>;
-      $b <val2> isa <attr>;
-      $c <val3> isa <attr>;
-      $d <val4> isa <attr>;
+      $a isa <attr> <val1>;
+      $b isa <attr> <val2>;
+      $c isa <attr> <val3>;
+      $d isa <attr> <val4>;
       """
     Given transaction commits
 
@@ -166,7 +166,7 @@ Feature: TypeQL Query Modifiers
       """
       match
         $x isa person, has age $a;
-        $to20 = 20 - $a;
+        let $to20 = 20 - $a;
       sort
         $to20 desc;
       """
@@ -356,11 +356,11 @@ Feature: TypeQL Query Modifiers
     Given typeql write query
       """
       insert
-      $a "Bond" isa name;
-      $b "James Bond" isa name;
-      $c "007" isa name;
-      $d "agent" isa name;
-      $e "secret agent" isa name;
+      $a isa name "Bond";
+      $b isa name "James Bond";
+      $c isa name "007";
+      $d isa name "agent";
+      $e isa name "secret agent";
       """
     Given transaction commits
 
@@ -468,9 +468,9 @@ Feature: TypeQL Query Modifiers
     Given typeql write query
       """
       insert
-      $a <pivot> isa <attr>;
-      $b <lesser> isa <attr>;
-      $c <greater> isa <attr>;
+      $a isa <attr> <pivot>;
+      $b isa <attr> <lesser>;
+      $c isa <attr> <greater>;
       """
     Given transaction commits
 
@@ -547,7 +547,6 @@ Feature: TypeQL Query Modifiers
     When get answers of typeql read query
       """
       match $x isa <attr>; $x >= <pivot>;
-      select;
       sort $x desc;
       """
     Then order of answer concepts is
@@ -568,10 +567,11 @@ Feature: TypeQL Query Modifiers
     Given typeql schema query
       """
       define
-      attribute <firstAttr>, value <firstType>;
-      attribute  <secondAttr>, value <secondType>;
-      attribute <thirdAttr>, value <thirdType>;
-      attribute <fourthAttr>, value <fourthType>;
+      attribute base-attr @abstract;
+      attribute <firstAttr> sub base-attr, value <firstType>;
+      attribute <secondAttr> sub base-attr, value <secondType>;
+      attribute <thirdAttr> sub base-attr, value <thirdType>;
+      attribute <fourthAttr> sub base-attr, value <fourthType>;
       entity owner,
         owns <firstAttr>,
         owns <secondAttr>,
@@ -598,12 +598,12 @@ Feature: TypeQL Query Modifiers
     # ascending
     When get answers of typeql read query
       """
-      match $o isa owner, has $x;
-#      sort $x asc;
-#      select $o;
+      match $o isa owner, has base-attr $x;
+      sort $x asc;
+      select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:2 |
       | key:ref:1 |
       | key:ref:4 |
@@ -612,46 +612,46 @@ Feature: TypeQL Query Modifiers
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x < <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x < <fourthValuePivot>;
       sort $x asc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:2 |
       | key:ref:1 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x <= <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x <= <fourthValuePivot>;
       sort $x asc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:2 |
       | key:ref:1 |
       | key:ref:4 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x > <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x > <fourthValuePivot>;
       sort $x asc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:0 |
       | key:ref:3 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x >= <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x >= <fourthValuePivot>;
       sort $x asc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:4 |
       | key:ref:0 |
       | key:ref:3 |
@@ -659,12 +659,12 @@ Feature: TypeQL Query Modifiers
     # descending
     When get answers of typeql read query
       """
-      match $o isa owner, has $x;
+      match $o isa owner, has base-attr $x;
       sort $x desc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
       | key:ref:4 |
@@ -673,46 +673,46 @@ Feature: TypeQL Query Modifiers
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x < <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x < <fourthValuePivot>;
       sort $x desc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:1 |
       | key:ref:2 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x <= <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x <= <fourthValuePivot>;
       sort $x desc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:4 |
       | key:ref:1 |
       | key:ref:2 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x > <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x > <fourthValuePivot>;
       sort $x desc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
 
     When get answers of typeql read query
       """
-      match $o isa owner, has $x; $x >= <fourthValuePivot>;
+      match $o isa owner, has base-attr $x; $x >= <fourthValuePivot>;
       sort $x desc;
       select $o;
       """
     Then order of answer concepts is
-      | x         |
+      | o         |
       | key:ref:3 |
       | key:ref:0 |
       | key:ref:4 |
@@ -723,9 +723,8 @@ Feature: TypeQL Query Modifiers
       | colour      | string    | "green"     | "blue"      | name       | string     | "alice"     | shape     | string    | "square"   | street     | string     | "carnaby"        |
       | score       | integer      | 4           | -38         | quantity   | integer       | -50         | area      | integer      | 100        | length     | integer       | 0                |
       | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
-      # mixed double-integer data
-      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
       | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
+      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
 
 
   Scenario: Fetch queries can use sort, offset, limit
@@ -740,37 +739,37 @@ Feature: TypeQL Query Modifiers
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
-    When typeql fetch
+    When get answers of typeql read query
       """
       match $x isa person, has ref $r;
-      fetch
-      $x as person: name, email;
-      $r as ref;
       sort $r desc; offset 1; limit 2;
+      fetch {
+        "person": {
+           "name": [ $x.name ],
+           "email": [ $x.email ],
+         },
+        "ref": $r,
+      };
       """
-    Then fetch answers are
+    Then answer contains document:
       """
-      [
         {
           "person": {
-            "type": { "label": "person", "root": "entity" },
-            "name": [
-              { "type": { "label": "name", "root": "attribute", "value_type": "string" }, "value": "Frederick" },
-              { "type": { "label": "name", "root": "attribute", "value_type": "string" }, "value": "Freddy" }
-            ],
-            "email": [ { "type": { "label": "email", "root": "attribute", "value_type": "string" }, "value": "frederick@gmail.com" } ]
+            "name": [ "Frederick", "Freddy" ],
+            "email": [ "frederick@gmail.com" ]
           },
-          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "integer" }, "value": 2 }
-        },
+          "ref": 2
+        }
+      """
+    Then answer contains document:
+    """
         {
           "person": {
-            "type":  { "label": "person", "root": "entity" },
-            "name": [ { "type": { "label": "name", "root": "attribute", "value_type": "string" }, "value": "Jemima" } ],
+            "name": [ "Jemima" ],
             "email": [ ]
           },
-          "ref": { "type" : { "label": "ref", "root": "attribute", "value_type": "integer" }, "value" : 1 }
+          "ref": 1
         }
-      ]
       """
 
   # ------------- write queries -------------
@@ -885,8 +884,8 @@ Feature: TypeQL Query Modifiers
     Given typeql write query
       """
       insert
-      $x "Lisa" isa name;
-      $y 16 isa age;
+      $x isa name "Lisa";
+      $y isa age 16;
       $z isa person, has name $x, has age $y, has ref 0;
       """
     Given transaction commits
@@ -916,8 +915,8 @@ Feature: TypeQL Query Modifiers
     Given typeql write query
       """
       insert
-      $x "Lisa" isa name;
-      $y 16 isa age;
+      $x isa name "Lisa";
+      $y isa age 16;
       $z isa person, has name $x, has age $y, has ref 0;
       """
     Given transaction commits
@@ -927,7 +926,7 @@ Feature: TypeQL Query Modifiers
       """
       match
         $z isa person, has name $x, has age $y;
-        $b = 2017 - $y;
+        let $b = 2017 - $y;
       select $z, $x, $b;
       """
     Then uniquely identify answer concepts

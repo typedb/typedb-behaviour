@@ -381,7 +381,7 @@ Feature: TypeQL Insert Query
       match
         $p has name $name;
       insert
-        $p2 isa dog, has name $name;
+        $p2 isa dog, has $name;
       """
     Then transaction commits
 
@@ -484,40 +484,6 @@ Parker";
         $p isa person, has name "Peter Parker";
       insert
         $p has name "Spiderman";
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $p has name "Spiderman";
-      """
-    Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-
-
-  Scenario: when inserting an additional attribute ownership on an entity, the entity type can be optionally specified
-    Given typeql write query
-      """
-      insert
-      $p isa person, has name "Peter Parker", has ref 0;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given get answers of typeql read query
-      """
-      match $p has name "Spiderman";
-      """
-    Given answer size is: 0
-    # TODO: error "IsaStatementForInputVariable"
-    When typeql write query
-      """
-      match
-        $p isa person, has name "Peter Parker";
-      insert
-        $p isa person, has name "Spiderman";
       """
     Then transaction commits
 
@@ -680,7 +646,7 @@ Parker";
         $r isa employment, has ref $ref;
         $c isa company;
       insert
-        $r isa employment, links (employer: $c);
+        $r links (employer: $c);
       """
     Then transaction commits
 
@@ -724,7 +690,6 @@ Parker";
 
 
   Scenario: a roleplayer can be inserted without explicitly specifying a role
-    # TODO: error "unwrap() None"
     Given typeql write query
       """
       insert
@@ -745,7 +710,6 @@ Parker";
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    # TODO: error "unwrap() None"
     Then typeql write query
       """
       insert
@@ -899,10 +863,9 @@ Parker";
       match $x isa <attr> <value>;
       """
     Given answer size is: 0
-    # TODO: error "Invalid query containing unbound concept variable x"
     When typeql write query
       """
-      match $x == <value>;
+      match let $x = <value>;
       insert $a isa <attr> == $x;
       """
     Then transaction commits
@@ -1167,19 +1130,6 @@ Parker";
       | datetime | start-date | "2019-12-26" |
 
 
-  Scenario: when inserting an attribute, the type and value can be specified in two individual statements
-    When get answers of typeql write query
-      """
-      insert
-      $x isa age;
-      $x 10;
-      """
-    Then uniquely identify answer concepts
-      | x           |
-      | attr:age:10 |
-    Then transaction commits
-
-
   Scenario: inserting an attribute with no value errors
     Then typeql write query; fails
       """
@@ -1197,7 +1147,7 @@ Parker";
   Scenario: inserting an attribute with a predicate errors
     Then typeql write query; fails
       """
-      insert $x > 18 isa age;
+      insert $x isa age > 18;
       """
 
   #################
@@ -1276,7 +1226,7 @@ Parker";
       """
       insert $y isa derived, has ref 0;
       """
-    Then typeql write query
+    Then typeql write query; fails with a message containing: "'@unique' has been violated"
       """
       insert $x isa base, has ref 0;
       """
@@ -1421,8 +1371,8 @@ Parker";
       define
       entity person @abstract;
       attribute email @abstract, value string;
-      attribute email-outlook sub email, value string;
-      entity child sub person, owns email-outlook;
+      attribute email-outlook sub email;
+      entity child sub person, owns email-outlook @card(0..2);
       """
     Given transaction commits
 
@@ -1433,10 +1383,9 @@ Parker";
       """
     Then transaction commits
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails
-    # TODO: Looks like it errors because of "email-outlOKO", not as expected...
+    Then typeql write query; fails with a message containing: "'@unique' has been violated"
       """
-      insert $x isa child, has email-outloko "abc@outlook.com", has ref 1;
+      insert $x isa child, has email-outlook "abc@outlook.com", has ref 1;
       """
 
 
@@ -1620,168 +1569,7 @@ Parker";
       match $r isa season-ticket-ownership;
       """
     Then answer size is: 0
-
-
-  Scenario: match-inserting only existing entities is a no-op
-    Given get answers of typeql write query
-      """
-      insert
-      $x isa person, has name "Rebecca", has ref 0;
-      $y isa person, has name "Steven", has ref 1;
-      $z isa person, has name "Theresa", has ref 2;
-      """
-    Given uniquely identify answer concepts
-      | x         | y         | z         |
-      | key:ref:0 | key:ref:1 | key:ref:2 |
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    Given get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Given uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
-      | key:ref:2 |
-    When typeql write query
-      """
-      match
-        $x isa person;
-      insert
-        $x isa person;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
-      | key:ref:2 |
-
-
-  Scenario: match-inserting only existing relations is a no-op
-    Given get answers of typeql write query
-      """
-      insert
-      $x isa person, has name "Homer", has ref 0;
-      $y isa person, has name "Burns", has ref 1;
-      $z isa person, has name "Smithers", has ref 2;
-      $c isa company, has name "Springfield Nuclear Power Plant", has ref 3;
-      $xr isa employment, links (employee: $x, employer: $c), has ref 4;
-      $yr isa employment, links (employee: $y, employer: $c), has ref 5;
-      $zr isa employment, links (employee: $z, employer: $c), has ref 6;
-      """
-    Given uniquely identify answer concepts
-      | x         | y         | z         | c         | xr        | yr        | zr        |
-      | key:ref:0 | key:ref:1 | key:ref:2 | key:ref:3 | key:ref:4 | key:ref:5 | key:ref:6 |
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given get answers of typeql read query
-      """
-      match $r isa employment, links (employee: $x, employer: $c);
-      """
-    Given uniquely identify answer concepts
-      | r         | x         | c         |
-      | key:ref:4 | key:ref:0 | key:ref:3 |
-      | key:ref:5 | key:ref:1 | key:ref:3 |
-      | key:ref:6 | key:ref:2 | key:ref:3 |
-    When typeql write query
-      """
-      match
-        $x isa employment;
-      insert
-        $x isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $r isa employment, links (employee: $x, employer: $c);
-      """
-    Then uniquely identify answer concepts
-      | r         | x         | c         |
-      | key:ref:4 | key:ref:0 | key:ref:3 |
-      | key:ref:5 | key:ref:1 | key:ref:3 |
-      | key:ref:6 | key:ref:2 | key:ref:3 |
-
-
-  Scenario: match-inserting only existing attributes is a no-op
-    Given get answers of typeql write query
-      """
-      insert
-      $x "Ash" isa name;
-      $y "Misty" isa name;
-      $z "Brock" isa name;
-      """
-    Given uniquely identify answer concepts
-      | x             | y               | z               |
-      | attr:name:Ash | attr:name:Misty | attr:name:Brock |
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given get answers of typeql read query
-      """
-      match $x isa name;
-      """
-    Given uniquely identify answer concepts
-      | x               |
-      | attr:name:Ash   |
-      | attr:name:Misty |
-      | attr:name:Brock |
-    When typeql write query
-      """
-      match
-        $x isa name;
-      insert
-        $x isa name;
-      """
-    Then transaction commits
-
-    Given connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa name;
-      """
-    Then uniquely identify answer concepts
-      | x               |
-      | attr:name:Ash   |
-      | attr:name:Misty |
-      | attr:name:Brock |
-
-
-  Scenario: re-inserting a matched instance does nothing
-    Given typeql write query
-      """
-      insert
-      $x isa person, has ref 0;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    Then typeql write query
-      """
-      match
-        $x isa person;
-      insert
-        $x isa person;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then answer size is: 1
+    Given transaction closes
 
 
   Scenario: re-inserting a matched instance as an unrelated type errors
@@ -1947,7 +1735,7 @@ Parker";
     Then typeql write query; fails
       """
       match
-      $t type part-time-employment:employee;
+      $t label part-time-employment:employee;
       insert
       ($t: $x) isa part-time-employment;
       $x isa person;
@@ -2371,112 +2159,6 @@ Parker";
     Then answer size is: 0
 
 
-  Scenario: when matching two disjoint instances of distinct types but only selecting one to insert a pattern, inserts will only happen for the selected instance
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      undefine
-      owns ref from person;
-      owns ref from company;
-      owns ref from employment;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person;
-      $y isa company;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open write transaction for database: typedb
-    When typeql write query
-      """
-      match
-        $x isa person;
-        $y isa company;
-      insert
-        $z isa person;
-        (employee: $z, employer: $y) isa employment;
-      """
-    Then transaction commits
-
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then answer size is: 7
-    When get answers of typeql read query
-      """
-      match $x isa employment;
-      """
-    # The original person is still unemployed.
-    Then answer size is: 6
-
   ####################
   # TRANSACTIONALITY #
   ####################
@@ -2487,7 +2169,7 @@ Parker";
       insert
       $x isa person, has name "Derek", has ref 0;
       """
-    When typeql write query; fails
+    When typeql write query; parsing fails
       """
       insert
       $y qwertyuiop;

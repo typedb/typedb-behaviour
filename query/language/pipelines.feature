@@ -173,8 +173,8 @@ Feature: TypeQL pipelines
     Given typeql write query
     """
     insert
-      $a0 0 isa age; $a1 1 isa age; $a2 2 isa age; $a3 3 isa age;
-      $n0 "Alice" isa name; $n1 "Bob" isa name; $n2 "Chris" isa name; $n3 "Dan" isa name;
+      $a0 isa age 0; $a1 isa age 1; $a2 isa age 2; $a3 isa age 3;
+      $n0 isa name "Alice"; $n1 isa name "Bob"; $n2 isa name "Chris"; $n3 isa name "Dan";
     """
     Given transaction commits
 

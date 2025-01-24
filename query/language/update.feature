@@ -11,65 +11,31 @@ Feature: TypeQL Update Query
     Given connection is open: true
     Given connection has 0 databases
     Given connection create database: typedb
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
-
+    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-      person sub entity,
+      entity person,
         plays friendship:friend,
         plays parenthood:parent,
         plays parenthood:child,
         owns name,
         owns ref @key;
-      friendship sub relation,
+      relation friendship,
         relates friend,
         owns ref @key;
-      parenthood sub relation,
+      relation parenthood,
         relates parent,
         relates child;
-      name sub attribute, value string;
-      ref sub attribute, value integer;
+      attribute name, value string;
+      attribute ref, value integer;
       """
     Given transaction commits
-
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-
-
-  Scenario: Deleting anonymous variables throws an exception
-    Given get answers of typeql insert
-      """
-      insert
-        $x isa person, has name "Alex", has ref 0;
-        $y isa person, has name "Alex", has ref 1;
-        (friend: $y) isa friendship, has ref 2;
-      """
-    Given transaction commits
-    Given session opens transaction of type: write
-    Then typeql update; throws exception
-      """
-      match
-      $x isa person, has ref 1;
-      delete $x has name "Alex";
-      insert $x has name "Bob";
-      """
-    Given session transaction closes
-    Given session opens transaction of type: write
-    Then typeql update; throws exception
-      """
-      match
-      $x isa person, has ref 1;
-      delete (friend: $x) isa friendship;
-      insert (parent: $x) isa parentship;
-      """
-
 
 
   Scenario: Update owned attribute without side effects on other owners
-    Given get answers of typeql insert
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
       """
       insert
         $x isa person, has name "Alex", has ref 0;
@@ -79,17 +45,17 @@ Feature: TypeQL Update Query
       | x         | y         |
       | key:ref:0 | key:ref:1 |
     Given transaction commits
-    Given session opens transaction of type: write
-    When typeql update
+    Given connection open write transaction for database: typedb
+    When typeql write query
       """
       match
       $x isa person, has ref 1, has $n;
       $n isa name;
-      delete $x has $n;
+      delete has $n of $x;
       insert $x has name "Bob";
       """
     Then transaction commits
-    When session opens transaction of type: read
+    Given connection open write transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person, has name $n;
@@ -101,42 +67,27 @@ Feature: TypeQL Update Query
 
 
   Scenario: Roleplayer exchange
-    Given get answers of typeql insert
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
       """
       insert
       $x isa person, has name "Alex", has ref 0;
       $y isa person, has name "Bob", has ref 1;
-      $r (parent: $x, child:$y) isa parenthood;
+      $r isa parenthood (parent: $x, child:$y);
       """
     Given transaction commits
-    Given session opens transaction of type: write
-    When typeql update
+    Given connection open write transaction for database: typedb
+    When typeql write query
       """
-      match $r (parent: $x, child: $y) isa parenthood;
-      delete $r isa parenthood;
-      insert (parent: $y, child: $x) isa parenthood;
-      """
-
-
-  Scenario: Unrelated insertion
-    Given get answers of typeql insert
-      """
-      insert
-      $x isa person, has name "Alex", has ref 0;
-      """
-    Given transaction commits
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    When typeql update; throws exception
-      """
-      match $p isa person;
-      delete $p isa person;
-      insert $x isa entity;
+      match $r isa parenthood (parent: $x, child: $y);
+      delete $r;
+      insert $q isa parenthood (parent: $y, child: $x);
       """
 
 
   Scenario: Complex migration
-    Given get answers of typeql insert
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
       """
       insert
       $u isa person, has name "Alex", has ref 0;
@@ -147,43 +98,39 @@ Feature: TypeQL Update Query
       $z isa person, has name "Bob", has ref 5;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open schema session for database: typedb
-    Given session opens transaction of type: write
+    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-      nameclass sub entity,
+      entity nameclass,
         owns name @key,
         plays naming:name;
-      naming sub relation,
+      relation naming,
         relates named,
         relates name;
       person plays naming:named;
       """
     Given transaction commits
-    Given connection close all sessions
-    Given connection open data session for database: typedb
-    Given session opens transaction of type: write
-    When typeql insert
+    Given connection open write transaction for database: typedb
+    When typeql write query
       """
       match $att isa name;
       insert $x isa nameclass, has $att;
       """
-    When typeql update
+    When typeql write query
       """
       match
       $p isa person, has name $n;
       $nc isa nameclass, has name $n;
-      delete $p has $n;
+      delete has $n of $p;
       insert (named: $p, name: $nc) isa naming;
       """
     Then transaction commits
-    When session opens transaction of type: read
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-      (named: $p, name: $nc) isa naming;
+      $r isa naming (named: $p, name: $nc);
       $nc has name $n;
 
       """
