@@ -186,9 +186,9 @@ Feature: Data validation
     When transaction commits
     Examples:
       | value-type  | value           |
-      | integer        | 1               |
+      | integer     | 1               |
       | double      | 1.0             |
-      | decimal     | 1.0             |
+      | decimal     | 1.0dec          |
       | string      | "alice"         |
       | boolean     | true            |
       | date        | 2024-05-04      |
@@ -223,9 +223,9 @@ Feature: Data validation
     When transaction commits
     Examples:
       | value-type  | value           |
-      | integer        | 1               |
+      | integer     | 1               |
       | double      | 1.0             |
-      | decimal     | 1.0             |
+      | decimal     | 1.0dec          |
       | string      | "alice"         |
       | boolean     | true            |
       | date        | 2024-05-04      |

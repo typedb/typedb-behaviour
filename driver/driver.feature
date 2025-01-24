@@ -1263,7 +1263,7 @@ Feature: TypeDB Driver
     Examples:
       | value-type  | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
       | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-      | integer        | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
+      | integer     | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
       | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
       | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
       | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
@@ -1514,11 +1514,11 @@ Feature: TypeDB Driver
     Examples:
       | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
       | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | integer        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | integer     | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
       | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
       | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
       | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
       | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
@@ -1687,11 +1687,11 @@ Feature: TypeDB Driver
     Examples:
       | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
       | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | integer        | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
+      | integer     | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
       | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
       | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
       | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
       | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
@@ -1834,11 +1834,11 @@ Feature: TypeDB Driver
     Examples:
       | value-type  | value                                       | expected                                      | not-expected                                 |
       | boolean     | true                                        | true                                          | false                                        |
-      | integer        | 12345090                                    | 12345090                                      | 0                                            |
+      | integer     | 12345090                                    | 12345090                                      | 0                                            |
       | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
       | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
-      | decimal     | 1234567890.0001234567890                    | "1234567890.000123456789"                     | "1234567890.0001234567890"                   |
-      | decimal     | 0.0000000000000000001                       | "0.0000000000000000001"                       | 0.000000000000000001                         |
+      | decimal     | 1234567890.0001234567890dec                 | "1234567890.000123456789dec"                  | "1234567890.0001234567890dec"                |
+      | decimal     | 0.0000000000000000001dec                    | "0.0000000000000000001dec"                    | "0.000000000000000001dec"                    |
       | string      | "outPUT"                                    | "outPUT"                                      | "output"                                     |
       | date        | 2024-09-20                                  | "2024-09-20"                                  | "2025-09-20"                                 |
       | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               | "1999-02-26T12:15:05"                        |
