@@ -51,7 +51,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type declared: <value-type>
     Examples:
       | value-type  |
-      | integer        |
+      | integer     |
       | string      |
       | boolean     |
       | double      |
@@ -89,7 +89,7 @@ Feature: Concept Attribute Type
     Then create attribute type: name; fails
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -138,7 +138,7 @@ Feature: Concept Attribute Type
       | age  |
     Examples:
       | value-type-1 | value-type-2 |
-      | string       | integer         |
+      | string       | integer      |
       | boolean      | double       |
       | decimal      | datetime-tz  |
       | datetime     | duration     |
@@ -237,10 +237,10 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations contain: @<annotation>
     Examples:
       | value-type  | annotation                              | annotation-category |
-      | integer        | abstract                                | abstract            |
-      | integer        | independent                             | independent         |
-      | integer        | values(1)                               | values              |
-      | integer        | range(1..3)                             | range               |
+      | integer     | abstract                                | abstract            |
+      | integer     | independent                             | independent         |
+      | integer     | values(1)                               | values              |
+      | integer     | range(1..3)                             | range               |
       | string      | abstract                                | abstract            |
       | string      | independent                             | independent         |
       | string      | regex("\S+")                            | regex               |
@@ -256,8 +256,8 @@ Feature: Concept Attribute Type
       | double      | range(1.0..3.0)                         | range               |
       | decimal     | abstract                                | abstract            |
       | decimal     | independent                             | independent         |
-      | decimal     | values(1.0)                             | values              |
-      | decimal     | range(1.0..3.0)                         | range               |
+      | decimal     | values(1.0dec)                          | values              |
+      | decimal     | range(1.0dec..3.0dec)                   | range               |
       | date        | abstract                                | abstract            |
       | date        | independent                             | independent         |
       | datetime    | abstract                                | abstract            |
@@ -332,7 +332,7 @@ Feature: Concept Attribute Type
       | decimal    | independent  | independent         |
       | string     | regex("\S+") | regex               |
       | string     | values("1")  | values              |
-      | integer       | range(1..3)  | range               |
+      | integer    | range(1..3)  | range               |
 
   Scenario Outline: Attribute type cannot set supertype with the same @<annotation> until it is explicitly unset from type
     When create attribute type: name
@@ -380,7 +380,7 @@ Feature: Concept Attribute Type
       | decimal    | independent  | independent         |
       | string     | regex("\S+") | regex               |
       | string     | values("1")  | values              |
-      | integer       | range(1..3)  | range               |
+      | integer    | range(1..3)  | range               |
 
   Scenario Outline: Attribute type loses inherited @<annotation> if supertype is unset
     When create attribute type: name
@@ -431,7 +431,7 @@ Feature: Concept Attribute Type
       | decimal    | independent  |
       | string     | regex("\S+") |
       | string     | values("1")  |
-      | integer       | range(1..3)  |
+      | integer    | range(1..3)  |
 
   Scenario Outline: Attribute type cannot set redundant duplicated @<annotation> while inheriting it
     When create attribute type: name
@@ -459,7 +459,7 @@ Feature: Concept Attribute Type
       | decimal    | independent  | independent         |
       | string     | regex("\S+") | regex               |
       | string     | values("1")  | values              |
-      | integer       | range(1..3)  | range               |
+      | integer    | range(1..3)  | range               |
 
 ########################
 # @abstract
@@ -784,16 +784,16 @@ Feature: Concept Attribute Type
     Then attribute(first-name) set supertype: name; fails
     Examples:
       | value-type-1  | value-type-2    |
-      | integer          | string          |
-      | integer          | boolean         |
-      | integer          | double          |
-      | integer          | decimal         |
-      | integer          | date            |
-      | integer          | datetime        |
-      | integer          | datetime-tz     |
-      | integer          | duration        |
-      | integer          | custom-struct   |
-      | string        | integer            |
+      | integer       | string          |
+      | integer       | boolean         |
+      | integer       | double          |
+      | integer       | decimal         |
+      | integer       | date            |
+      | integer       | datetime        |
+      | integer       | datetime-tz     |
+      | integer       | duration        |
+      | integer       | custom-struct   |
+      | string        | integer         |
       | boolean       | string          |
       | double        | datetime-tz     |
       | decimal       | datetime        |
@@ -801,7 +801,7 @@ Feature: Concept Attribute Type
       | datetime      | date            |
       | datetime-tz   | double          |
       | duration      | boolean         |
-      | custom-struct | integer            |
+      | custom-struct | integer         |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
@@ -841,24 +841,24 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type-2>
     Examples:
       | value-type-1  | value-type-2    |
-      | integer          | string          |
-      | integer          | boolean         |
-      | integer          | double          |
-      | integer          | decimal         |
-      | integer          | date            |
-      | integer          | datetime        |
-      | integer          | datetime-tz     |
-      | integer          | duration        |
-      | integer          | custom-struct   |
+      | integer       | string          |
+      | integer       | boolean         |
+      | integer       | double          |
+      | integer       | decimal         |
+      | integer       | date            |
+      | integer       | datetime        |
+      | integer       | datetime-tz     |
+      | integer       | duration        |
+      | integer       | custom-struct   |
       | string        | boolean         |
       | boolean       | string          |
       | double        | datetime        |
       | decimal       | datetime-tz     |
       | date          | decimal         |
-      | datetime      | integer            |
+      | datetime      | integer         |
       | datetime-tz   | double          |
       | duration      | date            |
-      | custom-struct | integer            |
+      | custom-struct | integer         |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
@@ -947,24 +947,24 @@ Feature: Concept Attribute Type
     Then attribute(sub-first-name) get value type is none
     Examples:
       | value-type-1  | value-type-2    |
-      | integer          | string          |
-      | integer          | boolean         |
-      | integer          | double          |
-      | integer          | decimal         |
-      | integer          | date            |
-      | integer          | datetime        |
-      | integer          | datetime-tz     |
-      | integer          | duration        |
-      | integer          | custom-struct   |
+      | integer       | string          |
+      | integer       | boolean         |
+      | integer       | double          |
+      | integer       | decimal         |
+      | integer       | date            |
+      | integer       | datetime        |
+      | integer       | datetime-tz     |
+      | integer       | duration        |
+      | integer       | custom-struct   |
       | string        | datetime-tz     |
       | boolean       | date            |
       | double        | datetime        |
       | decimal       | double          |
       | date          | string          |
-      | datetime      | integer            |
+      | datetime      | integer         |
       | datetime-tz   | decimal         |
       | duration      | boolean         |
-      | custom-struct | integer            |
+      | custom-struct | integer         |
       | custom-struct | string          |
       | custom-struct | boolean         |
       | custom-struct | double          |
@@ -1006,7 +1006,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type>
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1031,7 +1031,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type is none
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1056,7 +1056,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type is none
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1082,7 +1082,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type>
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1120,7 +1120,7 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get declared annotations contain: @abstract
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1342,7 +1342,7 @@ Feature: Concept Attribute Type
     Then attribute(email) get declared annotations is empty
     Examples:
       | value-type    | arg     |
-      | integer          | "value" |
+      | integer       | "value" |
       | boolean       | "value" |
       | double        | "value" |
       | decimal       | "value" |
@@ -1589,7 +1589,7 @@ Feature: Concept Attribute Type
     Then attribute(email) get declared annotations do not contain: @independent
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -1742,13 +1742,13 @@ Feature: Concept Attribute Type
     Then attribute(email) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                                                                                                                                                                                                                                                                                                                                                 |
-      | integer        | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | integer        | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | integer        | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
-      | integer        | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
-      | integer        | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
-      | integer        | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
-      | integer        | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
+      | integer     | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | integer     | 1                                                                                                                                                                                                                                                                                                                                                                                                    |
+      | integer     | -1                                                                                                                                                                                                                                                                                                                                                                                                   |
+      | integer     | 1, 2                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | integer     | -9223372036854775808, 9223372036854775807                                                                                                                                                                                                                                                                                                                                                            |
+      | integer     | 2, 1, 3, 4, 5, 6, 7, 9, 10, 11, 55, -1, -654321, 123456                                                                                                                                                                                                                                                                                                                                              |
+      | integer     | 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99 |
       | string      | ""                                                                                                                                                                                                                                                                                                                                                                                                   |
       | string      | "1"                                                                                                                                                                                                                                                                                                                                                                                                  |
       | string      | "福"                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -1766,13 +1766,13 @@ Feature: Concept Attribute Type
       | double      | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
       | double      | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
       | double      | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
-      | decimal     | 0.0                                                                                                                                                                                                                                                                                                                                                                                                  |
-      | decimal     | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | decimal     | 1.1                                                                                                                                                                                                                                                                                                                                                                                                  |
-      | decimal     | -2.45                                                                                                                                                                                                                                                                                                                                                                                                |
-      | decimal     | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
-      | decimal     | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
-      | decimal     | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
+      | decimal     | 0.0dec                                                                                                                                                                                                                                                                                                                                                                                               |
+      | decimal     | 0dec                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | decimal     | 1.1dec                                                                                                                                                                                                                                                                                                                                                                                               |
+      | decimal     | -2.45dec                                                                                                                                                                                                                                                                                                                                                                                             |
+      | decimal     | -3.444dec, 3.445dec                                                                                                                                                                                                                                                                                                                                                                                  |
+      | decimal     | 0.00001dec, 0.0001dec, 0.001dec, 0.01dec                                                                                                                                                                                                                                                                                                                                                             |
+      | decimal     | -333.553dec, 33895dec, 98984.4555dec, 902394.44dec, 1000000000dec, 0.00001dec, 0.3dec, 3.14159265358979323dec                                                                                                                                                                                                                                                                                        |
       | date        | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 1970-01-01                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02                                                                                                                                                                                                                                                                                                                                                       |
@@ -1871,8 +1871,8 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints do not contain: @values(<reset-args>)
     Examples:
       | value-type  | init-args       | reset-args      |
-      | integer        | 1, 5            | 7, 9            |
-      | double      | 1.1, 1.5        | -8.0, 88.3      |
+      | integer     | 1, 5            | 7, 9            |
+      | double      | 1.1dec, 1.5dec  | -8.0, 88.3      |
       | decimal     | -8.0, 88.3      | 1.1, 1.5        |
       | string      | "s"             | "not s"         |
       | boolean     | true            | false           |
@@ -1891,12 +1891,12 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     Examples:
       | value-type  | arg0                        | arg1                         | arg2                         |
-      | integer        | 1                           | 1                            | 1                            |
-      | integer        | 1                           | 1                            | 2                            |
-      | integer        | 1                           | 2                            | 1                            |
-      | integer        | 1                           | 2                            | 2                            |
-      | double      | 0.1                         | 0.0001                       | 0.0001                       |
-      | decimal     | 0.1                         | 0.0001                       | 0.0001                       |
+      | integer     | 1                           | 1                            | 1                            |
+      | integer     | 1                           | 1                            | 2                            |
+      | integer     | 1                           | 2                            | 1                            |
+      | integer     | 1                           | 2                            | 2                            |
+      | double      | 0.1dec                      | 0.0001dec                    | 0.0001dec                    |
+      | decimal     | 0.1dec                      | 0.0001dec                    | 0.0001dec                    |
       | string      | "stringwithoutdifferences"  | "stringwithoutdifferences"   | "stringWITHdifferences"      |
       | string      | "stringwithoutdifferences " | "stringwithoutdifferences  " | "stringwithoutdifferences  " |
       | boolean     | true                        | true                         | false                        |
@@ -1984,9 +1984,9 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise                            |
-      | integer        | 1, 10, 20, 30                                                                | 10, 30                                     |
+      | integer     | 1, 10, 20, 30                                                                | 10, 30                                     |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
-      | decimal     | 0.0, 1.0                                                                     | 0.0                                        |
+      | decimal     | 0.0dec, 1.0dec                                                               | 0.0dec                                     |
       | string      | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
       | boolean     | true, false                                                                  | true                                       |
       | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
@@ -2018,9 +2018,9 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
       | value-type  | args                                                                         | args-specialise          |
-      | integer        | 1, 10, 20, 30                                                                | 10, 31                   |
+      | integer     | 1, 10, 20, 30                                                                | 10, 31                   |
       | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
-      | decimal     | 0.0, 1.0                                                                     | 0.01                     |
+      | decimal     | 0.0dec, 1.0dec                                                               | 0.01dec                  |
       | string      | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
       | boolean     | false                                                                        | true                     |
       | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
@@ -2122,11 +2122,11 @@ Feature: Concept Attribute Type
     Then attribute(email) get declared annotations do not contain: @range(<arg0>..)
     Examples:
       | value-type  | arg0                              | arg1                                                  |
-      | integer        | 0                                 | 1                                                     |
-      | integer        | 1                                 | 2                                                     |
-      | integer        | 0                                 | 2                                                     |
-      | integer        | -1                                | 1                                                     |
-      | integer        | -9223372036854775808              | 9223372036854775807                                   |
+      | integer     | 0                                 | 1                                                     |
+      | integer     | 1                                 | 2                                                     |
+      | integer     | 0                                 | 2                                                     |
+      | integer     | -1                                | 1                                                     |
+      | integer     | -9223372036854775808              | 9223372036854775807                                   |
       | string      | "A"                               | "a"                                                   |
       | string      | "a"                               | "z"                                                   |
       | string      | "A"                               | "福"                                                   |
@@ -2137,10 +2137,10 @@ Feature: Concept Attribute Type
       | double      | 0.01                              | 1.0                                                   |
       | double      | 123.123                           | 123123123123.122                                      |
       | double      | -2.45                             | 2.45                                                  |
-      | decimal     | 0.0                               | 0.0001                                                |
-      | decimal     | 0.01                              | 1.0                                                   |
-      | decimal     | 123.123                           | 123123123123.122                                      |
-      | decimal     | -2.45                             | 2.45                                                  |
+      | decimal     | 0.0dec                            | 0.0001dec                                             |
+      | decimal     | 0.01dec                           | 1.0dec                                                |
+      | decimal     | 123.123dec                        | 123123123123.122dec                                   |
+      | decimal     | -2.45dec                          | 2.45dec                                               |
       | date        | 2024-06-04                        | 2024-06-05                                            |
       | date        | 2024-06-04                        | 2024-07-03                                            |
       | date        | 2024-06-04                        | 2025-01-01                                            |
@@ -2237,9 +2237,9 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations is empty
     Examples:
       | value-type  | arg0                     |
-      | integer        | 1                        |
+      | integer     | 1                        |
       | double      | 1.0                      |
-      | decimal     | 1.0                      |
+      | decimal     | 1.0dec                   |
       | string      | "123"                    |
       | boolean     | false                    |
       | date        | 2030-06-04               |
@@ -2277,9 +2277,9 @@ Feature: Concept Attribute Type
     Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
     Examples:
       | value-type  | init-args                        | reset-args                       |
-      | integer        | 1..5                             | 7..9                             |
+      | integer     | 1..5                             | 7..9                             |
       | double      | 1.1..1.5                         | -8.0..88.3                       |
-      | decimal     | -8.0..88.3                       | 1.1..1.5                         |
+      | decimal     | -8.0dec..88.3dec                 | 1.1dec..1.5dec                   |
       | string      | "S".."s"                         | "not s".."xxxxxxxxx"             |
       | date        | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
       | datetime    | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
@@ -2370,9 +2370,9 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
-      | integer        | 1..10                            | 1..5                                      |
+      | integer     | 1..10                            | 1..5                                      |
       | double      | 1.0..10.0                        | 2.0..10.0                                 |
-      | decimal     | 0.0..1.0                         | 0.0..0.999999                             |
+      | decimal     | 0.0dec..1.0dec                   | 0.0dec..0.999999dec                       |
       | string      | "A".."Z"                         | "J".."Z"                                  |
       | date        | 2024-06-04..2024-06-06           | 2024-06-04..2024-06-05                    |
       | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
@@ -2402,9 +2402,9 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
       | value-type  | args                             | args-specialise                           |
-      | integer        | 1..10                            | -1..5                                     |
+      | integer     | 1..10                            | -1..5                                     |
       | double      | 1.0..10.0                        | 0.0..150.0                                |
-      | decimal     | 0.0..1.0                         | -0.0001..0.999999                         |
+      | decimal     | 0.0dec..1.0dec                   | -0.0001dec..0.999999dec                   |
       | string      | "A".."Z"                         | "A".."z"                                  |
       | date        | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04                    |
       | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
@@ -2491,17 +2491,17 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
-      | annotation-1     | annotation-2       | annotation-category-1 | annotation-category-2 | value-type  |
-      | abstract         | independent        | abstract              | independent           | datetime-tz |
-      | abstract         | values(1, 2)       | abstract              | values                | double      |
-      | abstract         | range(1.0..2.0)    | abstract              | range                 | decimal     |
-      | abstract         | regex("s")         | abstract              | regex                 | string      |
-      | independent      | values(1, 2)       | independent           | values                | integer        |
-      | independent      | range(false..true) | independent           | range                 | boolean     |
-      | independent      | regex("s")         | independent           | regex                 | string      |
-      | values(1.0, 2.0) | range(1.0..2.0)    | values                | range                 | double      |
-      | values("str")    | regex("s")         | values                | regex                 | string      |
-      | range("1".."2")  | regex("s")         | range                 | regex                 | string      |
+      | annotation-1     | annotation-2          | annotation-category-1 | annotation-category-2 | value-type  |
+      | abstract         | independent           | abstract              | independent           | datetime-tz |
+      | abstract         | values(1, 2)          | abstract              | values                | double      |
+      | abstract         | range(1.0dec..2.0dec) | abstract              | range                 | decimal     |
+      | abstract         | regex("s")            | abstract              | regex                 | string      |
+      | independent      | values(1, 2)          | independent           | values                | integer     |
+      | independent      | range(false..true)    | independent           | range                 | boolean     |
+      | independent      | regex("s")            | independent           | regex                 | string      |
+      | values(1.0, 2.0) | range(1.0..2.0)       | values                | range                 | double      |
+      | values("str")    | regex("s")            | values                | regex                 | string      |
+      | range("1".."2")  | regex("s")            | range                 | regex                 | string      |
 
     # There are no incompatible annotations for attribute types for now
 #  Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for <value-type> value type
@@ -2549,7 +2549,7 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) is optional: false
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -2583,7 +2583,7 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) is optional: false
     Examples:
       | value-type-1  | value-type-2  |
-      | integer          | string        |
+      | integer       | string        |
       | string        | boolean       |
       | boolean       | double        |
       | double        | decimal       |
@@ -2592,7 +2592,7 @@ Feature: Concept Attribute Type
       | datetime      | datetime-tz   |
       | datetime-tz   | duration      |
       | duration      | custom-struct |
-      | custom-struct | integer          |
+      | custom-struct | integer       |
 
   Scenario Outline: Struct can be created with one optional field, including another struct
     When create struct: passport
@@ -2612,7 +2612,7 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) is optional: true
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -2660,7 +2660,7 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(middle-name) is optional: true
     Examples:
       | value-type-1  | value-type-2  |
-      | integer          | string        |
+      | integer       | string        |
       | string        | boolean       |
       | boolean       | double        |
       | double        | decimal       |
@@ -2669,7 +2669,7 @@ Feature: Concept Attribute Type
       | datetime      | datetime-tz   |
       | datetime-tz   | duration      |
       | duration      | custom-struct |
-      | custom-struct | integer          |
+      | custom-struct | integer       |
 
   Scenario: Struct without fields can be deleted
     When create struct: passport
@@ -2749,7 +2749,7 @@ Feature: Concept Attribute Type
       | not-name |
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | boolean       |
       | double        |
@@ -2772,7 +2772,7 @@ Feature: Concept Attribute Type
     Then struct(table) delete field: name; fails
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | string        |
       | date          |
       | custom-struct |
