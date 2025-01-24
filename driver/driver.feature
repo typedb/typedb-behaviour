@@ -1690,8 +1690,8 @@ Feature: TypeDB Driver
       | integer     | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
       | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
       | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890                     | 1234567890.001234567890              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false   | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
       | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
       | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
       | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
@@ -1838,7 +1838,7 @@ Feature: TypeDB Driver
       | double      | 0.0000000001                                | 0.0000000001                                  | 0.000000001                                  |
       | double      | 2.01234567                                  | 2.01234567                                    | 2.01234568                                   |
       | decimal     | 1234567890.0001234567890dec                 | "1234567890.000123456789dec"                  | "1234567890.0001234567890dec"                |
-      | decimal     | 0.0000000000000000001dec                    | "0.0000000000000000001dec"                    | 0.000000000000000001dec                      |
+      | decimal     | 0.0000000000000000001dec                    | "0.0000000000000000001dec"                    | "0.000000000000000001dec"                    |
       | string      | "outPUT"                                    | "outPUT"                                      | "output"                                     |
       | date        | 2024-09-20                                  | "2024-09-20"                                  | "2025-09-20"                                 |
       | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               | "1999-02-26T12:15:05"                        |

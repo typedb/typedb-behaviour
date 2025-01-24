@@ -1870,16 +1870,16 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints contain: @values(<init-args>)
     Then attribute(name) get constraints do not contain: @values(<reset-args>)
     Examples:
-      | value-type  | init-args       | reset-args      |
-      | integer     | 1, 5            | 7, 9            |
-      | double      | 1.1dec, 1.5dec  | -8.0, 88.3      |
-      | decimal     | -8.0, 88.3      | 1.1, 1.5        |
-      | string      | "s"             | "not s"         |
-      | boolean     | true            | false           |
-      | date        | 2024-05-05      | 2024-06-05      |
-      | datetime    | 2024-05-05      | 2024-06-05      |
-      | datetime-tz | 2024-05-05+0100 | 2024-05-05+0010 |
-      | duration    | P1Y             | P2Y             |
+      | value-type  | init-args        | reset-args      |
+      | integer     | 1, 5             | 7, 9            |
+      | double      | 1.1, 1.5         | -8.0, 88.3      |
+      | decimal     | -8.0dec, 88.3dec | 1.1dec, 1.5dec  |
+      | string      | "s"              | "not s"         |
+      | boolean     | true             | false           |
+      | date        | 2024-05-05       | 2024-06-05      |
+      | datetime    | 2024-05-05       | 2024-06-05      |
+      | datetime-tz | 2024-05-05+0100  | 2024-05-05+0010 |
+      | duration    | P1Y              | P2Y             |
 
   Scenario Outline: Attribute type cannot have @values annotation for <value-type> value type with duplicated args
     When create attribute type: name
