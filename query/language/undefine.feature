@@ -15,8 +15,8 @@ Feature: TypeQL Undefine Query
     Given typeql schema query
       """
       define
-      entity person, plays employment:employee, owns name, owns email @key;
-      relation employment, relates employee, relates employer;
+      entity person, plays employment:employee @card(0..), owns name, owns email @key;
+      relation employment, relates employee @card(0..1), relates employer;
       attribute name @independent, value string;
       attribute email @independent, value string @regex(".+@\w+\..+");
       entity abstract-type @abstract;
@@ -651,6 +651,29 @@ Feature: TypeQL Undefine Query
       """
 
 
+  Scenario: undefining specialising relates as if it was a real relates is not allowed
+    Given typeql schema query
+      """
+      define
+      relation part-time-employment sub employment, relates part-time-employee as employee;
+      relation internship sub part-time-employment;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates employee'"
+      """
+      undefine relates employee from part-time-employment;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates employee'"
+      """
+      undefine relates employee from internship;
+      """
+
+
   Scenario: all existing instances of a relation type must be deleted in order to undefine it
     Given get answers of typeql read query
       """
@@ -1133,6 +1156,34 @@ Feature: TypeQL Undefine Query
       | x               | role                      |
       | label:part-time | label:employment:employee |
 
+
+  Scenario: undefining inherited relates is not allowed
+    When typeql schema query
+      """
+      define relation part-time-employment sub employment;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'part-time-employment' does not relate the role 'employment:employee'"
+      """
+      undefine relates employee from part-time-employment;
+      """
+
+
+  Scenario: undefining annotations from an inherited relates is not allowed
+    When typeql schema query
+      """
+      define relation part-time-employment sub employment;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'user' does not play the role 'employment:employee'"
+      """
+      undefine @card from part-time-employment relates employee;
+      """
+
   ############################
   # PLAYABLE ROLES ('PLAYS') #
   ############################
@@ -1213,6 +1264,34 @@ Feature: TypeQL Undefine Query
     Then typeql schema query; fails
       """
       undefine plays employment:employee from person;
+      """
+
+
+  Scenario: undefining inherited plays is not allowed
+    When typeql schema query
+      """
+      define entity user sub person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'user' does not play the role 'employment:employee'"
+      """
+      undefine plays employment:employee from user;
+      """
+
+
+  Scenario: undefining annotations from an inherited plays is not allowed
+    When typeql schema query
+      """
+      define entity user sub person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'user' does not play the role 'employment:employee'"
+      """
+      undefine @card from user plays employment:employee;
       """
 
   ########################
@@ -1332,6 +1411,34 @@ Feature: TypeQL Undefine Query
     Then typeql schema query; fails
       """
       undefine owns email from person;
+      """
+
+
+  Scenario: undefining inherited ownerships is not allowed
+    When typeql schema query
+      """
+      define entity user sub person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'user' does not own attribute type 'email'"
+      """
+      undefine owns email from user;
+      """
+
+
+  Scenario: undefining annotations from an inherited ownership is not allowed
+    When typeql schema query
+      """
+      define entity user sub person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'user' does not own attribute type 'email'"
+      """
+      undefine @key from user owns email;
       """
 
   ###########
