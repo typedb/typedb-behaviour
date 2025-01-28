@@ -249,7 +249,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -271,7 +271,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -354,7 +354,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -663,7 +663,7 @@ Feature: TypeQL Define Query
       | label:employment           |
       | label:part-time-employment |
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    When get answers of typeql read query
 #      """
 #      match $x relates employee @abstract;
@@ -815,7 +815,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -837,7 +837,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2075,7 +2075,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Then connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2142,7 +2142,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2184,7 +2184,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2212,7 +2212,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2252,7 +2252,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    When connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2280,7 +2280,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2320,7 +2320,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2395,7 +2395,7 @@ Feature: TypeQL Define Query
       """
     Then answer size is: 1
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    When get answers of typeql read query
 #      """
 #      match $x label person, owns email @key;
@@ -2527,7 +2527,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2640,7 +2640,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    Then get answers of typeql read query
 #      """
@@ -2715,7 +2715,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2742,7 +2742,7 @@ Feature: TypeQL Define Query
       | x            |
       | label:person |
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    When get answers of typeql read query; fails ......
 #      """
 #      match $x owns email @key;
@@ -2837,7 +2837,7 @@ Feature: TypeQL Define Query
     Then transaction commits
 
     Given connection open write transaction for database: typedb
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    When get answers of typeql read query
 #      """
 #      match $x owns $y @unique;
@@ -2914,7 +2914,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+# TODO: 3.x: handle type statement annotations
 #    When connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2938,7 +2938,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -2962,7 +2962,7 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -3245,7 +3245,7 @@ Feature: TypeQL Define Query
       """
     Given transaction commits
 
-    # TODO: Uncomment when "match @..." is implemented
+    # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
 #    When get answers of typeql read query
 #      """
@@ -3392,4 +3392,3 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    # TODO 3.0: Add tests for functions

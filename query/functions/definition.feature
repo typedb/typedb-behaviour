@@ -367,3 +367,226 @@ Feature: Function Definition
     Then transaction commits; fails
     # TODO: Add messsage when it's an explicit check at query time
 
+
+  # TODO: 3.x: (Or rather, me right now) See if we're missing any of these.
+  #############
+  # FUNCTIONS #
+  #############
+# TODO: Write new tests for functions. Consider old Rules tests to be reimplemented if applicable
+#  Scenario: undefining a rule removes it
+#    Given typeql schema query
+#      """
+#      define
+#      entity company, plays employment:employer;
+#      rule a-rule:
+#      when {
+#        $c isa company; $y isa person;
+#      } then {
+#        (employer: $c, employee: $y) isa employment;
+#      };
+#      """
+#    Given transaction commits
+#
+#    When connection open schema transaction for database: typedb
+#    Then rules contain: a-rule
+#    When typeql schema query
+#      """
+#      undefine rule a-rule;
+#      """
+#    Then transaction commits
+#
+#    When connection open read transaction for database: typedb
+#    Then rules do not contain: a-rule
+#
+#  Scenario: after undefining a rule, concepts previously inferred by that rule are no longer inferred
+#    Given typeql schema query
+#      """
+#      define
+#      rule samuel-email-rule:
+#      when {
+#        $x has email "samuel@typedb.com";
+#      } then {
+#        $x has name "Samuel";
+#      };
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert $x isa person, has email "samuel@typedb.com";
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    Given get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Given uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#    Given transaction closes
+#    Given connection open schema transaction for database: typedb
+#    When typeql schema query
+#      """
+#      undefine rule samuel-email-rule;
+#      """
+#    Then transaction commits
+#
+#    When connection open read transaction for database: typedb
+#    Then typeql read query; fails with a message containing: "empty-set for some variable"
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#
+#
+#  # enable when we can do reasoning in a schema write transaction (it was a todo previously, not relevant anymore)
+#  @ignore
+#  Scenario: when undefining a rule, concepts inferred by that rule can still be retrieved until the next commit
+#    Given typeql schema query
+#      """
+#      define
+#      rule samuel-email-rule:
+#      when {
+#        $x has email "samuel@typedb.com";
+#      } then {
+#        $x has name "Samuel";
+#      };
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert $x isa person, has email "samuel@typedb.com";
+#      """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#    Given get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Given uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#    When typeql schema query
+#      """
+#      undefine rule samuel-email-rule;
+#      """
+#
+#    When get answers of typeql read query
+#      """
+#      match
+#        $x has name $n;
+#      get $n;
+#      """
+#    Then uniquely identify answer concepts
+#      | n                 |
+#      | attr:name:Samuel  |
+#
+#  Scenario: You cannot undefine a type if it is used in a rule
+#    Given typeql schema query
+#    """
+#    define
+#
+#    entity type-to-undefine, owns name;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa type-to-undefine;
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in a negation in a rule
+#    Given typeql schema query
+#    """
+#    define
+#    relation rel, relates rol;
+#    entity other-type, owns name, plays rel:rol;
+#    entity type-to-undefine, owns name, plays rel:rol;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa other-type;
+#      not { ($x, $y) isa relation; $y isa type-to-undefine; };
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in any disjunction in a rule
+#    Given typeql schema query
+#    """
+#    define
+#
+#    entity type-to-undefine, owns name;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x has name $y;
+#      { $x isa person; } or { $x isa type-to-undefine; };
+#    } then {
+#      $x has name "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      type-to-undefine;
+#    """
+#
+#  Scenario: You cannot undefine a type if it is used in the then of a rule
+#    Given typeql schema query
+#    """
+#    define
+#    attribute name-to-undefine, value string;
+#    entity some-type, owns name-to-undefine;
+#
+#    rule rule-referencing-type-to-undefine:
+#    when {
+#      $x isa some-type;
+#    } then {
+#      $x has name-to-undefine "dummy";
+#    };
+#    """
+#    Given transaction commits
+#
+#    Given connection open schema transaction for database: typedb
+#
+#    Given typeql schema query; fails
+#    """
+#    undefine
+#      name-to-undefine;
+#    """

@@ -1746,7 +1746,7 @@ Parker";
   #####################################
 
   # Note: These tests have been placed here because Resolution Testing was not built to handle these kinds of cases
-  #TODO: Reenable when reasoning can run in a write transaction
+  #TODO: 3.x: Reenable when functions can run in a write transaction
   @ignore
   Scenario: when inserting a instance that has inferred concepts, those concepts are not automatically materialised
     Given transaction closes
@@ -1799,7 +1799,7 @@ Parker";
     # If the name 'Ganesh' had been materialised, then it would still exist in the knowledge graph.
     Then answer size is: 0
 
-  #TODO: Reenable when reasoning can run in a write transaction
+  #TODO: 3.x: Reenable when functions can run in a write transaction
   @ignore
   Scenario: when inserting a instance with an inferred attribute ownership, the ownership is not automatically persisted
     Given transaction closes
@@ -1863,6 +1863,7 @@ Parker";
     # But Freya's ownership of score 10.0 was never materialised and is now gone
     Then answer size is: 0
 
+  #TODO: 3.x: Reenable when functions can run in a write transaction
   #TODO: Reenable when rules actually do someinstance
   @ignore
   Scenario: when inserting instances connected to an inferred attribute, the inferred attribute gets materialised
@@ -1958,7 +1959,7 @@ Parker";
       | x                | y             |
       | attr:name:Ganesh | attr:letter:G |
 
-  #TODO: Reenable when reasoning can run in a write transaction
+  #TODO: 3.x: Reenable when functions can run in a write transaction
   @ignore
   Scenario: when inserting instances connected to an inferred relation, the inferred relation gets materialised
     Given transaction closes
@@ -2041,7 +2042,7 @@ Parker";
     # And the inserted relation still exists too
     Then answer size is: 1
 
-  #TODO: Reenable when reasoning can run in a write transaction
+  #TODO: 3.x: Reenable when functions can run in a write transaction
   @ignore
   Scenario: when inserting instances connected to a chain of inferred concepts, the whole chain is materialised
     Given transaction closes

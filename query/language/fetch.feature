@@ -2260,7 +2260,7 @@ Feature: TypeQL Fetch Query
       """
 
 
-  # TODO: Uncomment when expressions allow function calling with math operations
+  # TODO: 3.x: Uncomment when expressions allow function calling with math operations
 #  Scenario: fetch can use an expression calling a function
 #    When get answers of typeql read query
 #      """

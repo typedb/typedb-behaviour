@@ -366,6 +366,7 @@ Feature: TypeQL Reduce Queries
       reduce $min = min($x);
       """
 
+  # TODO: 3.x: Commented out rows in the example table
   Scenario Outline: an error is thrown when getting the '<reduction>' of attributes that have the inapplicable type, '<type>'
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -505,7 +506,7 @@ Feature: TypeQL Reduce Queries
 #      | key:ref:2 | value:integer:3 |
 #      | key:ref:3 | value:integer:3 |
 
-  # TODO: re-enable after deduplicating identical players matched in the same relation
+  # TODO: 3.x: Needs role-player deduplication
 #  Scenario: the size of answer groups is still computed correctly when restricting variables with 'select'
 #    Given connection open write transaction for database: typedb
 #    Given typeql write query
