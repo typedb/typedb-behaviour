@@ -975,7 +975,7 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'family-relation:member' should be inherited without specialization"
+    Then typeql schema query; fails with a message containing: "'family-relation:member' must be inherited without specialization"
       """
       define
       relation fathership relates father as member;

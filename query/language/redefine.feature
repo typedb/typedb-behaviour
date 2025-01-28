@@ -572,7 +572,7 @@ Feature: TypeQL Redefine Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'empty-relation:empty-role' should be inherited without specialization"
+    Then typeql schema query; fails with a message containing: "'empty-relation:empty-role' must be inherited without specialization"
       """
       redefine internship relates intern as empty-role;
       """
