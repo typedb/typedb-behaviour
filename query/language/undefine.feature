@@ -668,7 +668,7 @@ Feature: TypeQL Undefine Query
     When transaction closes
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates employee'"
+    Then typeql schema query; fails with a message containing: "there is no defined 'internship relates employee'"
       """
       undefine relates employee from internship;
       """
@@ -780,7 +780,7 @@ Feature: TypeQL Undefine Query
     Examples:
       | value_type | attr       |
       | string     | colour     |
-      | integer       | age        |
+      | integer    | age        |
       | double     | height     |
       | boolean    | is-awake   |
       | datetime   | birth-date |
@@ -1165,7 +1165,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'part-time-employment' does not relate the role 'employment:employee'"
+    Then typeql schema query; fails with a message containing: "there is no defined 'part-time-employment relates employee'"
       """
       undefine relates employee from part-time-employment;
       """
@@ -1179,9 +1179,30 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'user' does not play the role 'employment:employee'"
+    Then typeql schema query; fails with a message containing: "The relation type 'part-time-employment' does not relate role 'employee'"
       """
       undefine @card from part-time-employment relates employee;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      undefine @card from part-time-employment relates employment:employee;
+      """
+
+
+  Scenario: undefining abstract annotation from a specialized relates is not allowed
+    When typeql schema query
+      """
+      define relation part-time-employment sub employment, relates part-time-employee as employee;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The relation type 'part-time-employment' does not relate role 'employee'"
+      """
+      undefine @abstract from part-time-employment relates employee;
       """
 
   ############################
@@ -1275,7 +1296,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'user' does not play the role 'employment:employee'"
+    Then typeql schema query; fails with a message containing: "Cannot unset 'plays employment:employee' constraint for 'user' inherited from 'person'"
       """
       undefine plays employment:employee from user;
       """
@@ -1422,7 +1443,7 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "'user' does not own attribute type 'email'"
+    Then typeql schema query; fails with a message containing: "Cannot unset 'owns email' constraint for 'user' inherited from 'person'"
       """
       undefine owns email from user;
       """
