@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Get Query with Expressions
+Feature: TypeQL Query with Expressions
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
@@ -45,7 +45,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "MultipleAssignmentsForSingleVariable"
+    Then typeql read query; fails with a message containing: "assigned to multiple times"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -58,7 +58,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "MultipleAssignmentsForSingleVariable"
+    Then typeql read query; fails with a message containing: "assigned to multiple times"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -86,7 +86,7 @@ Feature: TypeQL Get Query with Expressions
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "CircularDependencyInExpressions"
+    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -97,7 +97,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "CircularDependencyInExpressions"
+    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
     """
       match
         $x isa person, has age $a, has age $h;
@@ -597,7 +597,7 @@ Feature: TypeQL Get Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "DivisionFailed"
+    Then typeql read query; fails with a message containing: "Division failed"
       """
       match
         $p isa person, has age $a;
