@@ -1869,7 +1869,8 @@ Feature: TypeDB Driver
       """
     Then answer unwraps as ok; fails
     Then answer unwraps as concept documents; fails
-    Then answer get row(0) get variable(unknown); fails with a message containing: "The variable 'unknown' does not exist"
+    Then answer get row(0) get variable(unknown); fails with a message containing: "Cannot get concept from a concept row by variable 'unknown'"
+    Then answer get row(0) get variable by index(15); fails with a message containing: "Cannot get concept from a concept row by index '15'"
     Then answer get row(0) get variable(); fails
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
