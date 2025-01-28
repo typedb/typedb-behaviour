@@ -113,6 +113,10 @@ Feature: Function Definition
       | value:integer:5 |
     Given transaction closes
 
+  # TODO: 3.x:
+  Scenario: Functions with undefined types in their signature error.
+    TODO
+
 
   Scenario: Functions are stratified wrt negation
     Given connection open schema transaction for database: typedb
@@ -171,6 +175,8 @@ Feature: Function Definition
       $p isa person;
       let $nickname in nickname_of($p);
     """
+
+    # TODO: 3.x: Add the negation in just one branch of a disjunction.
 
 
   Scenario: Functions are stratified wrt aggregates

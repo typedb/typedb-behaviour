@@ -14,10 +14,10 @@ files = [
     "insert.feature",
     "match.feature",
     "modifiers.feature",
+    "negation.feature",
     "pipelines.feature",
     "redefine.feature",
     "reduce.feature",
-    "rule-validation.feature",
     "undefine.feature",
     "update.feature",
 ]
