@@ -1010,6 +1010,24 @@ Feature: TypeDB Driver
   # CONCEPTS #
   ############
 
+  Scenario: Driver processes empty concepts correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    When get answers of typeql write query
+      """
+      match not { $empty isa person; };
+      insert $p isa person;
+      """
+    Then answer type is: concept rows
+    Then answer size is: 1
+
+    Then answer get row(0) get variable(empty) is empty
+    Then answer get row(0) get variable(p) is not empty
+
+
   Scenario: Driver processes entity types correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
