@@ -113,7 +113,7 @@ Feature: Function Definition
       | value:integer:5 |
     Given transaction closes
 
-  # TODO: 3.x:
+
   Scenario: Functions with undefined types in their signature error.
     Given connection open schema transaction for database: typedb
     When typeql schema query
