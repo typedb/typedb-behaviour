@@ -213,8 +213,8 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(parentship) get role(parent) get supertype does not exist
     Then relation(parentship) get role(child) get supertype does not exist
-    Then relation(parentship) get relates(parentship:parent) is specialising: false
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(parentship) get relates(parentship:parent) is implicit: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(fathership) get supertypes contain:
       | parentship |
     Then relation(fathership) get role(father) get supertypes contain:
@@ -408,8 +408,8 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
     Then relation(fathership) get declared relates do not contain:
       | parentship:child |
-    Then relation(parentship) get relates(parentship:parent) is specialising: false
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(parentship) get relates(parentship:parent) is implicit: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(parentship) get role(parent) get declared annotations do not contain: @abstract
     Then relation(parentship) get role(parent) get constraints do not contain: @abstract
     Then relation(parentship) get constraints for related role(parentship:parent) do not contain: @abstract
@@ -458,9 +458,9 @@ Feature: Concept Relation Type and Role Type
       | fathership:father |
       | parentship:child  |
       | parentship:parent |
-    Then relation(fathership) get relates(fathership:father) is specialising: false
-    Then relation(fathership) get relates(parentship:child) is specialising: false
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(fathership:father) is implicit: false
+    Then relation(fathership) get relates(parentship:child) is implicit: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(fathership) get declared relates contain:
       | fathership:father |
       | parentship:parent |
@@ -472,9 +472,9 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
       | parentship:child  |
       | parentship:parent |
-    Then relation(fathership) get relates(fathership:father) is specialising: false
-    Then relation(fathership) get relates(parentship:child) is specialising: false
-    Then relation(fathership) get relates(parentship:parent) is specialising: false
+    Then relation(fathership) get relates(fathership:father) is implicit: false
+    Then relation(fathership) get relates(parentship:child) is implicit: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
     Then relation(fathership) get declared relates contain:
       | fathership:father |
     Then relation(fathership) get declared relates do not contain:
@@ -487,9 +487,9 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
       | parentship:child  |
       | parentship:parent |
-    Then relation(fathership) get relates(fathership:father) is specialising: false
-    Then relation(fathership) get relates(parentship:child) is specialising: false
-    Then relation(fathership) get relates(parentship:parent) is specialising: false
+    Then relation(fathership) get relates(fathership:father) is implicit: false
+    Then relation(fathership) get relates(parentship:child) is implicit: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
     Then relation(fathership) get declared relates contain:
       | fathership:father |
     Then relation(fathership) get declared relates do not contain:
@@ -507,7 +507,7 @@ Feature: Concept Relation Type and Role Type
     Then relation(fathership) get role(father) get supertype: parentship:parent
     Then relation(fathership) get relates contain:
       | parentship:parent |
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: mothership
@@ -516,16 +516,16 @@ Feature: Concept Relation Type and Role Type
     When relation(mothership) get role(mother) set specialise: parent
     Then relation(mothership) get relates contain:
       | parentship:parent |
-    Then relation(mothership) get relates(parentship:parent) is specialising: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(fathership) get relates contain:
       | parentship:parent |
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(mothership) get relates contain:
       | parentship:parent |
-    Then relation(mothership) get relates(parentship:parent) is specialising: true
-    Then relation(parentship) get relates(parentship:parent) is specialising: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    Then relation(parentship) get relates(parentship:parent) is implicit: false
 
   Scenario: Relation types cannot redeclare inherited related role types
     When create relation type: parentship
@@ -549,7 +549,7 @@ Feature: Concept Relation Type and Role Type
       | parentship:parent |
     Then relation(fathership) get relates do not contain:
       | fathership:parent |
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     When transaction commits
     When connection open schema transaction for database: typedb
     When create relation type: biological-fathership
@@ -581,8 +581,8 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:spouse |
       | parentship:parent |
-    Then relation(biological-fathership) get relates(parentship:parent) is specialising: true
-    Then relation(biological-fathership) get relates(fathership:father) is specialising: false
+    Then relation(biological-fathership) get relates(parentship:parent) is implicit: true
+    Then relation(biological-fathership) get relates(fathership:father) is implicit: false
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(biological-fathership) get relates do not contain:
@@ -596,8 +596,8 @@ Feature: Concept Relation Type and Role Type
       | parentship:child  |
       | fathership:spouse |
       | parentship:parent |
-    Then relation(biological-fathership) get relates(parentship:parent) is specialising: true
-    Then relation(biological-fathership) get relates(fathership:father) is specialising: false
+    Then relation(biological-fathership) get relates(parentship:parent) is implicit: true
+    Then relation(biological-fathership) get relates(fathership:father) is implicit: false
 
   Scenario: Relation types cannot redeclare inherited role without changes
     When create relation type: parentship
@@ -679,14 +679,14 @@ Feature: Concept Relation Type and Role Type
       | split-parentship:father |
       | split-parentship:mother |
       | parentship:parent       |
-    Then relation(split-parentship) get relates(parentship:parent) is specialising: true
+    Then relation(split-parentship) get relates(parentship:parent) is implicit: true
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(split-parentship) get relates contain:
       | split-parentship:father |
       | split-parentship:mother |
       | parentship:parent       |
-    Then relation(split-parentship) get relates(parentship:parent) is specialising: true
+    Then relation(split-parentship) get relates(parentship:parent) is implicit: true
 
   Scenario: Relation types cannot unset supertype while having relates specialise
     When create relation type: parentship
@@ -734,20 +734,20 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set specialise: parent
     When create relation type: subfathership
     When relation(subfathership) set supertype: fathership
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
-    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(subfathership) get relates(parentship:parent) is implicit: true
     When relation(subfathership) create role: subfather
     Then relation(subfathership) get role(subfather) set specialise: parent; fails
     When relation(fathership) get role(father) unset specialise
-    Then relation(fathership) get relates(parentship:parent) is specialising: false
-    Then relation(subfathership) get relates(parentship:parent) is specialising: false
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(subfathership) get relates(parentship:parent) is implicit: false
     Then relation(subfathership) get role(subfather) set specialise: parent
-    Then relation(fathership) get relates(parentship:parent) is specialising: false
-    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(subfathership) get relates(parentship:parent) is implicit: true
     When transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get relates(parentship:parent) is specialising: false
-    Then relation(subfathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(subfathership) get relates(parentship:parent) is implicit: true
     Then relation(fathership) get role(father) get supertype does not exist
     Then relation(subfathership) get role(subfather) get supertype: parentship:parent
 
@@ -764,29 +764,29 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(family) get role(father) get supertype: parentship:parent
     Then relation(family) get role(mother) get supertype: parentship:parent
-    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get relates(parentship:parent) is implicit: true
     Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
     When relation(family) get role(mother) unset specialise
     Then relation(family) get role(father) get supertype: parentship:parent
     Then relation(family) get role(mother) get supertype does not exist
-    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get relates(parentship:parent) is implicit: true
     Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
     Then relation(family) get role(father) get supertype: parentship:parent
     Then relation(family) get role(mother) get supertype does not exist
-    Then relation(family) get relates(parentship:parent) is specialising: true
+    Then relation(family) get relates(parentship:parent) is implicit: true
     Then relation(family) get constraints for related role(parentship:parent) contain: @abstract
     When relation(family) get role(father) unset specialise
     Then relation(family) get role(father) get supertype does not exist
     Then relation(family) get role(mother) get supertype does not exist
-    Then relation(family) get relates(parentship:parent) is specialising: false
+    Then relation(family) get relates(parentship:parent) is implicit: false
     Then relation(family) get constraints for related role(parentship:parent) do not contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
     Then relation(family) get role(father) get supertype does not exist
     Then relation(family) get role(mother) get supertype does not exist
-    Then relation(family) get relates(parentship:parent) is specialising: false
+    Then relation(family) get relates(parentship:parent) is implicit: false
     Then relation(family) get constraints for related role(parentship:parent) do not contain: @abstract
 
 ########################
@@ -1447,9 +1447,9 @@ Feature: Concept Relation Type and Role Type
     When relation(rel1) create role: role1
     # role00 is specialised by a role of rel1's subtype, but it can also be specialised by rel1 itself
     Then relation(rel1) get role(role1) set specialise: role00
-    Then relation(rel00) get relates(rel00:role00) is specialising: false
-    Then relation(rel1) get relates(rel00:role00) is specialising: true
-    Then relation(rel2) get relates(rel00:role00) is specialising: true
+    Then relation(rel00) get relates(rel00:role00) is implicit: false
+    Then relation(rel1) get relates(rel00:role00) is implicit: true
+    Then relation(rel2) get relates(rel00:role00) is implicit: true
     When transaction closes
     When connection open schema transaction for database: typedb
     When create relation type: rel3
@@ -1895,7 +1895,7 @@ Feature: Concept Relation Type and Role Type
     When relation(fathership) get role(father) set ordering: ordered
     When relation(fathership) get role(father) set specialise: parent
     Then relation(fathership) get role(father) get supertype: parentship:parent
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(fathership) get constraints for related role(parentship:parent) contain: @abstract
     When transaction commits
     When connection open schema transaction for database: typedb
@@ -1904,13 +1904,13 @@ Feature: Concept Relation Type and Role Type
     When relation(mothership) create role: mother
     When relation(mothership) get role(mother) set ordering: ordered
     When relation(mothership) get role(mother) set specialise: parent
-    Then relation(mothership) get relates(parentship:parent) is specialising: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
     Then relation(mothership) get constraints for related role(parentship:parent) contain: @abstract
     When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(fathership) get relates(parentship:parent) is specialising: true
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
     Then relation(fathership) get constraints for related role(parentship:parent) contain: @abstract
-    Then relation(mothership) get relates(parentship:parent) is specialising: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
     Then relation(mothership) get constraints for related role(parentship:parent) contain: @abstract
 
   Scenario: Relation types cannot redeclare inherited ordered role types
@@ -3096,11 +3096,11 @@ Feature: Concept Relation Type and Role Type
       | parentship:custom-role             |
       | parentship:second-custom-role      |
       | fathership:specialised-custom-role |
-    Then relation(fathership) get relates(custom-role) is specialising: false
-    Then relation(fathership) get relates(second-custom-role) is specialising: true
-    Then relation(fathership) get relates(specialised-custom-role) is specialising: false
-    Then relation(parentship) get relates(custom-role) is specialising: false
-    Then relation(parentship) get relates(second-custom-role) is specialising: false
+    Then relation(fathership) get relates(custom-role) is implicit: false
+    Then relation(fathership) get relates(second-custom-role) is implicit: true
+    Then relation(fathership) get relates(specialised-custom-role) is implicit: false
+    Then relation(parentship) get relates(custom-role) is implicit: false
+    Then relation(parentship) get relates(second-custom-role) is implicit: false
     Then relation(parentship) get role(custom-role) get constraints contain: @card(<args>)
     Then relation(fathership) get role(specialised-custom-role) get constraints do not contain: @card(<args>)
     Then relation(fathership) get role(specialised-custom-role) get declared annotations do not contain: @card(<args>)
