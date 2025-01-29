@@ -460,6 +460,14 @@ Parker";
       | p         |
       | key:ref:0 |
 
+
+  Scenario: inserting an ownership of an unbound attribute variable fails
+    Then typeql write query
+      """
+      insert $x isa person, has $e;
+      """
+
+
   ########################################
   # ADDING ATTRIBUTES TO EXISTING instanceS #
   ########################################
