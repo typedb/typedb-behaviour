@@ -408,6 +408,7 @@ Feature: Negation Resolution
     Given transaction commits
 
     Given connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match $x has $r;
       """
