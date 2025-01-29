@@ -323,7 +323,7 @@ Feature: TypeQL Match Clause
       | label:ref   |
 
 
-  # TODO: handle type statement annotations
+  # TODO: 3.x: handle type statement annotations
   # Scenario: directly declared 'owns' annotations are queryable
   #   When get answers of typeql read query
   #     """
@@ -361,8 +361,8 @@ Feature: TypeQL Match Clause
   #     | label:person | label:email |
 
 
-  # TODO: handle different annotations for different types/capabilities
-  # TODO: handle type statement annotations
+  # TODO: 3.x: handle different annotations for different types/capabilities
+  # TODO: 3.x: handle type statement annotations
   # Scenario: inherited 'owns' annotations are queryable
   #   Given typeql schema query
   #     """
@@ -575,7 +575,7 @@ Feature: TypeQL Match Clause
       | key:ref:2 | label:dog    |
 
 
-  # TODO: handle type statement annotations
+  # TODO: 3.x: handle type statement annotations
   # Scenario: 'owns @key' matches types that own the specified attribute type as a key
   #   Given typeql schema query
   #     """
@@ -682,8 +682,6 @@ Feature: TypeQL Match Clause
       | label:internship           |
 
 
-  # TODO cannot currently query for schema with 'as'
-  @ignore
   Scenario: 'relates' with 'as' matches relation types that specialise the specified roleplayer
     Given typeql schema query
       """
@@ -734,14 +732,12 @@ Feature: TypeQL Match Clause
       | label:employment:employer |
 
 
-  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
-  @ignore
   Scenario: when matching by a concept iid that doesn't exist, an empty result is returned
     When get answers of typeql read query
       """
       match
-        $x iid 0x83cb2;
-        $y iid 0x4ba92;
+        $x iid 0x1e00000000001234567890;
+        $y iid 0x1e00000000001234567890;
       """
     Then answer size is: 0
 
@@ -1031,62 +1027,61 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:2 |
 
 
-  # TODO: make sure roleplayers in the same `links` constraint are distinct
-  # expected the number of identifier entries to match the number of answers, found 6 entries and 9 answers
-  # Scenario: all combinations of players in a relation can be retrieved
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   When typeql write query
-  #     """
-  #     insert $p isa person, has ref 0;
-  #     $c isa company, has ref 1;
-  #     $c2 isa company, has ref 2;
-  #     $r links (employee: $p, employer: $c, employer: $c2), isa employment, has ref 3;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   Then get answers of typeql read query
-  #     """
-  #     match $r links ($x, $y), isa employment;
-  #     """
-  #   # here
-  #   Then uniquely identify answer concepts
-  #     | x         | y         | r         |
-  #     | key:ref:0 | key:ref:1 | key:ref:3 |
-  #     | key:ref:1 | key:ref:0 | key:ref:3 |
-  #     | key:ref:0 | key:ref:2 | key:ref:3 |
-  #     | key:ref:2 | key:ref:0 | key:ref:3 |
-  #     | key:ref:1 | key:ref:2 | key:ref:3 |
-  #     | key:ref:2 | key:ref:1 | key:ref:3 |
+   Scenario: all combinations of players in a relation can be retrieved
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     When typeql write query
+       """
+       insert $p isa person, has ref 0;
+       $c isa company, has ref 1;
+       $c2 isa company, has ref 2;
+       $r links (employee: $p, employer: $c, employer: $c2), isa employment, has ref 3;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     Then get answers of typeql read query
+       """
+       match $r links ($x, $y), isa employment;
+       """
+     # here
+     Then uniquely identify answer concepts
+       | x         | y         | r         |
+       | key:ref:0 | key:ref:1 | key:ref:3 |
+       | key:ref:1 | key:ref:0 | key:ref:3 |
+       | key:ref:0 | key:ref:2 | key:ref:3 |
+       | key:ref:2 | key:ref:0 | key:ref:3 |
+       | key:ref:1 | key:ref:2 | key:ref:3 |
+       | key:ref:2 | key:ref:1 | key:ref:3 |
 
 
-  # TODO: this should only be possible with ordered role players?
-  # Scenario: repeated role players are retrieved singly when queried doubly
-  #   Given typeql schema query
-  #     """
-  #     define
-  #     entity some-entity plays symmetric:player, owns ref @key;
-  #     relation symmetric relates player, owns ref @key;
-  #     """
-  #   Given transaction commits
+   # TODO: 3.x: this should only be possible with ordered role players?
+   @ignore
+   Scenario: repeated role players are retrieved singly when queried doubly
+     Given typeql schema query
+       """
+       define
+       entity some-entity plays symmetric:player, owns ref @key;
+       relation symmetric relates player, owns ref @key;
+       """
+     Given transaction commits
 
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
-  #     """
-  #   Given transaction commits
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert $x isa some-entity, has ref 0; symmetric (player: $x, player: $x), has ref 1;
+       """
+     Given transaction commits
 
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $r links (player: $x, player: $x);
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x         | r         |
-  #     | key:ref:0 | key:ref:1 |
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $r links (player: $x, player: $x);
+       """
+     Then uniquely identify answer concepts
+       | x         | r         |
+       | key:ref:0 | key:ref:1 |
 
 
   Scenario: repeated role players are retrieved singly when queried singly
@@ -1115,105 +1110,107 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:1 |
 
 
-  # TODO: make sure roleplayers in the same `links` constraint are distinct
-  # Scenario: a mixture of variable and explicit roles can retrieve relations
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa company, has ref 0;
-  #     $y isa person, has ref 1;
-  #     (employer: $x, employee: $y) isa employment, has ref 2;
-  #     """
-  #   Given transaction commits
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match (employer: $e, $role: $x) isa employment;
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | e         | x         | role                      |
-  #     | key:ref:0 | key:ref:1 | label:employment:employee |
+   Scenario: a mixture of variable and explicit roles can retrieve relations
+     Given transaction commits
 
-  @ignore
-  Scenario: A relation can play a role in itself
-    Given typeql schema query
-      """
-      define
-      relation comparator
-        relates compared,
-        plays comparator:compared;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $rlinks isa comparator (compared:$r);
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $rlinks isa comparator (compared:$r);
-      """
-    Then answer size is: 1
-
-  @ignore
-  Scenario: A relation can play a role in itself and have additional roleplayers
-    Given typeql schema query
-      """
-      define
-      relation comparator
-        relates compared,
-        plays comparator:compared;
-      entity variable
-        plays comparator:compared;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $rlinks isa comparator (compared: $v, compared:$r);
-      $v isa variable;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $rlinks isa comparator (compared: $v, compared:$r);
-      """
-    Then answer size is: 1
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa company, has ref 0;
+       $y isa person, has ref 1;
+       (employer: $x, employee: $y) isa employment, has ref 2;
+       """
+     Given transaction commits
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match (employer: $e, $role: $x) isa employment;
+       """
+     Then uniquely identify answer concepts
+       | e         | x         | role                      |
+       | key:ref:0 | key:ref:1 | label:employment:employee |
 
 
-  # TODO: make sure roleplayers in the same `links` constraint are distinct
-  # assertion `left == right` failed | left: 2 | right: 0
-  # Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has ref 1;
-  #     $y isa person, has ref 2;
-  #     (friend: $x, friend: $y) isa friendship, has ref 0;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match (friend: $x, friend: $x) isa friendship;
-  #     """
-  #   Then answer size is: 0
+#   TODO: 3.x: Low hanging
+#   panicked at compiler/executable/match_/instructions/mod.rs:93:9:
+#   assertion failed: existing.is_none()
+#  Scenario: A relation can play a role in itself
+#    Given typeql schema query
+#      """
+#      define
+#      relation comparator
+#        relates compared,
+#        plays comparator:compared;
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert
+#      $r isa comparator (compared:$r);
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $r isa comparator (compared:$r);
+#      """
+#    Then answer size is: 1
+
+#   TODO: 3.x: Low hanging
+#   panicked at compiler/executable/match_/instructions/mod.rs:93:9:
+#   assertion failed: existing.is_none()
+#  Scenario: A relation can play a role in itself and have additional roleplayers
+#    Given typeql schema query
+#      """
+#      define
+#      relation comparator
+#        relates compared @card(0..),
+#        plays comparator:compared;
+#      entity variable
+#        plays comparator:compared;
+#      """
+#    Given transaction commits
+#
+#    Given connection open write transaction for database: typedb
+#    Given typeql write query
+#      """
+#      insert
+#      $r isa comparator (compared: $v, compared:$r);
+#      $v isa variable;
+#      """
+#    Given transaction commits
+#
+#    Given connection open read transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $r  isa comparator (compared: $v, compared:$r);
+#      """
+#    Then answer size is: 1
+
+
+   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa person, has ref 1;
+       $y isa person, has ref 2;
+       (friend: $x, friend: $y) isa friendship, has ref 0;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match (friend: $x, friend: $x) isa friendship;
+       """
+     Then answer size is: 0
 
 
   Scenario: matching a chain of relations only returns answers if there is a chain of the required length
@@ -1266,54 +1263,52 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
-  # TODO: distinct answers
-  # expected the number of identifier entries to match the number of answers, found 1 entries and 3 answers
-  # Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
-  #   Given typeql schema query
-  #     """
-  #     define
-  #     relation residency
-  #       relates resident,
-  #       owns ref @key;
-  #     person plays residency:resident;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has ref 0;
-  #     $e links (employee: $x), isa employment, has ref 1;
-  #     $f links (friend: $x), isa friendship, has ref 2;
-  #     $r links (resident: $x), isa residency, has ref 3;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   Given get answers of typeql read query
-  #     """
-  #     match relation $t; $r isa $t;
-  #     """
-  #   Given uniquely identify answer concepts
-  #     | r         |
-  #     | key:ref:1 |
-  #     | key:ref:2 |
-  #     | key:ref:3 |
-  #   When get answers of typeql read query
-  #     """
-  #     match ($x) isa $_;
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x         |
-  #     | key:ref:0 |
-  #   When get answers of typeql read query
-  #     """
-  #     match ($x);
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x         |
-  #     | key:ref:0 |
+   Scenario: when multiple relation instances exist with the same roleplayer, matching that player returns just 1 answer
+     Given typeql schema query
+       """
+       define
+       relation residency
+         relates resident,
+         owns ref @key;
+       person plays residency:resident;
+       """
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa person, has ref 0;
+       $e links (employee: $x), isa employment, has ref 1;
+       $f links (friend: $x), isa friendship, has ref 2;
+       $r links (resident: $x), isa residency, has ref 3;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     Given get answers of typeql read query
+       """
+       match relation $t; $r isa $t;
+       """
+     Given uniquely identify answer concepts
+       | r         |
+       | key:ref:1 |
+       | key:ref:2 |
+       | key:ref:3 |
+     When get answers of typeql read query
+       """
+       match ($x) isa $_;
+       """
+     Then uniquely identify answer concepts
+       | x         |
+       | key:ref:0 |
+     When get answers of typeql read query
+       """
+       match ($x);
+       """
+     Then uniquely identify answer concepts
+       | x         |
+       | key:ref:0 |
 
 
   Scenario: an error is thrown when matching an entity type as if it were a role type
@@ -1365,92 +1360,93 @@ Feature: TypeQL Match Clause
       """
     Then transaction is open: true
 
-
+  # TODO: 3.x: Do we not want to allow multiple specialistaions of the same role?
   # [SVL13] Relation type 'hetero-marriage' is already specialised by a supertype for 'marriage:spouse'
-  # Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
-  #   Given typeql schema query
-  #     """
-  #     define
-  #     person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
-  #     relation marriage relates spouse @card(0..);
-  #     relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
-  #     relation civil-marriage sub marriage;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $a isa person, has ref 1;
-  #     $b isa person, has ref 2;
-  #     (wife: $a, husband: $b) isa hetero-marriage;
-  #     (spouse: $a, spouse: $b) isa civil-marriage;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (wife: $x, husband: $y), isa hetero-marriage;
-  #     """
-  #   Then answer size is: 1
-  #   Then typeql read query; fails
-  #     """
-  #     match $m links (wife: $x, husband: $y), isa civil-marriage;
-  #     """
-  #   Then transaction is open: false
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (wife: $x, husband: $y), isa marriage;
-  #     """
-  #   Then answer size is: 1
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (wife: $x, husband: $y);
-  #     """
-  #   Then answer size is: 1
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (spouse: $x, spouse: $y), isa hetero-marriage;
-  #     """
-  #   Then answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (spouse: $x, spouse: $y), isa civil-marriage;
-  #     """
-  #   Then answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (spouse: $x, spouse: $y), isa marriage;
-  #     """
-  #   Then answer size is: 4
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (spouse: $x, spouse: $y);
-  #     """
-  #   Then answer size is: 4
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (role: $x, role: $y), isa hetero-marriage;
-  #     """
-  #   Then answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (role: $x, role: $y), isa civil-marriage;
-  #     """
-  #   Then answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (role: $x, role: $y), isa marriage;
-  #     """
-  #   Then answer size is: 4
-  #   When get answers of typeql read query
-  #     """
-  #     match $m links (role: $x, role: $y);
-  #     """
-  #   Then answer size is: 4
+  @ignore
+   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
+     Given typeql schema query
+       """
+       define
+       person plays marriage:spouse, plays hetero-marriage:husband, plays hetero-marriage:wife;
+       relation marriage relates spouse @card(0..);
+       relation hetero-marriage sub marriage, relates husband as spouse, relates wife as spouse;
+       relation civil-marriage sub marriage;
+       """
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $a isa person, has ref 1;
+       $b isa person, has ref 2;
+       (wife: $a, husband: $b) isa hetero-marriage;
+       (spouse: $a, spouse: $b) isa civil-marriage;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $m links (wife: $x, husband: $y), isa hetero-marriage;
+       """
+     Then answer size is: 1
+     Then typeql read query; fails
+       """
+       match $m links (wife: $x, husband: $y), isa civil-marriage;
+       """
+     Then transaction is open: false
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $m links (wife: $x, husband: $y), isa marriage;
+       """
+     Then answer size is: 1
+     When get answers of typeql read query
+       """
+       match $m links (wife: $x, husband: $y);
+       """
+     Then answer size is: 1
+     When get answers of typeql read query
+       """
+       match $m links (spouse: $x, spouse: $y), isa hetero-marriage;
+       """
+     Then answer size is: 2
+     When get answers of typeql read query
+       """
+       match $m links (spouse: $x, spouse: $y), isa civil-marriage;
+       """
+     Then answer size is: 2
+     When get answers of typeql read query
+       """
+       match $m links (spouse: $x, spouse: $y), isa marriage;
+       """
+     Then answer size is: 4
+     When get answers of typeql read query
+       """
+       match $m links (spouse: $x, spouse: $y);
+       """
+     Then answer size is: 4
+     When get answers of typeql read query
+       """
+       match $m links (role: $x, role: $y), isa hetero-marriage;
+       """
+     Then answer size is: 2
+     When get answers of typeql read query
+       """
+       match $m links (role: $x, role: $y), isa civil-marriage;
+       """
+     Then answer size is: 2
+     When get answers of typeql read query
+       """
+       match $m links (role: $x, role: $y), isa marriage;
+       """
+     Then answer size is: 4
+     When get answers of typeql read query
+       """
+       match $m links (role: $x, role: $y);
+       """
+     Then answer size is: 4
 
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
@@ -1488,7 +1484,7 @@ Feature: TypeQL Match Clause
     Then answer size is: 1
 
 
-# TODO: Uncomment "as!" steps when it is implemented
+# TODO: 3.x: Uncomment "as!" steps when it is implemented
   Scenario: match 'as' pattern works similarly to `sub`
     Given typeql schema query
       """
@@ -1832,93 +1828,95 @@ Feature: TypeQL Match Clause
       | interval    | duration    | P1Y2M3DT4H5M6.789S       |
 
 
-  # TODO `like` / `contains`
-  # Scenario: 'contains' matches strings that contain the specified substring
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x "Seven Databases in Seven Weeks" isa name;
-  #     $y "Four Weddings and a Funeral" isa name;
-  #     $z "Fun Facts about Space" isa name;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $x contains "Fun";
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x                                     |
-  #     | attr:name:Four Weddings and a Funeral |
-  #     | attr:name:Fun Facts about Space       |
+   # TODO: 3.x: `like` / `contains`
+   @ignore
+   Scenario: 'contains' matches strings that contain the specified substring
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x "Seven Databases in Seven Weeks" isa name;
+       $y "Four Weddings and a Funeral" isa name;
+       $z "Fun Facts about Space" isa name;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $x contains "Fun";
+       """
+     Then uniquely identify answer concepts
+       | x                                     |
+       | attr:name:Four Weddings and a Funeral |
+       | attr:name:Fun Facts about Space       |
 
 
   # TODO `like` / `contains`
   # NOTE for implementation: we should be using Unicode full case folding for this, not just `.to_lowercase`
-  # Scenario: 'contains' performs a case-insensitive match
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x "The Phantom of the Opera" isa name;
-  #     $y "Pirates of the Caribbean" isa name;
-  #     $z "Mr. Bean" isa name;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $x contains "Bean";
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x                                  |
-  #     | attr:name:Pirates of the Caribbean |
-  #     | attr:name:Mr. Bean                 |
+   @ignore
+   Scenario: 'contains' performs a case-insensitive match
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x "The Phantom of the Opera" isa name;
+       $y "Pirates of the Caribbean" isa name;
+       $z "Mr. Bean" isa name;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $x contains "Bean";
+       """
+     Then uniquely identify answer concepts
+       | x                                  |
+       | attr:name:Pirates of the Caribbean |
+       | attr:name:Mr. Bean                 |
 
 
-  # TODO `like` / `contains`
-  # Scenario: 'like' matches strings that match the specified regex
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x "ABC123" isa name;
-  #     $y "123456" isa name;
-  #     $z "9" isa name;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match $x like "^[0-9]+$";
-  #     """
-  #   Then uniquely identify answer concepts
-  #     | x                |
-  #     | attr:name:123456 |
-  #     | attr:name:9      |
+  # TODO: 3.x: `like` / `contains`
+   @ignore
+   Scenario: 'like' matches strings that match the specified regex
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x "ABC123" isa name;
+       $y "123456" isa name;
+       $z "9" isa name;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match $x like "^[0-9]+$";
+       """
+     Then uniquely identify answer concepts
+       | x                |
+       | attr:name:123456 |
+       | attr:name:9      |
 
 
-  # TODO we can't test like this because the IID is not a valid encoded IID -- need to rethink this test
-  @ignore
+   # TODO: 3.x: Do we need a more realistic IID for the attribute?
   Scenario: when querying for a non-existent attribute type iid, an empty result is returned
     When get answers of typeql read query
       """
-      match $x has name $y; $x iid 0x83cb2;
+      match $x has name $y; $x iid 0x1e00000000001234567890;
       """
     Then answer size is: 0
     When get answers of typeql read query
       """
-      match $x has name $y; $y iid 0x83cb2;
+      match $x has name $y; $y iid 0x1e00000000001234567890;
       """
     Then answer size is: 0
 
@@ -2548,125 +2546,124 @@ Feature: TypeQL Match Clause
     Then answer size is: 8
 
 
-  # TODO: make sure roleplayers in the same `links` constraint are distinct
-  # Scenario: all relations and their types can be retrieved
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has name "Bertie", has ref 0;
-  #     $y isa person, has name "Angelina", has ref 1;
-  #     $r links (friend: $x, friend: $y), isa friendship, has ref 2;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   Given get answers of typeql read query
-  #     """
-  #     match relation $t; $r isa $t;
-  #     """
-  #   Given answer size is: 1
-  #   Given get answers of typeql read query
-  #     """
-  #     match ($x, $y);
-  #     """
-  #   # 2 permutations of the roleplayers
-  #   Given answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match ($x, $y) isa $type;
-  #     """
-  #   # 2 permutations of the roleplayers
-  #   Then answer size is: 2
+   Scenario: all relations and their types can be retrieved
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa person, has name "Bertie", has ref 0;
+       $y isa person, has name "Angelina", has ref 1;
+       $r links (friend: $x, friend: $y), isa friendship, has ref 2;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     Given get answers of typeql read query
+       """
+       match relation $t; $r isa $t;
+       """
+     Given answer size is: 1
+     Given get answers of typeql read query
+       """
+       match ($x, $y);
+       """
+     # 2 permutations of the roleplayers
+     Given answer size is: 2
+     When get answers of typeql read query
+       """
+       match ($x, $y) isa $type;
+       """
+     # 2 permutations of the roleplayers
+     Then answer size is: 2
 
 
-  # TODO ???
-  # [QEX8] Error analysing query. 
-  # Cause: [QUA1] Type inference error while compiling query annotations.
-  # Cause: [INF5] Type-inference derived an empty-set for some variable)
-  # Scenario: variable role types with relations playing roles
-  #   Given typeql schema query
-  #     """
-  #     define
-  #       relation parent relates nested, owns id;
-  #       relation nested relates player, plays parent:nested;
-  #       entity player owns id, plays nested:player;
-  #       attribute id value string;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #       $i1 "i1" isa id;
-  #       $i2 "i2" isa id;
-  #       $p1 isa player, has id $i1;
-  #       $p2 isa player, has id $i2;
-  #       $n1 links (player: $p1), isa nested;
-  #       $n2 links (player: $p2), isa nested;
-  #       $p1 links (nested: $n1), isa parent, has id $i1;
-  #       $p2 links (nested: $n2), isa parent, has id $i2;
-  #     """
-  #   Given transaction commits
-  #   Given connection open read transaction for database: typedb
-  #
-  #   # Force traversal of role edges in each direction: See typedb/typedb#6925
-  #   When get answers of typeql read query
-  #     """
-  #     match
-  #       $boundId1 = "i1";
-  #
-  #       $p links ($role-nested: $n), isa parent, has id $boundId1;
-  #       $n links ($role-player: $i), isa nested;
-  #
-  #       not { $role-nested sub! $r; };
-  #       not { $role-player sub! $r; };
-  #     """
-  #   Then answer size is: 1
-  #
-  #   When get answers of typeql read query
-  #     """
-  #     match
-  #       $boundId1 = "i1";
-  #
-  #       $p links ($role-nested: $n), isa parent, has id $i;
-  #       $n links ($role-player: $p), isa nested;
-  #       $p has $boundId1;
-  #
-  #       not { $role-nested sub! $r; };
-  #       not { $role-player sub! $r; };
-  #     """
-  #   Then answer size is: 1
+#   TODO: 3.x: Low hanging
+#   panicked at executor/instruction/sub_executor.rs:61:9:
+#   assertion failed: supertypes.len() > 0
+#   Scenario: variable role types with relations playing roles
+#     Given typeql schema query
+#       """
+#       define
+#         relation parent relates nested, owns id;
+#         relation nested relates player, plays parent:nested;
+#         entity player owns id, plays nested:player;
+#         attribute id value string;
+#       """
+#     Given transaction commits
+#
+#     Given connection open write transaction for database: typedb
+#     Given typeql write query
+#       """
+#       insert
+#         $i1 isa id "i1";
+#         $i2 isa id "i2";
+#         $pl1 isa player, has id $i1;
+#         $pl2 isa player, has id $i2;
+#         $n1 isa nested, links (player: $pl1);
+#         $n2 isa nested, links (player: $pl2);
+#         $par1 isa parent, links (nested: $n1), has id $i1;
+#         $par2 isa parent, links (nested: $n2), has id $i2;
+#       """
+#     Given transaction commits
+#     Given connection open read transaction for database: typedb
+#
+#     # Force traversal of role edges in each direction: See typedb/typedb#6925
+#     When get answers of typeql read query
+#       """
+#       match
+#         let $boundId1 = "i1";
+#
+#         $p links ($role-nested: $n), isa parent, has id == $boundId1;
+#         $n links ($role-player: $i), isa nested;
+#
+#         not { $role-nested sub! $r1; };
+#         not { $role-player sub! $r2; };
+#       """
+#     Then answer size is: 1
+#
+#     When get answers of typeql read query
+#       """
+#       match
+#         let $boundId1 = "i1";
+#
+#         $p links ($role-nested: $n), isa parent, has id $i;
+#         $n links ($role-player: $p), isa nested;
+#         $p has $pid;
+#         $pid == $boundId1;
+#
+#         not { $role-nested sub! $r1; };
+#         not { $role-player sub! $r2; };
+#       """
+#     Then answer size is: 1
 
 
   #######################
   # NEGATION VALIDATION #
   #######################
 
-  # TODO: nested pattern validation
-  # Scenario: when the entire match clause is a negation, an error is thrown
-  # At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
-  #   Then typeql read query; fails
-  #     """
-  #     match not { $x has $a "value"; };
-  #     """
-  #   Then transaction is open: false
+  # TODO: Do we want to allow this? Or WARN?
+   Scenario: the entire match clause may be a negation
+   At least one negated pattern variable must be bound outside the negation block, so this query is invalid.
+     Then typeql read query
+       """
+       match not { $x has $a "value"; };
+       """
 
-  # TODO: nested pattern validation
-  # Scenario: when matching a negation whose pattern variables are all unbound outside it, an error is thrown
-  #   Then typeql read query; fails
-  #     """
-  #     match
-  #       entity $t;
-  #       $r isa $t;
-  #       not {
-  #         ($r2, $i);
-  #       };
-  #     """
-  #   Then transaction is open: false
+
+   # TODO: 3.x: Do we want to disable this? Or WARN?
+   Scenario: matching a negation whose pattern variables are all unbound outside it is allowed
+     Then typeql read query
+       """
+       match
+         entity $t;
+         $r isa $t;
+         not {
+           $r0 links ($r2, $i);
+         };
+       """
+
 
   Scenario: the first variable in a negation can be unbound, as integer as it is connected to a bound variable
     Then get answers of typeql read query
@@ -2679,19 +2676,42 @@ Feature: TypeQL Match Clause
         };
       """
 
-  # TODO: nested pattern validation
-  # NOTE: do we need to disallow this?
-  # Scenario: when negating a negation redundantly, an error is thrown
-  #   Then typeql read query; fails
-  #     """
-  #     match
-  #       $x isa person, has name "Tim";
-  #       not {
-  #         not {
-  #           $x has age 55;
-  #         };
-  #       };
-  #     """
+
+   # TODO: 3.x: The original test was to check this was disallowed. Do we want to disallow it? Or WARN?
+   Scenario: negating a negation redundantly is allowed
+     Given transaction closes
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert $x isa person, has name "Tim", has age 55, has ref 0;
+       """
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Then get answers of typeql read query
+       """
+       match
+         $x isa person, has name "Tim";
+         not {
+           not {
+             $x has age 55;
+           };
+         };
+       """
+     Then answer size is: 1
+
+     Then get answers of typeql read query
+       """
+       match
+         $x isa person, has name "Tim";
+         not {
+           not {
+             $x has age 50;
+           };
+         };
+       """
+     Then answer size is: 0
 
 
   #######################
@@ -2866,3 +2886,4 @@ Feature: TypeQL Match Clause
       match
       entity $following_connectors-and-digits-1-2-3-allowed;
       """
+

@@ -114,6 +114,31 @@ Feature: Function Definition
     Given transaction closes
 
 
+  Scenario: Functions with undefined types in their signature error.
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun get_attr($arg: doesnotexist) -> integer :
+    match
+      $arg has $a;
+      let $x = $a;
+    return first $x;
+    """
+    Then transaction commits; fails with a message containing: "An error occurred when trying to resolve the type of the argument at index: 0"
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun pi() -> irrational :
+    match
+      let $x = 3.2;
+    return first $x;
+    """
+    Then transaction commits; fails with a message containing: "An error occurred when trying to resolve the type at return index: 0"
+
+
   Scenario: Functions are stratified wrt negation
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -171,6 +196,8 @@ Feature: Function Definition
       $p isa person;
       let $nickname in nickname_of($p);
     """
+
+    # TODO: 3.x: Add the negation in just one branch of a disjunction.
 
 
   Scenario: Functions are stratified wrt aggregates
@@ -366,4 +393,3 @@ Feature: Function Definition
     """
     Then transaction commits; fails
     # TODO: Add messsage when it's an explicit check at query time
-

@@ -9,7 +9,6 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 files = [
     "basic.feature",
     "definition.feature",
-    "movemetoquery-negation.feature",
     "negation.feature",
     "recursion.feature",
     "signature.feature",

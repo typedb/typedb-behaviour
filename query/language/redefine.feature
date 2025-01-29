@@ -1587,5 +1587,3 @@ Feature: TypeQL Redefine Query
       | x            |
       | label:pigeon |
 
-
-    # TODO 3.0: Add tests for functions?

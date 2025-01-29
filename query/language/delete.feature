@@ -274,8 +274,6 @@ Feature: TypeQL Delete Query
   # ROLEPLAYERS #
   ###############
 
-  # TODO: 3.x: Needs role-player deduplication
-  @ignore
   Scenario: deleting a role player from a relation using its role keeps the relation and removes the role player from it
     Given get answers of typeql write query
       """
@@ -997,7 +995,7 @@ Feature: TypeQL Delete Query
   # COMPLEX PATTERNS #
   ####################
 
-  # TODO: 3.x: Needs role-player deduplication
+  # TODO: 3.x: Bring back when we have lists, because (friend: $x, friend: $x)
   @ignore
   Scenario: deletion of a complex pattern
     Given transaction closes
@@ -1068,6 +1066,8 @@ Feature: TypeQL Delete Query
       | key:name:John | attr:lastname:Smith |
 
 
+  # TODO: 3.x: Bring back when we have lists (friend: $x, friend: $x)
+  @ignore
   Scenario: deleting everything in a complex pattern
     Given transaction closes
     Given connection open schema transaction for database: typedb
