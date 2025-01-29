@@ -661,6 +661,8 @@ Parker";
       | key:ref:0 | key:ref:3 | key:ref:2 |
 
 
+  # TODO: 3.x: Bring back when we have lists ( (employee: $p, employee: $p)
+  @ignore
   Scenario: an additional repeated role player can be inserted into an existing relation
     Given typeql write query
       """
