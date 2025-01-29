@@ -1016,6 +1016,18 @@ Feature: TypeDB Driver
       """
       define entity person;
       """
+
+    # TODO: Uncomment this when the server stops crashing
+#    When get answers of typeql read query
+#      """
+#      match not { $empty isa person; };
+#      """
+#    Then answer type is: concept rows
+#    Then answer size is: 1
+#
+#    Then answer get row(0) get variable(empty) is empty
+#    Then answer get row(0) get variable by index(0) is empty
+
     When get answers of typeql write query
       """
       match not { $empty isa person; };
