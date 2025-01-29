@@ -1027,9 +1027,6 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:2 |
 
 
-  # TODO: 3.x: make sure roleplayers in the same `links` constraint are distinct
-  # expected the number of identifier entries to match the number of answers, found 6 entries and 9 answers
-   @ignore
    Scenario: all combinations of players in a relation can be retrieved
      Given transaction commits
 
@@ -1113,8 +1110,6 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:1 |
 
 
-  # TODO: 3.x: make sure roleplayers in the same `links` constraint are distinct
-  @ignore
    Scenario: a mixture of variable and explicit roles can retrieve relations
      Given transaction commits
 
@@ -1192,27 +1187,25 @@ Feature: TypeQL Match Clause
     Then answer size is: 1
 
 
-  # TODO: 3.x: make sure roleplayers in the same `links` constraint are distinct
-  # assertion `left == right` failed | left: 2 | right: 0
-  # Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has ref 1;
-  #     $y isa person, has ref 2;
-  #     (friend: $x, friend: $y) isa friendship, has ref 0;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   When get answers of typeql read query
-  #     """
-  #     match (friend: $x, friend: $x) isa friendship;
-  #     """
-  #   Then answer size is: 0
+   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa person, has ref 1;
+       $y isa person, has ref 2;
+       (friend: $x, friend: $y) isa friendship, has ref 0;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     When get answers of typeql read query
+       """
+       match (friend: $x, friend: $x) isa friendship;
+       """
+     Then answer size is: 0
 
 
   Scenario: matching a chain of relations only returns answers if there is a chain of the required length
@@ -2544,38 +2537,37 @@ Feature: TypeQL Match Clause
     Then answer size is: 8
 
 
-  # TODO: 3.x: make sure roleplayers in the same `links` constraint are distinct
-  # Scenario: all relations and their types can be retrieved
-  #   Given transaction commits
-  #
-  #   Given connection open write transaction for database: typedb
-  #   Given typeql write query
-  #     """
-  #     insert
-  #     $x isa person, has name "Bertie", has ref 0;
-  #     $y isa person, has name "Angelina", has ref 1;
-  #     $r links (friend: $x, friend: $y), isa friendship, has ref 2;
-  #     """
-  #   Given transaction commits
-  #
-  #   Given connection open read transaction for database: typedb
-  #   Given get answers of typeql read query
-  #     """
-  #     match relation $t; $r isa $t;
-  #     """
-  #   Given answer size is: 1
-  #   Given get answers of typeql read query
-  #     """
-  #     match ($x, $y);
-  #     """
-  #   # 2 permutations of the roleplayers
-  #   Given answer size is: 2
-  #   When get answers of typeql read query
-  #     """
-  #     match ($x, $y) isa $type;
-  #     """
-  #   # 2 permutations of the roleplayers
-  #   Then answer size is: 2
+   Scenario: all relations and their types can be retrieved
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+       $x isa person, has name "Bertie", has ref 0;
+       $y isa person, has name "Angelina", has ref 1;
+       $r links (friend: $x, friend: $y), isa friendship, has ref 2;
+       """
+     Given transaction commits
+
+     Given connection open read transaction for database: typedb
+     Given get answers of typeql read query
+       """
+       match relation $t; $r isa $t;
+       """
+     Given answer size is: 1
+     Given get answers of typeql read query
+       """
+       match ($x, $y);
+       """
+     # 2 permutations of the roleplayers
+     Given answer size is: 2
+     When get answers of typeql read query
+       """
+       match ($x, $y) isa $type;
+       """
+     # 2 permutations of the roleplayers
+     Then answer size is: 2
 
 
   # TODO ???
