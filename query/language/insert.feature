@@ -462,7 +462,7 @@ Parker";
 
 
   Scenario: inserting an ownership of an unbound attribute variable fails
-    Then typeql write query
+    Then typeql write query; fails
       """
       insert $x isa person, has $e;
       """
