@@ -506,7 +506,7 @@ Feature: TypeQL Reduce Queries
 #      | key:ref:2 | value:integer:3 |
 #      | key:ref:3 | value:integer:3 |
 
-  # TODO: 3.x: Needs role-player deduplication
+
   Scenario: the size of answer groups is still computed correctly when restricting variables with 'select'
     Given connection open write transaction for database: typedb
     Given typeql write query

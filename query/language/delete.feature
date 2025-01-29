@@ -1066,6 +1066,8 @@ Feature: TypeQL Delete Query
       | key:name:John | attr:lastname:Smith |
 
 
+  # TODO: 3.x: Bring back when we have lists (friend: $x, friend: $x)
+  @ignore
   Scenario: deleting everything in a complex pattern
     Given transaction closes
     Given connection open schema transaction for database: typedb

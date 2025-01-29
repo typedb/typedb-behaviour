@@ -237,8 +237,7 @@ Feature: Negation Resolution
       match $x has age $y;
       """
 
-  # TODO: 3.x: Needs role-player deduplication
-  @ignore
+
   Scenario: negation can filter out an unwanted entity type from part of a chain of matched relations
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -283,9 +282,9 @@ Feature: Negation Resolution
     When get answers of typeql read query
       """
       match
-        $f1 isa friendship, (friend: $a, friend: $b);
-        $f2 isa friendship, (friend: $b, friend: $c);
-        $f3 isa friendship, (friend: $c, friend: $d);
+        $f1 isa friendship, links (friend: $a, friend: $b);
+        $f2 isa friendship, links (friend: $b, friend: $c);
+        $f3 isa friendship, links (friend: $c, friend: $d);
         not {$c isa dog;};
 
       """
@@ -301,8 +300,6 @@ Feature: Negation Resolution
 
       """
 
-  # TODO: 3.x: Needs role-player deduplication
-  @ignore
   Scenario: negation can filter out an unwanted connection between two concepts from a chain of matched relations
     Given connection open schema transaction for database: typedb
     Given typeql schema query
