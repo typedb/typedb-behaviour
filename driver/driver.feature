@@ -1010,6 +1010,24 @@ Feature: TypeDB Driver
   # CONCEPTS #
   ############
 
+  Scenario: Driver processes empty concepts correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    When get answers of typeql write query
+      """
+      match not { $empty isa person; };
+      insert $_ isa person;
+      """
+    Then answer type is: concept rows
+    Then answer size is: 1
+
+    Then answer get row(0) get variable(empty) is empty
+    Then answer get row(0) get variable by index(0) is empty
+
+
   Scenario: Driver processes entity types correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1262,15 +1280,15 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute type(a) is struct: <is-struct>
     Examples:
       | value-type  | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration | is-struct |
-      | boolean     | true       | false   | false     | false      | false     | false   | false       | false          | false       | false     |
-      | integer     | false      | true    | false     | false      | false     | false   | false       | false          | false       | false     |
-      | double      | false      | false   | true      | false      | false     | false   | false       | false          | false       | false     |
-      | decimal     | false      | false   | false     | true       | false     | false   | false       | false          | false       | false     |
-      | string      | false      | false   | false     | false      | true      | false   | false       | false          | false       | false     |
-      | date        | false      | false   | false     | false      | false     | true    | false       | false          | false       | false     |
-      | datetime    | false      | false   | false     | false      | false     | false   | true        | false          | false       | false     |
-      | datetime-tz | false      | false   | false     | false      | false     | false   | false       | true           | false       | false     |
-      | duration    | false      | false   | false     | false      | false     | false   | false       | false          | true        | false     |
+      | boolean     | true       | false      | false     | false      | false     | false   | false       | false          | false       | false     |
+      | integer     | false      | true       | false     | false      | false     | false   | false       | false          | false       | false     |
+      | double      | false      | false      | true      | false      | false     | false   | false       | false          | false       | false     |
+      | decimal     | false      | false      | false     | true       | false     | false   | false       | false          | false       | false     |
+      | string      | false      | false      | false     | false      | true      | false   | false       | false          | false       | false     |
+      | date        | false      | false      | false     | false      | false     | true    | false       | false          | false       | false     |
+      | datetime    | false      | false      | false     | false      | false     | false   | true        | false          | false       | false     |
+      | datetime-tz | false      | false      | false     | false      | false     | false   | false       | true           | false       | false     |
+      | duration    | false      | false      | false     | false      | false     | false   | false       | false          | true        | false     |
 
 
   Scenario: Driver processes attribute types with value type struct correctly
@@ -1513,24 +1531,24 @@ Feature: TypeDB Driver
     Then answer get row(0) get attribute(a) get <value-type> is not: <not-value>
     Examples:
       | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | integer     | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | boolean     | true                                         | false                                | true       | false      | false     | false      | false     | false   | false       | false          | false       |
+      | integer     | 12345090                                     | 0                                    | false      | true       | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false      | true      | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                   | 2.01234568                           | false      | false      | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false      | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false      | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false      | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false      | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false      | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false      | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false      | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                         | P67W                                 | false      | false      | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1686,24 +1704,24 @@ Feature: TypeDB Driver
     Then answer get row(0) get value(value) get <value-type> is not: <not-value>
     Examples:
       | value-type  | value                                        | not-value                            | is-boolean | is-integer | is-double | is-decimal | is-string | is-date | is-datetime | is-datetime-tz | is-duration |
-      | boolean     | true                                         | false                                | true       | false   | false     | false      | false     | false   | false       | false          | false       |
-      | integer     | 12345090                                     | 0                                    | false      | true    | false     | false      | false     | false   | false       | false          | false       |
-      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | double      | 2.01234567                                   | 2.01234568                           | false      | false   | true      | false      | false     | false   | false       | false          | false       |
-      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false   | false     | true       | false     | false   | false       | false          | false       |
-      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false   | false     | false      | true      | false   | false       | false          | false       |
-      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false   | false     | false      | false     | true    | false       | false          | false       |
-      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false   | false     | false      | false     | false   | true        | false          | false       |
-      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false   | false     | false      | false     | false   | false       | true           | false       |
-      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false   | false     | false      | false     | false   | false       | false          | true        |
-      | duration    | P66W                                         | P67W                                 | false      | false   | false     | false      | false     | false   | false       | false          | true        |
+      | boolean     | true                                         | false                                | true       | false      | false     | false      | false     | false   | false       | false          | false       |
+      | integer     | 12345090                                     | 0                                    | false      | true       | false     | false      | false     | false   | false       | false          | false       |
+      | double      | 0.0000000000000000001                        | 0.000000000000000001                 | false      | false      | true      | false      | false     | false   | false       | false          | false       |
+      | double      | 2.01234567                                   | 2.01234568                           | false      | false      | true      | false      | false     | false   | false       | false          | false       |
+      | decimal     | 1234567890.0001234567890dec                  | 1234567890.001234567890dec           | false      | false      | false     | true       | false     | false   | false       | false          | false       |
+      | decimal     | 0.0000000000000000001dec                     | 0.000000000000000001dec              | false      | false      | false     | true       | false     | false   | false       | false          | false       |
+      | string      | "John \"Baba Yaga\" Wick"                    | "John Baba Yaga Wick"                | false      | false      | false     | false      | true      | false   | false       | false          | false       |
+      | date        | 2024-09-20                                   | 2025-09-20                           | false      | false      | false     | false      | false     | true    | false       | false          | false       |
+      | datetime    | 1999-02-26T12:15:05                          | 1999-02-26T12:15:00                  | false      | false      | false     | false      | false     | false   | true        | false          | false       |
+      | datetime    | 1999-02-26T12:15:05.000000001                | 1999-02-26T12:15:05.00000001         | false      | false      | false     | false      | false     | false   | true        | false          | false       |
+      | datetime-tz | 2024-09-20T16:40:05 America/New_York         | 2024-06-20T15:40:05 America/New_York | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London  | 2024-09-20T16:40:05.000000001 UTC    | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/Belfast | 2024-09-20T16:40:05 Europe/Belfast   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100           | 2024-09-20T16:40:05.000000001-0100   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+1115           | 2024-09-20T16:40:05.000000001+0000   | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0000           | 2024-09-20T16:40:05+0000             | false      | false      | false     | false      | false     | false   | false       | true           | false       |
+      | duration    | P1Y10M7DT15H44M5.00394892S                   | P1Y10M7DT15H44M5.0394892S            | false      | false      | false     | false      | false     | false   | false       | false          | true        |
+      | duration    | P66W                                         | P67W                                 | false      | false      | false     | false      | false     | false   | false       | false          | true        |
 
 
   # TODO: Implement structs
@@ -1860,7 +1878,7 @@ Feature: TypeDB Driver
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $a isa age 25;  $n isa name "John";
+      insert $a isa age 25; $n isa name "John";
       """
 
     When get answers of typeql read query
@@ -1869,8 +1887,10 @@ Feature: TypeDB Driver
       """
     Then answer unwraps as ok; fails
     Then answer unwraps as concept documents; fails
-    Then answer get row(0) get variable(unknown); fails with a message containing: "The variable 'unknown' does not exist"
-    Then answer get row(0) get variable(); fails
+    Then answer get row(0) get variable(unknown); fails with a message containing: "Cannot get concept from a concept row by variable 'unknown'"
+    Then answer get row(0) get variable by index(15); fails with a message containing: "Cannot get concept from a concept row by index '15'"
+    Then answer get row(0) get variable(); fails with a message containing: "Cannot get concept from a concept row by variable ''"
+    Then answer get row(0) get variable( ); fails with a message containing: "Cannot get concept from a concept row by variable ' '"
     Then answer get row(0) get variable(a) as entity; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as attribute type; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get variable(a) as value; fails with a message containing: "Invalid concept conversion"
@@ -1892,6 +1912,14 @@ Feature: TypeDB Driver
     Then answer unwraps as concept documents; fails
     Then answer get row(0) get variable(n) as relation; fails with a message containing: "Invalid concept conversion"
     Then answer get row(0) get attribute(n) get integer; fails with a message containing: "Could not retrieve a 'integer' value"
+
+    Then typeql read query; fails with a message containing: "syntax error"
+      """
+      """
+    Then typeql read query; fails with a message containing: "syntax error"
+      """
+
+      """
 
 
   Scenario: Driver processes datetime values in different user time-zones identically
