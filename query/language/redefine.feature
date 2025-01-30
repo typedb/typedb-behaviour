@@ -543,7 +543,7 @@ Feature: TypeQL Redefine Query
       """
 
 
-  Scenario: redefining specialisation to an inherited not specialising relates is allowed
+  Scenario: redefining specialisation to an inherited explicit relates is allowed
     Then typeql schema query
       """
       define relation internship sub part-time-employment, relates intern as empty-role;

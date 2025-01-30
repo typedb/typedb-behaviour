@@ -651,7 +651,7 @@ Feature: TypeQL Undefine Query
       """
 
 
-  Scenario: undefining specialising relates as if it was a real relates is not allowed
+  Scenario: undefining implicit relates as if it was an explicit relates is not allowed
     Given typeql schema query
       """
       define
