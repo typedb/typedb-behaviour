@@ -922,6 +922,116 @@ Feature: TypeQL Define Query
       | label:loan      |
       | label:ownership |
 
+  Scenario: defining multiple relates specialising a single relates is allowed for a single relation type
+    When typeql schema query
+      """
+      define
+      relation family-relation relates member @abstract;
+      relation parentship sub family-relation, relates parent as member, relates child as member;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ relates $x as member;
+      """
+    Then uniquely identify answer concepts
+      | x                            |
+      | label:family-relation:member |
+      | label:parentship:parent      |
+      | label:parentship:child       |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation adopting-parentship sub parentship, relates advisor;
+      relation adopting-fathership sub adopting-parentship, relates adopting-father as parent, relates biological-father as parent;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ relates $x as parent;
+      """
+    Then uniquely identify answer concepts
+      | x                                           |
+      | label:parentship:parent                     |
+      | label:adopting-fathership:adopting-father   |
+      | label:adopting-fathership:biological-father |
+
+
+  Scenario: defining multiple relates specialising a single relates is not allowed for different relation types
+    Given typeql schema query
+      """
+      define
+      relation family-relation relates member @abstract, relates pet @abstract;
+      relation parentship sub family-relation, relates parent as member;
+      relation fathership sub parentship, relates fathers-dog as pet;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'family-relation:member' must be inherited without specialization"
+      """
+      define
+      relation fathership relates father as member;
+      """
+
+
+  Scenario: definition of a relates of an inherited role type is not allowed even after specialization
+    Given typeql schema query
+      """
+      define
+      relation parentship relates parent;
+      relation fathership sub parentship, relates father;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'parentship:parent' should be unique in relation type hierarchy"
+      """
+      define
+      fathership relates parent;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'parentship:parent' should be unique in relation type hierarchy"
+      """
+      define
+      fathership relates father as parent, relates parent;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      fathership relates father as parent;
+      """
+    Then typeql schema query; fails with a message containing: "'parentship:parent' should be unique in relation type hierarchy"
+      """
+      define
+      fathership relates parent @abstract;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      fathership relates father as parent;
+      """
+    Then typeql schema query; fails with a message containing: "'parentship:parent' should be unique in relation type hierarchy"
+      """
+      define
+      fathership relates parent;
+      """
+
   ###################
   # ATTRIBUTE TYPES #
   ###################
@@ -944,7 +1054,7 @@ Feature: TypeQL Define Query
     Then answer size is: 1
     Examples:
       | value-type  | label              |
-      | integer        | number-of-cows     |
+      | integer     | number-of-cows     |
       | string      | favourite-food     |
       | boolean     | can-fly            |
       | double      | density            |
@@ -1125,7 +1235,7 @@ Feature: TypeQL Define Query
     Examples:
       | value_type | label             |
       | boolean    | is-sleeping       |
-      | integer       | number-of-fingers |
+      | integer    | number-of-fingers |
       | double     | height            |
       | string     | first-word        |
       | datetime   | graduation-date   |
@@ -1453,7 +1563,7 @@ Feature: TypeQL Define Query
     Examples:
       | annotation                                            | value-type          |
       | regex("A")                                            | , value bool        |
-      | regex("A")                                            | , value integer        |
+      | regex("A")                                            | , value integer     |
       | regex("A")                                            | , value double      |
       | regex("A")                                            | , value decimal     |
       | regex("A")                                            | , value date        |
@@ -1464,8 +1574,8 @@ Feature: TypeQL Define Query
 
       | range("A".."B")                                       |                     |
       | range(1..2)                                           |                     |
-      | range("A".."B")                                       | , value integer        |
-      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value integer        |
+      | range("A".."B")                                       | , value integer     |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | , value integer     |
       | range("A".."B")                                       | , value datetime    |
       | range(1..2)                                           | , value datetime    |
       | range(1..2)                                           | , value string      |
@@ -1479,13 +1589,13 @@ Feature: TypeQL Define Query
       | values("A")                                           |                     |
       | values(false)                                         |                     |
       | values(0)                                             |                     |
-      | values("A", 2)                                        | , value integer        |
-      | values("A", "B")                                      | , value integer        |
-      | values(0.1)                                           | , value integer        |
-      | values("string")                                      | , value integer        |
-      | values(true)                                          | , value integer        |
-      | values(2024-06-04)                                    | , value integer        |
-      | values(2024-06-04T00:00:00+0010)                      | , value integer        |
+      | values("A", 2)                                        | , value integer     |
+      | values("A", "B")                                      | , value integer     |
+      | values(0.1)                                           | , value integer     |
+      | values("string")                                      | , value integer     |
+      | values(true)                                          | , value integer     |
+      | values(2024-06-04)                                    | , value integer     |
+      | values(2024-06-04T00:00:00+0010)                      | , value integer     |
       | values("string")                                      | , value double      |
       | values(true)                                          | , value double      |
       | values(2024-06-04)                                    | , value double      |
@@ -1540,7 +1650,7 @@ Feature: TypeQL Define Query
       """
     Examples:
       | arg0                     | arg1                     | value-type  |
-      | 1                        | 2                        | integer        |
+      | 1                        | 2                        | integer     |
       | 112.2                    | 134.3                    | double      |
       | 124.4                    | 124.0                    | decimal     |
       | false                    | true                     | boolean     |
@@ -1671,7 +1781,7 @@ Feature: TypeQL Define Query
     Examples:
       | annotation                                            | value-type  |
       | regex("A")                                            | bool        |
-      | regex("A")                                            | integer        |
+      | regex("A")                                            | integer     |
       | regex("A")                                            | double      |
       | regex("A")                                            | decimal     |
       | regex("A")                                            | date        |
@@ -1679,8 +1789,8 @@ Feature: TypeQL Define Query
       | regex("A")                                            | datetime-tz |
       | regex("A")                                            | duration    |
 
-      | range("A".."B")                                       | integer        |
-      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | integer        |
+      | range("A".."B")                                       | integer     |
+      | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | integer     |
       | range("A".."B")                                       | datetime    |
       | range(1..2)                                           | datetime    |
       | range(1..2)                                           | string      |
@@ -1690,13 +1800,13 @@ Feature: TypeQL Define Query
       | range(2024-06-04T16:35:02.10..2024-06-04T16:35:03.11) | date        |
       | range("P1Y2M3DT4H5M6.788S".."P1Y2M3DT4H5M6.789S")     | date        |
 
-      | values("A", 2)                                        | integer        |
-      | values("A", "B")                                      | integer        |
-      | values(0.1)                                           | integer        |
-      | values("string")                                      | integer        |
-      | values(true)                                          | integer        |
-      | values(2024-06-04)                                    | integer        |
-      | values(2024-06-04T00:00:00+0010)                      | integer        |
+      | values("A", 2)                                        | integer     |
+      | values("A", "B")                                      | integer     |
+      | values(0.1)                                           | integer     |
+      | values("string")                                      | integer     |
+      | values(true)                                          | integer     |
+      | values(2024-06-04)                                    | integer     |
+      | values(2024-06-04T00:00:00+0010)                      | integer     |
       | values("string")                                      | double      |
       | values(true)                                          | double      |
       | values(2024-06-04)                                    | double      |
@@ -1761,7 +1871,7 @@ Feature: TypeQL Define Query
       """
     Examples:
       | arg0                     | arg1                     | value-type  |
-      | 1                        | 2                        | integer        |
+      | 1                        | 2                        | integer     |
       | 112.2                    | 134.3                    | double      |
       | 124.4                    | 124.0                    | decimal     |
       | false                    | true                     | boolean     |

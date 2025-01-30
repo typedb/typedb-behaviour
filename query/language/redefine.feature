@@ -525,21 +525,56 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
 
-    # TODO: Uncomment when querying for specialise works. Now it returns every `$_ relates $x`.
-#    When connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $_ relates $x as empty-abstract-role;
-#      """
-#    Then uniquely identify answer concepts
-#      | x                                         |
-#      | label:part-time-employment:part-time-role |
-#    When transaction closes
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ relates $x as empty-abstract-role;
+      """
+    Then uniquely identify answer concepts
+      | x                                         |
+      | label:empty-relation:empty-abstract-role  |
+      | label:part-time-employment:part-time-role |
+    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "already defined"
       """
       redefine part-time-employment relates part-time-role as empty-abstract-role;
+      """
+
+
+  Scenario: redefining specialisation to an inherited explicit relates is allowed
+    Then typeql schema query
+      """
+      define relation internship sub part-time-employment, relates intern as empty-role;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ relates $x as empty-role;
+      """
+    Then uniquely identify answer concepts
+      | x                               |
+      | label:empty-relation:empty-role |
+      | label:internship:intern         |
+    When transaction closes
+
+
+  Scenario: redefining specialisation to a specialising relates of the supertype is not allowed
+    Given typeql schema query
+      """
+      define
+      part-time-employment relates part-time-role as empty-role;
+      relation internship sub part-time-employment, relates intern as part-time-role;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "'empty-relation:empty-role' must be inherited without specialization"
+      """
+      redefine internship relates intern as empty-role;
       """
 
 
@@ -763,13 +798,13 @@ Feature: TypeQL Redefine Query
 
     Examples:
       | value-type-1 | value-type-2 | label              |
-      | date         | integer         | number-of-cows     |
+      | date         | integer      | number-of-cows     |
       | decimal      | string       | favourite-food     |
       | duration     | boolean      | can-fly            |
       | datetime-tz  | double       | density            |
       | double       | decimal      | savings            |
       | datetime     | date         | flight-date        |
-      | integer         | datetime     | flight-time        |
+      | integer      | datetime     | flight-time        |
       | boolean      | datetime-tz  | flight-time-tz     |
       | string       | duration     | procedure-duration |
 
@@ -791,8 +826,8 @@ Feature: TypeQL Redefine Query
       match $x sub data;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | label:data      |
+      | x                  |
+      | label:data         |
       | label:integer-data |
 
 
