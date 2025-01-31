@@ -3558,11 +3558,26 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..1); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "card(1..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..); fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..1); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "card(1..1)"
+
+    When connection open schema transaction for database: typedb
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..1)
@@ -3574,7 +3589,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel1 add player for role(role1): $ent2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(0..1)"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3601,14 +3616,20 @@ Feature: Data validation
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..)
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..3); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
+    Then transaction commits; fails with a message containing: "card(2..3)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
     When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
     Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3620,7 +3641,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(1..2)"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
@@ -3635,7 +3656,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(1..2)"
 
     # Default cardinality effect validation (no validation as it creates @card(0..)!
 
@@ -3654,11 +3675,26 @@ Feature: Data validation
     When relation(rel1) get role(role2) set specialise: role0
     When relation(rel1) get role(role2) set annotation: @card(0..)
     When entity(ent2) set plays: rel1:role2
-    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set specialise: role0
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
-    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..1); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(0..1)
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..2)
     Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
@@ -3676,7 +3712,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
@@ -3719,7 +3755,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(1..10)
@@ -3738,7 +3774,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
@@ -3772,13 +3808,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(0..)
@@ -3822,12 +3858,15 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Interface type supertype changes validation
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
     Then relation(rel1) get role(role1) unset specialise
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
@@ -3856,8 +3895,17 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
     When relation(rel1) get role(role1) set specialise: role0
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2)
@@ -3870,35 +3918,38 @@ Feature: Data validation
     Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(2..2)
     Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
     Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
     When relation $rel1 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
-    Then relation(rel1) get role(role2) unset specialise; fails
-    When transaction closes
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) set specialise: role00; fails
-    When transaction closes
+    When relation(rel1) get role(role2) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3913,24 +3964,54 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
     When entity(ent2) set plays: rel0:role00
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..1)
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set specialise: role0
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role00
     When entity(ent2) get plays(rel0:role00) set annotation: @card(2..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(1..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role0
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3938,12 +4019,21 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel1 add player for role(role1): $ent2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(2..2); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..2); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
+    Then transaction commits; fails with a message containing: "@card(1..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..2)
     When transaction commits
 
@@ -3957,10 +4047,25 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(3..4); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(3..4)
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
@@ -3969,7 +4074,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3980,12 +4085,18 @@ Feature: Data validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role00
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
 
@@ -4014,10 +4125,10 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent2) set supertype: ent00; fails
+    When entity(ent2) set supertype: ent00; fails with a message containing: "instances"
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
@@ -4031,16 +4142,25 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(3..4)
     Then entity(ent1) set supertype: ent00
     Then transaction commits
@@ -4051,17 +4171,31 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
-    When entity(ent00) unset plays: rel0:role0
-    Then entity(ent1) set supertype: ent00
-    When entity(ent00) set plays: rel0:role0
-    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1); fails
-    When entity(ent00) unset plays: rel0:role0
     Then transaction commits
 
     When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) unset plays: rel0:role0
+    When entity(ent1) set supertype: ent00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) set plays: rel0:role0
+    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
-    Then entity(ent1) set supertype: ent0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..)
     Then entity(ent1) set supertype: ent0
     Then transaction commits
@@ -4070,11 +4204,29 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel0:role0
+    When entity(ent1) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set plays: rel0:role0
+    When entity(ent1) get plays(rel0:role0) set annotation: @card(0..10)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(0..10)
     When entity(ent1) unset plays: rel0:role0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) unset plays: rel0:role0
     When entity(ent2) set plays: rel1:role1
-    Then entity(ent2) get plays(rel1:role1) set annotation: @card(2..); fails
+    When entity(ent2) get plays(rel1:role1) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) unset plays: rel0:role0
+    When entity(ent2) set plays: rel1:role1
     When entity(ent2) get plays(rel1:role1) set annotation: @card(1..)
     Then transaction commits
 
@@ -4082,7 +4234,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role1) set annotation: @card(0..1)
@@ -4104,7 +4256,7 @@ Feature: Data validation
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel2 remove player for role(role2): $ent2
     When relation $rel3 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
@@ -4120,8 +4272,14 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
-    Then entity(ent2) get plays(rel0:role0) set annotation: @card(2..); fails
     When entity(ent2) get plays(rel0:role0) set annotation: @card(1..)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role0) set annotation: @card(1..1)
     Then transaction commits
 
@@ -4129,13 +4287,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role0) set annotation: @card(0..5)
@@ -4146,7 +4304,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
