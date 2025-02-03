@@ -5011,3 +5011,58 @@ Feature: Data validation
       | 0..   | 0..   | attr1           |                                                  |
 
 
+  Scenario Outline: Cardinality is correctly revalidated when owns is specialised on a supertype with @card(<card>)
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) set owns: attr
+    Given entity(ent1) get owns(attr) set annotation: @card(2..2)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) set owns: attr
+    When entity(ent0) get owns(attr) set annotation: @card(<card>)
+    Then transaction commits<opt-error>
+    Examples:
+      | card | opt-error                                        |
+      | 0..  |                                                  |
+      | 0..2 |                                                  |
+      | 2..  |                                                  |
+      | 1..1 | ; fails with a message containing: "@card(1..1)" |
+      | 0..1 | ; fails with a message containing: "@card(0..1)" |
+      | 3..  | ; fails with a message containing: "@card(3..)"  |
+
+
+  Scenario: Cardinality is correctly revalidated when owns is specialised on a supertype with the default card
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) set owns: attr
+    Given entity(ent1) get owns(attr) set annotation: @card(2..2)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) set owns: attr
+    Then transaction commits; fails with a message containing: "@card(0..1)"
