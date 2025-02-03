@@ -3214,10 +3214,10 @@ Feature: Data validation
     When entity $ent2 set has: $attr2_2
     Then transaction commits
 
-    
+
   Scenario: Relates data is revalidated when new cardinality constraints appear
     # Setup
-    
+
     When create attribute type: ref
     When attribute(ref) set value type: string
     When create relation type: rel0
@@ -4583,3 +4583,244 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
     Then transaction commits
+
+
+  Scenario: Cardinality is not validated if instance is deleted
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(2..)
+    Given entity(ent) get owns(attr1) set annotation: @card(3..3)
+    Given entity(ent) get owns(attr2) set annotation: @card(1..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given $attr2 = attribute(attr2) put instance with value: "attr2"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given entity $ent set has: $attr2
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When delete entity: $ent
+    Then transaction commits
+
+
+  Scenario: Cardinality is not validated if owns is unset with the instances deletions
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(2..)
+    Given entity(ent) get owns(attr1) set annotation: @card(3..3)
+    Given entity(ent) get owns(attr2) set annotation: @card(1..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given $attr2 = attribute(attr2) put instance with value: "attr2"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given entity $ent set has: $attr2
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(3..3)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr0
+    Then transaction commits; fails with a message containing: "@card(3..3)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr1"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr1"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr2"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr2"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr2
+    Then transaction commits
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(2..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ; fails with a message containing: "@card(2..2)" |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ; fails with a message containing: "@card(2..3)" |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments with partial owns unsetting: <unset-owns-ent-1>-><unset-owns-attr-1> and <unset-owns-ent-2>-><unset-owns-attr-2>
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    When entity(<unset-owns-ent-1>) unset owns: <unset-owns-attr-1>
+    When entity(<unset-owns-ent-2>) unset owns: <unset-owns-attr-2>
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | unset-owns-ent-1 | unset-owns-attr-1 | unset-owns-ent-2 | unset-owns-attr-2 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr3             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent1             | attr2             | ent1             | attr3             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr0             | ent1             | attr3             |                                                  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ent0             | attr0             | ent1             | attr2             | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ent0             | attr1             | ent1             | attr3             | ; fails with a message containing: "@card(2..2)" |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr2             | ; fails with a message containing: "@card(2..3)" |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr3             |                                                  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+
+
