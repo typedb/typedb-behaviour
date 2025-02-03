@@ -4965,6 +4965,130 @@ Feature: Data validation
       | 0..10 | 0..3  | 0..5  | 0..   | 0..   |                                                  |
 
 
+  Scenario: Cardinality is correctly revalidated when the owner type gets new owns from a new supertype with their partial deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given entity(ent0) set owns: attr2
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+
+    Given entity(ent0) get owns(attr1) set annotation: @card(1..2)
+    Given entity(ent0) get owns(attr2) set annotation: @card(2..)
+    Given entity(ent1) get owns(attr3) set annotation: @card(0..5)
+    Given entity(ent1) get owns(attr4) set annotation: @card(0..12893)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    Then transaction commits
+
+
+  Scenario: Cardinality is correctly revalidated between multiple instances when the owner type gets new owns from a new supertype with their partial deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given entity(ent0) set owns: attr2
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+
+    Given entity(ent0) get owns(attr1) set annotation: @card(1..2)
+    Given entity(ent0) get owns(attr2) set annotation: @card(2..)
+    Given entity(ent1) get owns(attr3) set annotation: @card(0..5)
+    Given entity(ent1) get owns(attr4) set annotation: @card(0..12893)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent0 = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent0 set has: $attr0
+    Given entity $ent0 set has: $attr1
+    Given $ent1 = entity(ent1) create new instance
+    Given entity $ent1 set has: $attr0
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits
+
+
   Scenario Outline: Cardinality is correctly revalidated if instance deletion is combined with owns unsetting: attr0 card(<card0>), attr1 card(<card1>), unset-owns(<unset-owns-attr>)
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
@@ -5066,3 +5190,34 @@ Feature: Data validation
     When connection open schema transaction for database: typedb
     When entity(ent0) set owns: attr
     Then transaction commits; fails with a message containing: "@card(0..1)"
+
+
+  Scenario Outline: Cardinality is correctly revalidated when owns is moved from a supertype @card(<super-card>) to a subtype @card(<sub-card>) with instances
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent0) set owns: attr
+    Given entity(ent0) get owns(attr) set annotation: @card(<super-card>)
+    Given entity(ent1) set supertype: ent0
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr
+    When entity(ent1) get owns(attr) set annotation: @card(<sub-card>)
+    When entity(ent0) unset owns: attr
+    Then transaction commits<opt-error>
+    Examples:
+      | super-card | sub-card | opt-error                                       |
+      | 2..        | 2..      |                                                 |
+      | 2..        | 1..2     |                                                 |
+      | 2..        | 3..      | ; fails with a message containing: "@card(3..)" |
