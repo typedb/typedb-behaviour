@@ -4706,6 +4706,81 @@ Feature: Data validation
     Then transaction commits
 
 
+  Scenario: Cardinality is not validated if cardinality is unset to the default value with the owns unsetting
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+
+    Given create entity type: ent
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+
+    Given entity(ent) get owns(attr0) set annotation: @card(0..)
+    Given entity(ent) get owns(attr1) set annotation: @card(2..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance
+    Given $attr0 = attribute(attr1) put instance with value: "attr0"
+    Given $attr1 = attribute(attr1) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr0) unset annotation: @card
+    Then entity(ent) get owns(attr0) get cardinality: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr0) unset annotation: @card
+    Then entity(ent) get owns(attr0) get cardinality: @card(0..1)
+    When entity(ent) unset owns: attr0
+    Then transaction commits
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface unsets a supertype and does no more satisfy its constraint
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create entity type: ent
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent) get owns(attr2) set annotation: @card(0..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | opt-error                                       |
+      | 2..   | 0..   | ; fails with a message containing: "@card(2..)" |
+      | 0..   | 1..   | ; fails with a message containing: "@card(1..)" |
+      | 2..   | 1..   | ; fails with a message containing: "@card"      |
+      | 0..   | 0..   |                                                 |
+
+
   Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
@@ -4822,5 +4897,117 @@ Feature: Data validation
       | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr2             | ; fails with a message containing: "@card(2..3)" |
       | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr3             |                                                  |
       | 0..10 | 0..3  | 0..5  | 0..   | 2..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments with partial instances deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) get owns(ref) set annotation: @key
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance with key(ref): ent
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When $ent = entity(ent1) get instance with key(ref): ent
+    When $attr = attribute(attr4) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(2..)"  |
+      | 1..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | 2..3  | 0..   | 0..   | ; fails with a message containing: "@card(2..3)" |
+      | 0..   | 0..   | 0..   | 2..5  | 0..   | ; fails with a message containing: "@card(2..5)" |
+      | 0..   | 0..   | 0..   | 1..5  | 0..   | ; fails with a message containing: "@card(1..5)" |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   | ; fails with a message containing: "@card(2..)"  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 1..   |                                                  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 0..   |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if instance deletion is combined with owns unsetting: attr0 card(<card0>), attr1 card(<card1>), unset-owns(<unset-owns-attr>)
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+    Given entity(ent) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent) get owns(attr1) set annotation: @card(<card1>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr = attribute(attr2) put instance with value: "attr0"
+    Given entity $ent set has: $attr
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: <unset-owns-attr>
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | unset-owns-attr | opt-error                                        |
+      | 1..   | 0..   | attr0           |                                                  |
+      | 1..   | 0..   | attr1           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | attr0           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | attr1           |                                                  |
+      | 1..   | 1..1  | attr0           | ; fails with a message containing: "@card(1..1)" |
+      | 1..   | 1..1  | attr1           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | attr0           |                                                  |
+      | 0..   | 0..   | attr1           |                                                  |
 
 
