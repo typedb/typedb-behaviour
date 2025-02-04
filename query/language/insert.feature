@@ -820,9 +820,7 @@ Parker";
       """
 
 
-
-
-  Scenario: An entity can play a specialization of a role
+  Scenario: An entity can play a specialized role
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
@@ -838,10 +836,29 @@ Parker";
     When typeql write query
     """
     insert
-      $p isa person, has ref 0;
-      $e isa employment, links (employee: $p), has ref 0;
+      $p0 isa person, has ref 0;
+      $e0 isa employment, links (employee: $p0), has ref 0;
     """
     Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $s1 isa student, has ref 1;
+      $e1 isa employment, links (employee: $s1), has ref 1;
+    """
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $s2 isa student, has ref 2;
+      $i2 isa internship, links (intern: $s2), has ref 2;
+    """
+    Then transaction commits
+
 
   #######################
   # ATTRIBUTE INSERTION #
