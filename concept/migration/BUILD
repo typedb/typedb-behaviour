@@ -7,7 +7,6 @@ package(default_visibility = ["//visibility:public"])
 load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 exports_files([
-    "function.feature",
     "data-validation.feature",
     "migration.feature"
 ])

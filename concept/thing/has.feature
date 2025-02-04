@@ -495,3 +495,40 @@ Feature: Concept Ownership
     Then transaction commits
 
     # TODO: Add steps to check what @unique means for lists when it's in the spec
+
+
+  Scenario: A single object can have instances of an attribute type and its subtypes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: attr2
+    When entity(ent) get owns(attr0) set annotation: @card(3..3)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent1
+    When $attr0 = attribute(attr0) put instance with value: "0"
+    When $attr1 = attribute(attr1) put instance with value: "1"
+    When $attr2 = attribute(attr2) put instance with value: "2"
+    When entity $ent set has: $attr0
+    When entity $ent set has: $attr1
+    When entity $ent set has: $attr2
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "1"
+    When $attr2 = attribute(attr2) get instance with value: "2"
+    Then entity $ent get has(attr0) contain: $attr0
+    Then entity $ent get has(attr1) contain: $attr1
+    Then entity $ent get has(attr2) contain: $attr2

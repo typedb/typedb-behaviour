@@ -86,15 +86,15 @@ Feature: Concept Owns
     Then entity(person) get owns is empty
     Examples:
       | value-type    | value-type-2 |
-      | integer          | string       |
+      | integer       | string       |
       | double        | datetime-tz  |
       | decimal       | datetime     |
       | string        | duration     |
-      | boolean       | integer         |
+      | boolean       | integer      |
       | date          | decimal      |
       | datetime-tz   | double       |
       | duration      | boolean      |
-      | custom-struct | integer         |
+      | custom-struct | integer      |
 
   Scenario Outline: Entity types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -109,7 +109,7 @@ Feature: Concept Owns
     Then entity(person) set owns: email
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | datetime      |
       | custom-struct |
 
@@ -241,15 +241,15 @@ Feature: Concept Owns
     Then relation(marriage) get owns is empty
     Examples:
       | value-type    | value-type-2 |
-      | integer          | string       |
+      | integer       | string       |
       | double        | datetime-tz  |
       | decimal       | datetime     |
       | string        | duration     |
-      | boolean       | integer         |
+      | boolean       | integer      |
       | date          | decimal      |
       | datetime-tz   | double       |
       | duration      | boolean      |
-      | custom-struct | integer         |
+      | custom-struct | integer      |
 
   Scenario: The schema does not contain redundant owns declarations
     When create attribute type: attr0
@@ -327,6 +327,50 @@ Feature: Concept Owns
     When entity(ent1) set supertype: ent00
     When entity(ent1) set owns: attr10
     Then transaction commits
+
+  Scenario: A type can have ownerships of both abstract and concrete attributes and subattributes
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @abstract
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set value type: string
+    When create entity type: ent0
+    When entity(ent0) set annotation: @abstract
+    When create entity type: ent0sub
+    When entity(ent0sub) set supertype: ent0
+    When create entity type: ent1
+    When create entity type: ent1sub
+    When entity(ent1sub) set supertype: ent1
+    When entity(ent0) set owns: attr0
+    When entity(ent0) set owns: attr1
+    When entity(ent0) set owns: attr2
+    When entity(ent1) set owns: attr0
+    When entity(ent1) set owns: attr2
+    When entity(ent1sub) set owns: attr1
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(attr0) get constraints contain: @abstract
+    Then attribute(attr1) get constraints do not contain: @abstract
+    Then attribute(attr2) get constraints do not contain: @abstract
+    Then entity(ent0) get owns contain:
+      | attr0 |
+      | attr1 |
+      | attr2 |
+    Then entity(ent0sub) get owns contain:
+      | attr0 |
+      | attr1 |
+      | attr2 |
+    Then entity(ent1) get owns contain:
+      | attr0 |
+      | attr2 |
+    Then entity(ent1) get owns do not contain:
+      | attr1 |
+    Then entity(ent1sub) get owns contain:
+      | attr0 |
+      | attr1 |
+      | attr2 |
 
   Scenario Outline: Relation types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -479,7 +523,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
-      | entity    | person         | customer     | integer       |
+      | entity    | person         | customer     | integer    |
       | relation  | description    | registration | string     |
       | relation  | description    | registration | datetime   |
 
@@ -521,7 +565,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
-      | relation  | description    | registration | integer       |
+      | relation  | description    | registration | integer    |
 
     # TODO: Move to annotation tests
   Scenario Outline: <root-type> types can have multiple subtypes of attribute type affected by its constraints
@@ -640,15 +684,15 @@ Feature: Concept Owns
     Then entity(person) get owns is empty
     Examples:
       | value-type    | value-type-2 |
-      | integer          | string       |
+      | integer       | string       |
       | double        | datetime-tz  |
       | decimal       | datetime     |
       | string        | duration     |
-      | boolean       | integer         |
+      | boolean       | integer      |
       | date          | decimal      |
       | datetime-tz   | double       |
       | duration      | boolean      |
-      | custom-struct | integer         |
+      | custom-struct | integer      |
 
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
@@ -671,7 +715,7 @@ Feature: Concept Owns
     Then transaction commits
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | double        |
       | decimal       |
       | string        |
@@ -765,7 +809,7 @@ Feature: Concept Owns
     Then relation(marriage) get owns is empty
     Examples:
       | value-type    | value-type-2 |
-      | integer          | string       |
+      | integer       | string       |
       | double        | datetime-tz  |
       | custom-struct | decimal      |
 
@@ -792,7 +836,7 @@ Feature: Concept Owns
     Then transaction commits
     Examples:
       | value-type    |
-      | integer          |
+      | integer       |
       | double        |
       | decimal       |
       | string        |
@@ -908,7 +952,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
-      | entity    | person         | customer     | integer       |
+      | entity    | person         | customer     | integer    |
       | relation  | description    | registration | string     |
       | relation  | description    | registration | datetime   |
 
@@ -988,7 +1032,7 @@ Feature: Concept Owns
     Examples:
       | root-type | supertype-name | subtype-name | value-type |
       | entity    | person         | customer     | string     |
-      | relation  | description    | registration | integer       |
+      | relation  | description    | registration | integer    |
 
   Scenario Outline: Ownerships with subtypes and supertypes can change ordering only together for <root-type>
     When create attribute type: literal
