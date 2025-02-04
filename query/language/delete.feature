@@ -390,6 +390,38 @@ Feature: TypeQL Delete Query
       | key:ref:0 | key:name:Bob |
 
 
+  Scenario: The role player playing the specialisation of a role can be deleted
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    relation internship sub employment, relates intern as employee;
+    entity student sub person, plays internship:intern;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+     $p isa person, has name "John";
+     $e isa employment, links (employee: $p), has ref 0;
+    """
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    match
+      $e isa employment, links (employee: $p); $p isa person;
+    delete
+      links (employee: $p) of $e;
+    """
+    Then transaction commits
+
+
   @ignore
   # TODO: 3.x: Bring back when we have lists ( this also fails because we don't have role-player de-duplication?)
   Scenario: when deleting multiple repeated role players from a relation, it removes the number you asked to delete
