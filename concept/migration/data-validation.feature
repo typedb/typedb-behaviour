@@ -2944,10 +2944,9 @@ Feature: Data validation
     When entity(ent0) get owns(attr0) set annotation: @card(0..2)
     When transaction commits
 
-    # TODO: Uncomment when attribute supertypes can be not abstract
-#    When connection open schema transaction for database: typedb
-#    When attribute(attr1) set supertype: attr2
-#    Then transaction commits; fails with a message containing: "@card"
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr2
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When attribute(attr1) set supertype: attr0
@@ -2957,10 +2956,9 @@ Feature: Data validation
     When entity(ent0) get owns(attr0) set annotation: @card(2..3)
     Then transaction commits
 
-    # TODO: Uncomment when attribute supertypes can be not abstract
-#    When connection open schema transaction for database: typedb
-#    When attribute(attr1) set supertype: attr2
-#    Then transaction commits; fails with a message containing: "@card"
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr2
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When attribute(attr1) set supertype: attr0
@@ -2972,10 +2970,11 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(2..4)
-    # TODO: Cannot set attr2 as supertype as it needs to be abstract.
-    # Cover this case when attribute supertypes will be allowed to supertype!
-    Then attribute(attr1) set supertype: attr2; fails
-    Then attribute(attr1) set supertype: attr0
+    When attribute(attr1) set supertype: attr2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr0
     Then transaction commits
 
     When connection open write transaction for database: typedb
@@ -5221,3 +5220,197 @@ Feature: Data validation
       | 2..        | 2..      |                                                 |
       | 2..        | 1..2     |                                                 |
       | 2..        | 3..      | ; fails with a message containing: "@card(3..)" |
+
+
+  Scenario: Cardinality validation considers all instances of attribute type subtypes
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given attribute(attr0) set annotation: @independent
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given create attribute type: attr3_0
+    Given attribute(attr3_0) set supertype: attr2
+    Given create attribute type: attr3_1
+    Given attribute(attr3_1) set supertype: attr2
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) get owns(ref) set annotation: @key
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3_0
+    Given entity(ent1) set owns: attr3_1
+    Given entity(ent0) get owns(attr0) set annotation: @card(3..6)
+    Given entity(ent0) get owns(attr1) set annotation: @card(3..4)
+    Given entity(ent1) get owns(attr2) set annotation: @card(0..)
+    Given entity(ent1) get owns(attr3_0) set annotation: @card(1..)
+    Given entity(ent1) get owns(attr3_1) set annotation: @card(2..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $attr3_0_0 = attribute(attr3_0) put instance with value: "attr3_0_0"
+    Given $attr3_0_1 = attribute(attr3_0) put instance with value: "attr3_0_1"
+    Given $attr3_1_0 = attribute(attr3_1) put instance with value: "attr3_1_0"
+    Given $attr3_1_1 = attribute(attr3_1) put instance with value: "attr3_1_1"
+    Given $attr2 = attribute(attr2) put instance with value: "attr2"
+    Given $attr1_0 = attribute(attr1) put instance with value: "attr1_0"
+    Given $attr1_1 = attribute(attr1) put instance with value: "attr1_1"
+    Given $attr1_2 = attribute(attr1) put instance with value: "attr1_2"
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr1_1
+    When entity $ent0 set has: $attr1_2
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr1_1
+    When entity $ent0 set has: $attr1_2
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_0_1 = attribute(attr3_0) get instance with value: "attr3_0_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
+    When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr1_1
+    When entity $ent0 set has: $attr1_2
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_0_1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_0_1 = attribute(attr3_0) get instance with value: "attr3_0_1"
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_0_1
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr2 = attribute(attr2) get instance with value: "attr2"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr2
+    When entity $ent0 set has: $attr3_0_0
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr2 = attribute(attr2) get instance with value: "attr2"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr2
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_1_0
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When entity $ent1 set has: $attr1_0
+    When entity $ent1 set has: $attr3_1_0
+    When entity $ent1 set has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) create new instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When $attr3_1_0 = attribute(attr3_1) get instance with value: "attr3_1_0"
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 set has: $attr1_0
+    When entity $ent0 set has: $attr3_0_0
+    When entity $ent0 set has: $attr3_1_0
+    When entity $ent0 set has: $attr3_1_1
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) get instance with key(ref): ent0
+    When $attr3_1_1 = attribute(attr3_1) get instance with value: "attr3_1_1"
+    When entity $ent0 unset has: $attr3_1_1
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) get instance with key(ref): ent0
+    When $attr3_0_0 = attribute(attr3_0) get instance with value: "attr3_0_0"
+    When entity $ent0 unset has: $attr3_0_0
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent1) get instance with key(ref): ent0
+    When $attr2 = attribute(attr2) get instance with value: "attr2"
+    When entity $ent0 set has: $attr2
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr1) set annotation: @card(4..5)
+    When $ent0 = entity(ent1) get instance with key(ref): ent0
+    When $attr2 = attribute(attr2) get instance with value: "attr2"
+    When entity $ent0 set has: $attr2
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent0 = entity(ent1) get instance with key(ref): ent0
+    When $attr1_0 = attribute(attr1) get instance with value: "attr1_0"
+    When entity $ent0 unset has: $attr1_0
+    Then transaction commits

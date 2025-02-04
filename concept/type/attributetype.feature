@@ -465,7 +465,7 @@ Feature: Concept Attribute Type
 # @abstract
 ########################
 
-  Scenario: Attribute types can be set to abstract
+  Scenario: @abstract annotation can be set and unset for attribute types
     When create attribute type: name
     When attribute(name) set value type: string
     When attribute(name) set annotation: @abstract
@@ -497,15 +497,8 @@ Feature: Concept Attribute Type
     When connection open schema transaction for database: typedb
     When create attribute type: company-email
     When attribute(company-email) set supertype: email
-    Then attribute(email) unset annotation: @abstract; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    When attribute(email) unset value type
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    When create attribute type: company-email
-    When attribute(company-email) set supertype: email
-    Then attribute(email) unset annotation: @abstract; fails
+    Then attribute(email) unset annotation: @abstract
+    Then transaction commits
 
   Scenario: Attribute types can be created without value types with @abstract annotation
     When create attribute type: name
@@ -1152,19 +1145,22 @@ Feature: Concept Attribute Type
     When attribute(name) get value type: string
     Then attribute(name) get constraints is empty
 
-  Scenario: Attribute types can be subtypes of other attribute types
+  Scenario: Attribute types can be subtypes of other attribute types with and without @abstract annotation
     When create attribute type: first-name
     When create attribute type: last-name
     When create attribute type: real-name
     When create attribute type: username
     When create attribute type: name
     When attribute(name) set value type: string
-    When attribute(real-name) set annotation: @abstract
     When attribute(name) set annotation: @abstract
     When attribute(first-name) set supertype: real-name
     When attribute(last-name) set supertype: real-name
     When attribute(real-name) set supertype: name
     When attribute(username) set supertype: name
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(real-name) get constraints do not contain: @abstract
+    Then attribute(first-name) get constraints do not contain: @abstract
+    Then attribute(last-name) get constraints do not contain: @abstract
     Then attribute(first-name) get supertype: real-name
     Then attribute(last-name) get supertype: real-name
     Then attribute(real-name) get supertype: name
@@ -1198,6 +1194,10 @@ Feature: Concept Attribute Type
       | last-name  |
     When transaction commits
     When connection open read transaction for database: typedb
+    Then attribute(name) get constraints contain: @abstract
+    Then attribute(real-name) get constraints do not contain: @abstract
+    Then attribute(first-name) get constraints do not contain: @abstract
+    Then attribute(last-name) get constraints do not contain: @abstract
     Then attribute(first-name) get supertype: real-name
     Then attribute(last-name) get supertype: real-name
     Then attribute(real-name) get supertype: name
@@ -1230,19 +1230,22 @@ Feature: Concept Attribute Type
       | first-name |
       | last-name  |
 
-  Scenario: Attribute types cannot subtype non abstract attribute types
+  Scenario: Attribute types can subtype non abstract attribute types
     When create attribute type: name
     When attribute(name) set value type: string
     When create attribute type: first-name
     When attribute(first-name) set value type: string
     When create attribute type: last-name
     When attribute(last-name) set value type: string
-    When transaction commits
-    When connection open schema transaction for database: typedb
-    Then attribute(first-name) set supertype: name; fails
-    When transaction closes
-    When connection open schema transaction for database: typedb
-    Then attribute(last-name) set supertype: name; fails
+    When attribute(first-name) set supertype: name
+    Then attribute(name) get constraints do not contain: @abstract
+    Then attribute(first-name) get supertype: name
+    When attribute(first-name) unset value type
+    Then attribute(first-name) get value type: string
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    Then attribute(name) get constraints do not contain: @abstract
+    Then attribute(first-name) get supertype: name
 
   Scenario: Abstract attribute type cannot set non-abstract supertype
     When create attribute type: name
