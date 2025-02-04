@@ -139,6 +139,19 @@ Feature: Function Definition
     Then transaction commits; fails with a message containing: "An error occurred when trying to resolve the type at return index: 0"
 
 
+  Scenario: A functions with an unused argument errors
+    Given connection open schema transaction for database: typedb
+    When typeql schema query; fails with a message containing: "Function argument variable 'arg' is unused."
+    """
+    define
+    fun get_attr($arg: person) -> { name } :
+    match
+      $arg_with_a_typo has name $name;
+    return { $name };
+    """
+    Given transaction closes
+
+
   Scenario: Functions are stratified wrt negation
     Given connection open schema transaction for database: typedb
     Given typeql schema query
