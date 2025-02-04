@@ -810,6 +810,7 @@ Parker";
       """
     Then answer size is: 0
 
+
   Scenario: when inserting a relation with an unbound variable as a roleplayer, an error is returned
     Then typeql write query; fails
       """
@@ -817,6 +818,47 @@ Parker";
       $r isa employment, links (employee: $x, employer: $y), has ref 0;
       $y isa company, has name "Sports Direct", has ref 1;
       """
+
+
+  Scenario: An entity can play a specialized role
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    relation internship sub employment, relates intern as employee;
+    entity student sub person, plays internship:intern;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $p0 isa person, has ref 0;
+      $e0 isa employment, links (employee: $p0), has ref 0;
+    """
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $s1 isa student, has ref 1;
+      $e1 isa employment, links (employee: $s1), has ref 1;
+    """
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $s2 isa student, has ref 2;
+      $i2 isa internship, links (intern: $s2), has ref 2;
+    """
+    Then transaction commits
+
 
   #######################
   # ATTRIBUTE INSERTION #

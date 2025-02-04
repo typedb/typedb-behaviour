@@ -390,6 +390,76 @@ Feature: TypeQL Delete Query
       | key:ref:0 | key:name:Bob |
 
 
+  Scenario: The role player playing the specialized role can be deleted
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    relation internship sub employment, relates intern as employee;
+    entity student sub person, plays internship:intern;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $p0 isa person, has name "p0";
+      $e0 isa employment, links (employee: $p0), has ref 0;
+      $s1 isa student, has name "s1";
+      $e1 isa employment, links (employee: $s1), has ref 1;
+      $s2 isa student, has name "s2";
+      $i2 isa internship, links (intern: $s2), has ref 2;
+    """
+    Then transaction commits
+
+    # We're not particular about this:
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "Write execution failed due to a concept write error"
+    """
+    match
+      $e isa employment, links (employee: $p);
+    delete
+      links (employee: $p) of $e;
+    """
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    match
+      $e isa! employment, links (employee: $p);
+    delete
+      links (employee: $p) of $e;
+    """
+    Then get answers of typeql read query
+    """
+    match $e isa employment, links (employee: $p);
+    """
+    Then uniquely identify answer concepts
+      | e         | p           |
+      | key:ref:2 | key:name:s2 |
+
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    match
+      $e isa employment, links (employee: $p);
+    delete
+      links (intern: $p) of $e;
+    """
+    Then get answers of typeql read query
+    """
+    match $e isa employment, links (employee: $p);
+    """
+    Then answer size is: 0
+    Then transaction commits
+
+
   @ignore
   # TODO: 3.x: Bring back when we have lists ( this also fails because we don't have role-player de-duplication?)
   Scenario: when deleting multiple repeated role players from a relation, it removes the number you asked to delete
