@@ -349,9 +349,12 @@ Feature: Data validation
     When relation $f add player for role(father): $p
     Then transaction commits
     When connection open schema transaction for database: typedb
-    Then relation(fathership) get role(father) unset specialise; fails
-    Then relation(fathership) unset supertype; fails
-    Then delete relation type: parentship; fails
+    When relation(fathership) get role(father) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(fathership) unset supertype; fails with a message containing: "will be lost"
+    When delete relation type: parentship; fails with a message containing: "existing subtypes"
     When relation(parentship) get role(parent) set annotation: @card(0..1)
     Then relation(fathership) get role(father) unset specialise
     Then relation(fathership) unset supertype
@@ -1261,8 +1264,8 @@ Feature: Data validation
     Then transaction commits
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
-    When entity(person) get owns(email) set annotation: @key; fails
-    When transaction closes
+    When entity(person) get owns(email) set annotation: @key
+    Then transaction commits; fails with a message containing: "@card"
     When connection open schema transaction for database: typedb
     When entity(person) set owns: email
     Then transaction commits
@@ -1321,7 +1324,8 @@ Feature: Data validation
     Given entity $ent0k set has: $attr0
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Then entity(ent1n) set supertype: ent0k; fails
+    When entity(ent1n) set supertype: ent0k
+    Then transaction commits; fails with a message containing: "@card"
 
 
   Scenario: Owns data is revalidated with set/unset @key, @card and @unique annotations
@@ -1356,10 +1360,10 @@ Feature: Data validation
 
     When transaction closes
     Given connection open schema transaction for database: typedb
-    Then entity(ent0u) get owns(attr0) unset annotation: @card; fails
     Then entity(ent0u) get owns(attr0) set annotation: @key; fails
+    When entity(ent0u) get owns(attr0) unset annotation: @card
+    Then transaction commits; fails with a message containing: "@card(0..1)"
 
-    Given transaction closes
     Given connection open write transaction for database: typedb
     When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
     When $ent0u = entity(ent0u) get instance with key(ref): ent0u
@@ -1384,9 +1388,14 @@ Feature: Data validation
     When entity $ent0u unset has: $attr0
     Then entity $ent0u get has do not contain: $attr0
     Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Then entity(ent0u) get owns(attr0) set annotation: @key; fails
-    Then entity(ent0u) get owns(attr0) set annotation: @card(1..1); fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0u) get owns(attr0) set annotation: @key
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0u) get owns(attr0) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
 
 
   Scenario: Owns data is validated to be unique for all siblings specialising an owns with @unique
@@ -1603,8 +1612,8 @@ Feature: Data validation
     When transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then entity(ent0) get owns(attr0) set annotation: @key; fails
-    When transaction closes
+    When entity(ent0) get owns(attr0) set annotation: @key
+    Then transaction commits; fails with a message containing: "@card"
 
     Given connection open write transaction for database: typedb
     Given $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -1623,8 +1632,7 @@ Feature: Data validation
     When $attr2_1 = attribute(attr2) get instance with value: "val2"
     When entity $ent2 unset has: $attr2_1
     Then entity $ent2 set has: $attr2_0; fails
-    # Wrong cardinality
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
 
   Scenario: Owns data is revalidated with set @regex
@@ -1847,8 +1855,8 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent0) get owns(attr0) set annotation: @range("val1".."val9"); fails
-    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @range("val1".."val9"); fails with a message containing: "@range"
+    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails with a message containing: "@range"
     When entity(ent1) get owns(attr2) set annotation: @range("val1".."val9")
 
     When transaction commits
@@ -1859,7 +1867,7 @@ Feature: Data validation
     Then entity $ent1 get has contain: $attr1_val
     Then entity $ent1 get has contain: $attr2_val1
     When $attr2_val = attribute(attr2) put instance with value: "val"
-    Then entity $ent1 set has: $attr2_val; fails
+    Then entity $ent1 set has: $attr2_val; fails with a message containing: "@range"
     When entity $ent1 unset has: $attr1_val
     Then entity $ent1 get has do not contain: $attr1_val
     When transaction commits
@@ -1879,8 +1887,8 @@ Feature: Data validation
     Then entity $ent1 get has do not contain: $attr1_val
     Then entity $ent1 get has do not contain: $attr2_val
     Then entity $ent1 get has contain: $attr2_val1
-    Then entity $ent1 set has: $attr1_val; fails
-    Then entity $ent1 set has: $attr2_val; fails
+    Then entity $ent1 set has: $attr1_val; fails with a message containing: "@range"
+    Then entity $ent1 set has: $attr2_val; fails with a message containing: "@range"
     When $attr1_val22 = attribute(attr1) put instance with value: "val22"
     When $attr2_val22 = attribute(attr2) put instance with value: "val22"
     Then entity $ent1 set has: $attr1_val22
@@ -1891,14 +1899,14 @@ Feature: Data validation
     When create attribute type: attr01
     When attribute(attr01) set annotation: @abstract
     When attribute(attr01) set value type: string
-    When attribute(attr0) set supertype: attr01
-    Then entity(ent0) set owns: attr01; fails
-    When attribute(attr0) unset supertype
     When entity(ent0) set owns: attr01
-    Then attribute(attr0) set supertype: attr01; fails
-    When entity(ent0) get owns(attr01) set annotation: @range("val".."val9999")
-    Then attribute(attr0) set supertype: attr01; fails
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
+    When entity(ent0) get owns(attr01) set annotation: @range("val23".."val9999")
+    Then attribute(attr0) set supertype: attr01; fails with a message containing: "@range"
+    When entity(ent0) get owns(attr01) unset annotation: @range
+    Then attribute(attr0) set supertype: attr01
+    When entity(ent0) get owns(attr01) set annotation: @range("val23".."val9999"); fails with a message containing: "@range"
+    When entity(ent0) get owns(attr01) set annotation: @range("val".."val9999")
     When attribute(attr0) set supertype: attr01
     When attribute(attr0) unset value type
     When transaction commits
@@ -1906,7 +1914,7 @@ Feature: Data validation
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
     When $attr1_val = attribute(attr1) get instance with value: "val"
-    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr1_val; fails with a message containing: "@range"
     When transaction closes
 
     When connection open schema transaction for database: typedb
@@ -1920,8 +1928,8 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent0) get owns(attr01) set annotation: @range("val1".."val9"); fails
-    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails
+    Then entity(ent0) get owns(attr01) set annotation: @range("val1".."val9"); fails with a message containing: "@range"
+    Then entity(ent1) get owns(attr1) set annotation: @range("val1".."val9"); fails with a message containing: "@range"
     When transaction closes
 
     When connection open write transaction for database: typedb
@@ -1951,7 +1959,7 @@ Feature: Data validation
     Given entity(ent0) get owns(attr0) set annotation: @range("A".."Z")
     Given entity(ent0) set owns: attr00
     Given entity(ent0) get owns(attr00) set annotation: @card(0..)
-    Given entity(ent0) get owns(attr00) set annotation: @regex("a".."z")
+    Given entity(ent0) get owns(attr00) set annotation: @range("a".."z")
     Given create entity type: ent1
     Given entity(ent1) set supertype: ent0
     Given entity(ent1) set owns: attr1
@@ -1964,8 +1972,8 @@ Feature: Data validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr0) set supertype: attr00; fails
-    Then attribute(attr1) set supertype: attr00; fails
+    Then attribute(attr0) set supertype: attr00; fails with a message containing: "@range"
+    Then attribute(attr1) set supertype: attr00; fails with a message containing: "@range"
 
 
   Scenario: Owns data is revalidated with set @values
@@ -2001,8 +2009,8 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent0) get owns(attr0) set annotation: @values("val5", "val1", "val8"); fails
-    Then entity(ent1) get owns(attr1) set annotation: @values("val5", "val1", "val8"); fails
+    Then entity(ent0) get owns(attr0) set annotation: @values("val5", "val1", "val8"); fails with a message containing: "@values"
+    Then entity(ent1) get owns(attr1) set annotation: @values("val5", "val1", "val8"); fails with a message containing: "@values"
     When entity(ent1) get owns(attr2) set annotation: @values("val5", "val1", "val8")
 
     When transaction commits
@@ -2013,7 +2021,7 @@ Feature: Data validation
     Then entity $ent1 get has contain: $attr1_val
     Then entity $ent1 get has contain: $attr2_val1
     When $attr2_val = attribute(attr2) put instance with value: "val"
-    Then entity $ent1 set has: $attr2_val; fails
+    Then entity $ent1 set has: $attr2_val; fails with a message containing: "@values"
     When entity $ent1 unset has: $attr1_val
     Then entity $ent1 get has do not contain: $attr1_val
     When transaction commits
@@ -2033,8 +2041,8 @@ Feature: Data validation
     Then entity $ent1 get has do not contain: $attr1_val
     Then entity $ent1 get has do not contain: $attr2_val
     Then entity $ent1 get has contain: $attr2_val1
-    Then entity $ent1 set has: $attr1_val; fails
-    Then entity $ent1 set has: $attr2_val; fails
+    Then entity $ent1 set has: $attr1_val; fails with a message containing: "@values"
+    Then entity $ent1 set has: $attr2_val; fails with a message containing: "@values"
     When $attr1_val22 = attribute(attr1) put instance with value: "val22"
     When $attr2_val22 = attribute(attr2) put instance with value: "val22"
     Then entity $ent1 set has: $attr1_val22
@@ -2045,15 +2053,13 @@ Feature: Data validation
     When create attribute type: attr01
     When attribute(attr01) set annotation: @abstract
     When attribute(attr01) set value type: string
-    When attribute(attr0) set supertype: attr01
-    Then entity(ent0) set owns: attr01; fails
-    When attribute(attr0) unset supertype
     When entity(ent0) set owns: attr01
-    Then attribute(attr0) set supertype: attr01; fails
-    When entity(ent0) get owns(attr01) set annotation: @values("val1", "val", "val1237")
-    Then attribute(attr0) set supertype: attr01; fails
     When entity(ent0) get owns(attr01) set annotation: @card(0..)
-    Then attribute(attr0) set supertype: attr01; fails
+    When entity(ent0) get owns(attr01) set annotation: @values("val1", "val", "val1237")
+    Then attribute(attr0) set supertype: attr01; fails with a message containing: "@values"
+    When entity(ent0) get owns(attr01) unset annotation: @values
+    Then attribute(attr0) set supertype: attr01
+    When entity(ent0) get owns(attr01) set annotation: @values("val1", "val", "val1237"); fails with a message containing: "@values"
     When entity(ent0) get owns(attr01) set annotation: @values("val22", "val", "val1")
     When attribute(attr0) set supertype: attr01
     When attribute(attr0) unset value type
@@ -2062,7 +2068,7 @@ Feature: Data validation
     When connection open write transaction for database: typedb
     When $ent1 = entity(ent1) get instance with key(ref): ent1
     When $attr1_val = attribute(attr1) get instance with value: "val"
-    Then entity $ent1 set has: $attr1_val; fails
+    Then entity $ent1 set has: $attr1_val; fails with a message containing: "@values"
     When transaction closes
 
     When connection open schema transaction for database: typedb
@@ -2076,8 +2082,8 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent0) get owns(attr01) set annotation: @values("val5", "val1", "val8"); fails
-    Then entity(ent1) get owns(attr1) set annotation: @values("val5", "val1", "val8"); fails
+    Then entity(ent0) get owns(attr01) set annotation: @values("val5", "val1", "val8"); fails with a message containing: "@values"
+    Then entity(ent1) get owns(attr1) set annotation: @values("val5", "val1", "val8"); fails with a message containing: "@values"
     When transaction closes
 
     When connection open write transaction for database: typedb
@@ -2120,8 +2126,8 @@ Feature: Data validation
     Given transaction commits
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr0) set supertype: attr00; fails
-    Then attribute(attr1) set supertype: attr00; fails
+    Then attribute(attr0) set supertype: attr00; fails with a message containing: "@values"
+    Then attribute(attr1) set supertype: attr00; fails with a message containing: "@values"
 
 
   Scenario: Owns data is revalidated with set/unset @key, @card and @unique annotations
@@ -2152,14 +2158,14 @@ Feature: Data validation
     Given entity $ent0u set has: $attr1
     Given transaction commits
     Given connection open schema transaction for database: typedb
-    Then entity(ent0n) get owns(attr0) set annotation: @unique; fails
+    Then entity(ent0n) get owns(attr0) set annotation: @unique; fails with a message containing: "unique"
 
     When transaction closes
     Given connection open schema transaction for database: typedb
-    Then entity(ent0u) get owns(attr0) unset annotation: @card; fails
-    Then entity(ent0u) get owns(attr0) set annotation: @key; fails
+    Then entity(ent0u) get owns(attr0) set annotation: @key; fails with a message containing: "key"
+    When entity(ent0u) get owns(attr0) unset annotation: @card
+    Then transaction commits; fails with a message containing: "@card"
 
-    Given transaction closes
     Given connection open write transaction for database: typedb
     When $ent0n1 = entity(ent0n) get instance with key(ref): ent0n1
     When $ent0u = entity(ent0u) get instance with key(ref): ent0u
@@ -2184,9 +2190,14 @@ Feature: Data validation
     When entity $ent0u unset has: $attr0
     Then entity $ent0u get has do not contain: $attr0
     Then transaction commits
-    Given connection open schema transaction for database: typedb
-    Then entity(ent0u) get owns(attr0) set annotation: @key; fails
-    Then entity(ent0u) get owns(attr0) set annotation: @card(1..1); fails
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0u) get owns(attr0) set annotation: @key
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0u) get owns(attr0) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
 
 
   Scenario: Owns data is revalidated with set @distinct
@@ -2453,10 +2464,22 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set annotation: @card(1..); fails
-    Then entity(ent1) get owns(attr1) set annotation: @card(1..1); fails
-    Then entity(ent0) get owns(attr0) set annotation: @card(1..); fails
-    Then entity(ent0) get owns(attr0) set annotation: @card(1..1); fails
+    When entity(ent1) get owns(attr1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get owns(attr1) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
     Then entity(ent2) get constraints for owned attribute(attr1) contain: @card(0..1)
     Then entity(ent2) get constraints for owned attribute(attr1) do not contain: @card(1..1)
     When transaction closes
@@ -2467,7 +2490,7 @@ Feature: Data validation
     When $attr1_2 = attribute(attr1) put instance with value: "attr1_2"
     When entity $ent2 set has: $attr1_1
     When entity $ent2 set has: $attr1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -2493,7 +2516,13 @@ Feature: Data validation
     Then entity(ent2) get constraints for owned attribute(attr1) contain: @card(0..1)
     Then entity(ent2) get constraints for owned attribute(attr1) contain: @card(1..1)
     Then entity(ent2) get constraints for owned attribute(attr1) do not contain: @card(1..)
-    Then entity(ent0) get owns(attr0) set annotation: @card(2..3); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(2..3)
+    Then transaction commits; fails with a message containing: "@card(2..3)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(1..3)
     When entity(ent1) get owns(attr1) set annotation: @card(1..2)
     Then entity(ent2) get constraints for owned attribute(attr0) contain: @card(1..3)
@@ -2512,7 +2541,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_3 = attribute(attr1) put instance with value: "attr1_3"
     When entity $ent2 set has: $attr1_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(1..2)
@@ -2527,18 +2556,33 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_3 = attribute(attr1) put instance with value: "attr1_3"
     When entity $ent2 set has: $attr1_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Default cardinality effect validation
     # Set sibling capability effect validation
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) unset annotation: @card; fails
+    When entity(ent1) get owns(attr1) unset annotation: @card
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr2
+    When attribute(attr2) set value type: string
+    When entity(ent2) set owns: attr2
+    When entity(ent2) get owns(attr2) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When create attribute type: attr2
     When entity(ent2) set owns: attr2
-    Then entity(ent2) get owns(attr2) set annotation: @card(1..); fails
     When attribute(attr2) set supertype: attr0
-    Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
+    When entity(ent0) get owns(attr0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When create attribute type: attr2
+    When entity(ent2) set owns: attr2
+    When attribute(attr2) set supertype: attr0
     When entity(ent0) get owns(attr0) set annotation: @card(0..2)
     Then entity(ent2) get constraints for owned attribute(attr0) contain: @card(0..2)
     Then entity(ent2) get constraints for owned attribute(attr0) do not contain: @card(1..3)
@@ -2555,7 +2599,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_1 = attribute(attr2) put instance with value: "attr2_1"
     When entity $ent2 set has: $attr2_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(2..3)
@@ -2598,7 +2642,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_2 = attribute(attr2) put instance with value: "attr2_2"
     When entity $ent2 set has: $attr2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr2) set annotation: @card(1..10)
@@ -2617,7 +2661,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_2 = attribute(attr2) put instance with value: "attr2_2"
     When entity $ent2 set has: $attr2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(2..4)
@@ -2651,13 +2695,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
     When entity $ent2 unset has: $attr1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
     When entity $ent2 unset has: $attr2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr2) set annotation: @card(0..)
@@ -2701,14 +2745,19 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
     When entity $ent2 unset has: $attr1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Interface type supertype changes validation
 
     When connection open schema transaction for database: typedb
     When attribute(attr1) set value type: string
     When attribute(attr1) set annotation: @independent
-    Then attribute(attr1) unset supertype; fails
+    When attribute(attr1) unset supertype
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set value type: string
+    When attribute(attr1) set annotation: @independent
     When entity(ent0) get owns(attr0) set annotation: @card(0..3)
     Then attribute(attr1) unset supertype
     Then entity(ent2) get constraints for owned attribute(attr0) contain: @card(0..3)
@@ -2738,8 +2787,17 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(1..1)
-    Then attribute(attr1) set supertype: attr0; fails
-    Then entity(ent0) get owns(attr0) set annotation: @card(2..2); fails
+    When attribute(attr1) set supertype: attr0
+    When attribute(attr1) unset value type
+    When attribute(attr1) unset annotation: @independent
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(1..1)
+    When entity(ent0) get owns(attr0) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(1..2)
     When attribute(attr1) set supertype: attr0
     When attribute(attr1) unset value type
@@ -2762,32 +2820,35 @@ Feature: Data validation
     When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
     When entity $ent2 unset has: $attr1_1
     When entity $ent2 unset has: $attr2_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_1 = attribute(attr2) get instance with value: "attr2_1"
     When entity $ent2 unset has: $attr2_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
     When entity $ent2 unset has: $attr1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When attribute(attr1) set value type: string
     When attribute(attr1) set annotation: @independent
-    When attribute(attr2) set value type: string
-    When attribute(attr2) set annotation: @independent
-    Then attribute(attr1) unset supertype; fails
-    Then attribute(attr2) unset supertype; fails
-    When transaction closes
+    When attribute(attr1) unset supertype
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr1) set supertype: attr00; fails
-    When transaction closes
+    When attribute(attr2) set value type: string
+    When attribute(attr2) set annotation: @independent
+    When attribute(attr2) unset supertype
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr00
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -2802,20 +2863,47 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr2) set supertype: attr00; fails
-    Then entity(ent0) get owns(attr0) set annotation: @card(0..1); fails
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..2)
-    Then attribute(attr2) set supertype: attr00
-    Then entity(ent2) set owns: attr00; fails
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set owns: attr00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When attribute(attr2) set supertype: attr0
-    Then entity(ent2) set owns: attr00
-    Then attribute(attr2) set supertype: attr00; fails
+    When entity(ent2) set owns: attr00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr00) set annotation: @card(0..2)
-    Then attribute(attr2) set supertype: attr00
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr00) set annotation: @card(2..2)
-    Then attribute(attr2) set supertype: attr0; fails
+    When attribute(attr2) set supertype: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr00) set annotation: @card(1..2)
-    Then attribute(attr2) set supertype: attr0; fails
+    When attribute(attr2) set supertype: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr00) set annotation: @card(0..2)
     Then attribute(attr2) set supertype: attr0
     When transaction commits
@@ -2826,12 +2914,21 @@ Feature: Data validation
     When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
     When entity $ent2 set has: $attr1_1
     When entity $ent2 set has: $attr1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get owns(attr1) set annotation: @card(2..2); fails
-    Then entity(ent1) get owns(attr1) set annotation: @card(1..2); fails
-    Then entity(ent1) get owns(attr1) set annotation: @card(1..); fails
+    When entity(ent1) get owns(attr1) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get owns(attr1) set annotation: @card(1..2)
+    Then transaction commits; fails with a message containing: "@card(1..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get owns(attr1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent1) get owns(attr1) set annotation: @card(0..2)
     When transaction commits
 
@@ -2845,12 +2942,35 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..2)
-    Then attribute(attr1) set supertype: attr2; fails
-    Then attribute(attr1) set supertype: attr0; fails
+    When transaction commits
+
+    # TODO: Uncomment when attribute supertypes can be not abstract
+#    When connection open schema transaction for database: typedb
+#    When attribute(attr1) set supertype: attr2
+#    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(2..3)
-    Then attribute(attr1) set supertype: attr2; fails
-    Then attribute(attr1) set supertype: attr0; fails
-    Then entity(ent0) get owns(attr0) set annotation: @card(3..4); fails
+    Then transaction commits
+
+    # TODO: Uncomment when attribute supertypes can be not abstract
+#    When connection open schema transaction for database: typedb
+#    When attribute(attr1) set supertype: attr2
+#    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr1) set supertype: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get owns(attr0) set annotation: @card(3..4)
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(2..4)
     # TODO: Cannot set attr2 as supertype as it needs to be abstract.
     # Cover this case when attribute supertypes will be allowed to supertype!
@@ -2862,7 +2982,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_3 = attribute(attr2) put instance with value: "attr2_3"
     When entity $ent2 set has: $attr2_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -2873,12 +2993,18 @@ Feature: Data validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr2) set supertype: attr00; fails
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr00
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then attribute(attr2) set supertype: attr00; fails
+    When attribute(attr2) set supertype: attr00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr0
     Then transaction commits
 
@@ -2905,10 +3031,10 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
     When entity $ent2 set has: $attr1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent2) set supertype: ent00; fails
+    Then entity(ent2) set supertype: ent00; fails with a message containing: "lost"
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
@@ -2922,18 +3048,24 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_2 = attribute(attr1) get instance with value: "attr1_2"
     When entity $ent2 set has: $attr1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
     When entity(ent00) get owns(attr0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
     When entity(ent00) get owns(attr0) set annotation: @card(3..4)
-    Then entity(ent1) set supertype: ent00
     Then transaction commits
 
     When connection open schema transaction for database: typedb
@@ -2942,15 +3074,27 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent00) get owns(attr0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent00) unset owns: attr0
     Then entity(ent1) set supertype: ent00
-    Then entity(ent00) set owns: attr0; fails
     Then transaction commits
 
     When connection open schema transaction for database: typedb
+    When entity(ent00) set owns: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..1)
-    Then entity(ent1) set supertype: ent0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..)
     Then entity(ent1) set supertype: ent0
     Then transaction commits
@@ -2958,18 +3102,39 @@ Feature: Data validation
     # Redeclaration with specialisation validation
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) set owns: attr0; fails
-    Then entity(ent2) set owns: attr0; fails
+    When entity(ent1) set owns: attr0
+    When entity(ent1) get owns(attr0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set owns: attr0
+    When entity(ent2) get owns(attr0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) unset owns: attr0
+    When entity(ent2) set owns: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) unset owns: attr0
+    When entity(ent1) set owns: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) set owns: attr1
-    Then entity(ent2) get owns(attr1) set annotation: @card(2..); fails
     When entity(ent2) get owns(attr1) set annotation: @card(1..)
     Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get owns(attr1) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
     When entity $ent2 unset has: $attr1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr1) set annotation: @card(0..1)
@@ -2991,7 +3156,7 @@ Feature: Data validation
     When $attr2_3 = attribute(attr2) get instance with value: "attr2_3"
     When entity $ent2 unset has: $attr2_2
     When entity $ent2 unset has: $attr2_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..3)
@@ -3007,7 +3172,11 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set owns: attr0
-    Then entity(ent2) get owns(attr0) set annotation: @card(2..); fails
+    When entity(ent2) get owns(attr0) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) set owns: attr0
     When entity(ent2) get owns(attr0) set annotation: @card(1..)
     When entity(ent2) get owns(attr0) set annotation: @card(1..1)
     Then transaction commits
@@ -3016,13 +3185,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
     When entity $ent2 set has: $attr2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr1_1 = attribute(attr1) get instance with value: "attr1_1"
     When entity $ent2 set has: $attr1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get owns(attr0) set annotation: @card(0..5)
@@ -3033,7 +3202,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $attr2_2 = attribute(attr2) get instance with value: "attr2_2"
     When entity $ent2 set has: $attr2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get owns(attr0) set annotation: @card(0..2)
@@ -3045,10 +3214,10 @@ Feature: Data validation
     When entity $ent2 set has: $attr2_2
     Then transaction commits
 
-    
+
   Scenario: Relates data is revalidated when new cardinality constraints appear
     # Setup
-    
+
     When create attribute type: ref
     When attribute(ref) set value type: string
     When create relation type: rel0
@@ -3088,13 +3257,22 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) set annotation: @card(1..); fails
-    Then relation(rel1) get role(role1) set annotation: @card(1..1); fails
-    Then relation(rel0) get role(role0) set annotation: @card(1..); fails
-    Then relation(rel0) get role(role0) set annotation: @card(1..1); fails
+    When relation(rel1) get role(role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(1..1)
     Then relation(rel2) get constraints for related role(rel1:role1) contain: @card(0..1)
-    Then relation(rel2) get constraints for related role(rel1:role1) do not contain: @card(1..1)
-    When transaction closes
+    Then relation(rel2) get constraints for related role(rel1:role1) contain: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
@@ -3102,7 +3280,7 @@ Feature: Data validation
     When $player1_2 = entity(ent2) create new instance with key(ref): player1_2
     When relation $rel2 add player for role(role1): $player1_1
     When relation $rel2 add player for role(role1): $player1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
@@ -3128,8 +3306,17 @@ Feature: Data validation
     Then relation(rel2) get constraints for related role(rel1:role1) contain: @card(0..1)
     Then relation(rel2) get constraints for related role(rel1:role1) contain: @card(1..1)
     Then relation(rel2) get constraints for related role(rel1:role1) do not contain: @card(1..)
-    Then relation(rel0) get role(role0) set annotation: @card(2..3); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(2..3)
+    Then transaction commits; fails with a message containing: "@card(2..3)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(1..3)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role1) set annotation: @card(1..2)
     Then relation(rel2) get constraints for related role(rel0:role0) contain: @card(1..3)
     Then relation(rel2) get constraints for related role(rel0:role0) do not contain: @card(1..2)
@@ -3147,7 +3334,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player1_3 = entity(ent2) create new instance with key(ref): player1_3
     When relation $rel2 add player for role(role1): $player1_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(1..2)
@@ -3162,19 +3349,34 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player1_3 = entity(ent2) create new instance with key(ref): player1_3
     When relation $rel2 add player for role(role1): $player1_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Default cardinality effect validation
     # Set sibling capability effect validation
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset annotation: @card; fails
+    When relation(rel1) get role(role1) unset annotation: @card
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) create role: role2
     When entity(ent2) set plays: rel1:role2
     When relation(rel1) get role(role2) set specialise: role0
-    Then relation(rel1) get role(role2) set annotation: @card(1..); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set specialise: role0
-    Then relation(rel0) get role(role0) set annotation: @card(0..1); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(0..2)
     Then relation(rel2) get constraints for related role(rel0:role0) contain: @card(0..2)
     Then relation(rel2) get constraints for related role(rel0:role0) do not contain: @card(1..3)
@@ -3191,7 +3393,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_1 = entity(ent2) create new instance with key(ref): player2_1
     When relation $rel2 add player for role(role2): $player2_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(2..3)
@@ -3234,7 +3436,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_2 = entity(ent2) create new instance with key(ref): player2_2
     When relation $rel2 add player for role(role2): $player2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set annotation: @card(1..10)
@@ -3253,7 +3455,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_2 = entity(ent2) create new instance with key(ref): player2_2
     When relation $rel2 add player for role(role2): $player2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(2..4)
@@ -3287,13 +3489,13 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player1_1 = entity(ent2) get instance with key(ref): player1_1
     When relation $rel2 remove player for role(role1): $player1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_2 = entity(ent2) get instance with key(ref): player2_2
     When relation $rel2 remove player for role(role2): $player2_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set annotation: @card(0..)
@@ -3337,12 +3539,15 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player1_1 = entity(ent2) get instance with key(ref): player1_1
     When relation $rel2 remove player for role(role1): $player1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Interface type supertype changes validation
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(0..3)
     Then relation(rel1) get role(role1) unset specialise
     Then relation(rel2) get constraints for related role(rel0:role0) contain: @card(0..3)
@@ -3372,8 +3577,13 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(1..1)
-    Then relation(rel1) get role(role1) set specialise: rel0; fails
-    Then relation(rel0) get role(role0) set annotation: @card(2..2); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(1..2)
     When relation(rel1) get role(role1) set specialise: role0
     Then relation(rel0) get role(role0) set annotation: @card(2..2)
@@ -3394,28 +3604,32 @@ Feature: Data validation
     When $player2_1 = entity(ent2) get instance with key(ref): player2_1
     When relation $rel2 remove player for role(role1): $player1_1
     When relation $rel2 remove player for role(role2): $player2_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_1 = entity(ent2) get instance with key(ref): player2_1
     When relation $rel2 remove player for role(role2): $player2_1
-    Then transaction commits; fails
+
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player1_1 = entity(ent2) get instance with key(ref): player1_1
     When relation $rel2 remove player for role(role1): $player1_1
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
-    Then relation(rel1) get role(role2) unset specialise; fails
-    When transaction closes
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) set specialise: role00; fails
-    When transaction closes
+    Then relation(rel1) get role(role2) unset specialise
+    When transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
@@ -3430,16 +3644,40 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
-    Then relation(rel0) get role(role0) set annotation: @card(0..1); fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(0..2)
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role00
     When relation(rel0) get role(role00) set annotation: @card(2..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role00) set annotation: @card(1..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role0
     When transaction commits
@@ -3450,12 +3688,21 @@ Feature: Data validation
     When $player1_2 = entity(ent2) get instance with key(ref): player1_2
     When relation $rel2 add player for role(role1): $player1_1
     When relation $rel2 add player for role(role1): $player1_2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) set annotation: @card(2..2); fails
-    Then relation(rel1) get role(role1) set annotation: @card(1..2); fails
-    Then relation(rel1) get role(role1) set annotation: @card(1..); fails
+    When relation(rel1) get role(role1) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set annotation: @card(1..2)
+    Then transaction commits; fails with a message containing: "@card(1..2)"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role1) set annotation: @card(0..2)
     When transaction commits
 
@@ -3469,10 +3716,25 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(0..2)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(2..3)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
-    Then relation(rel0) get role(role0) set annotation: @card(3..4); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel0) get role(role0) set annotation: @card(3..4)
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel0) get role(role0) set annotation: @card(2..4)
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
@@ -3481,7 +3743,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When $player2_3 = entity(ent2) create new instance with key(ref): player2_3
     When relation $rel2 add player for role(role2): $player2_3
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $rel2 = relation(rel2) get instance with key(ref): rel2
@@ -3492,12 +3754,18 @@ Feature: Data validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role00
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
 
@@ -3558,11 +3826,26 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..1); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "card(1..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..); fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(1..1); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "card(1..1)"
+
+    When connection open schema transaction for database: typedb
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..1)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(0..)
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..1)
@@ -3574,7 +3857,7 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel1 add player for role(role1): $ent2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(0..1)"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3601,14 +3884,20 @@ Feature: Data validation
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(0..1)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..1)
     Then entity(ent2) get constraints for played role(rel1:role1) do not contain: @card(1..)
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..3); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
+    Then transaction commits; fails with a message containing: "card(2..3)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..3)
     When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(1..3)
     Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..2)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..3)
     Then entity(ent2) get constraints for played role(rel1:role1) contain: @card(1..2)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3620,7 +3909,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(1..2)"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
@@ -3635,7 +3924,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card(1..2)"
 
     # Default cardinality effect validation (no validation as it creates @card(0..)!
 
@@ -3654,11 +3943,26 @@ Feature: Data validation
     When relation(rel1) get role(role2) set specialise: role0
     When relation(rel1) get role(role2) set annotation: @card(0..)
     When entity(ent2) set plays: rel1:role2
-    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set specialise: role0
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
-    Then entity(ent2) get plays(rel1:role2) set annotation: @card(1..1); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel1:role2) set annotation: @card(1..1)
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(0..1)
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..2)
     Then entity(ent2) get constraints for played role(rel0:role0) do not contain: @card(1..3)
@@ -3676,7 +3980,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
@@ -3719,7 +4023,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(1..10)
@@ -3738,7 +4042,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
@@ -3772,13 +4076,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role2) set annotation: @card(0..)
@@ -3822,12 +4126,15 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     # Interface type supertype changes validation
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
     Then relation(rel1) get role(role1) unset specialise
     Then entity(ent2) get constraints for played role(rel0:role0) contain: @card(0..3)
@@ -3856,8 +4163,17 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..1)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(1..2)
     When relation(rel1) get role(role1) set specialise: role0
     Then entity(ent0) get plays(rel0:role0) set annotation: @card(2..2)
@@ -3870,35 +4186,38 @@ Feature: Data validation
     Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(2..2)
     Then entity(ent2) get constraints for played role(rel1:role2) contain: @card(0..)
     Then entity(ent2) get constraints for played role(rel1:role2) do not contain: @card(0..1)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
     When relation $rel1 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) unset specialise; fails
-    Then relation(rel1) get role(role2) unset specialise; fails
-    When transaction closes
+    When relation(rel1) get role(role1) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role1) set specialise: role00; fails
-    When transaction closes
+    When relation(rel1) get role(role2) unset specialise
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3913,24 +4232,54 @@ Feature: Data validation
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(0..1); fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
     When entity(ent2) set plays: rel0:role00
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..1)
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When relation(rel1) get role(role2) set specialise: role0
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role00
     When entity(ent2) get plays(rel0:role00) set annotation: @card(2..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(1..2)
-    Then relation(rel1) get role(role2) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role2) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role00) set annotation: @card(0..2)
     Then relation(rel1) get role(role2) set specialise: role0
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..1)
-    When transaction commits
+    Then transaction commits
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3938,12 +4287,21 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel1 add player for role(role1): $ent2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(2..2); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..2); fails
-    Then entity(ent1) get plays(rel1:role1) set annotation: @card(1..); fails
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(2..2)
+    Then transaction commits; fails with a message containing: "@card(2..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..2)
+    Then transaction commits; fails with a message containing: "@card(1..2)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) get plays(rel1:role1) set annotation: @card(1..)
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent1) get plays(rel1:role1) set annotation: @card(0..2)
     When transaction commits
 
@@ -3957,10 +4315,25 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..3)
-    Then relation(rel1) get role(role1) set specialise: role0; fails
-    Then entity(ent0) get plays(rel0:role0) set annotation: @card(3..4); fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When relation(rel1) get role(role1) set specialise: role0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) get plays(rel0:role0) set annotation: @card(3..4)
+    Then transaction commits; fails with a message containing: "@card(3..4)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(2..4)
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
@@ -3969,7 +4342,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel3 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
@@ -3980,12 +4353,18 @@ Feature: Data validation
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    When relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role00
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel1) get role(role2) set specialise: role00; fails
+    Then relation(rel1) get role(role2) set specialise: role00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     Then relation(rel1) get role(role1) set specialise: role0
     Then transaction commits
 
@@ -4014,10 +4393,10 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
-    Then entity(ent2) set supertype: ent00; fails
+    When entity(ent2) set supertype: ent00; fails with a message containing: "instances"
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
@@ -4031,16 +4410,25 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set supertype: ent1
     Then transaction commits
 
     When connection open schema transaction for database: typedb
-    Then entity(ent1) set supertype: ent00; fails
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(3..4)
     Then entity(ent1) set supertype: ent00
     Then transaction commits
@@ -4051,17 +4439,31 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent00) get plays(rel0:role0) set annotation: @card(0..3)
-    Then entity(ent1) set supertype: ent00; fails
-    When entity(ent00) unset plays: rel0:role0
-    Then entity(ent1) set supertype: ent00
-    When entity(ent00) set plays: rel0:role0
-    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1); fails
-    When entity(ent00) unset plays: rel0:role0
     Then transaction commits
 
     When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent00
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) unset plays: rel0:role0
+    When entity(ent1) set supertype: ent00
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent00) set plays: rel0:role0
+    Then entity(ent00) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..1)
-    Then entity(ent1) set supertype: ent0; fails
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..)
     Then entity(ent1) set supertype: ent0
     Then transaction commits
@@ -4070,11 +4472,29 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent1) set plays: rel0:role0
+    When entity(ent1) get plays(rel0:role0) set annotation: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set plays: rel0:role0
+    When entity(ent1) get plays(rel0:role0) set annotation: @card(0..10)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(0..10)
     When entity(ent1) unset plays: rel0:role0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) unset plays: rel0:role0
     When entity(ent2) set plays: rel1:role1
-    Then entity(ent2) get plays(rel1:role1) set annotation: @card(2..); fails
+    When entity(ent2) get plays(rel1:role1) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) unset plays: rel0:role0
+    When entity(ent2) set plays: rel1:role1
     When entity(ent2) get plays(rel1:role1) set annotation: @card(1..)
     Then transaction commits
 
@@ -4082,7 +4502,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 remove player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel1:role1) set annotation: @card(0..1)
@@ -4104,7 +4524,7 @@ Feature: Data validation
     When $rel3 = relation(rel2) get instance with key(ref): rel3
     When relation $rel2 remove player for role(role2): $ent2
     When relation $rel3 remove player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..3)
@@ -4120,8 +4540,14 @@ Feature: Data validation
 
     When connection open schema transaction for database: typedb
     When entity(ent2) set plays: rel0:role0
-    Then entity(ent2) get plays(rel0:role0) set annotation: @card(2..); fails
     When entity(ent2) get plays(rel0:role0) set annotation: @card(1..)
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent2) get plays(rel0:role0) set annotation: @card(2..)
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role0) set annotation: @card(1..1)
     Then transaction commits
 
@@ -4129,13 +4555,13 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open write transaction for database: typedb
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel1 = relation(rel2) get instance with key(ref): rel1
     When relation $rel1 add player for role(role1): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent2) get plays(rel0:role0) set annotation: @card(0..5)
@@ -4146,7 +4572,7 @@ Feature: Data validation
     When $ent2 = entity(ent2) get instance with key(ref): ent2
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
-    Then transaction commits; fails
+    Then transaction commits; fails with a message containing: "@card"
 
     When connection open schema transaction for database: typedb
     When entity(ent0) get plays(rel0:role0) set annotation: @card(0..2)
@@ -4157,3 +4583,641 @@ Feature: Data validation
     When $rel2 = relation(rel2) get instance with key(ref): rel2
     When relation $rel2 add player for role(role2): $ent2
     Then transaction commits
+
+
+  Scenario: Cardinality is not validated if instance is deleted
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(2..)
+    Given entity(ent) get owns(attr1) set annotation: @card(3..3)
+    Given entity(ent) get owns(attr2) set annotation: @card(1..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given $attr2 = attribute(attr2) put instance with value: "attr2"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given entity $ent set has: $attr2
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When delete entity: $ent
+    Then transaction commits
+
+
+  Scenario: Cardinality is not validated if owns is unset with the instances deletions
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(2..)
+    Given entity(ent) get owns(attr1) set annotation: @card(3..3)
+    Given entity(ent) get owns(attr2) set annotation: @card(1..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given $attr2 = attribute(attr2) put instance with value: "attr2"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given entity $ent set has: $attr2
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(3..3)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr0
+    Then transaction commits; fails with a message containing: "@card(3..3)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr1
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr1"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(2..)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr1"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr0
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr2"
+    When entity $ent unset has: $attr
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr2"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: attr2
+    Then transaction commits
+
+
+  Scenario: Cardinality is not validated if cardinality is unset to the default value with the owns unsetting
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+
+    Given create entity type: ent
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+
+    Given entity(ent) get owns(attr0) set annotation: @card(0..)
+    Given entity(ent) get owns(attr1) set annotation: @card(2..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance
+    Given $attr0 = attribute(attr1) put instance with value: "attr0"
+    Given $attr1 = attribute(attr1) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr0) unset annotation: @card
+    Then entity(ent) get owns(attr0) get cardinality: @card(0..1)
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr0) unset annotation: @card
+    Then entity(ent) get owns(attr0) get cardinality: @card(0..1)
+    When entity(ent) unset owns: attr0
+    Then transaction commits
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface unsets a supertype and does no more satisfy its constraint
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create entity type: ent
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+
+    Given entity(ent) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent) get owns(attr2) set annotation: @card(0..)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance
+    Given $attr0 = attribute(attr2) put instance with value: "attr0"
+    Given $attr1 = attribute(attr2) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | opt-error                                       |
+      | 2..   | 0..   | ; fails with a message containing: "@card(2..)" |
+      | 0..   | 1..   | ; fails with a message containing: "@card(1..)" |
+      | 2..   | 1..   | ; fails with a message containing: "@card"      |
+      | 0..   | 0..   |                                                 |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(2..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ; fails with a message containing: "@card(2..2)" |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ; fails with a message containing: "@card(2..3)" |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments with partial owns unsetting: <unset-owns-ent-1>-><unset-owns-attr-1> and <unset-owns-ent-2>-><unset-owns-attr-2>
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    When entity(<unset-owns-ent-1>) unset owns: <unset-owns-attr-1>
+    When entity(<unset-owns-ent-2>) unset owns: <unset-owns-attr-2>
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | unset-owns-ent-1 | unset-owns-attr-1 | unset-owns-ent-2 | unset-owns-attr-2 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr3             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent1             | attr2             | ent1             | attr3             | ; fails with a message containing: "@card(2..)"  |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ent0             | attr0             | ent1             | attr3             |                                                  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ent0             | attr0             | ent1             | attr2             | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ent0             | attr1             | ent1             | attr3             | ; fails with a message containing: "@card(2..2)" |
+      | 0..   | 0..   | 2..2  | 0..   | 0..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr2             | ; fails with a message containing: "@card(2..3)" |
+      | 0..   | 0..   | 0..   | 2..3  | 0..   | ent0             | attr1             | ent1             | attr3             |                                                  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   | ent0             | attr1             | ent1             | attr2             |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated if interface subtyping hierarchy is split to multiple segments with partial instances deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent0
+    Given entity(ent0) set owns: ref
+    Given entity(ent0) get owns(ref) set annotation: @key
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr2
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+    Given entity(ent1) set supertype: ent0
+
+    Given entity(ent0) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent0) get owns(attr1) set annotation: @card(<card1>)
+    Given entity(ent1) get owns(attr2) set annotation: @card(<card2>)
+    Given entity(ent1) get owns(attr3) set annotation: @card(<card3>)
+    Given entity(ent1) get owns(attr4) set annotation: @card(<card4>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance with key(ref): ent
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When $ent = entity(ent1) get instance with key(ref): ent
+    When $attr = attribute(attr4) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When attribute(attr4) set value type: string
+    When attribute(attr4) unset supertype
+    When attribute(attr2) set value type: string
+    When attribute(attr2) unset supertype
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | card2 | card3 | card4 | opt-error                                        |
+      | 2..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(2..)"  |
+      | 1..   | 0..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | 0..   | 0..   | 0..   | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | 2..3  | 0..   | 0..   | ; fails with a message containing: "@card(2..3)" |
+      | 0..   | 0..   | 0..   | 2..5  | 0..   | ; fails with a message containing: "@card(2..5)" |
+      | 0..   | 0..   | 0..   | 1..5  | 0..   | ; fails with a message containing: "@card(1..5)" |
+      | 0..10 | 0..3  | 0..5  | 0..   | 2..   | ; fails with a message containing: "@card(2..)"  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 1..   |                                                  |
+      | 0..10 | 0..3  | 0..5  | 0..   | 0..   |                                                  |
+
+
+  Scenario: Cardinality is correctly revalidated when the owner type gets new owns from a new supertype with their partial deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given entity(ent0) set owns: attr2
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+
+    Given entity(ent0) get owns(attr1) set annotation: @card(1..2)
+    Given entity(ent0) get owns(attr2) set annotation: @card(2..)
+    Given entity(ent1) get owns(attr3) set annotation: @card(0..5)
+    Given entity(ent1) get owns(attr4) set annotation: @card(0..12893)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    Then transaction commits
+
+
+  Scenario: Cardinality is correctly revalidated between multiple instances when the owner type gets new owns from a new supertype with their partial deletion
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+    Given attribute(attr2) set annotation: @abstract
+    Given create attribute type: attr3
+    Given attribute(attr3) set supertype: attr2
+    Given attribute(attr3) set annotation: @abstract
+    Given create attribute type: attr4
+    Given attribute(attr4) set supertype: attr3
+
+    Given create entity type: ent0
+    Given entity(ent0) set owns: attr0
+    Given entity(ent0) set owns: attr1
+    Given entity(ent0) set owns: attr2
+    Given create entity type: ent1
+    Given entity(ent1) set owns: attr3
+    Given entity(ent1) set owns: attr4
+
+    Given entity(ent0) get owns(attr1) set annotation: @card(1..2)
+    Given entity(ent0) get owns(attr2) set annotation: @card(2..)
+    Given entity(ent1) get owns(attr3) set annotation: @card(0..5)
+    Given entity(ent1) get owns(attr4) set annotation: @card(0..12893)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent0 = entity(ent1) create new instance
+    Given $attr0 = attribute(attr4) put instance with value: "attr0"
+    Given $attr1 = attribute(attr4) put instance with value: "attr1"
+    Given entity $ent0 set has: $attr0
+    Given entity $ent0 set has: $attr1
+    Given $ent1 = entity(ent1) create new instance
+    Given entity $ent1 set has: $attr0
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr1
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    Then transaction commits; fails with a message containing: "@card"
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set supertype: ent0
+    When entity(ent0) unset owns: attr0
+    When entity(ent0) unset owns: attr2
+    Then transaction commits
+
+
+  Scenario Outline: Cardinality is correctly revalidated if instance deletion is combined with owns unsetting: attr0 card(<card0>), attr1 card(<card1>), unset-owns(<unset-owns-attr>)
+    Given create attribute type: attr0
+    Given attribute(attr0) set value type: string
+    Given attribute(attr0) set annotation: @abstract
+    Given create attribute type: attr1
+    Given attribute(attr1) set supertype: attr0
+    Given attribute(attr1) set annotation: @abstract
+    Given create attribute type: attr2
+    Given attribute(attr2) set supertype: attr1
+
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create entity type: ent
+    Given entity(ent) set owns: ref
+    Given entity(ent) get owns(ref) set annotation: @key
+    Given entity(ent) set owns: attr0
+    Given entity(ent) set owns: attr1
+    Given entity(ent) set owns: attr2
+    Given entity(ent) get owns(attr0) set annotation: @card(<card0>)
+    Given entity(ent) get owns(attr1) set annotation: @card(<card1>)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent) create new instance with key(ref): "ent"
+    Given $attr = attribute(attr2) put instance with value: "attr0"
+    Given entity $ent set has: $attr
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): "ent"
+    When $attr = attribute(attr2) get instance with value: "attr0"
+    When entity $ent unset has: $attr
+    When entity(ent) unset owns: <unset-owns-attr>
+    Then transaction commits<opt-error>
+    Examples:
+      | card0 | card1 | unset-owns-attr | opt-error                                        |
+      | 1..   | 0..   | attr0           |                                                  |
+      | 1..   | 0..   | attr1           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | attr0           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 1..   | attr1           |                                                  |
+      | 1..   | 1..1  | attr0           | ; fails with a message containing: "@card(1..1)" |
+      | 1..   | 1..1  | attr1           | ; fails with a message containing: "@card(1..)"  |
+      | 0..   | 0..   | attr0           |                                                  |
+      | 0..   | 0..   | attr1           |                                                  |
+
+
+  Scenario Outline: Cardinality is correctly revalidated when owns is specialised on a supertype with @card(<card>)
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) set owns: attr
+    Given entity(ent1) get owns(attr) set annotation: @card(2..2)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) set owns: attr
+    When entity(ent0) get owns(attr) set annotation: @card(<card>)
+    Then transaction commits<opt-error>
+    Examples:
+      | card | opt-error                                        |
+      | 0..  |                                                  |
+      | 0..2 |                                                  |
+      | 2..  |                                                  |
+      | 1..1 | ; fails with a message containing: "@card(1..1)" |
+      | 0..1 | ; fails with a message containing: "@card(0..1)" |
+      | 3..  | ; fails with a message containing: "@card(3..)"  |
+
+
+  Scenario: Cardinality is correctly revalidated when owns is specialised on a supertype with the default card
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent1) set supertype: ent0
+    Given entity(ent1) set owns: attr
+    Given entity(ent1) get owns(attr) set annotation: @card(2..2)
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent0) set owns: attr
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+
+  Scenario Outline: Cardinality is correctly revalidated when owns is moved from a supertype @card(<super-card>) to a subtype @card(<sub-card>) with instances
+    Given create attribute type: attr
+    Given attribute(attr) set value type: string
+
+    Given create entity type: ent0
+    Given create entity type: ent1
+    Given entity(ent0) set owns: attr
+    Given entity(ent0) get owns(attr) set annotation: @card(<super-card>)
+    Given entity(ent1) set supertype: ent0
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $ent = entity(ent1) create new instance
+    Given $attr0 = attribute(attr) put instance with value: "attr0"
+    Given $attr1 = attribute(attr) put instance with value: "attr1"
+    Given entity $ent set has: $attr0
+    Given entity $ent set has: $attr1
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When entity(ent1) set owns: attr
+    When entity(ent1) get owns(attr) set annotation: @card(<sub-card>)
+    When entity(ent0) unset owns: attr
+    Then transaction commits<opt-error>
+    Examples:
+      | super-card | sub-card | opt-error                                       |
+      | 2..        | 2..      |                                                 |
+      | 2..        | 1..2     |                                                 |
+      | 2..        | 3..      | ; fails with a message containing: "@card(3..)" |

@@ -2667,11 +2667,12 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
+    When typeql schema query
       """
       define
       product owns barcode @key;
       """
+    Then transaction commits; fails with a message containing: "@card"
 
 
   Scenario: defining a key on a type errors if there is a key collision between two existing instances
