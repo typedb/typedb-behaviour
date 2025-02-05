@@ -521,6 +521,82 @@ Parker";
       | attr:first-name:Alice |
       | attr:surname:Morgan   |
 
+
+    # TODO: This test is not finished. It awaits the server fix
+  Scenario: inserting has for owned attribute types is possible even with existing subtypes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute root-attribute @abstract;
+      attribute name sub root-attribute;
+      attribute first-name sub name;
+      attribute surname sub name;
+      attribute passport-surname sub surname;
+
+      entity root-entity owns root-attribute @card(1..);
+      entity citizen sub root-entity, owns first-name, owns surname;
+      entity registered-citizen sub citizen, owns passport-surname;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "idk something todo"
+      """
+      insert $c isa citizen, has name "Alice";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa citizen, has first-name "Alice";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa citizen, has surname "Morgan";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "idk something todo"
+      """
+      insert $c isa citizen, has passport-surname "Morgan";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has passport-surname "Morgan";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has surname "Morgan";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has first-name "Alice";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "idk something todo"
+      """
+      insert $c isa registered-citizen, has name "Alice";
+      """
+    # TODO: Repeat the same, but set an additional subtype of passport-surname and set registered-citizen owns. Repeat insert ops
+
   ########################################
   # ADDING ATTRIBUTES TO EXISTING instanceS #
   ########################################
