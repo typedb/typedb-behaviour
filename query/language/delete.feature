@@ -270,6 +270,96 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
+  Scenario: instances of multiple attribute supertypes and subtypes can be deleted based on a match
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        email @independent;
+        attribute encrypted-email sub email;
+        attribute corporate-email sub encrypted-email;
+      """
+    Given typeql write query
+      """
+      insert
+        $e1 isa email "bob@mail.com";
+        $e2 isa email "bobbie1987@gmail.com";
+        $e3 isa encrypted-email "b0b@bob.bob";
+        $e4 isa corporate-email "bob@typedb.com";
+      """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $e isa email;
+      delete
+        $e;
+      """
+    When get answers of typeql read query
+      """
+      match $e isa email;
+      """
+    Then answer size is: 0
+
+    When typeql write query
+      """
+      insert
+        $e1 isa email "bob@mail.com";
+        $e2 isa email "bobbie1987@gmail.com";
+        $e3 isa encrypted-email "b0b@bob.bob";
+        $e4 isa corporate-email "bob@typedb.com";
+      """
+    When typeql write query
+      """
+      match
+        $e isa encrypted-email;
+      delete
+        $e;
+      """
+    When get answers of typeql read query
+      """
+      match $e isa email;
+      """
+    Then uniquely identify answer concepts
+      | e                                 |
+      | attr:email:"bob@mail.com"         |
+      | attr:email:"bobbie1987@gmail.com" |
+
+    When typeql write query
+      """
+      match
+        $e isa email;
+      delete
+        $e;
+      """
+    When typeql write query
+      """
+      insert
+        $e1 isa email "bob@mail.com";
+        $e2 isa email "bobbie1987@gmail.com";
+        $e3 isa encrypted-email "b0b@bob.bob";
+        $e4 isa corporate-email "bob@typedb.com";
+      """
+    When typeql write query
+      """
+      match
+        $e isa corporate-email;
+      delete
+        $e;
+      """
+    When get answers of typeql read query
+      """
+      match $e isa email;
+      """
+    Then uniquely identify answer concepts
+      | e                                  |
+      | attr:email:"bob@mail.com"          |
+      | attr:email:"bobbie1987@gmail.com"  |
+      | attr:encrypted-email:"b0b@bob.bob" |
+    Then transaction commits
+
   ###############
   # ROLEPLAYERS #
   ###############
