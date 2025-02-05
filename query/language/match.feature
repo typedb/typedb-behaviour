@@ -2039,6 +2039,53 @@ Feature: TypeQL Match Clause
       | a                                |
       | attr:passport-first-name:"Alice" |
 
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      not { $a isa passport-first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:first-name:"Allie"          |
+      | attr:second-name:"Morgan"        |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      not { $a isa! passport-first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:first-name:"Allie"          |
+      | attr:second-name:"Morgan"        |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      not { $a isa first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:second-name:"Morgan"        |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      not { $a isa! first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:second-name:"Morgan"        |
+      | attr:passport-first-name:"Alice" |
+
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################
@@ -2254,6 +2301,39 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | a                                |
       | attr:passport-first-name:"Alice" |
+
+    When get answers of typeql read query
+      """
+      match
+      $_ has name $a;
+      not { $a isa! passport-first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:first-name:"Allie"          |
+      | attr:second-name:"Morgan"        |
+
+    When get answers of typeql read query
+      """
+      match $_ has name $a;
+      not { $a isa! first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:second-name:"Morgan"        |
+      | attr:passport-first-name:"Alice" |
+
+    When get answers of typeql read query
+      """
+      match $_ has name $a;
+      not { $a isa first-name; };
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:second-name:"Morgan"        |
 
   ##############################
   # ATTRIBUTE VALUE COMPARISON #

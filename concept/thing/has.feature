@@ -216,8 +216,8 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | values-args                               | fail-val                      | suc-val                       |
-      | integer        | 1, 5, 4                                   | 2                             | 1                             |
-      | integer        | 1                                         | 2                             | 1                             |
+      | integer     | 1, 5, 4                                   | 2                             | 1                             |
+      | integer     | 1                                         | 2                             | 1                             |
       | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
       | double      | 0.01                                      | 0.1                           | 0.01                          |
       | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
@@ -269,11 +269,11 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | range-args                                                           | fail-val                          | suc-val                           |
-      | integer        | 1..3                                                                 | 0                                 | 1                                 |
-      | integer        | 1..3                                                                 | -1                                | 2                                 |
-      | integer        | 1..3                                                                 | 4                                 | 3                                 |
-      | integer        | -1..1                                                                | -2                                | 0                                 |
-      | integer        | -1..1                                                                | 2                                 | -1                                |
+      | integer     | 1..3                                                                 | 0                                 | 1                                 |
+      | integer     | 1..3                                                                 | -1                                | 2                                 |
+      | integer     | 1..3                                                                 | 4                                 | 3                                 |
+      | integer     | -1..1                                                                | -2                                | 0                                 |
+      | integer     | -1..1                                                                | 2                                 | -1                                |
       | double      | 0.01..0.1                                                            | 0.001                             | 0.01                              |
       | double      | 0.01..0.1                                                            | 0.11                              | 0.0111111                         |
       | double      | -0.01..0.1                                                           | -0.011                            | 0.01                              |
@@ -494,8 +494,117 @@ Feature: Concept Ownership
     Then entity $ent1 set has(attr0[]): [$val2, $val2]
     Then transaction commits
 
-    # TODO: Add steps to check what @unique means for lists when it's in the spec
+  Scenario: @unique annotation works on all concrete subtypes of a concrete type, collisions are allowed for the same object
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: attr2_1
+    When attribute(attr2_1) set supertype: attr2
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) get owns(attr0) set annotation: @unique
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: attr2
+    When entity(ent) set owns: attr2_1
+    When entity(ent) get owns(attr0) set annotation: @card(0..)
+    When entity(ent) get owns(attr1) set annotation: @card(0..)
+    When entity(ent) get owns(attr2) set annotation: @card(0..)
+    When entity(ent) get owns(attr2_1) set annotation: @card(0..)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) create new instance with key(ref): ent0
+    When $ent1 = entity(ent) create new instance with key(ref): ent1
+    When $attr0 = attribute(attr0) put instance with value: "0"
+    When $attr1 = attribute(attr1) put instance with value: "1"
+    When $attr2 = attribute(attr2) put instance with value: "2"
+    When $attr2_1 = attribute(attr2_1) put instance with value: "2_1"
+    When $attr10 = attribute(attr1) put instance with value: "0"
+    When $attr20 = attribute(attr2) put instance with value: "0"
+    When $attr2_10 = attribute(attr2_1) put instance with value: "0"
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "1"
+    When $attr2 = attribute(attr2) get instance with value: "2"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "2_1"
+    When entity $ent0 set has: $attr0
+    Then entity $ent1 set has: $attr1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    When entity $ent0 set has: $attr0
+    Then entity $ent0 set has: $attr1
+    Then entity $ent0 set has: $attr2_1
+    Then entity $ent0 set has: $attr2
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    When entity $ent0 unset has: $attr0
+    When entity $ent0 unset has: $attr1
+    When entity $ent0 unset has: $attr2_1
+    When entity $ent0 unset has: $attr2
+    When entity $ent0 set has: $attr0
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr0
+    Then entity $ent0 set has: $attr1
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr2
+    Then entity $ent0 set has: $attr2_1
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr2) set annotation: @unique
+    When entity(ent) get owns(attr0) unset annotation: @unique
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0
+    Then entity $ent1 set has: $attr1
+    When entity $ent0 unset has: $attr2_1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then transaction commits
 
+    # TODO: Add tests to check what @unique means for lists when it's in the spec
 
   Scenario: A single object can have instances of an attribute type and its subtypes
     Given transaction closes
@@ -516,7 +625,7 @@ Feature: Concept Ownership
     When entity(ent) get owns(attr0) set annotation: @card(3..3)
     When transaction commits
     When connection open write transaction for database: typedb
-    When $ent = entity(ent) create new instance with key(ref): ent1
+    When $ent = entity(ent) create new instance with key(ref): ent
     When $attr0 = attribute(attr0) put instance with value: "0"
     When $attr1 = attribute(attr1) put instance with value: "1"
     When $attr2 = attribute(attr2) put instance with value: "2"
@@ -525,7 +634,7 @@ Feature: Concept Ownership
     When entity $ent set has: $attr2
     Then transaction commits
     When connection open read transaction for database: typedb
-    When $ent = entity(ent) get instance with key(ref): ent1
+    When $ent = entity(ent) get instance with key(ref): ent
     When $attr0 = attribute(attr0) get instance with value: "0"
     When $attr1 = attribute(attr1) get instance with value: "1"
     When $attr2 = attribute(attr2) get instance with value: "2"
