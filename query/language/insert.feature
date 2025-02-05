@@ -468,6 +468,59 @@ Parker";
       """
 
 
+  Scenario: inserting subtype instances of an attribute based on a matched supertype instances is allowed for specific types
+    Given typeql write query
+      """
+      insert $x isa person, has name "Allie", has age 25, has ref 0;
+      """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      person owns first-name, owns surname;
+      attribute first-name sub name;
+      attribute surname sub name;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $p has name $_;
+      """
+    Given answer size is: 1
+    Given get answers of typeql read query
+      """
+      match $p has name $_; not { $p isa person; };
+      """
+    Given answer size is: 0
+    Then typeql write query; fails with a message containing: "'company' across constraint 'has' is not compatible"
+      """
+      match $p has name $_; let $fn = "Alice";
+      insert $p has first-name == $fn, has surname "Morgan";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match $p has name $_; $p isa $pt; $pt owns first-name, owns surname; let $fn = "Alice";
+      insert $p has first-name == $fn, has surname "Morgan";
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ has name $a;
+      """
+    Then uniquely identify answer concepts
+      | a                     |
+      | attr:name:Allie       |
+      | attr:first-name:Alice |
+      | attr:surname:Morgan   |
+
   ########################################
   # ADDING ATTRIBUTES TO EXISTING instanceS #
   ########################################
