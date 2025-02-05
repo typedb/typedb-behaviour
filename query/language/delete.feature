@@ -1011,8 +1011,8 @@ Feature: TypeQL Delete Query
       friendship owns timespan;
       """
     Given transaction commits
-
     Given connection open write transaction for database: typedb
+
     Given typeql write query
       """
       insert
@@ -1060,6 +1060,109 @@ Feature: TypeQL Delete Query
         has $val of $x;
       """
 
+
+  Scenario: has can be deleted for instances of multiple attribute supertypes and subtypes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        person owns encrypted-email @card(0..), owns corporate-email;
+        attribute encrypted-email sub email;
+        attribute corporate-email sub encrypted-email;
+      """
+    Given typeql write query
+      """
+      insert
+        $p isa person,
+          has name "Bob",
+          has email "bob@mail.com",
+          has email "bobbie1987@gmail.com",
+          has encrypted-email "b0b@bob.bob",
+          has corporate-email "bob@typedb.com";
+      """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $p has email $e;
+      delete
+        has $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $_ has email $e;
+      """
+    Then answer size is: 0
+
+    When typeql write query
+      """
+      match
+        $p isa person;
+      delete
+        $p;
+      """
+    When typeql write query
+      """
+      insert
+        $p isa person,
+          has name "Bob",
+          has email "bob@mail.com",
+          has email "bobbie1987@gmail.com",
+          has encrypted-email "b0b@bob.bob",
+          has corporate-email "bob@typedb.com";
+      """
+    When typeql write query
+      """
+      match
+        $p has encrypted-email $e;
+      delete
+        has $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $_ has email $e;
+      """
+    Then uniquely identify answer concepts
+      | e                                 |
+      | attr:email:"bob@mail.com"         |
+      | attr:email:"bobbie1987@gmail.com" |
+
+    When typeql write query
+      """
+      match
+        $p isa person;
+      delete
+        $p;
+      """
+    When typeql write query
+      """
+      insert
+        $p isa person,
+          has name "Bob",
+          has email "bob@mail.com",
+          has email "bobbie1987@gmail.com",
+          has encrypted-email "b0b@bob.bob",
+          has corporate-email "bob@typedb.com";
+      """
+    When typeql write query
+      """
+      match
+        $p has corporate-email $e;
+      delete
+        has $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $_ has email $e;
+      """
+    Then uniquely identify answer concepts
+      | e                                  |
+      | attr:email:"bob@mail.com"          |
+      | attr:email:"bobbie1987@gmail.com"  |
+      | attr:encrypted-email:"b0b@bob.bob" |
+    Then transaction commits
 
   ####################
   # COMPLEX PATTERNS #
