@@ -522,7 +522,6 @@ Parker";
       | attr:surname:Morgan   |
 
 
-    # TODO: This test is not finished. It awaits the server fix
   Scenario: inserting has for owned attribute types is possible even with existing subtypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
@@ -533,16 +532,16 @@ Parker";
       attribute name sub root-attribute;
       attribute first-name sub name;
       attribute surname sub name;
-      attribute passport-surname sub surname;
+      attribute document-surname sub surname;
 
       entity root-entity owns root-attribute @card(1..);
       entity citizen sub root-entity, owns first-name, owns surname;
-      entity registered-citizen sub citizen, owns passport-surname;
+      entity registered-citizen sub citizen, owns document-surname;
       """
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "idk something todo"
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
       """
       insert $c isa citizen, has name "Alice";
       """
@@ -563,16 +562,16 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "idk something todo"
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
       """
-      insert $c isa citizen, has passport-surname "Morgan";
+      insert $c isa citizen, has document-surname "Morgan";
       """
     When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query
       """
-      insert $c isa registered-citizen, has passport-surname "Morgan";
+      insert $c isa registered-citizen, has document-surname "Morgan";
       """
     Then transaction commits
 
@@ -591,11 +590,55 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "idk something todo"
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
       """
       insert $c isa registered-citizen, has name "Alice";
       """
-    # TODO: Repeat the same, but set an additional subtype of passport-surname and set registered-citizen owns. Repeat insert ops
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute passport-surname sub document-surname;
+      registered-citizen owns passport-surname;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has passport-surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has document-surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa registered-citizen, has first-name "Morgan";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
+      """
+      insert $c isa registered-citizen, has name "Morgan";
+      """
+    When transaction closes
 
   ########################################
   # ADDING ATTRIBUTES TO EXISTING instanceS #
