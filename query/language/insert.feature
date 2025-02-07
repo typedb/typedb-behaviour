@@ -602,6 +602,7 @@ Parker";
       define
       attribute passport-surname sub document-surname;
       registered-citizen owns passport-surname;
+      entity birthright-citizen sub registered-citizen;
       """
     When transaction commits
 
@@ -639,6 +640,40 @@ Parker";
       insert $c isa registered-citizen, has name "Morgan";
       """
     When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa birthright-citizen, has passport-surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa birthright-citizen, has document-surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa birthright-citizen, has surname "Freeman";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $c isa birthright-citizen, has first-name "Morgan";
+      """
+    Then transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
+      """
+      insert $c isa birthright-citizen, has name "Morgan";
+      """
 
   ########################################
   # ADDING ATTRIBUTES TO EXISTING instanceS #
