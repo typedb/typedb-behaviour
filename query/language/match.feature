@@ -3481,4 +3481,3 @@ Feature: TypeQL Match Clause
       match
       entity $following_connectors-and-digits-1-2-3-allowed;
       """
-
