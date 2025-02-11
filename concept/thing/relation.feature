@@ -252,16 +252,42 @@ Feature: Concept Relation
     When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When $email = attribute(email) get instance with value: alice@email.com
+    When $m = relation(marriage) get instance with key(license): m
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $m = relation(marriage) create new instance with key(license): m
+    Then relation $m get players do not contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $m = relation(marriage) get instance with key(license): m
     Then relation $m get players contain: $a
     When relation $m add player for role(wife): $a
     Then relation $m get players contain: $a
     When relation $m remove player for role(wife): $a
     Then relation $m get players do not contain: $a
     When transaction commits
-    When connection open write transaction for database: typedb
-    When $a = entity(person) get instance with key(username): alice
-    Then relation $m get players do not contain: $a
+    When connection open read transaction for database: typedb
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m does not exist
 
   Scenario: Cannot create instances of abstract relation type and role type
     Given transaction closes
