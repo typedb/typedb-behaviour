@@ -237,10 +237,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x label child; $x plays employment:employee;
       """
+    Then answer size is: 0
 
 
   Scenario: undefining non-existing entity type owns errors
@@ -303,10 +304,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x label child; $x owns name;
       """
+    Then answer size is: 0
 
 
   Scenario: removing a key ownership from a super entity type also removes it from its subtypes
@@ -324,10 +326,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x label child; $x owns email;
       """
+    Then answer size is:0
 
 
   Scenario: all existing instances of an entity type must be deleted in order to undefine it
@@ -400,11 +403,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match relation $x;
       """
-
+    Then answer size is:0
 
   Scenario: undefining non-existing relation type sub errors
     Given typeql schema query
@@ -490,10 +493,12 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match contract-employment plays $x;
       """
+    Then answer size is:0
+
 
   Scenario: removing attribute ownerships from a super relation type also removes them from its subtypes
     Given typeql schema query
@@ -521,10 +526,12 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x owns start-date;
       """
+    Then answer size is:0
+
 
 # TODO: match with annotations (do we really need this test in this file? Only for undefine + match purposes...)
 #  Scenario: removing key ownerships from a super relation type also removes them from its subtypes
@@ -553,10 +560,11 @@ Feature: TypeQL Undefine Query
 #    Then transaction commits
 #
 #    When connection open read transaction for database: typedb
-#    Then typeql read query; fails with a message containing: "empty-set for some variable"
+#    When get answers of typeql read query
 #      """
 #      match $x owns employment-reference @key;
 #      """
+#    Then answer size is:0
 
 
   Scenario: undefining a relation type errors on commit if it has existing instances
@@ -694,10 +702,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match relation $x;
       """
+    Then answer size is:0
 
 
   Scenario: undefining a relation type automatically detaches any possible roleplayers
@@ -718,13 +727,13 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match
         $x label person;
         $x plays $y;
-
       """
+    Then answer size is:0
 
   ###################
   # ATTRIBUTE TYPES #
@@ -970,10 +979,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x plays employment:employee;
       """
+    Then answer size is:0
 
 
   Scenario: after removing a role from a relation type, relation instances can no longer be created with that role
@@ -1049,12 +1059,13 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match
         $x label person;
         $x plays $y;
       """
+    Then answer size is:0
 
 
   Scenario: removing a role errors if it is played by existing roleplayers in relations
@@ -1166,10 +1177,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x plays employment:employee;
       """
+    Then answer size is:0
     When transaction closes
 
     When connection open write transaction for database: typedb
@@ -1236,12 +1248,13 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match
         $x owns name;
         $x label person;
       """
+    Then answer size is:0
 
 
   Scenario: attempting to undefine an attribute ownership inherited from a parent errors
@@ -1266,10 +1279,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x owns email;
       """
+    Then answer size is:0
 
 
   Scenario: when a type can own an attribute, but none of its instances actually do, the ownership can be undefined
@@ -1297,10 +1311,11 @@ Feature: TypeQL Undefine Query
     Then transaction commits
 
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $x owns name;
       """
+    Then answer size is:0
 
 
   Scenario: removing an attribute ownership errors if it is owned by existing instances
@@ -2142,10 +2157,11 @@ Feature: TypeQL Undefine Query
     Then uniquely identify answer concepts
       | x                   |
       | label:abstract-type |
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match relation $x;
       """
+    Then answer size is:0
     When get answers of typeql read query
       """
       match attribute $x;
@@ -2154,10 +2170,11 @@ Feature: TypeQL Undefine Query
       | x                    |
       | label:email          |
       | label:root-attribute |
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match $_ relates $x;
       """
+    Then answer size is:0
 
 
   Scenario: can undefine the same type's capabilities piece by piece in one query
