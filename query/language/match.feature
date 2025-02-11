@@ -742,6 +742,100 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
+  Scenario: Match queries can contain negated schema constraints
+    Given typeql schema query
+       """
+       define
+         attribute ref, value integer;
+         entity e0, owns ref @key,
+          plays l0:r0, plays l1:r1,
+          plays l21:r21, plays l22:r22;
+         relation l0, relates r0;
+         relation l1 sub l0, relates r1 as r0;
+         relation l21 sub l1, relates r21 as r1;
+         relation l22 sub l1, relates r22 as r1;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match
+        $lt sub l0;
+        relation $lt; $lt relates $rt;
+        not { $other sub! $lt; };
+        select $lt, $rt;
+       """
+    Then uniquely identify answer concepts
+      | lt        | rt            |
+      | label:l21 | label:l0:r0   |
+      | label:l21 | label:l1:r1   |
+      | label:l21 | label:l21:r21 |
+      | label:l22 | label:l0:r0   |
+      | label:l22 | label:l1:r1   |
+      | label:l22 | label:l22:r22 |
+
+    When get answers of typeql read query
+       """
+       match
+        $lt sub l0;
+        relation $lt; $lt relates $rt;
+        not { $lt sub! $other; };
+        select $lt, $rt;
+       """
+    Then uniquely identify answer concepts
+      | lt        | rt            |
+      | label:l0  | label:l0:r0   |
+
+    When get answers of typeql read query
+       """
+       match
+        $lt sub l0;
+        relation $lt; $lt relates $rt;
+        not {
+          $lt relates $other;
+          not { $other is $rt; };
+        };
+        select $lt, $rt;
+       """
+    Then uniquely identify answer concepts
+      | lt        | rt            |
+      | label:l0  | label:l0:r0   |
+
+
+  Scenario: Match queries with unsatisfiable schema constraints pass type-inference but return no answers
+    Given typeql schema query
+       """
+       define
+         attribute ref, value integer;
+         entity e0, owns ref @key,
+          plays l0:r0, plays l1:r1,
+          plays l21:r21, plays l22:r22;
+         relation l0, relates r0;
+         relation l1 sub l0, relates r1 as r0;
+         relation l21 sub l1, relates r21 as r1;
+         relation l22 sub l1, relates r22 as r1;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match
+        relation $lt label l0;
+        $lt sub! $other;
+       """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+       """
+       match
+        relation $l22t label l22;
+        not { $l22t sub! $other; };
+       """
+    Then answer size is: 0
+
+
   ##########
   # THINGS #
   ##########
@@ -1132,64 +1226,59 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:1 | label:employment:employee |
 
 
-#   TODO: 3.x: Low hanging
-#   panicked at compiler/executable/match_/instructions/mod.rs:93:9:
-#   assertion failed: existing.is_none()
-#  Scenario: A relation can play a role in itself
-#    Given typeql schema query
-#      """
-#      define
-#      relation comparator
-#        relates compared,
-#        plays comparator:compared;
-#      """
-#    Given transaction commits
-#
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query
-#      """
-#      insert
-#      $r isa comparator (compared:$r);
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $r isa comparator (compared:$r);
-#      """
-#    Then answer size is: 1
+  Scenario: A relation can play a role in itself
+    Given typeql schema query
+      """
+      define
+      relation comparator
+        relates compared,
+        plays comparator:compared;
+      """
+    Given transaction commits
 
-#   TODO: 3.x: Low hanging
-#   panicked at compiler/executable/match_/instructions/mod.rs:93:9:
-#   assertion failed: existing.is_none()
-#  Scenario: A relation can play a role in itself and have additional roleplayers
-#    Given typeql schema query
-#      """
-#      define
-#      relation comparator
-#        relates compared @card(0..),
-#        plays comparator:compared;
-#      entity variable
-#        plays comparator:compared;
-#      """
-#    Given transaction commits
-#
-#    Given connection open write transaction for database: typedb
-#    Given typeql write query
-#      """
-#      insert
-#      $r isa comparator (compared: $v, compared:$r);
-#      $v isa variable;
-#      """
-#    Given transaction commits
-#
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $r  isa comparator (compared: $v, compared:$r);
-#      """
-#    Then answer size is: 1
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $r isa comparator (compared:$r);
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r isa comparator (compared:$r);
+      """
+    Then answer size is: 1
+
+
+  Scenario: A relation can play a role in itself and have additional roleplayers
+    Given typeql schema query
+      """
+      define
+      relation comparator
+        relates compared @card(0..),
+        plays comparator:compared;
+      entity variable
+        plays comparator:compared;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $r isa comparator (compared: $v, compared:$r);
+      $v isa variable;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r  isa comparator (compared: $v, compared:$r);
+      """
+    Then answer size is: 1
 
 
   Scenario: relations between distinct concepts are not retrieved when matching concepts that relate to themselves
@@ -3088,64 +3177,61 @@ Feature: TypeQL Match Clause
     Then answer size is: 2
 
 
-#   TODO: 3.x: Low hanging
-#   panicked at executor/instruction/sub_executor.rs:61:9:
-#   assertion failed: supertypes.len() > 0
-#   Scenario: variable role types with relations playing roles
-#     Given typeql schema query
-#       """
-#       define
-#         relation parent relates nested, owns id;
-#         relation nested relates player, plays parent:nested;
-#         entity player owns id, plays nested:player;
-#         attribute id value string;
-#       """
-#     Given transaction commits
-#
-#     Given connection open write transaction for database: typedb
-#     Given typeql write query
-#       """
-#       insert
-#         $i1 isa id "i1";
-#         $i2 isa id "i2";
-#         $pl1 isa player, has id $i1;
-#         $pl2 isa player, has id $i2;
-#         $n1 isa nested, links (player: $pl1);
-#         $n2 isa nested, links (player: $pl2);
-#         $par1 isa parent, links (nested: $n1), has id $i1;
-#         $par2 isa parent, links (nested: $n2), has id $i2;
-#       """
-#     Given transaction commits
-#     Given connection open read transaction for database: typedb
-#
-#     # Force traversal of role edges in each direction: See typedb/typedb#6925
-#     When get answers of typeql read query
-#       """
-#       match
-#         let $boundId1 = "i1";
-#
-#         $p links ($role-nested: $n), isa parent, has id == $boundId1;
-#         $n links ($role-player: $i), isa nested;
-#
-#         not { $role-nested sub! $r1; };
-#         not { $role-player sub! $r2; };
-#       """
-#     Then answer size is: 1
-#
-#     When get answers of typeql read query
-#       """
-#       match
-#         let $boundId1 = "i1";
-#
-#         $p links ($role-nested: $n), isa parent, has id $i;
-#         $n links ($role-player: $p), isa nested;
-#         $p has $pid;
-#         $pid == $boundId1;
-#
-#         not { $role-nested sub! $r1; };
-#         not { $role-player sub! $r2; };
-#       """
-#     Then answer size is: 1
+   Scenario: variable role types with relations playing roles
+     Given typeql schema query
+       """
+       define
+         relation parent relates nested, owns id;
+         relation nested relates player, plays parent:nested;
+         entity player owns id, plays nested:player;
+         attribute id value string;
+       """
+     Given transaction commits
+
+     Given connection open write transaction for database: typedb
+     Given typeql write query
+       """
+       insert
+         $i1 isa id "i1";
+         $i2 isa id "i2";
+         $pl1 isa player, has id $i1;
+         $pl2 isa player, has id $i2;
+         $n1 isa nested, links (player: $pl1);
+         $n2 isa nested, links (player: $pl2);
+         $par1 isa parent, links (nested: $n1), has id $i1;
+         $par2 isa parent, links (nested: $n2), has id $i2;
+       """
+     Given transaction commits
+     Given connection open read transaction for database: typedb
+
+     # Force traversal of role edges in each direction: See typedb/typedb#6925
+     When get answers of typeql read query
+       """
+       match
+         let $boundId1 = "i1";
+
+         $p links ($role-nested: $n), isa parent, has id == $boundId1;
+         $n links ($role-player: $i), isa nested;
+
+         not { $role-nested sub! $r1; };
+         not { $role-player sub! $r2; };
+       """
+     Then answer size is: 1
+
+     When get answers of typeql read query
+       """
+       match
+         let $boundId1 = "i1";
+
+         $r links ($role-nested: $n), isa parent, has id $i;
+         $n links ($role-player: $p), isa nested;
+         $p has $pid;
+         $pid == $boundId1;
+
+         not { $role-nested sub! $r1; };
+         not { $role-player sub! $r2; };
+       """
+     Then answer size is: 1
 
 
   #######################
