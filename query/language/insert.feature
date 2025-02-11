@@ -208,6 +208,17 @@ Feature: TypeQL Insert Query
       insert $x isa factory;
       """
 
+
+  Scenario: A single variable may not have multiple isa constraints in an insert stage
+    When typeql write query; fails with a message containing: "Found multiple insert statements for the variable"
+      """
+      insert
+      $x isa person;
+      $x isa person;
+      $x has ref 0;
+      """
+
+
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################

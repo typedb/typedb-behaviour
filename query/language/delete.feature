@@ -882,6 +882,51 @@ Feature: TypeQL Delete Query
       """
 
 
+  Scenario: Matching & deleting a links constraint a supertype of the actual role-type labels does nothing.
+    # TODO: Eventually, stronger insert validation can catch this.
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+       """
+        define
+          relation internship sub employment, relates intern as employee;
+          entity student sub person, plays internship:intern;
+       """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When typeql write query
+       """
+       insert
+        $s2 isa student, has name "s2";
+        $i2 isa internship, links (intern: $s2), has ref 2;
+       """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $e isa internship, links (intern: $p);
+    """
+    Then answer size is: 1
+    When typeql write query
+      """
+      match
+        $e isa employment, links (employee: $p);
+      delete
+        links (employee: $p) of $e;
+      """
+    Then transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $e isa internship, links (intern: $p);
+    """
+    Then answer size is: 1
+
+
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
 #  We only delete role player edges until the 'match' is no longer satisfied.
 #
