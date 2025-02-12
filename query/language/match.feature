@@ -1950,6 +1950,8 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
+      attribute valueless-name @abstract;
+      name sub valueless-name;
       attribute first-name sub name;
       attribute second-name sub name;
       attribute passport-first-name sub first-name;
@@ -1970,6 +1972,24 @@ Feature: TypeQL Match Clause
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match $a isa valueless-name;
+      """
+    Then uniquely identify answer concepts
+      | a                                |
+      | attr:name:"Allie Morgan"         |
+      | attr:first-name:"Allie"          |
+      | attr:second-name:"Morgan"        |
+      | attr:passport-first-name:"Alice" |
+
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match $a isa! valueless-name;
+      """
+    When transaction closes
+    When connection open read transaction for database: typedb
 
     When get answers of typeql read query
       """
@@ -2046,10 +2066,10 @@ Feature: TypeQL Match Clause
       not { $a isa passport-first-name; };
       """
     Then uniquely identify answer concepts
-      | a                                |
-      | attr:name:"Allie Morgan"         |
-      | attr:first-name:"Allie"          |
-      | attr:second-name:"Morgan"        |
+      | a                         |
+      | attr:name:"Allie Morgan"  |
+      | attr:first-name:"Allie"   |
+      | attr:second-name:"Morgan" |
 
     When get answers of typeql read query
       """
@@ -2058,10 +2078,10 @@ Feature: TypeQL Match Clause
       not { $a isa! passport-first-name; };
       """
     Then uniquely identify answer concepts
-      | a                                |
-      | attr:name:"Allie Morgan"         |
-      | attr:first-name:"Allie"          |
-      | attr:second-name:"Morgan"        |
+      | a                         |
+      | attr:name:"Allie Morgan"  |
+      | attr:first-name:"Allie"   |
+      | attr:second-name:"Morgan" |
 
     When get answers of typeql read query
       """
@@ -2070,9 +2090,9 @@ Feature: TypeQL Match Clause
       not { $a isa first-name; };
       """
     Then uniquely identify answer concepts
-      | a                                |
-      | attr:name:"Allie Morgan"         |
-      | attr:second-name:"Morgan"        |
+      | a                         |
+      | attr:name:"Allie Morgan"  |
+      | attr:second-name:"Morgan" |
 
     When get answers of typeql read query
       """
@@ -2085,6 +2105,244 @@ Feature: TypeQL Match Clause
       | attr:name:"Allie Morgan"         |
       | attr:second-name:"Morgan"        |
       | attr:passport-first-name:"Alice" |
+
+  Scenario: Not owned attributes can be matched only if their types are independent
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute valueless-name @abstract @independent;
+      attribute name value string, sub valueless-name;
+
+      attribute age @independent, value integer;
+      attribute dog-age sub age;
+
+      attribute birth-info @abstract;
+      attribute birth-date value date, sub birth-info;
+      attribute official-birth-date sub birth-date;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+      $n isa name "Bob"; # independent: inherited
+      $a isa age 25; # independent: declared
+      $da isa dog-age 7; # independent: inherited
+      $bd isa birth-date 2025-02-11; # not independent
+      $obd isa official-birth-date 2025-02-12; # not independent
+      """
+    Then uniquely identify answer concepts
+      | n               | a           | da             | bd                         | obd                                 |
+      | attr:name:"Bob" | attr:age:25 | attr:dog-age:7 | attr:birth-date:2025-02-11 | attr:official-birth-date:2025-02-12 |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:age:25    |
+      | attr:dog-age:7 |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! age;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:25 |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa dog-age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:dog-age:7 |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! dog-age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:dog-age:7 |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa birth-date;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+      $a isa! birth-date;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa official-birth-date;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+      $a isa! official-birth-date;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa valueless-name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa birth-info;
+      """
+    Then answer size is: 0
+
+    When transaction commits
+    When connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:age:25    |
+      | attr:dog-age:7 |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! age;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:25 |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa dog-age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:dog-age:7 |
+    When get answers of typeql read query
+      """
+      match
+      $a isa! dog-age;
+      """
+    Then uniquely identify answer concepts
+      | a              |
+      | attr:dog-age:7 |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa birth-date;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+      $a isa! birth-date;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa official-birth-date;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+      $a isa! official-birth-date;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa valueless-name;
+      """
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:"Bob" |
+
+    When get answers of typeql read query
+      """
+      match
+      $a isa birth-info;
+      """
+    Then answer size is: 0
+
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match
+      $a isa! valueless-name;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql read query; fails with a message containing: "empty-set for some variable"
+      """
+      match
+      $a isa! birth-info;
+      """
 
   #######################
   # ATTRIBUTE OWNERSHIP #
@@ -2309,10 +2567,10 @@ Feature: TypeQL Match Clause
       not { $a isa! passport-first-name; };
       """
     Then uniquely identify answer concepts
-      | a                                |
-      | attr:name:"Allie Morgan"         |
-      | attr:first-name:"Allie"          |
-      | attr:second-name:"Morgan"        |
+      | a                         |
+      | attr:name:"Allie Morgan"  |
+      | attr:first-name:"Allie"   |
+      | attr:second-name:"Morgan" |
 
     When get answers of typeql read query
       """
@@ -2331,9 +2589,9 @@ Feature: TypeQL Match Clause
       not { $a isa first-name; };
       """
     Then uniquely identify answer concepts
-      | a                                |
-      | attr:name:"Allie Morgan"         |
-      | attr:second-name:"Morgan"        |
+      | a                         |
+      | attr:name:"Allie Morgan"  |
+      | attr:second-name:"Morgan" |
 
   ##############################
   # ATTRIBUTE VALUE COMPARISON #

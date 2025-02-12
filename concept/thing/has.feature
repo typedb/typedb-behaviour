@@ -148,6 +148,68 @@ Feature: Concept Ownership
     When connection open read transaction for database: typedb
     Then attribute(name) get instances is not empty
 
+  Scenario: Has can be unset before and after commits
+    When $p = entity(person) create new instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    Then entity $p get has(birth-date) do not contain: $n
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n does not exist
+
   Scenario: Cannot set has when object doesn't own the attribute
     When $k = entity(person) create new instance with key(username): "k"
     When $l = relation(parentship) create new instance with key(username): "l"
@@ -298,7 +360,7 @@ Feature: Concept Ownership
       | datetime-tz | 2024-05-05T00:00:00+0010..2024-05-05T16:31:59+0100                   | 2024-05-05T00:00:00+0100          | 2024-05-05T00:00:00+0010          |
       | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin..2024-05-05T00:00:00 Europe/London | 2024-05-05T00:00:01 Europe/London | 2024-05-05T00:00:01 Europe/Berlin |
 
-  Scenario: Dependent attributes without owners can be seen only before commit
+  Scenario: Dependent attributes without owners cannot be seen right after modification
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given create attribute type: ind-attr
@@ -333,11 +395,11 @@ Feature: Concept Ownership
     Then attribute $get_dep2 is none: false
     Then attribute $get_ind1 is none: false
     Then attribute $get_ind2 is none: false
-    Then attribute(dep-attr) get instances contain: $dep1
+    Then attribute(dep-attr) get instances do not contain: $dep1
     Then attribute(dep-attr) get instances contain: $dep2
     Then attribute(ind-attr) get instances contain: $ind1
     Then attribute(ind-attr) get instances contain: $ind2
-    Then attribute(dep-attr) get instances contain: $get_dep1
+    Then attribute(dep-attr) get instances do not contain: $get_dep1
     Then attribute(dep-attr) get instances contain: $get_dep2
     Then attribute(ind-attr) get instances contain: $get_ind1
     Then attribute(ind-attr) get instances contain: $get_ind2
@@ -378,7 +440,7 @@ Feature: Concept Ownership
     Then attribute $get_dep2 is none: false
     Then attribute $get_ind1 is none: false
     Then attribute $get_ind2 is none: false
-    Then attribute(dep-attr) get instances contain: $get_dep2
+    Then attribute(dep-attr) get instances do not contain: $get_dep2
     Then attribute(ind-attr) get instances contain: $get_ind1
     Then attribute(ind-attr) get instances contain: $get_ind2
     When transaction commits

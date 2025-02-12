@@ -642,7 +642,7 @@ Feature: Schema migration
     When entity $p set has: $attr2
     Then attribute(attr1) get instances contain: $attr1
     Then attribute(attr2) get instances contain: $attr2
-    Then attribute(attr1) get instances contain: $attr1_0
+    Then attribute(attr1) get instances do not contain: $attr1_0
     Then attribute(attr2) get instances contain: $attr2_0
     When $attr1 = attribute(attr1) get instance with value: 198273645
     When $attr2 = attribute(attr2) get instance with value: 198273645

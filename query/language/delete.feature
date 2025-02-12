@@ -1271,10 +1271,10 @@ Feature: TypeQL Delete Query
       """
     Given transaction commits
 
-    When connection open write transaction for database: typedb
+    When connection open schema transaction for database: typedb
     When typeql write query
       """
-      insert $p isa safe-person, has name "Alice", has encrypted-email "al1ice@typedb.com";
+      insert $p isa safe-person, has name "Alice", has encrypted-email "al1ce@typedb.com";
       """
     When get answers of typeql read query
       """
@@ -1292,8 +1292,8 @@ Feature: TypeQL Delete Query
         has $e of $p;
       """
     Then uniquely identify answer concepts
-      | e                                      | p              |
-      | attr:encrypted-email:al1ice@typedb.com | key:name:Alice |
+      | e                                     | p              |
+      | attr:encrypted-email:al1ce@typedb.com | key:name:Alice |
     When get answers of typeql read query
       """
       match $_ has name $n, has encrypted-email $_;
@@ -1318,15 +1318,22 @@ Feature: TypeQL Delete Query
       delete
         has $e of $p;
       """
+    # email is independent, so the attributes are not cleaned up
     Then uniquely identify answer concepts
-      | e                                   | p              |
-      | attr:encrypted-email:b0b@typedb.com | key:name:Alice |
-      | attr:encrypted-email:b0b@typedb.com | key:name:Bob   |
+      | e                                     | p              |
+      | attr:encrypted-email:al1ce@typedb.com | key:name:Alice |
+      | attr:encrypted-email:al1ce@typedb.com | key:name:Bob   |
+      | attr:encrypted-email:b0b@typedb.com   | key:name:Alice |
+      | attr:encrypted-email:b0b@typedb.com   | key:name:Bob   |
     When get answers of typeql read query
       """
       match $_ has name $n, has encrypted-email $_;
       """
     Then answer size is: 0
+    When typeql schema query
+      """
+      undefine @independent from email;
+      """
     When typeql write query
       """
       insert $p isa safe-person, has name "Charlie", has encrypted-email "4arl1e@typedb.com";
@@ -1358,10 +1365,17 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
     When transaction closes
 
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine @independent from email;
+      """
+    When transaction commits
+
     When connection open write transaction for database: typedb
     When typeql write query
       """
-      insert $p isa safe-person, has name "Alice", has encrypted-email "al1ice@typedb.com";
+      insert $p isa safe-person, has name "Alice", has encrypted-email "al1ce@typedb.com";
       """
     When get answers of typeql read query
       """
@@ -1379,8 +1393,8 @@ Feature: TypeQL Delete Query
         has $e of $p;
       """
     Then uniquely identify answer concepts
-      | e                                      | p              |
-      | attr:encrypted-email:al1ice@typedb.com | key:name:Alice |
+      | e                                     | p              |
+      | attr:encrypted-email:al1ce@typedb.com | key:name:Alice |
     When get answers of typeql read query
       """
       match $_ has name $n, has encrypted-email $_;
@@ -1406,9 +1420,9 @@ Feature: TypeQL Delete Query
         has $e of $p;
       """
     Then uniquely identify answer concepts
-      | e                                   | p              |
-      | attr:encrypted-email:b0b@typedb.com | key:name:Alice |
-      | attr:encrypted-email:b0b@typedb.com | key:name:Bob   |
+      | e                                     | p              |
+      | attr:encrypted-email:b0b@typedb.com   | key:name:Alice |
+      | attr:encrypted-email:b0b@typedb.com   | key:name:Bob   |
     When get answers of typeql read query
       """
       match $_ has name $n, has encrypted-email $_;
@@ -1916,6 +1930,574 @@ Feature: TypeQL Delete Query
       | attr:name:Alice   |
       | attr:name:Bob     |
       | attr:name:Charlie |
+
+
+  Scenario Outline: not independent attributes are always hidden after queries if owners are lost: <mode>
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      undefine @independent from email;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert $a isa email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+
+    When typeql write query
+      """
+      insert $p isa person, has name "<deleted-name>", has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+        $b isa person, has name "Bob", has email "bob@typedb.com";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then answer size is: 0
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      delete
+        $a;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $b isa person, has name "Bob";
+      insert
+        $b has email "bob@typedb.com";
+        $a isa person, has name "<deleted-name>", has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then answer size is: 0
+
+    When typeql write query
+      """
+      match
+        $b isa person, has name "Bob";
+        $a isa person, has name "<deleted-name>";
+      insert
+        $b has email "bob@typedb.com";
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    Examples:
+      | mode                         | deleted-name | deleted-email      |
+      | alphabetically smaller value | Alice        | alice@typedb.com   |
+      | alphabetically bigger value  | Charlie      | charlie@typedb.com |
 
   ####################
   # COMPLEX PATTERNS #
