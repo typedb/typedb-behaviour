@@ -206,3 +206,95 @@ Feature: Concept Role Players
     When $rel0 = relation(rel0) create new instance with key(ref): rel0
     Then relation $rel0 set players for role(rol0[]): [$ent1, $ent2]; fails
 
+  Scenario: Links can be unset before and after commits
+    When $p = entity(person) create new instance with key(name): "p"
+    When $e = relation(employment) create new instance with key(date): 2025-02-12
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    Then relation $e remove player for role(employee): $p; fails with a message containing: "only 0 role players exists"
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e does not exist
+    When $e = relation(employment) create new instance with key(date): 2025-02-12
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When relation $e add player for role(employee): $p
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e remove player for role(employee): $p
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e does not exist
+    When $e = relation(employment) create new instance with key(date): 2025-02-12
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When relation $e add player for role(employee): $p
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e exists
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e remove player for role(employee): $p
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e does not exist
+    When $e = relation(employment) create new instance with key(date): 2025-02-12
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When relation $e add player for role(employee): $p
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e exists
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e add player for role(employee): $p
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e exists
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e add player for role(employee): $p
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e remove player for role(employee): $p
+    # 3 are inserted, 1 is removed -> 2 is left
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e remove player for role(employee): $p
+    # 3 are inserted, 2 is removed -> 1 is left
+    Then relation $e get players for role(employee) contain: $p
+    Then entity $p get relations contain: $e
+    When relation $e remove player for role(employee): $p
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    Then relation $e get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $e
+    When $e = relation(employment) get instance with key(date): 2025-02-12
+    Then relation $e does not exist
