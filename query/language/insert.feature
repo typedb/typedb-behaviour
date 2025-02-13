@@ -272,7 +272,8 @@ Feature: TypeQL Insert Query
     Given answer size is: 0
     When typeql write query
       """
-      insert $a isa age 25; $x isa person, has name "Wilhelmina", has age $a, has ref 0;
+      match let $a = 25;
+      insert $x isa person, has name "Wilhelmina", has age == $a, has ref 0;
       """
     Then transaction commits
 

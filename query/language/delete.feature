@@ -505,22 +505,11 @@ Feature: TypeQL Delete Query
     """
     Then transaction commits
 
-    # We're not particular about this:
-    Given connection open write transaction for database: typedb
-    When typeql write query; fails with a message containing: "Write execution failed due to a concept write error"
-    """
-    match
-      $e isa employment, links (employee: $p);
-    delete
-      links (employee: $p) of $e;
-    """
-    Given transaction closes
-
     Given connection open write transaction for database: typedb
     When typeql write query
     """
     match
-      $e isa! employment, links (employee: $p);
+      $e isa employment, links (employee: $p);
     delete
       links (employee: $p) of $e;
     """

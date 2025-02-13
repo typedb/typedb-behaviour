@@ -886,7 +886,7 @@ Feature: TypeQL Query Modifiers
       insert
       $x isa name "Lisa";
       $y isa age 16;
-      $z isa person, has name $x, has age $y, has ref 0;
+      $z isa person, has $x, has $y, has ref 0;
       """
     Given transaction commits
 
@@ -917,7 +917,7 @@ Feature: TypeQL Query Modifiers
       insert
       $x isa name "Lisa";
       $y isa age 16;
-      $z isa person, has name $x, has age $y, has ref 0;
+      $z isa person, has $x, has $y, has ref 0;
       """
     Given transaction commits
 
