@@ -148,7 +148,7 @@ Feature: Concept Ownership
     When connection open read transaction for database: typedb
     Then attribute(name) get instances is not empty
 
-  Scenario: Has can be unset before and after commits
+  Scenario: Has can be unset before and after commits (unordered version)
     When $p = entity(person) create new instance with key(username): "p"
     When $n = attribute(birth-date) put instance with value: 2025-02-12
     Then entity $p get has(birth-date) do not contain: $n
@@ -209,6 +209,19 @@ Feature: Concept Ownership
     Then entity $p get has(birth-date) do not contain: $n
     When $n = attribute(birth-date) get instance with value: 2025-02-12
     Then attribute $n does not exist
+
+  Scenario: Cannot unset an unordered has for an ordered ownership and an ordered has for an unordered ownership
+    When $p = entity(person) create new instance with key(username): "p"
+    When $e = attribute(email) put instance with value: "bob@typedb.com"
+    When $bd = attribute(birth-date) put instance with value: 2025-02-13
+    Then entity $p get has(email) do not contain: $e
+    Then entity $p get has(birth-date) do not contain: $bd
+    When entity $p unset has: $e; fails with a message containing: "cannot unset an unordered owns when the ownership is ordered"
+    When entity $p unset has: birth-date[]; fails with a message containing: "cannot unset an ordered owns when the ownership is unordered"
+    When entity $p unset has: email[]
+    When entity $p unset has: $bd
+    Then entity $p get has(email) do not contain: $e
+    Then entity $p get has(birth-date) do not contain: $bd
 
   Scenario: Cannot set has when object doesn't own the attribute
     When $k = entity(person) create new instance with key(username): "k"
