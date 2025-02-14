@@ -241,7 +241,7 @@ Feature: Concept Relation
     Then entity $a is deleted: true
     Then relation $m add player for role(wife): $a; fails
 
-  Scenario: Relaton cannot have multiple layers of set role players
+  Scenario: Relation cannot have multiple layers of set role players
     When $m = relation(marriage) create new instance with key(license): m
     When $a = entity(person) create new instance with key(username): alice
     When relation $m add player for role(wife): $a
