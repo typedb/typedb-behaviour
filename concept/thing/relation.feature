@@ -205,7 +205,89 @@ Feature: Concept Relation
     When relation $m add player for role(wife): $a
     When delete relation: $m
     Then relation $m is deleted: true
-    When relation $m add player for role(wife): $a; fails
+    Then relation $m add player for role(wife): $a; fails
+
+  Scenario: Relation cannot have roleplayers inserted after role player deletion
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    When delete entity: $a
+    Then entity $a is deleted: true
+    Then relation $m add player for role(wife): $a; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $m = relation(marriage) get instance with key(license): m
+    When $a = entity(person) get instance with key(username): alice
+    Then relation $m get players contain: $a
+    When delete entity: $a
+    Then entity $a is deleted: true
+    Then relation $m add player for role(wife): $a; fails
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then relation $m add player for role(wife): $a; fails
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m does not exist
+    Then relation(marriage) get instances is empty
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    When delete entity: $a
+    Then entity $a is deleted: true
+    Then relation $m add player for role(wife): $a; fails
+
+  Scenario: Relation cannot have multiple layers of set role players
+    When $m = relation(marriage) create new instance with key(license): m
+    When $a = entity(person) create new instance with key(username): alice
+    When relation $m add player for role(wife): $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $m = relation(marriage) get instance with key(license): m
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $m = relation(marriage) create new instance with key(license): m
+    Then relation $m get players do not contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When relation $m add player for role(wife): $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m get players contain: $a
+    When relation $m add player for role(wife): $a
+    Then relation $m get players contain: $a
+    When relation $m remove player for role(wife): $a
+    Then relation $m get players do not contain: $a
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $m = relation(marriage) get instance with key(license): m
+    Then relation $m does not exist
 
   Scenario: Cannot create instances of abstract relation type and role type
     Given transaction closes

@@ -148,6 +148,81 @@ Feature: Concept Ownership
     When connection open read transaction for database: typedb
     Then attribute(name) get instances is not empty
 
+  Scenario: Has can be unset before and after commits (unordered version)
+    When $p = entity(person) create new instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) put instance with value: 2025-02-12
+    Then entity $p get has(birth-date) do not contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n exists
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p set has: $n
+    Then entity $p get has(birth-date) contain: $n
+    When entity $p unset has: $n
+    Then entity $p get has(birth-date) do not contain: $n
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $p = entity(person) get instance with key(username): "p"
+    Then entity $p get has(birth-date) do not contain: $n
+    When $n = attribute(birth-date) get instance with value: 2025-02-12
+    Then attribute $n does not exist
+
+  Scenario: Cannot unset an unordered has for an ordered ownership and an ordered has for an unordered ownership
+    When $p = entity(person) create new instance with key(username): "p"
+    When $e = attribute(email) put instance with value: "bob@typedb.com"
+    When $bd = attribute(birth-date) put instance with value: 2025-02-13
+    Then entity $p get has(email) do not contain: $e
+    Then entity $p get has(birth-date) do not contain: $bd
+    When entity $p unset has: $e; fails with a message containing: "cannot unset an unordered owns when the ownership is ordered"
+    When entity $p unset has: birth-date[]; fails with a message containing: "cannot unset an ordered owns when the ownership is unordered"
+    When entity $p unset has: email[]
+    When entity $p unset has: $bd
+    Then entity $p get has(email) do not contain: $e
+    Then entity $p get has(birth-date) do not contain: $bd
+
   Scenario: Cannot set has when object doesn't own the attribute
     When $k = entity(person) create new instance with key(username): "k"
     When $l = relation(parentship) create new instance with key(username): "l"
@@ -216,8 +291,8 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | values-args                               | fail-val                      | suc-val                       |
-      | integer        | 1, 5, 4                                   | 2                             | 1                             |
-      | integer        | 1                                         | 2                             | 1                             |
+      | integer     | 1, 5, 4                                   | 2                             | 1                             |
+      | integer     | 1                                         | 2                             | 1                             |
       | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
       | double      | 0.01                                      | 0.1                           | 0.01                          |
       | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
@@ -269,11 +344,11 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
       | value-type  | range-args                                                           | fail-val                          | suc-val                           |
-      | integer        | 1..3                                                                 | 0                                 | 1                                 |
-      | integer        | 1..3                                                                 | -1                                | 2                                 |
-      | integer        | 1..3                                                                 | 4                                 | 3                                 |
-      | integer        | -1..1                                                                | -2                                | 0                                 |
-      | integer        | -1..1                                                                | 2                                 | -1                                |
+      | integer     | 1..3                                                                 | 0                                 | 1                                 |
+      | integer     | 1..3                                                                 | -1                                | 2                                 |
+      | integer     | 1..3                                                                 | 4                                 | 3                                 |
+      | integer     | -1..1                                                                | -2                                | 0                                 |
+      | integer     | -1..1                                                                | 2                                 | -1                                |
       | double      | 0.01..0.1                                                            | 0.001                             | 0.01                              |
       | double      | 0.01..0.1                                                            | 0.11                              | 0.0111111                         |
       | double      | -0.01..0.1                                                           | -0.011                            | 0.01                              |
@@ -298,7 +373,7 @@ Feature: Concept Ownership
       | datetime-tz | 2024-05-05T00:00:00+0010..2024-05-05T16:31:59+0100                   | 2024-05-05T00:00:00+0100          | 2024-05-05T00:00:00+0010          |
       | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin..2024-05-05T00:00:00 Europe/London | 2024-05-05T00:00:01 Europe/London | 2024-05-05T00:00:01 Europe/Berlin |
 
-  Scenario: Dependent attributes without owners can be seen only before commit
+  Scenario: Dependent attributes without owners cannot be seen right after modification
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given create attribute type: ind-attr
@@ -333,11 +408,11 @@ Feature: Concept Ownership
     Then attribute $get_dep2 is none: false
     Then attribute $get_ind1 is none: false
     Then attribute $get_ind2 is none: false
-    Then attribute(dep-attr) get instances contain: $dep1
+    Then attribute(dep-attr) get instances do not contain: $dep1
     Then attribute(dep-attr) get instances contain: $dep2
     Then attribute(ind-attr) get instances contain: $ind1
     Then attribute(ind-attr) get instances contain: $ind2
-    Then attribute(dep-attr) get instances contain: $get_dep1
+    Then attribute(dep-attr) get instances do not contain: $get_dep1
     Then attribute(dep-attr) get instances contain: $get_dep2
     Then attribute(ind-attr) get instances contain: $get_ind1
     Then attribute(ind-attr) get instances contain: $get_ind2
@@ -378,7 +453,7 @@ Feature: Concept Ownership
     Then attribute $get_dep2 is none: false
     Then attribute $get_ind1 is none: false
     Then attribute $get_ind2 is none: false
-    Then attribute(dep-attr) get instances contain: $get_dep2
+    Then attribute(dep-attr) get instances do not contain: $get_dep2
     Then attribute(ind-attr) get instances contain: $get_ind1
     Then attribute(ind-attr) get instances contain: $get_ind2
     When transaction commits
@@ -494,4 +569,150 @@ Feature: Concept Ownership
     Then entity $ent1 set has(attr0[]): [$val2, $val2]
     Then transaction commits
 
-    # TODO: Add steps to check what @unique means for lists when it's in the spec
+  Scenario: @unique annotation works on all concrete subtypes of a concrete type, collisions are allowed for the same object
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: attr2_1
+    When attribute(attr2_1) set supertype: attr2
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) get owns(attr0) set annotation: @unique
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: attr2
+    When entity(ent) set owns: attr2_1
+    When entity(ent) get owns(attr0) set annotation: @card(0..)
+    When entity(ent) get owns(attr1) set annotation: @card(0..)
+    When entity(ent) get owns(attr2) set annotation: @card(0..)
+    When entity(ent) get owns(attr2_1) set annotation: @card(0..)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) create new instance with key(ref): ent0
+    When $ent1 = entity(ent) create new instance with key(ref): ent1
+    When $attr0 = attribute(attr0) put instance with value: "0"
+    When $attr1 = attribute(attr1) put instance with value: "1"
+    When $attr2 = attribute(attr2) put instance with value: "2"
+    When $attr2_1 = attribute(attr2_1) put instance with value: "2_1"
+    When $attr10 = attribute(attr1) put instance with value: "0"
+    When $attr20 = attribute(attr2) put instance with value: "0"
+    When $attr2_10 = attribute(attr2_1) put instance with value: "0"
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "1"
+    When $attr2 = attribute(attr2) get instance with value: "2"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "2_1"
+    When entity $ent0 set has: $attr0
+    Then entity $ent1 set has: $attr1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    When entity $ent0 set has: $attr0
+    Then entity $ent0 set has: $attr1
+    Then entity $ent0 set has: $attr2_1
+    Then entity $ent0 set has: $attr2
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    When entity $ent0 unset has: $attr0
+    When entity $ent0 unset has: $attr1
+    When entity $ent0 unset has: $attr2_1
+    When entity $ent0 unset has: $attr2
+    When entity $ent0 set has: $attr0
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr0
+    Then entity $ent0 set has: $attr1
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    When entity $ent0 unset has: $attr2
+    Then entity $ent0 set has: $attr2_1
+    Then entity $ent1 set has: $attr0; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr1; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When entity(ent) get owns(attr2) set annotation: @unique
+    When entity(ent) get owns(attr0) unset annotation: @unique
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) get instance with key(ref): ent0
+    When $ent1 = entity(ent) get instance with key(ref): ent1
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "0"
+    When $attr2 = attribute(attr2) get instance with value: "0"
+    When $attr2_1 = attribute(attr2_1) get instance with value: "0"
+    Then entity $ent1 set has: $attr2; fails with a message containing: "@unique"
+    Then entity $ent1 set has: $attr0
+    Then entity $ent1 set has: $attr1
+    When entity $ent0 unset has: $attr2_1
+    Then entity $ent0 set has: $attr2
+    Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
+    Then transaction commits
+
+    # TODO: Add tests to check what @unique means for lists when it's in the spec
+
+  Scenario: A single object can have instances of an attribute type and its subtypes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: attr2
+    When attribute(attr2) set supertype: attr0
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: attr2
+    When entity(ent) get owns(attr0) set annotation: @card(3..3)
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent
+    When $attr0 = attribute(attr0) put instance with value: "0"
+    When $attr1 = attribute(attr1) put instance with value: "1"
+    When $attr2 = attribute(attr2) put instance with value: "2"
+    When entity $ent set has: $attr0
+    When entity $ent set has: $attr1
+    When entity $ent set has: $attr2
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    When $ent = entity(ent) get instance with key(ref): ent
+    When $attr0 = attribute(attr0) get instance with value: "0"
+    When $attr1 = attribute(attr1) get instance with value: "1"
+    When $attr2 = attribute(attr2) get instance with value: "2"
+    Then entity $ent get has(attr0) contain: $attr0
+    Then entity $ent get has(attr1) contain: $attr1
+    Then entity $ent get has(attr2) contain: $attr2

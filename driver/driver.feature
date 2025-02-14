@@ -59,9 +59,6 @@ Feature: TypeDB Driver
     Then connection is open: true
     Then connection has database: typedb
 
-
-    # TODO: Test credentials (should be available for CORE as well)
-
   #############
   # DATABASES #
   #############

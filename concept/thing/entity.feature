@@ -166,6 +166,9 @@ Feature: Concept Entity
     When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then attribute $email does not exist
+    When $email = attribute(email) put instance with value: alice@email.com
     Then entity $a get has(email) do not contain: $email
     Then entity $a get has do not contain: $email
     Then attribute $email get owners do not contain: $a
@@ -173,6 +176,8 @@ Feature: Concept Entity
     When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then attribute $email exists
     Then entity $a get has(email) contain: $email
     Then entity $a get has contain: $email
     Then attribute $email get owners contain: $a
@@ -183,13 +188,15 @@ Feature: Concept Entity
     When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then attribute $email does not exist
+    When $email = attribute(email) put instance with value: alice@email.com
     Then entity $a get has(email) do not contain: $email
     Then attribute $email get owners do not contain: $a
     When entity $a set has: $email
     When transaction commits
     When connection open write transaction for database: typedb
     When $a = entity(person) get instance with key(username): alice
-    When entity $a set has: $email
     When entity $a unset has: $email
     Then entity $a get has(email) do not contain: $email
     Then entity $a get has do not contain: $email
@@ -200,12 +207,122 @@ Feature: Concept Entity
     Then entity $a get has(email) do not contain: $email
     Then attribute $email get owners do not contain: $a
 
+  Scenario: Entity cannot have multiple layers of put attributes
+    When $a = entity(person) create new instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    When entity $a set has: $email
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    Then attribute $email get owners do not contain: $a
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
+    Then attribute $email get owners contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
+    Then attribute $email get owners contain: $a
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    Then entity $a get has contain: $email
+    Then attribute $email get owners contain: $a
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    Then attribute $email get owners do not contain: $a
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    Then attribute $email get owners do not contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    When entity $a set has: $email
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then entity $a get has(email) contain: $email
+    When entity $a set has: $email
+    Then entity $a get has(email) contain: $email
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    Then entity $a get has(email) do not contain: $email
+
   Scenario: Entity cannot be given an attribute after deletion
     When $a = entity(person) create new instance with key(username): alice
     When $email = attribute(email) put instance with value: alice@email.com
     When delete entity: $a
     Then entity $a is deleted: true
-    When entity $a set has: $email; fails
+    Then entity $a set has: $email; fails
+
+  Scenario: Entity cannot be given an attribute after attribute deletion
+    When $a = entity(person) create new instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    When delete attribute: $email
+    Then attribute $email is deleted: true
+    Then entity $a set has: $email; fails
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $a = entity(person) create new instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    When entity $a set has: $email
+    Then entity $a get has contain: $email
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then entity $a get has contain: $email
+    When delete attribute: $email
+    Then attribute $email is deleted: true
+    Then entity $a set has: $email; fails
+    When transaction commits
+    When connection open write transaction for database: typedb
+    Then entity $a set has: $email; fails
+    When $email = attribute(email) get instance with value: alice@email.com
+    Then attribute $email does not exist
+    When $a = entity(person) get instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    When entity $a set has: $email
+    When delete attribute: $email
+    Then attribute $email is deleted: true
+    Then entity $a set has: $email; fails
+
+  Scenario: Entity cannot be given an attribute after attribute cleanup
+    When $a = entity(person) create new instance with key(username): alice
+    When $email = attribute(email) put instance with value: alice@email.com
+    When entity $a set has: $email
+    When entity $a unset has: $email
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    Then attribute $email get owners do not contain: $a
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $a = entity(person) get instance with key(username): alice
+    Then entity $a get has(email) do not contain: $email
+    Then entity $a get has do not contain: $email
+    Then entity $a set has: $email; fails
 
   Scenario: Cannot create instances of abstract entity type
     Given transaction closes
