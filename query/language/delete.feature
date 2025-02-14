@@ -1101,8 +1101,8 @@ Feature: TypeQL Delete Query
       friendship owns timespan;
       """
     Given transaction commits
-    Given connection open write transaction for database: typedb
 
+    Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert

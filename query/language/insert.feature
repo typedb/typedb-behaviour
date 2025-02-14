@@ -467,6 +467,7 @@ Parker";
       insert $x isa person, has $e;
       """
 
+<<<<<<< HEAD
 
   Scenario: inserting subtype instances of an attribute based on a matched supertype instances is allowed for specific types
     Given typeql write query
@@ -675,9 +676,9 @@ Parker";
       insert $c isa birthright-citizen, has name "Morgan";
       """
 
-  ########################################
-  # ADDING ATTRIBUTES TO EXISTING instanceS #
-  ########################################
+  ###########################################
+  # ADDING ATTRIBUTES TO EXISTING INSTANCES #
+  ###########################################
 
   Scenario: when an entity owns an attribute, an additional value can be inserted on it
     Given typeql write query
