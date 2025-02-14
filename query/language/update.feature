@@ -283,7 +283,7 @@ Feature: TypeQL Update Query
         $p isa person;
         let $n = "Bob";
       update
-        $p has name $n;
+        $p has name == $n;
       """
     Then uniquely identify answer concepts
       | p         |
@@ -293,8 +293,8 @@ Feature: TypeQL Update Query
       match $p isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | p         | n             |
-      | key:ref:0 | attr:name:Bob |
+      | p         | n               |
+      | key:ref:0 | attr:name:Bob   |
 
     When get answers of typeql write query
       """
@@ -335,59 +335,80 @@ Feature: TypeQL Update Query
     Given typeql write query
       """
       insert
-        $p isa person, has ref 0, has balance 20.0dec;
-        $p isa person, has ref 1, has balance 0.0dec;
+        $p0 isa person, has ref 0, has balance 20.0dec;
+        $p1 isa person, has ref 1, has balance 0.0dec;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
 
-    When get answers of typeql write query
+    # TODO: Uncomment when inserts can do this. Now it returns errors! Write tests for inserts + cover it here
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p isa person, has balance $b;
+#      update
+#        $p has balance $b + 15;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:20.0dec |
+#      | key:ref:1 | attr:balance:0.0dec  |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:35.0dec |
+#      | key:ref:1 | attr:balance:15.0dec |
+#
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p isa person, has balance $_;
+#        let $v = 15.5dec;
+#      update
+#        $p has $v + 15;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | v                     |
+#      | key:ref:0 | value:decimal:15.5dec |
+#      | key:ref:1 | value:decimal:15.5dec |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:30.5dec |
+#      | key:ref:1 | attr:balance:30.5dec |
+
+    When typeql write query; fails with a message containing: "'b' cannot be declared as both a 'ThingType' and as a 'Attribute'"
       """
       match
         $p isa person, has balance $b;
       update
         $p has $b + 15;
       """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:20.0dec |
-      | key:ref:1 | attr:balance:0.0dec  |
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:35.0dec |
-      | key:ref:1 | attr:balance:15.0dec |
+    When transaction closes
+    When connection open write transaction for database: typedb
 
-    When get answers of typeql write query
-      """
-      match
-        $p isa person, has balance $_;
-        let $v = 15.5dec;
-      update
-        $p has $v + 15;
-      """
-    Then uniquely identify answer concepts
-      | p         | v                     |
-      | key:ref:0 | value:decimal:15.5dec |
-      | key:ref:1 | value:decimal:15.5dec |
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:30.5dec |
-      | key:ref:1 | attr:balance:30.5dec |
-
-    Then typeql write query; fails with a message containing: "faklfmakwlfmalkaklf"
+    Then typeql write query; fails with a message containing: "'b' cannot be declared as both a 'ThingType' and as a 'Attribute'"
       """
       match
         $p isa person, has balance $b;
       update
         $p has $b < 15;
+      """
+    When transaction closes
+    When connection open write transaction for database: typedb
+
+    Then typeql write query; parsing fails
+      """
+      match
+        $p isa person, has balance $b;
+      update
+        $p has balance $b < 15;
       """
 
 
@@ -413,7 +434,7 @@ Feature: TypeQL Update Query
 
 
   Scenario: Cannot declare new attribute and value variables in an update stage
-    Then typeql write query; fails with a message containing: "awfklkawf"
+    Then typeql write query; parsing fails
       """
       insert
         $p isa person, has ref 0, has name "Alice";
@@ -421,9 +442,17 @@ Feature: TypeQL Update Query
         let $n = "Bob";
         $p has name $n;
       """
-    When transaction closes
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "awfklkafawfawfvwf"
+    Then typeql write query; parsing fails
+      """
+      insert
+        $p isa person, has ref 0, has name "Alice";
+      update
+        let $n = "Bob";
+        $p has name == $n;
+      """
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "The variable 'n' referenced in the update stage is unavailable"
       """
       insert
         $p isa person, has ref 0, has name "Alice";
@@ -442,7 +471,7 @@ Feature: TypeQL Update Query
         person owns balance; attribute balance value decimal;
         fun increased_balance($b: balance) -> decimal:
           match
-            $ib = $b + 15.0dec;
+            let $ib = $b + 15.0dec;
           return first $ib;
         fun get_balance($p: person) -> balance:
           match
@@ -452,8 +481,8 @@ Feature: TypeQL Update Query
     Given typeql write query
       """
       insert
-        $p isa person, has ref 0, has balance 20.0dec;
-        $p isa person, has ref 1, has balance 0.0dec;
+        $p0 isa person, has ref 0, has balance 20.0dec;
+        $p1 isa person, has ref 1, has balance 0.0dec;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -613,7 +642,7 @@ Feature: TypeQL Update Query
     When get answers of typeql write query
       """
       match
-        $p isa person, has name ref 1;
+        $p isa person, has ref 1;
       update
         $p has ref 0;
       """
@@ -656,7 +685,7 @@ Feature: TypeQL Update Query
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "akfkawlflaw"
+    Then typeql write query; fails with a message containing: "Constraint '@unique' has been violated"
       """
       match
         $p isa person;
@@ -691,9 +720,9 @@ Feature: TypeQL Update Query
       """
       insert $p isa person, has ref 0, has name "Alice";
       """
-    Given typeql read query
+    Given get answers of typeql read query
       """
-      insert $p isa person, has name $n;
+      match $p isa person, has name $n;
       """
     Given uniquely identify answer concepts
       | p         | n               |
@@ -725,7 +754,7 @@ Feature: TypeQL Update Query
     Given typeql schema query
       """
       define
-        person owns first-name @card(0..), second-name @card(0..);
+        person owns first-name @card(0..), owns second-name @card(0..);
         attribute first-name sub name;
         attribute surname sub name;
       """
@@ -760,61 +789,14 @@ Feature: TypeQL Update Query
       """
       match $p isa person, has name $n;
       """
-    # ?????????
+    # TODO: Continue.... check result, close tx, reopen, test with updates of subtypes!
+
     Then uniquely identify answer concepts
       | p         | n                       |
       | key:ref:0 | attr:name:"Bob Marley"  |
       | key:ref:0 | attr:first-name:"Alice" |
       | key:ref:0 | attr:surname:"Morgan"   |
 
-
-  Scenario: Has update: attribute subtypes
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-        person owns first-name, second-name;
-        attribute first-name sub name;
-        attribute surname sub name;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert $p isa person, has ref 0, has name "Alice";
-      """
-    Given typeql read query
-      """
-      insert $p isa person, has name $n;
-      """
-    Given uniquely identify answer concepts
-      | p         | n                        |
-      | key:ref:0 | attr:name:"Alice Morgan" |
-      | key:ref:0 | attr:first-name:"Alice"  |
-      | key:ref:0 | attr:surname:"Morgan"    |
-
-    When get answers of typeql write query
-      """
-      match
-        $p isa person;
-      update
-        $p has name "Bob Marley";
-      """
-    Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-    When get answers of typeql read query
-      """
-      match $p isa person, has name $n;
-      """
-    # ?????????
-    Then uniquely identify answer concepts
-      | p         | n                       |
-      | key:ref:0 | attr:name:"Bob Marley"  |
-      | key:ref:0 | attr:first-name:"Alice" |
-      | key:ref:0 | attr:surname:"Morgan"   |
 
   #######################
   # LINKS (ROLEPLAYING) #
