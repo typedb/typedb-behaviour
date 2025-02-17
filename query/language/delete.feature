@@ -1175,7 +1175,7 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: an error is thrown when deleting the ownership of a non-existent attribute
+  Scenario: an error is thrown when deleting the ownership of a non-existent attribute type
     Then typeql write query; fails
       """
       match
@@ -2532,6 +2532,27 @@ Feature: TypeQL Delete Query
       | mode                         | deleted-name | deleted-email      |
       | alphabetically smaller value | Alice        | alice@typedb.com   |
       | alphabetically bigger value  | Charlie      | charlie@typedb.com |
+
+
+  Scenario: Non-existent ownerships are ignored by the delete.
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Tom";
+      $y isa person, has name "Jerry";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $x isa person; $n isa name;
+      delete
+        has $n of $x;
+      """
+    Then answer size is: 4
+
 
   ####################
   # COMPLEX PATTERNS #
