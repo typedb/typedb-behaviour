@@ -2695,3 +2695,31 @@ Feature: TypeQL Delete Query
       delete
         $x;
       """
+
+
+  Scenario: deleting an anonymous variable errors
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      delete
+        $_ of $_;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $p isa person, has name "John";
+      delete
+        $_ of $p;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $n isa name "John";
+      delete
+        $n of $_;
+      """

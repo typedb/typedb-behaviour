@@ -467,7 +467,6 @@ Parker";
       insert $x isa person, has $e;
       """
 
-<<<<<<< HEAD
 
   Scenario: inserting subtype instances of an attribute based on a matched supertype instances is allowed for specific types
     Given typeql write query
@@ -2516,4 +2515,40 @@ Parker";
       insert
       $x isa bird;
       $x iid V123;
+      """
+
+  Scenario: insert an anonymous variable is possible only for non-capabilities
+    When typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person;
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+
+    Then typeql write query; fails with a message containing: "not available"
+      """
+      insert
+        $p isa person, has $_;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "not available"
+      """
+      insert
+        $p isa employment, links (employee: $_);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Could not determine the value of the insert attribute"
+      """
+      insert
+        $p isa person, has name $_;
       """

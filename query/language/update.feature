@@ -212,6 +212,13 @@ Feature: TypeQL Update Query
         $n value datetime;
       """
 
+    When connection open schema transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      update
+        entity superperson;
+      """
+
 
   Scenario: Update queries cannot declare new instances through isa
     Given typeql write query
@@ -309,12 +316,34 @@ Feature: TypeQL Update Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+    Then typeql write query; parsing fails
       """
-      update
-        $p isa person;
+      update > 5;
       """
-    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      update = 5;
+      """
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      update 6 > 5;
+      """
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      update $p is $f;
+      """
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      update person owns name;
+      """
 
   #############################
   # HAS (ATTRIBUTE OWNERSHIP) #
@@ -906,33 +935,38 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:name:Alice |
 
 
-    # TODO: This test awaits concrete attribute supertypes
   Scenario: Has update: attribute subtypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-        person owns first-name @card(0..), owns second-name @card(0..);
+        person owns first-name @card(0..), owns surname @card(0..), owns old-surname;
         attribute first-name sub name;
         attribute surname sub name;
+        attribute old-surname sub surname;
       """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
-      insert $p isa person, has ref 0, has name "Alice Morgan", has first-name "Alice", has surname "Morgan";
+      insert $p isa person, has ref 0,
+        has name "Alice Morgan",
+        has first-name "Alice",
+        has surname "Morgan",
+        has old-surname "Cooper";
       """
-    Given typeql read query
+    Given get answers of typeql read query
       """
-      insert $p isa person, has name $n;
+      match $p isa person, has name $n;
       """
     Given uniquely identify answer concepts
-      | p         | n                        |
-      | key:ref:0 | attr:name:"Alice Morgan" |
-      | key:ref:0 | attr:first-name:"Alice"  |
-      | key:ref:0 | attr:surname:"Morgan"    |
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Alice Morgan"  |
+      | key:ref:0 | attr:first-name:"Alice"   |
+      | key:ref:0 | attr:surname:"Morgan"     |
+      | key:ref:0 | attr:old-surname:"Cooper" |
 
     When get answers of typeql write query
       """
@@ -948,13 +982,75 @@ Feature: TypeQL Update Query
       """
       match $p isa person, has name $n;
       """
-    # TODO: Continue.... check result, close tx, reopen, test with updates of subtypes!
-
     Then uniquely identify answer concepts
-      | p         | n                       |
-      | key:ref:0 | attr:name:"Bob Marley"  |
-      | key:ref:0 | attr:first-name:"Alice" |
-      | key:ref:0 | attr:surname:"Morgan"   |
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Bob Marley"    |
+      | key:ref:0 | attr:first-name:"Alice"   |
+      | key:ref:0 | attr:surname:"Morgan"     |
+      | key:ref:0 | attr:old-surname:"Cooper" |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has first-name "Bob";
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Bob Marley"    |
+      | key:ref:0 | attr:first-name:"Bob"     |
+      | key:ref:0 | attr:surname:"Morgan"     |
+      | key:ref:0 | attr:old-surname:"Cooper" |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has surname "Marley";
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Bob Marley"    |
+      | key:ref:0 | attr:first-name:"Bob"     |
+      | key:ref:0 | attr:surname:"Marley"     |
+      | key:ref:0 | attr:old-surname:"Cooper" |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has old-surname "Morgan";
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Bob Marley"    |
+      | key:ref:0 | attr:first-name:"Bob"     |
+      | key:ref:0 | attr:surname:"Marley"     |
+      | key:ref:0 | attr:old-surname:"Morgan" |
 
 
   Scenario: Update queries can only use bound variables with 'has'
@@ -1056,4 +1152,200 @@ Feature: TypeQL Update Query
       | key:ref:0 | key:ref:15 |
 
 
+
+  ###############################
+  # COMBINATIONS AND EDGE CASES #
+  ###############################
+
+  Scenario: Update on an empty match does nothing
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has name "Bob";
+      """
+    Then answer size is: 0
+
+
+  Scenario: updating an anonymous variable errors
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      update
+        $_ has $_;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $p isa person, has ref 0, has name "John";
+      update
+        $p has $_;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $n isa name "John";
+      update
+        $_ has $n;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      update
+        $_ links (parent: $_);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $p isa parentship, has ref 0;
+      update
+        $p links (parent: $_);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $p isa person, has ref 0;
+      update
+        $_ links (parent: $p);
+      """
+
+
+  Scenario: Update queries can update multiple 'has'es in a single query
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        person owns first-name, owns surname;
+        attribute first-name sub name;
+        attribute surname sub name;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0,
+          has name "Alice Morgan",
+          has first-name "Alice",
+          has surname "Morgan";
+        $p1 isa person, has ref 1,
+          has name "Bob Marley",
+          has first-name "Bob",
+          has surname "Marley";
+      """
+    Given get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Given uniquely identify answer concepts
+      | p         | n                        |
+      | key:ref:0 | attr:name:"Alice Morgan" |
+      | key:ref:0 | attr:first-name:"Alice"  |
+      | key:ref:0 | attr:surname:"Morgan"    |
+      | key:ref:1 | attr:name:"Bob Marley"   |
+      | key:ref:1 | attr:first-name:"Bob"    |
+      | key:ref:1 | attr:surname:"Marley"    |
+
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has first-name "Alice";
+      update
+        $p has surname "Cooper", has ref 20;
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                        |
+      | key:ref:20 | attr:name:"Alice Morgan" |
+      | key:ref:20 | attr:first-name:"Alice"  |
+      | key:ref:20 | attr:surname:"Cooper"    |
+      | key:ref:1  | attr:name:"Bob Marley"   |
+      | key:ref:1  | attr:first-name:"Bob"    |
+      | key:ref:1  | attr:surname:"Marley"    |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has first-name "Charlie", has name "404";
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+      | key:ref:1  |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                         |
+      | key:ref:20 | attr:name:"404"           |
+      | key:ref:20 | attr:first-name:"Charlie" |
+      | key:ref:20 | attr:surname:"Cooper"     |
+      | key:ref:1  | attr:name:"404"           |
+      | key:ref:1  | attr:first-name:"Charlie" |
+      | key:ref:1  | attr:surname:"Marley"     |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has name "404";
+      update
+        $p has first-name "David";
+        $p has name "Unknown";
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+      | key:ref:1  |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                       |
+      | key:ref:20 | attr:name:"Unknown"     |
+      | key:ref:20 | attr:first-name:"David" |
+      | key:ref:20 | attr:surname:"Cooper"   |
+      | key:ref:1  | attr:name:"Unknown"     |
+      | key:ref:1  | attr:first-name:"David" |
+      | key:ref:1  | attr:surname:"Marley"   |
+
+    Then typeql write query; fails with a message containing: "Constraint '@unique' has been violated"
+      """
+      match
+        $p isa person;
+      update
+        $p has first-name "Elon";
+        $p has ref 0;
+      """
+
+
+    # TODO: multiple links edges
+
+    # TODO: has + links edges in one query
 
