@@ -155,8 +155,166 @@ Feature: TypeQL Update Query
   # UNSUPPORTED UPDATES #
   #######################
 
+  Scenario: Update queries cannot define or update schema
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $p label person;
+      update
+        $p label superperson;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $p label person;
+      update
+        entity superperson;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $p label person;
+      update
+        $p owns name;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $p label person;
+      update
+        $p @abstract;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $p label person;
+      update
+        $p owns name @card(5..);
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; parsing fails
+      """
+      match
+        $n label name;
+      update
+        $n value datetime;
+      """
 
 
+  Scenario: Update queries cannot declare new instances through isa
+    Given typeql write query
+      """
+      insert
+        $p isa person, has ref 0, has name "Bob";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'a' referenced in the update stage is unavailable"
+      """
+      update
+        $a isa name "John";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'a' referenced in the update stage is unavailable"
+      """
+      match
+        $p isa person;
+      update
+        $a isa name "John";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
+      """
+      match
+        $p isa person, has name $a;
+      update
+        $a isa name "Bob";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
+      """
+      match
+        $p isa person, has name $a;
+      update
+        $a isa name "John";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p isa person;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p isa parentship;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
+      """
+      match $p isa person;
+      update
+        (parent: $p) isa parentship;
+      """
+
+
+  Scenario: Update queries cannot match instances and types or illegally update them
+    Given typeql write query
+      """
+      insert
+        $p isa person, has ref 0, has name "Bob";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p iid 0x1e00000000001234567890;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p isa person;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p isa person;
+      """
+    When transaction closes
 
   #############################
   # HAS (ATTRIBUTE OWNERSHIP) #
@@ -293,8 +451,8 @@ Feature: TypeQL Update Query
       match $p isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | p         | n               |
-      | key:ref:0 | attr:name:Bob   |
+      | p         | n             |
+      | key:ref:0 | attr:name:Bob |
 
     When get answers of typeql write query
       """
@@ -315,6 +473,7 @@ Feature: TypeQL Update Query
       | p         | n                 |
       | key:ref:0 | attr:name:Charlie |
 
+    # TODO: This should work
     Then typeql write query; fails with a message containing: "fajawklwla"
       """
       match
@@ -452,7 +611,7 @@ Feature: TypeQL Update Query
         $p has name == $n;
       """
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "The variable 'n' referenced in the update stage is unavailable"
+    Then typeql write query; fails with a message containing: "variable 'n' referenced in the update stage is unavailable"
       """
       insert
         $p isa person, has ref 0, has name "Alice";
@@ -798,9 +957,103 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:surname:"Morgan"   |
 
 
+  Scenario: Update queries can only use bound variables with 'has'
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      update
+        $p has name "Bob";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $p isa person, has ref 0, has name "Alice";
+      update
+        $p has name "Bob";
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n             |
+      | key:ref:0 | attr:name:Bob |
+
   #######################
   # LINKS (ROLEPLAYING) #
   #######################
+
+  Scenario: Update queries cannot update non-existing roles
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
+      """
+      insert
+        $f isa person, has ref 0;
+        $p isa parentship, has ref 15;
+      update
+        $p links (father: $f);
+      """
+
+
+
+  # TODO
+
+
+
+  Scenario: Update queries can only use bound variables with 'links'
+    Then typeql write query; fails with a message containing: "referenced in the update stage is unavailable"
+      """
+      update
+        $p links (parent: $f);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      insert
+        $f isa person, has ref 0;
+      update
+        $p links (parent: $f);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      insert
+        $f isa person, has ref 0;
+      update
+        $p isa parentship, links (parent: $f);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'f' referenced in the update stage is unavailable"
+      """
+      insert
+        $p isa parentship, has ref 15;
+      update
+        $p links (parent: $f);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $f isa person, has ref 0;
+        $p isa parentship, has ref 15;
+      update
+        $p links (parent: $f);
+      """
+    Then uniquely identify answer concepts
+      | f         | p          |
+      | key:ref:0 | key:ref:15 |
 
 
 
