@@ -171,6 +171,58 @@ Feature: Function Definition
     match
       let $dummy = $nickname;
       { $p has nickname $nickname; } or
+      {
+        not { let $ignored in nickname_of($p); }; # $p has no nickname
+        $nickname-mapping isa nickname-mapping;
+        $p has name $name;
+        $nickname-mapping has name $name;
+        $nickname-mapping has nickname $nickname;
+       };
+    return { $nickname };
+    """
+    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Given connection open read transaction for database: typedb
+    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    """
+    with
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      let $dummy = $nickname;
+      { $p has nickname $nickname; } or
+      {
+        not { let $ignored in nickname_of($p); }; # $p has no nickname
+        $nickname-mapping isa nickname-mapping;
+        $p has name $name;
+        $nickname-mapping has name $name;
+        $nickname-mapping has nickname $nickname;
+       };
+    return { $nickname };
+
+    match
+      $p isa person;
+      let $nickname in nickname_of($p);
+    """
+
+
+  Scenario: Functions are stratified wrt negation, over multiple hops
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    attribute nickname, value string;
+    person owns nickname;
+    entity nickname-mapping, owns name, owns nickname;
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun nickname_of($p: person) -> { nickname }:
+    match
+      let $dummy = $nickname;
+      { $p has nickname $nickname; } or
       { let $nickname in default_nickname($p); };
     return { $nickname };
 
@@ -214,6 +266,80 @@ Feature: Function Definition
 
 
   Scenario: Functions are stratified wrt aggregates
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun sum_numbers() -> integer:
+    match
+      let $dummy = $number;
+      {
+       let $number = 1;
+      } or {
+        let $number = sum_numbers();
+      };
+    reduce $sum = sum($number);
+    return first $sum;
+    """
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    """
+    with
+    fun sum_numbers() -> integer:
+    match
+      let $dummy = $number;
+      {
+       let $number = 1;
+      } or {
+        let $number = sum_numbers();
+      };
+    reduce $sum = sum($number);
+    return first $sum;
+
+    match
+      let $number = sum_numbers();
+    """
+
+
+  Scenario: Functions are stratified wrt aggregates in return statements
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun sum_numbers() -> integer:
+    match
+      let $dummy = $number;
+      {
+       let $number = 1;
+      } or {
+        let $number = sum_numbers();
+      };
+    return sum($number);
+    """
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    """
+    with
+    fun sum_numbers() -> integer:
+    match
+      let $dummy = $number;
+      {
+       let $number = 1;
+      } or {
+        let $number = sum_numbers();
+      };
+    return sum($number);
+
+    match
+      let $number = sum_numbers();
+    """
+
+
+  Scenario: Functions are stratified wrt aggregates, over multiple hops
     Given connection open schema transaction for database: typedb
     Given typeql schema query
     """
