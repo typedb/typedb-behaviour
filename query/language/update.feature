@@ -26,129 +26,13 @@ Feature: TypeQL Update Query
         owns ref @key;
       relation parentship,
         relates parent,
-        relates child;
+        relates child,
+        owns ref;
       attribute name value string;
       attribute ref @independent, value integer;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
-
-
-#  Scenario: Update owned attribute without side effects on other owners
-#    Given get answers of typeql write query
-#      """
-#      insert
-#        $x isa person, has name "Alex", has ref 0;
-#        $y isa person, has name "Alex", has ref 1;
-#      """
-#    Given uniquely identify answer concepts
-#      | x         | y         |
-#      | key:ref:0 | key:ref:1 |
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    When typeql write query
-#      """
-#      match
-#      $x isa person, has ref 1, has $n;
-#      $n isa name;
-#      delete has $n of $x;
-#      insert $x has name "Bob";
-#      """
-#    Then transaction commits
-#    Given connection open write transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match $x isa person, has name $n;
-#      """
-#    Then uniquely identify answer concepts
-#      | x         | n               |
-#      | key:ref:0 | attr:name:Alex  |
-#      | key:ref:1 | attr:name:Bob   |
-#
-#
-#  Scenario: Roleplayer exchange
-#    Given get answers of typeql write query
-#      """
-#      insert
-#      $x isa person, has name "Alex", has ref 0;
-#      $y isa person, has name "Bob", has ref 1;
-#      $r isa parentship (parent: $x, child:$y);
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    When typeql write query
-#      """
-#      match $r isa parentship (parent: $x, child: $y);
-#      delete $r;
-#      insert $q isa parentship (parent: $y, child: $x);
-#      """
-#
-#
-#  Scenario: Complex migration
-#    Given get answers of typeql write query
-#      """
-#      insert
-#      $u isa person, has name "Alex", has ref 0;
-#      $v isa person, has name "Bob", has ref 1;
-#      $w isa person, has name "Charlie", has ref 2;
-#      $x isa person, has name "Darius", has ref 3;
-#      $y isa person, has name "Alex", has ref 4;
-#      $z isa person, has name "Bob", has ref 5;
-#      """
-#    Given transaction commits
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define
-#      entity nameclass,
-#        owns name @key,
-#        plays naming:name;
-#      relation naming,
-#        relates named,
-#        relates name;
-#      person plays naming:named;
-#      """
-#    Given transaction commits
-#    Given connection open write transaction for database: typedb
-#    When typeql write query
-#      """
-#      match $att isa name;
-#      insert $x isa nameclass, has $att;
-#      """
-#    When typeql write query
-#      """
-#      match
-#      $p isa person, has name $n;
-#      $nc isa nameclass, has name $n;
-#      delete has $n of $p;
-#      insert (named: $p, name: $nc) isa naming;
-#      """
-#    Then transaction commits
-#    Given connection open read transaction for database: typedb
-#    When get answers of typeql read query
-#      """
-#      match
-#      $r isa naming (named: $p, name: $nc);
-#      $nc has name $n;
-#
-#      """
-#    Then uniquely identify answer concepts
-#      | p         | n                  |
-#      | key:ref:0 | attr:name:Alex     |
-#      | key:ref:1 | attr:name:Bob      |
-#      | key:ref:2 | attr:name:Charlie  |
-#      | key:ref:3 | attr:name:Darius   |
-#      | key:ref:4 | attr:name:Alex     |
-#      | key:ref:5 | attr:name:Bob      |
-#
-#    When get answers of typeql read query
-#      """
-#      match
-#      $p isa person;
-#      $p has name $n;
-#
-#      """
-#    Then answer size is: 0
 
 
   #######################
@@ -1641,3 +1525,107 @@ Feature: TypeQL Update Query
 
     # TODO: has + links edges in one query
 
+
+  #############################
+  # DELETE + INSERT == UPDATE #
+  #############################
+
+  Scenario: Update owned attribute without side effects on other owners
+    Given get answers of typeql write query
+      """
+      insert
+        $x0 isa person, has name "Alex", has ref 0;
+        $y0 isa person, has name "Alex", has ref 1;
+
+        $x1 isa person, has name "Charlie", has ref 2;
+        $y1 isa person, has name "Charlie", has ref 3;
+      """
+    Given uniquely identify answer concepts
+      | x0        | y0        | x1        | y1        |
+      | key:ref:0 | key:ref:1 | key:ref:2 | key:ref:3 |
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $x isa person, has ref 1, has $n;
+        $n isa name;
+      delete
+        has $n of $x;
+      insert
+        $x has name "Bob";
+      """
+    When typeql write query
+      """
+      match
+        $x isa person, has ref 3, has $n;
+        $n isa name;
+      update
+        $x has name "David";
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | x         | n                 |
+      | key:ref:0 | attr:name:Alex    |
+      | key:ref:1 | attr:name:Bob     |
+      | key:ref:2 | attr:name:Charlie |
+      | key:ref:3 | attr:name:David   |
+
+
+  Scenario: Update can exchange roleplayers
+    Given get answers of typeql write query
+      """
+      insert
+        $x0 isa person, has ref 0;
+        $y0 isa person, has ref 1;
+        $r0 isa parentship (parent: $x0, child: $y0), has ref 0;
+
+        $x1 isa person, has ref 2;
+        $y1 isa person, has ref 3;
+        $r1 isa parentship (parent: $x1, child: $y1), has ref 1;
+      """
+    Given get answers of typeql read query
+      """
+      match $p isa parentship (parent: $x, child: $y);
+      """
+    Given uniquely identify answer concepts
+      | p         | x         | y         |
+      | key:ref:0 | key:ref:0 | key:ref:1 |
+      | key:ref:1 | key:ref:2 | key:ref:3 |
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $p isa parentship (parent: $x, child: $y), has ref $r;
+        $r == 0;
+      delete
+        $p;
+      insert
+        $q isa parentship (parent: $y, child: $x), has $r;
+      """
+    When typeql write query
+      """
+      match
+        $p isa parentship (parent: $x, child: $y), has ref $r;
+        $r == 1;
+      update
+        $p links (parent: $y, child: $x);
+      """
+    When transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa parentship (parent: $x, child: $y);
+      """
+    Then uniquely identify answer concepts
+      | p         | x         | y         |
+      | key:ref:0 | key:ref:1 | key:ref:0 |
+      | key:ref:1 | key:ref:3 | key:ref:2 |
