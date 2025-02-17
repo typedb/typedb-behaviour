@@ -233,6 +233,16 @@ Feature: TypeQL Update Query
   # HAS (ATTRIBUTE OWNERSHIP) #
   #############################
 
+  Scenario: Has update on an empty match does nothing
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has name "Bob";
+      """
+    Then answer size is: 0
+
   Scenario: Has can be updated by a new attribute without a variable
     Given typeql write query
       """
@@ -555,132 +565,173 @@ Feature: TypeQL Update Query
       """
 
 
-  Scenario: Has can be updated by a function call
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-        person owns balance; attribute balance value decimal;
-        fun increased_balance($b: balance) -> decimal:
-          match
-            let $ib = $b + 15.0dec;
-          return first $ib;
-        fun get_balance($p: person) -> balance:
-          match
-            $p has balance $b;
-          return first $b;
-      """
-    Given typeql write query
-      """
-      insert
-        $p0 isa person, has ref 0, has balance 20.0dec;
-        $p1 isa person, has ref 1, has balance 0.0dec;
-      """
-    Given transaction commits
-    Given connection open write transaction for database: typedb
+  # TODO: Uncomment when built-in functions can be called
+#  Scenario: Has can be updated by a built-in function call
+#    Given transaction closes
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#        person owns balance;
+#        attribute balance value decimal;
+#      """
+#    Given typeql write query
+#      """
+#      insert
+#        $p0 isa person, has ref 0, has balance 20.0dec;
+#        $p1 isa person, has ref 1, has balance 0.0dec;
+#      """
+#    Given transaction commits
+#    Given connection open write transaction for database: typedb
+#
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p isa person, has balance $b;
+#      update
+#        $p has balance mean($b);
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:20.0dec |
+#      | key:ref:1 | attr:balance:0.0dec  |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:10.0dec |
+#      | key:ref:1 | attr:balance:10.0dec |
 
-    When get answers of typeql write query
-      """
-      match
-        $p isa person, has balance $b;
-      update
-        $p has balance increased_balance($b);
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:20.0dec |
-      | key:ref:1 | attr:balance:0.0dec  |
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:30.5dec |
-      | key:ref:1 | attr:balance:30.5dec |
 
-    When transaction commits
-    When connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:30.5dec |
-      | key:ref:1 | attr:balance:30.5dec |
-
-    Then typeql write query; fails with a message containing: "afkawnlfla"
-      """
-      match
-        $p isa person, has balance $b;
-      update
-        $p has increased_balance($b);
-      """
-    When transaction closes
-
-    When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "afkawnlfla"
-      """
-      match
-        $p isa person, has balance $b;
-      update
-        let $ib = increased_balance($b);
-        $p has balance $ib;
-      """
-
-    When connection open write transaction for database: typedb
-    When get answers of typeql write query
-      """
-      match
-        $p isa person, has ref 0, has balance $b;
-        let $nb = increased_balance($b);
-      update
-        $p has balance $nb;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    | nb                    |
-      | key:ref:0 | attr:balance:30.5dec | value:decimal:46.0dec |
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:46.0dec |
-      | key:ref:1 | attr:balance:30.5dec |
-    When transaction commits
-
-    When connection open write transaction for database: typedb
-    When get answers of typeql write query
-      """
-      match
-        $p0 isa person, has ref 0, has balance $b0;
-        $p1 isa person, has ref 1, has balance $b1;
-      update
-        $p1 has get_balance($p0);
-      """
-    Then uniquely identify answer concepts
-      | p0        | p1        | b0                   | b1                    |
-      | key:ref:0 | key:ref:1 | attr:balance:46.0dec | value:decimal:30.5dec |
-    When get answers of typeql read query
-      """
-      match $p isa person, has balance $b;
-      """
-    Then uniquely identify answer concepts
-      | p         | b                    |
-      | key:ref:0 | attr:balance:46.0dec |
-      | key:ref:1 | attr:balance:46.0dec |
-
-    Then typeql write query; fails with a message containing: "afkgalwfl"
-      """
-      match
-        $p0 isa person, has ref 0, has balance $b0;
-        $p1 isa person, has ref 1, has balance $b1;
-      update
-        $p1 has balance get_balance($p0);
-      """
+  # TODO: Uncomment and adjust when user-defined functions can be called
+#  Scenario: Has can be updated by a user-defined function call
+#    Given transaction closes
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#        person owns balance; attribute balance value decimal;
+#        fun increased_balance($b: balance) -> decimal:
+#          match
+#            let $ib = $b + 15.0dec;
+#          return first $ib;
+#        fun get_balance($p: person) -> balance:
+#          match
+#            $p has balance $b;
+#          return first $b;
+#      """
+#    Given typeql write query
+#      """
+#      insert
+#        $p0 isa person, has ref 0, has balance 20.0dec;
+#        $p1 isa person, has ref 1, has balance 0.0dec;
+#      """
+#    Given transaction commits
+#    Given connection open write transaction for database: typedb
+#
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p isa person, has balance $b;
+#      update
+#        $p has balance increased_balance($b);
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:20.0dec |
+#      | key:ref:1 | attr:balance:0.0dec  |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:30.5dec |
+#      | key:ref:1 | attr:balance:30.5dec |
+#
+#    When transaction commits
+#    When connection open write transaction for database: typedb
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:30.5dec |
+#      | key:ref:1 | attr:balance:30.5dec |
+#
+#    Then typeql write query; fails with a message containing: "todo"
+#      """
+#      match
+#        $p isa person, has balance $b;
+#      update
+#        $p has increased_balance($b);
+#      """
+#    When transaction closes
+#
+#    When connection open write transaction for database: typedb
+#    Then typeql write query; fails with a message containing: "todo"
+#      """
+#      match
+#        $p isa person, has balance $b;
+#      update
+#        let $ib = increased_balance($b);
+#        $p has balance $ib;
+#      """
+#
+#    When connection open write transaction for database: typedb
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p isa person, has ref 0, has balance $b;
+#        let $nb = increased_balance($b);
+#      update
+#        $p has balance $nb;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    | nb                    |
+#      | key:ref:0 | attr:balance:30.5dec | value:decimal:46.0dec |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:46.0dec |
+#      | key:ref:1 | attr:balance:30.5dec |
+#    When transaction commits
+#
+#    When connection open write transaction for database: typedb
+#    When get answers of typeql write query
+#      """
+#      match
+#        $p0 isa person, has ref 0, has balance $b0;
+#        $p1 isa person, has ref 1, has balance $b1;
+#      update
+#        $p1 has get_balance($p0);
+#      """
+#    Then uniquely identify answer concepts
+#      | p0        | p1        | b0                   | b1                    |
+#      | key:ref:0 | key:ref:1 | attr:balance:46.0dec | value:decimal:30.5dec |
+#    When get answers of typeql read query
+#      """
+#      match $p isa person, has balance $b;
+#      """
+#    Then uniquely identify answer concepts
+#      | p         | b                    |
+#      | key:ref:0 | attr:balance:46.0dec |
+#      | key:ref:1 | attr:balance:46.0dec |
+#
+#    Then typeql write query; fails with a message containing: "todo"
+#      """
+#      match
+#        $p0 isa person, has ref 0, has balance $b0;
+#        $p1 isa person, has ref 1, has balance $b1;
+#      update
+#        $p1 has balance get_balance($p0);
+#      """
 
 
   Scenario Outline: Cannot update has with cardinality higher than 1: @card(<card>)
@@ -690,22 +741,96 @@ Feature: TypeQL Update Query
       """
       define person owns name @card(<card>);
       """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert $p isa person, has ref 0<has-name>;
       """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $p isa person;
+      update
+        $p <has-name-changed>;
+      """
     Examples:
-      | card  | has-name                              |
-      | 0..   | , has name "Alice"                    |
-      | 0..10 | , has name "Alice"                    |
-      | 0..2  | , has name "Alice"                    |
-      | 1..   | , has name "Alice"                    |
-      | 1..2  | , has name "Alice"                    |
-      | 2..2  | , has name "Alice", has name "Morgan" |
-      | 2     | , has name "Alice", has name "Morgan" |
+      | card  | has-name                              | has-name-changed                  |
+      | 0..   | , has name "Alice"                    | has name "Bob"                    |
+      | 0..10 | , has name "Alice"                    | has name "Bob"                    |
+      | 0..2  | , has name "Alice"                    | has name "Bob"                    |
+      | 1..   | , has name "Alice"                    | has name "Bob"                    |
+      | 1..2  | , has name "Alice"                    | has name "Bob"                    |
+      | 2..2  | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+      | 2     | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+      | 2..   | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+
+
+  Scenario: Can update has with a correct declared cardinality even if a supertype has a @card(1..)
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        person owns name @card(0..), owns first-name @card(0..1), owns surname @card(1..1);
+        attribute first-name sub name;
+        attribute surname sub name;
+      """
+    Given typeql write query
+      """
+      insert $p isa person, has ref 0, has surname "Morgan";
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                   |
+      | key:ref:0 | attr:surname:Morgan |
+
+    When typeql write query
+      """
+      match
+        $p isa person, has ref 0;
+      update
+        $p has first-name "Alice";
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                     |
+      | key:ref:0 | attr:first-name:Alice |
+      | key:ref:0 | attr:surname:Morgan   |
+
+    When typeql write query
+      """
+      match
+        $p isa person, has ref 0;
+      update
+        $p has surname "Cooper";
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                     |
+      | key:ref:0 | attr:first-name:Alice |
+      | key:ref:0 | attr:surname:Cooper   |
+
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $p isa person, has ref 0;
+      update
+        $p has name "Alice Cooper";
+      """
 
 
   Scenario: Has for keys can be updated
@@ -846,7 +971,7 @@ Feature: TypeQL Update Query
     Given typeql schema query
       """
       define
-        person owns first-name @card(0..), owns surname @card(0..), owns old-surname;
+        person owns first-name, owns surname, owns old-surname;
         attribute first-name sub name;
         attribute surname sub name;
         attribute old-surname sub surname;
@@ -859,19 +984,17 @@ Feature: TypeQL Update Query
       insert $p isa person, has ref 0,
         has name "Alice Morgan",
         has first-name "Alice",
-        has surname "Morgan",
-        has old-surname "Cooper";
+        has surname "Morgan";
       """
     Given get answers of typeql read query
       """
       match $p isa person, has name $n;
       """
     Given uniquely identify answer concepts
-      | p         | n                         |
-      | key:ref:0 | attr:name:"Alice Morgan"  |
-      | key:ref:0 | attr:first-name:"Alice"   |
-      | key:ref:0 | attr:surname:"Morgan"     |
-      | key:ref:0 | attr:old-surname:"Cooper" |
+      | p         | n                        |
+      | key:ref:0 | attr:name:"Alice Morgan" |
+      | key:ref:0 | attr:first-name:"Alice"  |
+      | key:ref:0 | attr:surname:"Morgan"    |
 
     When get answers of typeql write query
       """
@@ -888,11 +1011,10 @@ Feature: TypeQL Update Query
       match $p isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | p         | n                         |
-      | key:ref:0 | attr:name:"Bob Marley"    |
-      | key:ref:0 | attr:first-name:"Alice"   |
-      | key:ref:0 | attr:surname:"Morgan"     |
-      | key:ref:0 | attr:old-surname:"Cooper" |
+      | p         | n                       |
+      | key:ref:0 | attr:name:"Bob Marley"  |
+      | key:ref:0 | attr:first-name:"Alice" |
+      | key:ref:0 | attr:surname:"Morgan"   |
 
     When get answers of typeql write query
       """
@@ -909,11 +1031,10 @@ Feature: TypeQL Update Query
       match $p isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | p         | n                         |
-      | key:ref:0 | attr:name:"Bob Marley"    |
-      | key:ref:0 | attr:first-name:"Bob"     |
-      | key:ref:0 | attr:surname:"Morgan"     |
-      | key:ref:0 | attr:old-surname:"Cooper" |
+      | p         | n                      |
+      | key:ref:0 | attr:name:"Bob Marley" |
+      | key:ref:0 | attr:first-name:"Bob"  |
+      | key:ref:0 | attr:surname:"Morgan"  |
 
     When get answers of typeql write query
       """
@@ -930,16 +1051,17 @@ Feature: TypeQL Update Query
       match $p isa person, has name $n;
       """
     Then uniquely identify answer concepts
-      | p         | n                         |
-      | key:ref:0 | attr:name:"Bob Marley"    |
-      | key:ref:0 | attr:first-name:"Bob"     |
-      | key:ref:0 | attr:surname:"Marley"     |
-      | key:ref:0 | attr:old-surname:"Cooper" |
+      | p         | n                      |
+      | key:ref:0 | attr:name:"Bob Marley" |
+      | key:ref:0 | attr:first-name:"Bob"  |
+      | key:ref:0 | attr:surname:"Marley"  |
 
     When get answers of typeql write query
       """
       match
-        $p isa person;
+        $p isa person, has surname $sn;
+      delete
+        $sn of $p;
       update
         $p has old-surname "Morgan";
       """
@@ -954,7 +1076,6 @@ Feature: TypeQL Update Query
       | p         | n                         |
       | key:ref:0 | attr:name:"Bob Marley"    |
       | key:ref:0 | attr:first-name:"Bob"     |
-      | key:ref:0 | attr:surname:"Marley"     |
       | key:ref:0 | attr:old-surname:"Morgan" |
 
     When get answers of typeql write query
@@ -979,6 +1100,7 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:first-name:"Bob"     |
       | key:ref:0 | attr:surname:"Cruise"     |
       | key:ref:0 | attr:old-surname:"Morgan" |
+    Then transaction commits; fails with a message containing: "card"
 
 
   Scenario: Update queries can only use bound variables with 'has'
@@ -1150,6 +1272,18 @@ Feature: TypeQL Update Query
   #######################
   # LINKS (ROLEPLAYING) #
   #######################
+
+  Scenario: Links update on an empty match does nothing
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+        $f isa friendship;
+      update
+        $f links (friend: $p);
+      """
+    Then answer size is: 0
+
 
   Scenario: Update queries cannot update non-existing roles
     Then typeql write query; fails with a message containing: "Role label not found 'father'"
@@ -1333,17 +1467,6 @@ Feature: TypeQL Update Query
   # COMBINATIONS AND EDGE CASES #
   ###############################
 
-  Scenario: Update on an empty match does nothing
-    When get answers of typeql write query
-      """
-      match
-        $p isa person;
-      update
-        $p has name "Bob";
-      """
-    Then answer size is: 0
-
-
   Scenario: updating an anonymous variable errors
     Then typeql write query; fails with a message containing: "anonymous"
       """
@@ -1437,7 +1560,6 @@ Feature: TypeQL Update Query
       | key:ref:1 | attr:name:"Bob Marley"   |
       | key:ref:1 | attr:first-name:"Bob"    |
       | key:ref:1 | attr:surname:"Marley"    |
-
 
     When get answers of typeql write query
       """
