@@ -502,14 +502,35 @@ Feature: TypeQL Update Query
       | p         | n                 |
       | key:ref:0 | attr:name:Charlie |
 
-    # TODO: This should work
-    Then typeql write query; fails with a message containing: "fajawklwla"
+    Then typeql write query; fails with a message containing: "Illegal 'isa' provided for variable 'n' that is input from a previous stage"
       """
       match
         $p isa person;
-        $n isa name "Charlie";
+        $n isa name "Alice";
       update
         $p has name $n;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "The variable 'n' referenced in the update stage is unavailable"
+      """
+      match
+        $p isa person;
+      update
+        $n isa name "Charlie";
+        $p has $n;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+      """
+      match
+        $p isa person;
+      update
+        let $n = "Charlie";
+        $p has name == $n;
       """
 
 
@@ -1085,11 +1106,11 @@ Feature: TypeQL Update Query
   #######################
 
   Scenario: Update queries cannot update non-existing roles
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Role label not found 'father'"
       """
       insert
         $f isa person, has ref 0;
-        $p isa parentship, has ref 15;
+        $p isa parentship;
       update
         $p links (father: $f);
       """
@@ -1143,15 +1164,14 @@ Feature: TypeQL Update Query
       """
       insert
         $f isa person, has ref 0;
-        $p isa parentship, has ref 15;
+        $p isa parentship;
       update
         $p links (parent: $f);
+      select $f;
       """
     Then uniquely identify answer concepts
-      | f         | p          |
-      | key:ref:0 | key:ref:15 |
-
-
+      | f         |
+      | key:ref:0 |
 
   ###############################
   # COMBINATIONS AND EDGE CASES #
@@ -1208,7 +1228,7 @@ Feature: TypeQL Update Query
     Then typeql write query; fails with a message containing: "anonymous"
       """
       insert
-        $p isa parentship, has ref 0;
+        $p isa parentship;
       update
         $p links (parent: $_);
       """
