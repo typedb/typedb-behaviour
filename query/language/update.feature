@@ -27,8 +27,8 @@ Feature: TypeQL Update Query
       relation parentship,
         relates parent,
         relates child;
-      attribute name, value string;
-      attribute ref, value integer;
+      attribute name value string;
+      attribute ref @independent, value integer;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -621,7 +621,7 @@ Feature: TypeQL Update Query
       """
 
 
-  Scenario: Can update right after an insert stage or an update stage
+  Scenario: Can update from any other write stage, even right after creating a new instance
     When get answers of typeql write query
       """
       insert
@@ -824,7 +824,7 @@ Feature: TypeQL Update Query
       | 2     | , has name "Alice", has name "Morgan" |
 
 
-  Scenario: Single has update of a key
+  Scenario: Has for keys can be updated
     Given typeql write query
       """
       insert $p isa person, has ref 0;
@@ -924,7 +924,7 @@ Feature: TypeQL Update Query
       | key:ref:1 | attr:ref:1 |
 
 
-  Scenario: Single to same single has update
+  Scenario: Has update can result in 0 changes if it updates existing data by the same value
     Given typeql write query
       """
       insert $p isa person, has ref 0, has name "Alice";
@@ -956,7 +956,7 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:name:Alice |
 
 
-  Scenario: Has update: attribute subtypes
+  Scenario: Has for attribute subtypes can be updated without affecting sub and supertypes
     Given transaction closes
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1073,6 +1073,29 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:surname:"Marley"     |
       | key:ref:0 | attr:old-surname:"Morgan" |
 
+    When get answers of typeql write query
+      """
+      insert
+        $n isa surname "Cruise";
+      match
+        $p isa person;
+      update
+        $p has $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                     |
+      | key:ref:0 | attr:surname:"Cruise" |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                         |
+      | key:ref:0 | attr:name:"Bob Marley"    |
+      | key:ref:0 | attr:first-name:"Bob"     |
+      | key:ref:0 | attr:surname:"Cruise"     |
+      | key:ref:0 | attr:old-surname:"Morgan" |
+
 
   Scenario: Update queries can only use bound variables with 'has'
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -1100,6 +1123,145 @@ Feature: TypeQL Update Query
     Then uniquely identify answer concepts
       | p         | n             |
       | key:ref:0 | attr:name:Bob |
+
+
+  Scenario: Update queries are validated similarly to insert queries and do not allow creating abstract has instances
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        name @abstract;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
+      """
+      insert
+        $p isa person, has ref 0;
+      update
+        $p has name "Bob";
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        person owns first-name;
+        attribute first-name sub name;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "empty-set for some variable"
+      """
+      insert
+        $p isa person, has ref 0;
+      update
+        $p has name "Bob";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+        $p isa person, has ref 0;
+      update
+        $p has first-name "Bob";
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                   |
+      | key:ref:0 | attr:first-name:Bob |
+
+
+  Scenario: Dependent attributes are not preserved if they are no longer owned after updates
+    When typeql write query
+      """
+      insert
+        $r0 isa ref 0;
+        $n0 isa name "Alice";
+        $r1 isa ref 1;
+        $n1 isa name "Bob";
+        $p isa person, has $r0, has $n0;
+      update
+        $p has $r1, has $n1;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n             |
+      | key:ref:1 | attr:name:Bob |
+    When get answers of typeql read query
+      """
+      match
+        attribute $t;
+        $a isa $t;
+      """
+    Then uniquely identify answer concepts
+      | t          | a             |
+      | label:ref  | attr:ref:0    |
+      | label:ref  | attr:ref:1    |
+      | label:name | attr:name:Bob |
+
+    When typeql write query
+      """
+      match
+        $p1 isa person, has ref 1, has name $n1;
+      insert
+        $r2 isa ref 2;
+        $n2 isa name "Charlie";
+        $p3 isa person, has ref 3, has $n1;
+      update
+        $p1 has $r2, has $n2;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                 |
+      | key:ref:3 | attr:name:Bob     |
+      | key:ref:2 | attr:name:Charlie |
+    When get answers of typeql read query
+      """
+      match
+        attribute $t;
+        $a isa $t;
+      """
+    Then uniquely identify answer concepts
+      | t          | a                 |
+      | label:ref  | attr:ref:0        |
+      | label:ref  | attr:ref:1        |
+      | label:ref  | attr:ref:2        |
+      | label:ref  | attr:ref:3        |
+      | label:name | attr:name:Bob     |
+      | label:name | attr:name:Charlie |
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        attribute $t;
+        $a isa $t;
+      """
+    Then uniquely identify answer concepts
+      | t          | a                 |
+      | label:ref  | attr:ref:0        |
+      | label:ref  | attr:ref:1        |
+      | label:ref  | attr:ref:2        |
+      | label:ref  | attr:ref:3        |
+      | label:name | attr:name:Bob     |
+      | label:name | attr:name:Charlie |
 
   #######################
   # LINKS (ROLEPLAYING) #
@@ -1172,6 +1334,116 @@ Feature: TypeQL Update Query
     Then uniquely identify answer concepts
       | f         |
       | key:ref:0 |
+
+
+  Scenario: Update queries are validated similarly to insert queries and do not allow creating abstract links instances
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        friendship relates friend @abstract;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+      """
+      insert
+        $p isa person, has ref 0;
+        $f isa friendship, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        person plays best-friendship:best-friend;
+        relation best-friendship relates best-friend as friend, sub friendship;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+      """
+      insert
+        $p isa person, has ref 0;
+        $f isa friendship, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+      """
+      insert
+        $p isa person, has ref 0;
+        $f isa best-friendship, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+        $p isa person, has ref 0;
+        $f isa best-friendship, has ref 0;
+      update
+        $f links (best-friend: $p);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | p         | f         |
+      | key:ref:0 | key:ref:0 |
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        person plays eternal-friendship:eternal-friend;
+        relation eternal-friendship relates eternal-friend as best-friend, sub best-friendship;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+      """
+      insert
+        $p isa person, has ref 1;
+        $f isa eternal-friendship, has ref 1;
+      update
+        $f links (best-friend: $p);
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+        $p isa person, has ref 1;
+        $f isa eternal-friendship, has ref 1;
+      update
+        $f links (eternal-friend: $p);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | p         | f         |
+      | key:ref:0 | key:ref:0 |
+      | key:ref:1 | key:ref:1 |
+    When transaction commits
 
   ###############################
   # COMBINATIONS AND EDGE CASES #
