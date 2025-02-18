@@ -34,7 +34,6 @@ Feature: TypeQL Update Query
     Given transaction commits
     Given connection open write transaction for database: typedb
 
-
   #######################
   # UNSUPPORTED UPDATES #
   #######################
@@ -515,7 +514,7 @@ Feature: TypeQL Update Query
       """
 
 
-  Scenario: Can update from any other write stage, even right after creating a new instance
+  Scenario: Can update has from any other write stage, even right after creating a new instance
     When get answers of typeql write query
       """
       insert
@@ -565,7 +564,7 @@ Feature: TypeQL Update Query
       """
 
 
-  # TODO: Uncomment when built-in functions can be called
+    # TODO: Uncomment after implemented [REP254] The language feature is not yet implemented: BuiltinFunction("max")
 #  Scenario: Has can be updated by a built-in function call
 #    Given transaction closes
 #    Given connection open schema transaction for database: typedb
@@ -589,7 +588,7 @@ Feature: TypeQL Update Query
 #      match
 #        $p isa person, has balance $b;
 #      update
-#        $p has balance mean($b);
+#        $p has balance max($b);
 #      """
 #    Then uniquely identify answer concepts
 #      | p         | b                    |
@@ -601,8 +600,8 @@ Feature: TypeQL Update Query
 #      """
 #    Then uniquely identify answer concepts
 #      | p         | b                    |
-#      | key:ref:0 | attr:balance:10.0dec |
-#      | key:ref:1 | attr:balance:10.0dec |
+#      | key:ref:0 | attr:balance:20.0dec |
+#      | key:ref:1 | attr:balance:20.0dec |
 
 
   # TODO: Uncomment and adjust when user-defined functions can be called
@@ -743,7 +742,7 @@ Feature: TypeQL Update Query
       """
     Given typeql write query
       """
-      insert $p isa person, has ref 0<has-name>;
+      insert $p isa person, has ref 0, <has>;
       """
     Given transaction commits
 
@@ -753,18 +752,20 @@ Feature: TypeQL Update Query
       match
         $p isa person;
       update
-        $p <has-name-changed>;
+        $p <has-changed>;
       """
     Examples:
-      | card  | has-name                              | has-name-changed                  |
-      | 0..   | , has name "Alice"                    | has name "Bob"                    |
-      | 0..10 | , has name "Alice"                    | has name "Bob"                    |
-      | 0..2  | , has name "Alice"                    | has name "Bob"                    |
-      | 1..   | , has name "Alice"                    | has name "Bob"                    |
-      | 1..2  | , has name "Alice"                    | has name "Bob"                    |
-      | 2..2  | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
-      | 2     | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
-      | 2..   | , has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+      | card  | has                                 | has-changed                       |
+      | 0..   | has name "Alice"                    | has name "Bob"                    |
+      | 0..10 | has name "Alice"                    | has name "Bob"                    |
+      | 0..2  | has name "Alice"                    | has name "Bob"                    |
+      | 0..2  | has name "Alice", has name "Morgan" | has name "Bob"                    |
+      | 1..   | has name "Alice"                    | has name "Bob"                    |
+      | 1..2  | has name "Alice"                    | has name "Bob"                    |
+      | 1..2  | has name "Alice"                    | has name "Bob", has name "Marley" |
+      | 2..2  | has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+      | 2     | has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
+      | 2..   | has name "Alice", has name "Morgan" | has name "Bob", has name "Marley" |
 
 
   Scenario: Can update has with a correct declared cardinality even if a supertype has a @card(1..)
@@ -1269,6 +1270,262 @@ Feature: TypeQL Update Query
       | label:name | attr:name:Bob     |
       | label:name | attr:name:Charlie |
 
+
+  Scenario: Update queries can update multiple 'has'es in a single query
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        person owns first-name, owns surname;
+        attribute first-name sub name;
+        attribute surname sub name;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0,
+          has name "Alice Morgan",
+          has first-name "Alice",
+          has surname "Morgan";
+        $p1 isa person, has ref 1,
+          has name "Bob Marley",
+          has first-name "Bob",
+          has surname "Marley";
+      """
+    Given get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Given uniquely identify answer concepts
+      | p         | n                        |
+      | key:ref:0 | attr:name:"Alice Morgan" |
+      | key:ref:0 | attr:first-name:"Alice"  |
+      | key:ref:0 | attr:surname:"Morgan"    |
+      | key:ref:1 | attr:name:"Bob Marley"   |
+      | key:ref:1 | attr:first-name:"Bob"    |
+      | key:ref:1 | attr:surname:"Marley"    |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has first-name "Alice";
+      update
+        $p has surname "Cooper", has ref 20;
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                        |
+      | key:ref:20 | attr:name:"Alice Morgan" |
+      | key:ref:20 | attr:first-name:"Alice"  |
+      | key:ref:20 | attr:surname:"Cooper"    |
+      | key:ref:1  | attr:name:"Bob Marley"   |
+      | key:ref:1  | attr:first-name:"Bob"    |
+      | key:ref:1  | attr:surname:"Marley"    |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      update
+        $p has first-name "Charlie", has name "404";
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+      | key:ref:1  |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                         |
+      | key:ref:20 | attr:name:"404"           |
+      | key:ref:20 | attr:first-name:"Charlie" |
+      | key:ref:20 | attr:surname:"Cooper"     |
+      | key:ref:1  | attr:name:"404"           |
+      | key:ref:1  | attr:first-name:"Charlie" |
+      | key:ref:1  | attr:surname:"Marley"     |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has name "404";
+      update
+        $p has first-name "David";
+        $p has name "Unknown";
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:20 |
+      | key:ref:1  |
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p          | n                       |
+      | key:ref:20 | attr:name:"Unknown"     |
+      | key:ref:20 | attr:first-name:"David" |
+      | key:ref:20 | attr:surname:"Cooper"   |
+      | key:ref:1  | attr:name:"Unknown"     |
+      | key:ref:1  | attr:first-name:"David" |
+      | key:ref:1  | attr:surname:"Marley"   |
+
+    Then typeql write query; fails with a message containing: "Constraint '@unique' has been violated"
+      """
+      match
+        $p isa person;
+      update
+        $p has first-name "Elon";
+        $p has ref 0;
+      """
+
+
+  Scenario: Update queries check the actual has cardinality
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define person owns name @card(0..);
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0, has name "Alice";
+      """
+    Given get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Given uniquely identify answer concepts
+      | p         | n                 |
+      | key:ref:0 | attr:name:"Alice" |
+
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $p isa person, has ref 0;
+      update
+        $p has name "Bob";
+      """
+
+    When typeql schema query
+      """
+      redefine person owns name @card(0..1);
+      """
+    Then typeql write query
+      """
+      match
+        $p isa person, has ref 0;
+      update
+        $p has name "Bob";
+      """
+
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n               |
+      | key:ref:0 | attr:name:"Bob" |
+
+
+  Scenario: Update has queries on X rows are executed X times
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0, has name "Alice";
+        $p1 isa person, has ref 1, has name "Bob";
+        $p2 isa person, has ref 2, has name "Charlie";
+      """
+    Given get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Given uniquely identify answer concepts
+      | p         | n                   |
+      | key:ref:0 | attr:name:"Alice"   |
+      | key:ref:1 | attr:name:"Bob"     |
+      | key:ref:2 | attr:name:"Charlie" |
+
+    When typeql write query
+      """
+      match
+        $n isa name;
+        $p isa person, has ref 0;
+      sort $n asc;
+      update
+        $p has $n;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                   |
+      | key:ref:0 | attr:name:"Charlie" |
+      | key:ref:1 | attr:name:"Bob"     |
+      | key:ref:2 | attr:name:"Charlie" |
+
+    When typeql write query
+      """
+      match
+        $p isa person, has name $n;
+      sort $n desc;
+      update
+        $p has $n;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                   |
+      | key:ref:0 | attr:name:"Charlie" |
+      | key:ref:1 | attr:name:"Bob"     |
+      | key:ref:2 | attr:name:"Charlie" |
+
+    When typeql write query
+      """
+      match
+        $p isa person;
+        $n isa name;
+      sort $n desc;
+      update
+        $p has $n;
+      """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n               |
+      | key:ref:0 | attr:name:"Bob" |
+      | key:ref:1 | attr:name:"Bob" |
+      | key:ref:2 | attr:name:"Bob" |
+
+    Then typeql write query; fails with a message containing: "Constraint '@unique' has been violated"
+      """
+      match
+        $p isa person;
+        $r isa ref;
+      update
+        $p has $r;
+      """
+
   #######################
   # LINKS (ROLEPLAYING) #
   #######################
@@ -1296,9 +1553,508 @@ Feature: TypeQL Update Query
       """
 
 
+  Scenario: Update queries cannot update links to zero roleplayers
+    Then typeql write query; parsing fails
+      """
+      insert
+        $p isa parentship;
+      update
+        $p links ();
+      """
 
-  # TODO
 
+  Scenario: Links can be updated with a role player variable
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+
+    When get answers of typeql write query
+      """
+      insert
+        $f isa friendship, has ref 2;
+      match
+        $p isa person, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 1;
+        $f isa friendship;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+
+
+  Scenario: Links can be updated without specifying the role if it's unambiguous
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+
+    When get answers of typeql write query
+      """
+      insert
+        $f isa friendship, has ref 2;
+      match
+        $p isa person, has ref 0;
+      update
+        $f links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:2 | key:ref:0 | label:friendship:friend |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 1;
+        $f isa friendship;
+      update
+        $f links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:2 | key:ref:1 | label:friendship:friend |
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:2 | key:ref:1 | label:friendship:friend |
+
+    When typeql schema query
+      """
+      define friendship relates oldest-friend;
+      """
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 0;
+        $f isa friendship;
+      update
+        $f links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:2 | key:ref:0 | label:friendship:friend |
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:2 | key:ref:0 | label:friendship:friend |
+
+
+  Scenario: Links cannot be updated without specifying the role if it's ambiguous
+    Then typeql write query; fails with a message containing: "requires unambiguous role type"
+      """
+      insert
+        $p isa person, has ref 0;
+        $r isa parentship, has ref 1;
+      update
+        $r links ($p);
+      """
+
+
+  Scenario: Can update links from any other write stage, even right after creating a new instance
+    When get answers of typeql write query
+      """
+      insert
+        $f isa friendship, has ref 0;
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+      update
+        $f links (friend: $p0);
+      update
+        $f links (friend: $p1);
+      update
+        $f links (friend: $p2);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:2 |
+
+
+  Scenario: Cannot declare new relations and role players variables in an update stage
+    Then typeql write query; fails with a message containing: "variable 'f' referenced in the update stage is unavailable"
+      """
+      insert
+        $p isa person, has ref 0;
+      update
+        $f isa friendship, links ($p);
+      """
+    When transaction closes
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
+      """
+      insert
+        $f isa friendship;
+      update
+        $p isa person, has ref 0;
+        $f links ($p);
+      """
+    When transaction closes
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "referenced in the update stage is unavailable"
+      """
+      update
+        $p isa person, has ref 0;
+        $f isa friendship, links ($p);
+      """
+
+
+  Scenario Outline: Cannot update links with relates cardinality higher than 1: @card(<card>)
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define friendship relates friend @card(<card>);
+      """
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+        $f isa friendship, has ref 0, <links>;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+        $f isa friendship;
+      update
+        $f <links-changed>;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+        $f isa friendship;
+      update
+        $f <links-changed>;
+      """
+    Examples:
+      | card  | links                            | links-changed                    |
+      | 0..   | links (friend: $p0)              | links (friend: $p1)              |
+      | 0..10 | links (friend: $p0)              | links (friend: $p1)              |
+      | 0..2  | links (friend: $p0)              | links (friend: $p1)              |
+      | 0..2  | links (friend: $p0, friend: $p1) | links (friend: $p1)              |
+      | 1..   | links (friend: $p0)              | links (friend: $p1)              |
+      | 1..2  | links (friend: $p0)              | links (friend: $p1, friend: $p2) |
+      | 1..2  | links (friend: $p0)              | links (friend: $p1)              |
+      | 2..2  | links (friend: $p0, friend: $p1) | links (friend: $p1, friend: $p2) |
+      | 2     | links (friend: $p0, friend: $p1) | links (friend: $p1, friend: $p2) |
+      | 2..   | links (friend: $p0, friend: $p1) | links (friend: $p1, friend: $p2) |
+
+
+  Scenario: Can update links with a correct declared cardinality even if a supertype has a @card(1..)
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        relation aged-friendship sub friendship,
+          relates older-friend as friend,
+          relates younger-friend as friend;
+        friendship relates friend @card(0..);
+        person plays aged-friendship:older-friend, plays aged-friendship:younger-friend;
+      """
+    Given typeql write query
+      """
+      insert
+        $f isa aged-friendship, has ref 0, links (younger-friend: $p0);
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                    |
+      | key:ref:0 | key:ref:0 | label:aged-friendship:younger-friend |
+
+    When typeql write query
+      """
+      match
+        $f isa aged-friendship, has ref 0;
+        $p isa person, has ref 1;
+      update
+        $f links (older-friend: $p);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                    |
+      | key:ref:0 | key:ref:0 | label:aged-friendship:younger-friend |
+      | key:ref:0 | key:ref:1 | label:aged-friendship:older-friend   |
+
+    When typeql write query
+      """
+      match
+        $f isa aged-friendship, has ref 0;
+        $p isa person, has ref 2;
+      update
+        $f links (younger-friend: $p);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                    |
+      | key:ref:0 | key:ref:2 | label:aged-friendship:younger-friend |
+      | key:ref:0 | key:ref:1 | label:aged-friendship:older-friend   |
+
+    When typeql write query
+      """
+      match
+        $f isa aged-friendship, has ref 0;
+        $p isa person, has ref 1;
+      update
+        $f links (younger-friend: $p);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                    |
+      | key:ref:0 | key:ref:1 | label:aged-friendship:younger-friend |
+      | key:ref:0 | key:ref:1 | label:aged-friendship:older-friend   |
+
+    # This would not actually be inserted as it's specialised, but we should also see this error first
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $f isa aged-friendship, has ref 0;
+        $p isa person, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+
+
+  Scenario Outline: Links for card(<card>) can be updated
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define friendship relates friend @card(<card>);
+      """
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+
+    When get answers of typeql write query
+      """
+      insert
+        $f isa friendship, has ref 2;
+      match
+        $p isa person, has ref 0;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 1;
+        $f isa friendship;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:1 |
+    Examples:
+      | card |
+      | 0..1 |
+      | 1..1 |
+
+
+  Scenario: Has update can result in 0 changes if it updates existing data by the same value
+    Given typeql write query
+      """
+      insert
+        $p isa person, has ref 0;
+        $f isa friendship, has ref 1, links ($p);
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:1 | key:ref:0 |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+        $f isa friendship;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:1 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:1 | key:ref:0 | label:friendship:friend |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+        $f isa friendship;
+      update
+        $f links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:1 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                       |
+      | key:ref:1 | key:ref:0 | label:friendship:friend |
 
 
   Scenario: Update queries can only use bound variables with 'links'
@@ -1463,11 +2219,389 @@ Feature: TypeQL Update Query
       | key:ref:1 | key:ref:1 |
     When transaction commits
 
+
+  Scenario: Update queries can update multiple 'links'es in a single query
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        person plays friendship:youngest-friend, plays friendship:oldest-friend;
+        friendship relates youngest-friend, relates oldest-friend;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $f0 isa friendship, has ref 0,
+          links (oldest-friend: $p0, youngest-friend: $p1, friend: $p0);
+        $f1 isa friendship, has ref 1,
+          links (oldest-friend: $p1, youngest-friend: $p0, friend: $p2);
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+      """
+    Given get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Given uniquely identify answer concepts
+      | f         | p         | r                                |
+      | key:ref:0 | key:ref:0 | label:friendship:friend          |
+      | key:ref:0 | key:ref:0 | label:friendship:oldest-friend   |
+      | key:ref:0 | key:ref:1 | label:friendship:youngest-friend |
+      | key:ref:1 | key:ref:2 | label:friendship:friend          |
+      | key:ref:1 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:1 | key:ref:0 | label:friendship:youngest-friend |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 1;
+        $f isa friendship, links (youngest-friend: $p);
+      update
+        $f links (oldest-friend: $p, friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                |
+      | key:ref:0 | key:ref:1 | label:friendship:friend          |
+      | key:ref:0 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:0 | key:ref:1 | label:friendship:youngest-friend |
+      | key:ref:1 | key:ref:2 | label:friendship:friend          |
+      | key:ref:1 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:1 | key:ref:0 | label:friendship:youngest-friend |
+
+    When get answers of typeql write query
+      """
+      insert
+        $p isa person, has ref 3;
+      match
+        $f isa friendship, links (youngest-friend: $p-youngest);
+      update
+        $f links (youngest-friend: $p, oldest-friend: $p-youngest);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | p-youngest |
+      | key:ref:0 | key:ref:3 | key:ref:1  |
+      | key:ref:1 | key:ref:3 | key:ref:0  |
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                |
+      | key:ref:0 | key:ref:1 | label:friendship:friend          |
+      | key:ref:0 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:0 | key:ref:3 | label:friendship:youngest-friend |
+      | key:ref:1 | key:ref:2 | label:friendship:friend          |
+      | key:ref:1 | key:ref:0 | label:friendship:oldest-friend   |
+      | key:ref:1 | key:ref:3 | label:friendship:youngest-friend |
+
+    When typeql write query
+      """
+      match
+        $p1 isa person, has ref 1;
+        $p3 isa person, has ref 3;
+        $f isa friendship, links (youngest-friend: $p3);
+      update
+        $f links (youngest-friend: $p1), links (friend: $p3);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                |
+      | key:ref:0 | key:ref:3 | label:friendship:friend          |
+      | key:ref:0 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:0 | key:ref:1 | label:friendship:youngest-friend |
+      | key:ref:1 | key:ref:3 | label:friendship:friend          |
+      | key:ref:1 | key:ref:0 | label:friendship:oldest-friend   |
+      | key:ref:1 | key:ref:1 | label:friendship:youngest-friend |
+
+    When typeql write query
+      """
+      match
+        $p0 isa person, has ref 0;
+        $p2 isa person, has ref 2;
+        $f isa friendship, links (oldest-friend: $_);
+      update
+        $f links (youngest-friend: $p0), links (friend: $p2);
+      """
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($r: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | r                                |
+      | key:ref:0 | key:ref:2 | label:friendship:friend          |
+      | key:ref:0 | key:ref:1 | label:friendship:oldest-friend   |
+      | key:ref:0 | key:ref:0 | label:friendship:youngest-friend |
+      | key:ref:1 | key:ref:2 | label:friendship:friend          |
+      | key:ref:1 | key:ref:0 | label:friendship:oldest-friend   |
+      | key:ref:1 | key:ref:0 | label:friendship:youngest-friend |
+
+
+  Scenario: Update queries can update links with relation roleplayers
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        relation family relates parent, relates child, plays friendship:friend, owns ref @key;
+        person plays family:parent, plays family:child;
+      """
+    Given typeql write query
+      """
+      insert
+        $p isa person, has ref 0;
+        (parent: $p) isa family, has ref 0;
+        (child: $p) isa family, has ref 1;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+
+    When get answers of typeql write query
+      """
+      insert
+        $f isa friendship, has ref 2;
+      match
+        $fam isa family, has ref 0;
+      update
+        $f links (friend: $fam);
+      """
+    Then uniquely identify answer concepts
+      | f         | fam       |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($friend);
+        $friend isa $t;
+      """
+    Then uniquely identify answer concepts
+      | f         | friend    | t            |
+      | key:ref:2 | key:ref:0 | label:family |
+
+    When get answers of typeql write query
+      """
+      match
+        $fam isa family, has ref 1;
+        $f isa friendship;
+      update
+        $f links (friend: $fam);
+      """
+    Then uniquely identify answer concepts
+      | f         | fam       |
+      | key:ref:2 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($friend);
+        $friend isa $t;
+      """
+    Then uniquely identify answer concepts
+      | f         | friend    | t            |
+      | key:ref:2 | key:ref:1 | label:family |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($friend);
+        $friend isa $t;
+      """
+    Then uniquely identify answer concepts
+      | f         | friend    | t            |
+      | key:ref:2 | key:ref:1 | label:family |
+
+    When get answers of typeql write query
+      """
+      match
+        $p isa person, has ref 0;
+        $f isa friendship;
+      update
+        $f links (friend: $p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:2 | key:ref:0 |
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($friend);
+        $friend isa $t;
+      """
+    Then uniquely identify answer concepts
+      | f         | friend    | t            |
+      | key:ref:2 | key:ref:0 | label:person |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($friend);
+        $friend isa $t;
+      """
+    Then uniquely identify answer concepts
+      | f         | friend    | t            |
+      | key:ref:2 | key:ref:0 | label:person |
+
+
+  Scenario: Update queries check the actual links cardinality
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define friendship relates friend @card(0..);
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $f isa friendship, has ref 0, links ($p0);
+      """
+    Given get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Given uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:0 |
+
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $f isa friendship;
+        $p1 isa person, has ref 1;
+      update
+        $f links ($p1);
+      """
+
+    When typeql schema query
+      """
+      redefine friendship relates friend @card(0..1);
+      """
+    Then typeql write query
+      """
+      match
+        $f isa friendship;
+        $p1 isa person, has ref 1;
+      update
+        $f links ($p1);
+      """
+
+    When get answers of typeql read query
+      """
+      match $f isa friendship, links ($p);
+      """
+    Given uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:1 |
+
+
+  Scenario: Update links queries on X rows are executed X times
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+        $f0 isa friendship, has ref 0, links ($p0);
+        $f1 isa friendship, has ref 1, links ($p1);
+        $f2 isa friendship, has ref 2, links ($p2);
+      """
+    Given get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+      """
+    Given uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:0 |
+      | key:ref:1 | key:ref:1 |
+      | key:ref:2 | key:ref:2 |
+
+    When typeql write query
+      """
+      match
+        $p isa person, has ref $r;
+        $f isa friendship, has ref 0;
+      sort $r asc;
+      update
+        $f links ($p);
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:2 |
+      | key:ref:1 | key:ref:1 |
+      | key:ref:2 | key:ref:2 |
+
+    When typeql write query
+      """
+      match
+        $f isa friendship, links ($p);
+        $p has ref $r;
+      sort $r desc;
+      update
+        $f links ($p);
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:2 |
+      | key:ref:1 | key:ref:1 |
+      | key:ref:2 | key:ref:2 |
+
+    When typeql write query
+      """
+      match
+        $f isa friendship;
+        $p isa person, has ref $r;
+      sort $r desc;
+      update
+        $f links ($p);
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+      """
+    Then uniquely identify answer concepts
+      | f         | p         |
+      | key:ref:0 | key:ref:0 |
+      | key:ref:1 | key:ref:0 |
+      | key:ref:2 | key:ref:0 |
+
   ###############################
   # COMBINATIONS AND EDGE CASES #
   ###############################
 
-  Scenario: updating an anonymous variable errors
+  Scenario: Updating an anonymous variable errors
     Then typeql write query; fails with a message containing: "anonymous"
       """
       update
@@ -1523,130 +2657,165 @@ Feature: TypeQL Update Query
       """
 
 
-  Scenario: Update queries can update multiple 'has'es in a single query
-    Given transaction closes
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-        person owns first-name, owns surname;
-        attribute first-name sub name;
-        attribute surname sub name;
-      """
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
+  Scenario: Update queries can update has and links of multiple instances at the same time
+    When typeql write query
       """
       insert
-        $p0 isa person, has ref 0,
-          has name "Alice Morgan",
-          has first-name "Alice",
-          has surname "Morgan";
-        $p1 isa person, has ref 1,
-          has name "Bob Marley",
-          has first-name "Bob",
-          has surname "Marley";
+        $p0 isa person, has ref 0, has name "Alice";
+        $p1 isa person, has ref 1, has name "Bob";
+        $f isa friendship, has ref 0, links ($p0);
       """
-    Given get answers of typeql read query
-      """
-      match $p isa person, has name $n;
-      """
-    Given uniquely identify answer concepts
-      | p         | n                        |
-      | key:ref:0 | attr:name:"Alice Morgan" |
-      | key:ref:0 | attr:first-name:"Alice"  |
-      | key:ref:0 | attr:surname:"Morgan"    |
-      | key:ref:1 | attr:name:"Bob Marley"   |
-      | key:ref:1 | attr:first-name:"Bob"    |
-      | key:ref:1 | attr:surname:"Marley"    |
-
-    When get answers of typeql write query
-      """
-      match
-        $p isa person, has first-name "Alice";
-      update
-        $p has surname "Cooper", has ref 20;
-      """
-    Then uniquely identify answer concepts
-      | p          |
-      | key:ref:20 |
     When get answers of typeql read query
       """
-      match $p isa person, has name $n;
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
       """
     Then uniquely identify answer concepts
-      | p          | n                        |
-      | key:ref:20 | attr:name:"Alice Morgan" |
-      | key:ref:20 | attr:first-name:"Alice"  |
-      | key:ref:20 | attr:surname:"Cooper"    |
-      | key:ref:1  | attr:name:"Bob Marley"   |
-      | key:ref:1  | attr:first-name:"Bob"    |
-      | key:ref:1  | attr:surname:"Marley"    |
+      | f         | p         | n               |
+      | key:ref:0 | key:ref:0 | attr:name:Alice |
 
-    When get answers of typeql write query
+    When typeql write query
       """
       match
-        $p isa person;
+        $p1 isa person, has name "Bob";
+        $f isa friendship, has ref 0;
       update
-        $p has first-name "Charlie", has name "404";
+        $f has ref 5, links ($p1);
       """
-    Then uniquely identify answer concepts
-      | p          |
-      | key:ref:20 |
-      | key:ref:1  |
     When get answers of typeql read query
       """
-      match $p isa person, has name $n;
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
       """
     Then uniquely identify answer concepts
-      | p          | n                         |
-      | key:ref:20 | attr:name:"404"           |
-      | key:ref:20 | attr:first-name:"Charlie" |
-      | key:ref:20 | attr:surname:"Cooper"     |
-      | key:ref:1  | attr:name:"404"           |
-      | key:ref:1  | attr:first-name:"Charlie" |
-      | key:ref:1  | attr:surname:"Marley"     |
+      | f         | p         | n             |
+      | key:ref:5 | key:ref:1 | attr:name:Bob |
 
-    When get answers of typeql write query
+    When typeql write query
       """
       match
-        $p isa person, has name "404";
+        $p0 isa person, has name "Alice";
+        $p1 isa person, has name "Bob";
+        $f isa friendship, links ($p1);
       update
-        $p has first-name "David";
-        $p has name "Unknown";
+        $f has ref 0, links ($p0);
+        $p0 has name "Charlie", has ref 2;
       """
-    Then uniquely identify answer concepts
-      | p          |
-      | key:ref:20 |
-      | key:ref:1  |
     When get answers of typeql read query
       """
-      match $p isa person, has name $n;
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
       """
     Then uniquely identify answer concepts
-      | p          | n                       |
-      | key:ref:20 | attr:name:"Unknown"     |
-      | key:ref:20 | attr:first-name:"David" |
-      | key:ref:20 | attr:surname:"Cooper"   |
-      | key:ref:1  | attr:name:"Unknown"     |
-      | key:ref:1  | attr:first-name:"David" |
-      | key:ref:1  | attr:surname:"Marley"   |
+      | f         | p         | n                 |
+      | key:ref:0 | key:ref:2 | attr:name:Charlie |
+    When transaction commits
 
-    Then typeql write query; fails with a message containing: "Constraint '@unique' has been violated"
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
       """
       match
-        $p isa person;
-      update
-        $p has first-name "Elon";
-        $p has ref 0;
+        $f isa friendship, links ($p);
+        $p has name $n;
       """
+    Then uniquely identify answer concepts
+      | f         | p         | n                 |
+      | key:ref:0 | key:ref:2 | attr:name:Charlie |
 
 
-    # TODO: multiple links edges
+  Scenario: Update queries cannot update non-existing capabilities, but can update different types matching update constraints
+    When typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0, has name "Alice";
+        $f isa friendship, has ref 0, links ($p0);
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | n               |
+      | key:ref:0 | key:ref:0 | attr:name:Alice |
 
-    # TODO: has + links edges in one query
+    When typeql write query
+      """
+      match
+        $p isa person, has ref $_;
+        $f isa friendship, has ref $_;
+      update
+        $f has ref 1;
+        $p has ref 2;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | n               |
+      | key:ref:1 | key:ref:2 | attr:name:Alice |
 
+    When typeql write query
+      """
+      match
+        $p has ref $_;
+      update
+        $p has ref 3;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | n               |
+      | key:ref:3 | key:ref:3 | attr:name:Alice |
+
+    When typeql write query
+      """
+      match
+        $p has name $_;
+      update
+        $p has name "Bob";
+      """
+    When get answers of typeql read query
+      """
+      match
+        $f isa friendship, links ($p);
+        $p has name $n;
+      """
+    Then uniquely identify answer concepts
+      | f         | p         | n             |
+      | key:ref:3 | key:ref:3 | attr:name:Bob |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Left type 'friendship' across constraint 'has' is not compatible with right type 'name'"
+      """
+      match
+        $p has ref $_;
+      update
+        $p has name "Charlie";
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Left type 'person' across constraint 'links' is not compatible with right type 'friendship:friend'"
+      """
+      match
+        $p has name "Bob";
+        $f has ref $_;
+      update
+        $f links ($p);
+      """
 
   #############################
   # DELETE + INSERT == UPDATE #
