@@ -506,10 +506,20 @@ Feature: TypeQL Delete Query
     Then transaction commits
 
     Given connection open write transaction for database: typedb
-    When typeql write query
+    When typeql write query; fails with a message containing: "Left type 'internship' across constraint 'links' is not compatible with right type 'employment:employee'"
     """
     match
       $e isa employment, links (employee: $p);
+    delete
+      links (employee: $p) of $e;
+    """
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    match
+      $e isa! employment, links (employee: $p);
     delete
       links (employee: $p) of $e;
     """
@@ -527,7 +537,7 @@ Feature: TypeQL Delete Query
     When typeql write query
     """
     match
-      $e isa employment, links (employee: $p);
+      $e isa employment, links (intern: $p);
     delete
       links (intern: $p) of $e;
     """
@@ -898,22 +908,14 @@ Feature: TypeQL Delete Query
       $e isa internship, links (intern: $p);
     """
     Then answer size is: 1
-    When typeql write query
+    When typeql write query; fails with a message containing: "Left type 'internship' across constraint 'links' is not compatible with right type 'employment:employee'"
       """
       match
         $e isa employment, links (employee: $p);
       delete
         links (employee: $p) of $e;
       """
-    Then transaction commits
-
-    Given connection open write transaction for database: typedb
-    When get answers of typeql read query
-    """
-    match
-      $e isa internship, links (intern: $p);
-    """
-    Then answer size is: 1
+    Then transaction closes
 
 
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
