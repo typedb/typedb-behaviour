@@ -32,10 +32,10 @@ Feature: TypeQL pipelines
       attribute ref value integer;
       """
     Given transaction commits
+    Given connection open write transaction for database: typedb
 
 
   Scenario: Matches can be chained, with variables bindings kept into later stages
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -53,13 +53,12 @@ Feature: TypeQL pipelines
       $p has age $age;
     """
     Then uniquely identify answer concepts
-      | p         | name            | age          |
-      | key:ref:0 | attr:name:Alice | attr:age:10  |
-      | key:ref:1 | attr:name:Bob   | attr:age:11  |
+      | p         | name            | age         |
+      | key:ref:0 | attr:name:Alice | attr:age:10 |
+      | key:ref:1 | attr:name:Bob   | attr:age:11 |
 
 
   Scenario: A match can be used to bind variables, and chained with an insert for constraints.
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -78,12 +77,11 @@ Feature: TypeQL pipelines
       $f isa friendship, links (friend: $p1, friend: $p2), has ref 3;
     """
     Then uniquely identify answer concepts
-      | f         | p1              | p2           |
-      | key:ref:3 | key:ref:0       | key:ref:1    |
+      | f         | p1        | p2        |
+      | key:ref:3 | key:ref:0 | key:ref:1 |
 
 
   Scenario: The set of variables being streamed can be reduced using select.
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -99,12 +97,11 @@ Feature: TypeQL pipelines
     select $p;
     """
     Then uniquely identify answer concepts
-      | p              |
-      | key:ref:0      |
+      | p         |
+      | key:ref:0 |
 
 
   Scenario: A match can be chained with a delete and insert to emulate an update.
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -130,12 +127,11 @@ Feature: TypeQL pipelines
       $p isa person, has name $name, has age $age;
     """
     Then uniquely identify answer concepts
-      | p         | name            | age          |
-      | key:ref:0 | attr:name:Alice | attr:age:11  |
+      | p         | name            | age         |
+      | key:ref:0 | attr:name:Alice | attr:age:11 |
 
 
   Scenario: A stream can be sorted
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -153,8 +149,8 @@ Feature: TypeQL pipelines
     limit 1;
     """
     Then uniquely identify answer concepts
-      | p              |
-      | key:ref:0      |
+      | p         |
+      | key:ref:0 |
 
     Given get answers of typeql read query
     """
@@ -164,12 +160,11 @@ Feature: TypeQL pipelines
     limit 1;
     """
     Then uniquely identify answer concepts
-      | p              |
-      | key:ref:1      |
+      | p         |
+      | key:ref:1 |
 
 
   Scenario: Sort, offset, limit can be combined
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -190,13 +185,12 @@ Feature: TypeQL pipelines
     limit 2;
     """
     Then uniquely identify answer concepts
-      | name             | age             |
-      | attr:name:Alice  | attr:age:1      |
-      | attr:name:Bob    | attr:age:2      |
+      | name            | age        |
+      | attr:name:Alice | attr:age:1 |
+      | attr:name:Bob   | attr:age:2 |
 
 
   Scenario: Reduce can be performed within groups
-    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -215,7 +209,75 @@ Feature: TypeQL pipelines
     reduce $sum_age = sum($age) groupby $name;
     """
     Then uniquely identify answer concepts
-      | name             | sum_age        |
-      | attr:name:Alice  | value:integer:23  |
-      | attr:name:Bob    | value:integer:47  |
+      | name            | sum_age          |
+      | attr:name:Alice | value:integer:23 |
+      | attr:name:Bob   | value:integer:47 |
 
+
+  Scenario: Complex insert + delete migration with intersection of role names and attributes
+    Given get answers of typeql write query
+      """
+      insert
+        $u isa person, has name "Alex", has ref 0;
+        $v isa person, has name "Bob", has ref 1;
+        $w isa person, has name "Charlie", has ref 2;
+        $x isa person, has name "Darius", has ref 3;
+        $y isa person, has name "Alex", has ref 4;
+        $z isa person, has name "Bob", has ref 5;
+      """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity nameclass,
+        owns name @key,
+        plays naming:name;
+      relation naming,
+        relates named,
+        relates name;
+      person plays naming:named;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $att isa name;
+      insert
+        $x isa nameclass, has $att;
+      """
+    When typeql write query
+      """
+      match
+        $p isa person, has name $n;
+        $nc isa nameclass, has name $n;
+      delete
+        has $n of $p;
+      insert
+        (named: $p, name: $nc) isa naming;
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $r isa naming (named: $p, name: $nc);
+        $nc has name $n;
+      """
+    Then uniquely identify answer concepts
+      | p         | n                 |
+      | key:ref:0 | attr:name:Alex    |
+      | key:ref:1 | attr:name:Bob     |
+      | key:ref:2 | attr:name:Charlie |
+      | key:ref:3 | attr:name:Darius  |
+      | key:ref:4 | attr:name:Alex    |
+      | key:ref:5 | attr:name:Bob     |
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        $p has name $n;
+      """
+    Then answer size is: 0

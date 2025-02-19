@@ -1101,8 +1101,8 @@ Feature: TypeQL Delete Query
       friendship owns timespan;
       """
     Given transaction commits
-    Given connection open write transaction for database: typedb
 
+    Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert
@@ -2694,4 +2694,32 @@ Feature: TypeQL Delete Query
         $x label person;
       delete
         $x;
+      """
+
+
+  Scenario: deleting an anonymous variable errors
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      delete
+        $_ of $_;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $p isa person, has name "John";
+      delete
+        $_ of $p;
+      """
+    When transaction closes
+
+    When connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "anonymous"
+      """
+      insert
+        $n isa name "John";
+      delete
+        $n of $_;
       """
