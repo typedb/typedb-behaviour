@@ -1864,7 +1864,7 @@ Feature: TypeQL Delete Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "cannot own"
+    Then typeql write query; fails with a message containing: "Left type 'safe-person' across constraint 'has' is not compatible with right type 'corporate-email'"
       """
       match
         $p isa safe-person;
