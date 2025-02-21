@@ -115,7 +115,7 @@ Feature: TypeQL Query with Expressions
       insert
       $x isa name "Lisa";
       $y isa age 16;
-      $z isa person, has name $x, has age $y;
+      $z isa person, has $x, has $y;
       """
     Given transaction commits
 
@@ -140,7 +140,7 @@ Feature: TypeQL Query with Expressions
       insert
       $x isa name "Lisa";
       $y isa age 16;
-      $z isa person, has name $x, has age $y;
+      $z isa person, has $x, has $y;
       """
     Given transaction commits
 
@@ -592,7 +592,7 @@ Feature: TypeQL Query with Expressions
       insert
       $n isa name "Baby";
       $a isa age 20;
-      $p isa person, has name $n, has age $a;
+      $p isa person, has $n, has $a;
       """
     Given transaction commits
 

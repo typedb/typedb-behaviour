@@ -208,6 +208,17 @@ Feature: TypeQL Insert Query
       insert $x isa factory;
       """
 
+
+  Scenario: A single variable may not have multiple isa constraints in an insert stage
+    When typeql write query; fails with a message containing: "Found multiple insert statements for the variable"
+      """
+      insert
+      $x isa person;
+      $x isa person;
+      $x has ref 0;
+      """
+
+
   #######################
   # ATTRIBUTE OWNERSHIP #
   #######################
@@ -261,7 +272,8 @@ Feature: TypeQL Insert Query
     Given answer size is: 0
     When typeql write query
       """
-      insert $a isa age 25; $x isa person, has name "Wilhelmina", has age $a, has ref 0;
+      match let $a = 25;
+      insert $x isa person, has name "Wilhelmina", has age == $a, has ref 0;
       """
     Then transaction commits
 

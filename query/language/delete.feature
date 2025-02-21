@@ -505,9 +505,8 @@ Feature: TypeQL Delete Query
     """
     Then transaction commits
 
-    # We're not particular about this:
     Given connection open write transaction for database: typedb
-    When typeql write query; fails with a message containing: "Write execution failed due to a concept write error"
+    When typeql write query; fails with a message containing: "Left type 'internship' across constraint 'links' is not compatible with right type 'employment:employee'"
     """
     match
       $e isa employment, links (employee: $p);
@@ -538,7 +537,7 @@ Feature: TypeQL Delete Query
     When typeql write query
     """
     match
-      $e isa employment, links (employee: $p);
+      $e isa employment, links (intern: $p);
     delete
       links (intern: $p) of $e;
     """
@@ -882,6 +881,43 @@ Feature: TypeQL Delete Query
       """
 
 
+  Scenario: Matching & deleting a links constraint a supertype of the actual role-type labels does nothing.
+    # TODO: Eventually, stronger insert validation can catch this.
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+       """
+        define
+          relation internship sub employment, relates intern as employee;
+          entity student sub person, plays internship:intern;
+       """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When typeql write query
+       """
+       insert
+        $s2 isa student, has name "s2";
+        $i2 isa internship, links (intern: $s2), has ref 2;
+       """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $e isa internship, links (intern: $p);
+    """
+    Then answer size is: 1
+    When typeql write query; fails with a message containing: "Left type 'internship' across constraint 'links' is not compatible with right type 'employment:employee'"
+      """
+      match
+        $e isa employment, links (employee: $p);
+      delete
+        links (employee: $p) of $e;
+      """
+    Then transaction closes
+
+
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
 #  We only delete role player edges until the 'match' is no longer satisfied.
 #
@@ -1141,7 +1177,7 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: an error is thrown when deleting the ownership of a non-existent attribute
+  Scenario: an error is thrown when deleting the ownership of a non-existent attribute type
     Then typeql write query; fails
       """
       match
@@ -1828,7 +1864,7 @@ Feature: TypeQL Delete Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "cannot own"
+    Then typeql write query; fails with a message containing: "Left type 'safe-person' across constraint 'has' is not compatible with right type 'corporate-email'"
       """
       match
         $p isa safe-person;
@@ -2498,6 +2534,27 @@ Feature: TypeQL Delete Query
       | mode                         | deleted-name | deleted-email      |
       | alphabetically smaller value | Alice        | alice@typedb.com   |
       | alphabetically bigger value  | Charlie      | charlie@typedb.com |
+
+
+  Scenario: Non-existent ownerships are ignored by the delete.
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Tom";
+      $y isa person, has name "Jerry";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $x isa person; $n isa name;
+      delete
+        has $n of $x;
+      """
+    Then answer size is: 4
+
 
   ####################
   # COMPLEX PATTERNS #
