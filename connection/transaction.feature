@@ -320,17 +320,19 @@ Feature: Connection Transaction
     Then answer size is: 1
 
     When transaction rollbacks
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match entity $x;
       """
+    Then answer size is: 0
 
     When transaction commits
     When connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    When get answers of typeql read query
       """
       match entity $x;
       """
+    Then answer size is: 0
 
   Scenario: commit after a write transaction rollback does nothing
     Given connection create database: typedb
