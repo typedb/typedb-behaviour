@@ -34,7 +34,7 @@ Feature: TypeQL Match Clause
         relates employee @card(0..),
         relates employer @card(0..),
         owns ref @key;
-      attribute name value string;
+      attribute name @independent, value string;
       attribute age @independent, value integer;
       attribute ref value integer;
       attribute email value string;
