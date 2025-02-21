@@ -1918,6 +1918,15 @@ Feature: TypeQL Update Query
       | f         | p         | r                                    |
       | key:ref:0 | key:ref:1 | label:aged-friendship:younger-friend |
       | key:ref:0 | key:ref:1 | label:aged-friendship:older-friend   |
+    # We don't need instances since it's a compile-time check
+    Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
+      """
+      match
+        $f isa! friendship, has ref 0;
+        $p isa person, has ref 0;
+      update
+        $f links (friend: $p);
+      """
 
 
   Scenario Outline: Links for card(<card>) can be updated
