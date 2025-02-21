@@ -34,7 +34,7 @@ Feature: TypeQL Match Clause
         relates employee @card(0..),
         relates employer @card(0..),
         owns ref @key;
-      attribute name @independent, value string;
+      attribute name value string;
       attribute age @independent, value integer;
       attribute ref value integer;
       attribute email value string;
@@ -1918,6 +1918,11 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'contains' matches strings that contain the specified substring
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -1943,6 +1948,11 @@ Feature: TypeQL Match Clause
 
   # NOTE for implementation: we should be using Unicode full case folding for this, not just `.to_lowercase`
   Scenario: 'contains' performs a case-insensitive match
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -1967,6 +1977,11 @@ Feature: TypeQL Match Clause
 
 
   Scenario: 'like' matches strings that match the specified regex
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
