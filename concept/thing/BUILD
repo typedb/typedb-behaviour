@@ -9,7 +9,9 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 exports_files([
     "attribute.feature",
     "entity.feature",
-    "relation.feature"
+    "has.feature",
+    "links.feature",
+    "relation.feature",
 ])
 
 checkstyle_test(

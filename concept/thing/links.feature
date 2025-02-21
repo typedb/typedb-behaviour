@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Concept Role Players
+Feature: Concept Links
 
   Background:
     Given typedb starts
@@ -291,6 +291,89 @@ Feature: Concept Role Players
     Then entity $p get relations do not contain: $v
     When $v = relation(vacation) get instance with key(date): 2025-02-12
     Then relation $v does not exist
+
+  Scenario: Multiple related links can be unset before and after commits
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given relation(vacation) get role(employee) set annotation: @card(0..2)
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When $p = entity(person) create new instance with key(name): "p"
+    When $v = relation(vacation) create new instance with key(date): 2025-02-12
+    When relation $v add player for role(employee): $p
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $v = relation(vacation) get instance with key(date): 2025-02-12
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    When $q = entity(person) create new instance with key(name): "q"
+    When relation $v add player for role(employee): $q
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $q = entity(person) get instance with key(name): "q"
+    When $v = relation(vacation) get instance with key(date): 2025-02-12
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When relation $v remove player for role(employee): $p
+    Then relation $v get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $q = entity(person) get instance with key(name): "q"
+    When $v = relation(vacation) get instance with key(date): 2025-02-12
+    Then relation $v get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When relation $v add player for role(employee): $p
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When relation $v remove player for role(employee): $p
+    Then relation $v get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $q = entity(person) get instance with key(name): "q"
+    When $v = relation(vacation) get instance with key(date): 2025-02-12
+    Then relation $v get players for role(employee) do not contain: $p
+    Then entity $p get relations do not contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When relation $v add player for role(employee): $p
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    Then relation $v get players for role(employee) contain: $q
+    Then entity $q get relations contain: $v
+    When relation $v remove player for role(employee): $q
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    Then relation $v get players for role(employee) do not contain: $q
+    Then entity $q get relations do not contain: $v
+    When transaction commits
+    When connection open read transaction for database: typedb
+    When $p = entity(person) get instance with key(name): "p"
+    When $q = entity(person) get instance with key(name): "q"
+    When $v = relation(vacation) get instance with key(date): 2025-02-12
+    Then relation $v get players for role(employee) contain: $p
+    Then entity $p get relations contain: $v
+    Then relation $v get players for role(employee) do not contain: $q
+    Then entity $q get relations do not contain: $v
 
   Scenario: Links can be unset before and after commits (ordered version)
     When $p = entity(person) create new instance with key(name): "p"
