@@ -3236,6 +3236,47 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
+  Scenario: optional input variables from disjunctions are handled correctly
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $first isa person, has ref 0;
+        $second isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $first isa person, has ref 0; } or { $second isa person, has ref 1; };
+      """
+    Then uniquely identify answer concepts
+      | first     | second    |
+      | key:ref:0 | empty     |
+      | empty     | key:ref:1 |
+
+    When get answers of typeql read query
+      """
+      match { $first isa person, has ref 0; } or { $second isa person, has ref 1; };
+      match $first has ref $ref;
+      """
+    Then uniquely identify answer concepts
+      | first     | second    | ref        |
+      | key:ref:0 | empty     | attr:ref:0 |
+
+    When get answers of typeql read query
+      """
+      match { $first isa person, has ref 0; } or { $second isa person, has ref 1; }; $ref isa ref;
+      match $first has ref $fref; $fref == $ref;
+      """
+    Then uniquely identify answer concepts
+      | first     | second    | ref        | fref       |
+      | key:ref:0 | empty     | attr:ref:0 | attr:ref:0 |
+
+
   Scenario: negations can be applied to filtered variables
     Given transaction commits
 
