@@ -209,14 +209,61 @@ Feature: TypeQL Insert Query
       """
 
 
-  Scenario: A single variable may not have multiple isa constraints in an insert stage
-    When typeql write query; fails with a message containing: "Found multiple insert statements for the variable"
+  Scenario: A single variable may have multiple isa constraints in an insert stage, provided the types don't conflict
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity subperson sub person;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+      """
+      insert
+      $x isa person;
+      $x isa subperson;
+      $x has ref 0;
+      """
+    Then transaction closes
+    When connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+      """
+      insert
+      $x isa person, has ref $age;
+      $age isa age 10;
+      """
+    Then transaction closes
+
+    When connection open write transaction for database: typedb
+    When typeql write query
       """
       insert
       $x isa person;
       $x isa person;
       $x has ref 0;
       """
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $x isa person;
+    """
+    Then answer size is: 1
+    When typeql write query
+      """
+      insert
+      $x isa person, has ref $ref;
+      $ref isa ref 1;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $x isa person;
+    """
+    Then answer size is: 2
 
 
   #######################
