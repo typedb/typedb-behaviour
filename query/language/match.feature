@@ -3123,6 +3123,119 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
+  Scenario: disjunctions produce optional variables
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $t label person; } or { $x isa person; };
+      """
+    Then uniquely identify answer concepts
+      | t            | x     |
+      | label:person | empty |
+
+
+  Scenario: variables in disjunction branches are optionally available
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $first isa person, has ref 0;
+        $second isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $first isa person, has ref 0; } or { $second isa person, has ref 1; };
+      """
+    Then uniquely identify answer concepts
+      | first     | second    |
+      | key:ref:0 | empty     |
+      | empty     | key:ref:1 |
+
+    When get answers of typeql read query
+      """
+      match
+        $ref isa ref;
+        {
+          $first isa person, has $ref;
+          $ref == 0;
+        } or {
+          $second isa person, has $ref;
+          $ref == 1;
+        };
+      """
+    Then uniquely identify answer concepts
+      | ref        | first     | second    |
+      | attr:ref:0 | key:ref:0 | empty     |
+      | attr:ref:1 | empty     | key:ref:1 |
+
+
+  Scenario: disjunctions can emulate try blocks
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $person isa person, has ref 0;
+        $company isa company, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $ref isa ref;
+        { $person isa person, has $ref; } or { $ref == $ref; };
+      """
+    Then uniquely identify answer concepts
+      | ref        | person    |
+      | attr:ref:0 | key:ref:0 |
+      | attr:ref:0 | empty     |
+      | attr:ref:1 | empty     |
+
+    When get answers of typeql read query
+      """
+      match
+        $ref isa ref;
+        { $person isa person, has $ref; } or { not { $_ isa person, has $ref; }; };
+      """
+    Then uniquely identify answer concepts
+      | ref        | person    |
+      | attr:ref:0 | key:ref:0 |
+      | attr:ref:1 | empty     |
+
+
+  Scenario: a variable can be repeated across disjunction branches
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $first isa person, has ref 0;
+        $second isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $person isa person, has ref 0; } or { $person isa person, has ref 1; };
+      """
+    Then uniquely identify answer concepts
+      | person    |
+      | key:ref:0 |
+      | key:ref:1 |
+
+
   Scenario: negations can be applied to filtered variables
     Given transaction commits
 
