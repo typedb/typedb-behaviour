@@ -1918,12 +1918,11 @@ Feature: TypeQL Update Query
       | f         | p         | r                                    |
       | key:ref:0 | key:ref:1 | label:aged-friendship:younger-friend |
       | key:ref:0 | key:ref:1 | label:aged-friendship:older-friend   |
-
-    # This would not actually be inserted as it's specialised, but we should also see this error first
+    # We don't need instances since it's a compile-time check
     Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
       """
       match
-        $f isa aged-friendship, has ref 0;
+        $f isa! friendship, has ref 0;
         $p isa person, has ref 0;
       update
         $f links (friend: $p);
@@ -2121,7 +2120,7 @@ Feature: TypeQL Update Query
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
       """
       insert
         $p isa person, has ref 0;
@@ -2141,7 +2140,7 @@ Feature: TypeQL Update Query
     When transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
       """
       insert
         $p isa person, has ref 0;
@@ -2152,7 +2151,7 @@ Feature: TypeQL Update Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
       """
       insert
         $p isa person, has ref 0;
@@ -2190,7 +2189,7 @@ Feature: TypeQL Update Query
     When transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Constraint '@abstract' has been violated"
+    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
       """
       insert
         $p isa person, has ref 1;
