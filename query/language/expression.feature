@@ -31,12 +31,19 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
 
-  Scenario: A value variable must have exactly one assignment constraint in the same scope
+  Scenario: A value variable must have exactly one assignment constraint in the same branch of a pipeline
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert $p isa person, has name "Lisa", has age 10, has height 180;
+    """
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable v"
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         $v == $a;
         $v > $h;
       select
@@ -45,23 +52,67 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "assigned to multiple times"
+    Then typeql read query; fails with a message containing: "Variable 'v' cannot be assigned to multiple times in the same branch."
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         let $v = $a * 2;
-        let $v = $h / 2;
+        let $v = $h * 2;
       select
         $x, $v;
       """
+    Then typeql read query; fails with a message containing: "The variable 'v' cannot be assigned to, as it was already assigned in a the previous stage."
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        let $v = $a * 2;
+      match
+        let $v = $h * 2;
+      select
+        $x, $v;
+      """
+    Then typeql read query; fails with a message containing: "Variable 'v' cannot be assigned to multiple times in the same branch."
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+        { let $v = $a * 2; } or { let $v = 0; };
+        { let $v = $h * 2; } or { let $v = 1; };
+      select
+        $x, $v;
+      """
+    Then typeql read query; fails with a message containing: "The variable 'v' cannot be assigned to, as it was already assigned in a the previous stage"
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+        { let $v = $a * 2; } or { let $v = 1; };
+      match
+        { let $v = $h * 2; } or { let $v = 2; };
+      select
+        $x, $v;
+      """
+    Then get answers of typeql read query
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+        { let $v = $a * 2; } or { let $v = $h * 2; };
+      select
+        $v;
+      """
+    Then uniquely identify answer concepts
+      | v                 |
+      | value:integer:20  |
+      | value:integer:360 |
 
 
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "assigned to multiple times"
+    Then typeql read query; fails with a message containing: "Variable 'v' cannot be assigned to multiple times in the same branch."
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         let $v = $a + $h;
         not { $a > 10; not { let $v = 10; }; };
       select
@@ -71,12 +122,12 @@ Feature: TypeQL Query with Expressions
 
   @ignore
   # TODO: 3.x: The beam search unwraps a None because there are no valid plans.
-  Scenario: A value variable's assignment must be in the highest scope
+  Scenario: When no evaluation order can bind the variables in an expression, an error is returned.
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "TODO"
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         $v > $h;
         not { let $v = $a / 2;};
       select
@@ -89,7 +140,7 @@ Feature: TypeQL Query with Expressions
     Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         let $v = $a + $v;
       select
         $x, $v;
@@ -100,7 +151,7 @@ Feature: TypeQL Query with Expressions
     Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
     """
       match
-        $x isa person, has age $a, has age $h;
+        $x isa person, has age $a, has height $h;
         let $u = $a + $v;
         let $v = $h + $u;
       select
@@ -145,13 +196,49 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: " The variable 'y' cannot be declared as both a 'Value' and as a 'Attribute'"
+    Then typeql read query; fails with a message containing: "The variable 'y' cannot be declared as both a 'Value' and as a 'Attribute'"
       """
       match
         $z isa person, has age $y;
         let $y = $y;
       select $z, $y, $y;
       """
+
+
+  Scenario: All assignments of value variables must have the same value type
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $p isa person, has name "Lisa", has age 16;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'a' must have a single possible value type to be used in an expression"
+      """
+      match
+      $p isa person, has $a;
+      let $v = $a;
+      """
+    Then typeql read query; fails with a message containing: "All assignments of the variable 'v' must have the same value type."
+      """
+      match
+      $p isa person;
+      let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+      { $p has age $a; let $v = $a; } or
+      { $p has name $n; let $v = $n; };
+      """
+    Then typeql read query; fails with a message containing: "All assignments of the variable 'v' must have the same value type."
+      """
+      match
+      $p isa person, has age $a;
+      let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+      { let $v = $a * 2; } or
+      { let $v = $a / 2.0; };
+      """
+#  All assignments of the variable 'a' must have the same value type
+
 
 
   Scenario: Test unary minus sign
