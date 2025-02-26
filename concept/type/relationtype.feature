@@ -94,11 +94,12 @@ Feature: Concept Relation Type and Role Type
     Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
+    Then relation(marriage) delete role: spouse; fails
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When relation(marriage) delete role: spouse
     Then relation(marriage) get relates do not contain:
       | spouse |
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
     When transaction commits
     When connection open schema transaction for database: typedb
     When delete relation type: marriage
@@ -344,38 +345,33 @@ Feature: Concept Relation Type and Role Type
       | rel0b:role0b |
     Then relation(rel0b) get declared relates contain:
       | rel0b:role0b |
-    When relation(rel0b) delete role: role0b
-    Then relation(rel0b) get relates is empty
-    Then relation(rel0b) get relates do not contain:
-      | rel0b:role0b |
-    Then relation(rel0b) get declared relates is empty
-    Then transaction commits; fails
+    Then relation(rel0b) delete role: role0b; fails
 
-    When connection open schema transaction for database: typedb
     When create relation type: rel0c
-    When relation(rel0c) set annotation: @abstract
-    Then relation(rel0c) get relates is empty
-    Then relation(rel0c) get declared relates is empty
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
-    When create relation type: rel0c
-    When relation(rel0c) set annotation: @abstract
     When relation(rel0c) create role: role0c
-    When relation(rel0c) get role(role0c) set annotation: @abstract
-    Then relation(rel0c) get relates contain:
+    When relation(rel0b) set supertype: rel0c
+    Then relation(rel0b) get relates contain:
+      | rel0b:role0b |
       | rel0c:role0c |
-    Then relation(rel0c) get declared relates contain:
+    Then relation(rel0b) get declared relates contain:
+      | rel0b:role0b |
+    When relation(rel0b) delete role: role0b
+    Then relation(rel0b) get relates contain:
       | rel0c:role0c |
+    Then relation(rel0b) get declared relates is empty
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0c) get relates contain:
+    Then relation(rel0b) get relates contain:
       | rel0c:role0c |
-    Then relation(rel0c) get declared relates contain:
-      | rel0c:role0c |
-    When relation(rel0c) unset annotation: @abstract
-    Then transaction commits
+    Then relation(rel0b) get declared relates is empty
+    When create relation type: rel0d
+    Then relation(rel0d) get relates is empty
+    Then relation(rel0d) get declared relates is empty
+    When relation(rel0b) set supertype: rel0d
+    Then relation(rel0b) get relates is empty
+    Then relation(rel0b) get declared relates is empty
+    Then transaction commits; fails
 
   Scenario: Relation types cannot subtype itself
     When create relation type: marriage
@@ -997,12 +993,13 @@ Feature: Concept Relation Type and Role Type
 # @abstract
 ########################
 
-  Scenario: Abstract relation cannot be created without roles
+  Scenario: Abstract relation can be created without roles
     When create relation type: marriage
     When relation(marriage) set annotation: @abstract
-    When transaction commits; fails
+    When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(marriage) does not exist
+    Then relation(marriage) exists
+    Then relation(marriage) get relates is empty
 
   Scenario: Relation type can be set to abstract while role types remain concrete
     When create relation type: marriage
@@ -1058,14 +1055,17 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get constraints do not contain: @abstract
     Then relation(parentship) get role(child) get declared annotations do not contain: @abstract
 
-  Scenario: Relation types must have at least one role even if it's abstract
+  Scenario: Relation types can have zero role types if relation types are abstract
     When create relation type: connection
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create relation type: connection
     When relation(connection) set annotation: @abstract
-    When transaction commits; fails
+    When transaction commits
     When connection open schema transaction for database: typedb
+    Then relation(connection) unset annotation: @abstract; fails
+
+  Scenario: Abstract relation types cannot unset role types if their non-abstract subtypes do not have other role types
     When create relation type: rel00
     When relation(rel00) set annotation: @abstract
     When relation(rel00) create role: role00
@@ -1078,24 +1078,33 @@ Feature: Concept Relation Type and Role Type
     Then relation(rel1) get relates contain:
       | rel01:role01 |
     Then relation(rel1) get declared relates is empty
-    When relation(rel1) set supertype: rel00
+    When relation(rel01) set supertype: rel00
     Then relation(rel1) get relates contain:
       | rel00:role00 |
     Then relation(rel1) get declared relates is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(rel00) delete role: role00
-    Then relation(rel00) get relates is empty
-    Then relation(rel1) get relates is empty
-    Then relation(rel00) get relates do not contain:
+    Then relation(rel01) delete role: role01; fails
+    When relation(rel00) create role: role00
+    When relation(rel01) delete role: role01
+    Then relation(rel00) delete role: role00; fails
+    Then relation(rel1) get relates contain:
       | rel00:role00 |
-    Then relation(rel1) get relates do not contain:
+    Then relation(rel00) get relates contain:
       | rel00:role00 |
-    Then transaction commits; fails
+    Then relation(rel01) get relates contain:
+      | rel00:role00 |
+    When transaction commits
     When connection open schema transaction for database: typedb
-    When relation(rel1) unset supertype
-    Then relation(rel1) get relates is empty
-    Then transaction commits; fails
+    Then relation(rel1) get relates contain:
+      | rel00:role00 |
+    Then relation(rel00) get relates contain:
+      | rel00:role00 |
+    Then relation(rel01) get relates contain:
+      | rel00:role00 |
+    Then relation(rel1) unset supertype; fails
+    Then relation(rel01) unset supertype; fails
 
   Scenario: Relation type can reset @abstract annotation
     When create relation type: parentship
@@ -1644,10 +1653,11 @@ Feature: Concept Relation Type and Role Type
     Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
+    Then relation(marriage) delete role: spouse; fails
+    When relation(marriage) create role: husband
     When relation(marriage) delete role: spouse
     Then relation(marriage) get relates do not contain:
       | spouse |
-    When relation(marriage) create role: husband
     When relation(marriage) get role(husband) set ordering: ordered
     When relation(marriage) create role: wife
     When relation(marriage) get role(wife) set ordering: ordered
