@@ -237,8 +237,6 @@ Feature: TypeQL Query with Expressions
       { let $v = $a * 2; } or
       { let $v = $a / 2.0; };
       """
-#  All assignments of the variable 'a' must have the same value type
-
 
 
   Scenario: Test unary minus sign
