@@ -320,3 +320,26 @@ Feature: TypeQL Insert Query
       | attr:email:bob@email.com  |
       | attr:email:bob@typedb.com |
 
+
+  # TODO:
+  Scenario: Putting an ownership when a subtype is owned does nothing.
+
+
+  ####################
+  #  Put relations   #
+  ####################
+  # TODO:
+  Scenario: Match-put friendship
+
+
+  ####################
+  #  Validation      #
+  ####################
+  Scenario: Concepts in a put stage must either be an input or be insertable in the put stage.
+    Given connection open write transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Ensure the variable is available from a previous stage or is inserted in this stage"
+    """
+    put $p has age 10;
+    """
+    Given transaction closes
+
