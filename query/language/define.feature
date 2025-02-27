@@ -851,12 +851,21 @@ Feature: TypeQL Define Query
 #      | label:flight-attendant-employment |
 
 
-  Scenario: a relation type cannot be defined with no roleplayers even if it is marked as @abstract
+  Scenario: a relation type can be defined with no role players if it is @abstract
     When typeql schema query
       """
       define relation connection @abstract;
       """
-    Then transaction commits; fails
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match relation $x label connection;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | label:connection |
 
 
   Scenario: an abstract relation type can be defined with both abstract and concrete role types

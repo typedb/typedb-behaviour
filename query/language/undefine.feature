@@ -2305,7 +2305,7 @@ Feature: TypeQL Undefine Query
     Then answer size is: 0
 
 
-  Scenario: can undefine the same type's capabilities piece by piece in one query
+  Scenario: can undefine the same type's capabilities piece by piece in one query, with exceptions
     Given typeql schema query
       """
       define
@@ -2318,10 +2318,139 @@ Feature: TypeQL Undefine Query
     Then typeql schema query
       """
       undefine
+      fathership;
+      """
+    When get answers of typeql read query
+      """
+      match parentship relates $r;
+      """
+    Then uniquely identify answer concepts
+      | r                       |
+      | label:parentship:parent |
+      | label:parentship:child  |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      relates father from fathership;
+      fathership;
+      """
+    When get answers of typeql read query
+      """
+      match parentship relates $r;
+      """
+    Then uniquely identify answer concepts
+      | r                       |
+      | label:parentship:parent |
+      | label:parentship:child  |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @abstract from fathership;
+      fathership;
+      """
+    When get answers of typeql read query
+      """
+      match parentship relates $r;
+      """
+    Then uniquely identify answer concepts
+      | r                       |
+      | label:parentship:parent |
+      | label:parentship:child  |
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine
+      relates father from fathership;
+      """
+    When get answers of typeql read query
+      """
+      match fathership relates $r;
+      """
+    Then answer size is: 2
+    When typeql schema query
+      """
+      undefine
+      sub parentship from fathership;
+      """
+    When get answers of typeql read query
+      """
+      match fathership relates $r;
+      """
+    Then answer size is: 0
+    Then typeql schema query; fails with a message containing: "not have any role types related"
+      """
+      undefine
+      @abstract from fathership;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine
+      relates father from fathership;
+      """
+    When get answers of typeql read query
+      """
+      match fathership relates $r;
+      """
+    Then answer size is: 2
+    When typeql schema query
+      """
+      undefine
+      @abstract from fathership;
+      """
+    When get answers of typeql read query
+      """
+      match fathership relates $r;
+      """
+    Then answer size is: 2
+    Then typeql schema query; fails with a message containing: "not have any role types related"
+      """
+      undefine
+      sub parentship from fathership;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "not have any role types related"
+      """
+      undefine
+      relates father from fathership;
+      @abstract from fathership;
+      sub parentship from fathership;
+      fathership;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "not have any role types related"
+      """
+      undefine
+      as parent from fathership relates father;
+      relates father from fathership;
+      @abstract from fathership;
+      sub parentship from fathership;
+      fathership;
+      """
+    When transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
       as parent from fathership relates father;
       @card from fathership relates father;
       relates father from fathership;
-      @abstract from fathership;
+      # @abstract from fathership; # fathership does not have roles at this point. we may want to allow it or error...
       sub parentship from fathership;
       fathership;
       """
