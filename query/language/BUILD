@@ -16,6 +16,7 @@ files = [
     "modifiers.feature",
     "negation.feature",
     "pipelines.feature",
+    "put.feature",
     "redefine.feature",
     "reduce.feature",
     "undefine.feature",
