@@ -624,8 +624,8 @@ Feature: TypeQL Query with Expressions
       let $b = (6 * (5 ^ 3)) + 2;
     """
     Then uniquely identify answer concepts
-      | a                 | b                 |
-      | value:integer:752 | value:integer:752 |
+      | a                  | b                  |
+      | value:double:752.0 | value:double:752.0 |
 
 
   Scenario: Operations other than exponentiation are right-associative
@@ -658,15 +658,14 @@ Feature: TypeQL Query with Expressions
       let $c = 6 / (2 * 3);
     """
     Then uniquely identify answer concepts
-      | a               | b               | c               |
-      | value:integer:9 | value:integer:9 | value:integer:1 |
+      | a                | b                | c                |
+      | value:double:9.0 | value:double:9.0 | value:double:1.0 |
 
     Given get answers of typeql read query
     """
     match
       let $a = 5 * 4 % 3 * 2;
       let $b = ((5 * 4) % 3) * 2;
-      let $c = ((5 * 4) % (3 * 2);
     """
     Then uniquely identify answer concepts
       | a               | b               |
@@ -681,6 +680,6 @@ Feature: TypeQL Query with Expressions
       let $c = 2 ^ (2 ^ (2 ^ 2));
     """
     Then uniquely identify answer concepts
-      | a                   | b                   | c                   |
-      | value:integer:65536 | value:integer:256   | value:integer:65536 |
+      | a                  | b                  | c                  |
+      | value:double:65536 | value:double:256   | value:double:65536 |
 
