@@ -106,6 +106,24 @@ Feature: TypeQL Query with Expressions
       | value:integer:20  |
       | value:integer:360 |
 
+    Then get answers of typeql read query
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
+        { let $v = 12; } or {
+          let $v1 = $v;
+          { let $v = $a * 2; } or { let $v = $h * 2; };
+        };
+      select
+        $v;
+      """
+    Then uniquely identify answer concepts
+      | v                 |
+      | value:integer:12  |
+      | value:integer:20  |
+      | value:integer:360 |
+
 
   Scenario: A value variable must have exactly one assignment constraint recursively
     Given connection open read transaction for database: typedb
