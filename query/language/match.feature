@@ -1917,25 +1917,28 @@ Feature: TypeQL Match Clause
       | interval    | duration    | P1Y2M3DT4H5M6.789S       |
 
 
-   # TODO: 3.x: `like` / `contains`
-  @ignore
   Scenario: 'contains' matches strings that contain the specified substring
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
        """
        insert
-       $x "Seven Databases in Seven Weeks" isa name;
-       $y "Four Weddings and a Funeral" isa name;
-       $z "Fun Facts about Space" isa name;
+       $x isa name "Seven Databases in Seven Weeks";
+       $y isa name "Four Weddings and a Funeral";
+       $z isa name "Fun Facts about Space";
        """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
        """
-       match $x contains "Fun";
+       match $x isa name contains "Fun";
        """
     Then uniquely identify answer concepts
       | x                                     |
@@ -1943,26 +1946,29 @@ Feature: TypeQL Match Clause
       | attr:name:Fun Facts about Space       |
 
 
-  # TODO `like` / `contains`
   # NOTE for implementation: we should be using Unicode full case folding for this, not just `.to_lowercase`
-  @ignore
   Scenario: 'contains' performs a case-insensitive match
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
        """
        insert
-       $x "The Phantom of the Opera" isa name;
-       $y "Pirates of the Caribbean" isa name;
-       $z "Mr. Bean" isa name;
+       $x isa name "The Phantom of the Opera";
+       $y isa name "Pirates of the Caribbean";
+       $z isa name "Mr. Bean";
        """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
        """
-       match $x contains "Bean";
+       match $x isa name contains "Bean";
        """
     Then uniquely identify answer concepts
       | x                                  |
@@ -1970,30 +1976,71 @@ Feature: TypeQL Match Clause
       | attr:name:Mr. Bean                 |
 
 
-  # TODO: 3.x: `like` / `contains`
-  @ignore
   Scenario: 'like' matches strings that match the specified regex
+    Given typeql schema query
+    """
+    define
+    attribute name @independent, value string;
+    """
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
        """
        insert
-       $x "ABC123" isa name;
-       $y "123456" isa name;
-       $z "9" isa name;
+       $x isa name "ABC123";
+       $y isa name "123456";
+       $z isa name "9";
        """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
        """
-       match $x like "^[0-9]+$";
+       match $x isa name like "^[0-9]+$";
        """
     Then uniquely identify answer concepts
       | x                |
       | attr:name:123456 |
       | attr:name:9      |
+
+
+  Scenario: 'like' expects string literals as regex
+    Given transaction closes
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Expected a string literal as regex"
+    """
+    match
+    let $x = "alice@example.com";
+    $x like 12;
+    """
+    Then typeql read query; fails with a message containing: "Expected a string literal as regex"
+    """
+    match
+    let $x = "alice@example.com";
+    let $regex = "[a-z]+@[a-z]+\\.[a-z]+";
+    $x like $regex;
+    """
+    Then typeql read query; fails with a message containing: "The regular expression failed compilation: '[a-z+@[a-z]+\.[a-z]+'."
+    """
+    match
+    let $x = "alice@example.com";
+    $x like "[a-z+@[a-z]+\\.[a-z]+";
+    """
+    When get answers of typeql read query
+    """
+    match
+    let $x = "alice@example.com";
+    $x like "[a-z]+@[a-z]+\\.[a-z]+";
+    """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """
+    match
+    let $x = "alice@local";
+    $x like "[a-z]+@[a-z]+\\.[a-z]+";
+    """
+    Then answer size is: 0
 
 
    # TODO: 3.x: Do we need a more realistic IID for the attribute?
