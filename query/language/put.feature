@@ -469,6 +469,28 @@ Feature: TypeQL Put Query
       | cname            | pname           |
       | attr:name:typedb | attr:name:alice |
 
+    # Doing it again does not increase the answer count.
+    When get answers of typeql write query
+    """
+    match
+      $company isa company, has name "typedb";
+      $person isa person, has name "alice";
+    put
+      $emp isa employment, links (employer: $company, employee: $person);
+    """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """
+    match
+      $emp isa employment, links (employer: $company, employee: $person);
+      $company has name $cname;
+      $person has name $pname;
+    """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | cname            | pname           |
+      | attr:name:typedb | attr:name:alice |
+
 
   ####################
   #  Validation      #
