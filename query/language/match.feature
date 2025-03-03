@@ -784,8 +784,8 @@ Feature: TypeQL Match Clause
         select $lt, $rt;
        """
     Then uniquely identify answer concepts
-      | lt        | rt            |
-      | label:l0  | label:l0:r0   |
+      | lt       | rt          |
+      | label:l0 | label:l0:r0 |
 
     When get answers of typeql read query
        """
@@ -799,8 +799,8 @@ Feature: TypeQL Match Clause
         select $lt, $rt;
        """
     Then uniquely identify answer concepts
-      | lt        | rt            |
-      | label:l0  | label:l0:r0   |
+      | lt       | rt          |
+      | label:l0 | label:l0:r0 |
 
 
   Scenario: Match queries with unsatisfiable schema constraints pass type-inference but return no answers
@@ -1064,6 +1064,38 @@ Feature: TypeQL Match Clause
   #############
   # RELATIONS #
   #############
+
+  Scenario: relation types without role types can be matched
+    Given typeql schema query
+      """
+      define relation loneliness;
+      """
+    When get answers of typeql read query
+      """
+      match $r label loneliness;
+      """
+    Then uniquely identify answer concepts
+      | r                |
+      | label:loneliness |
+    When get answers of typeql read query
+      """
+      match relation $r;
+      """
+    Then uniquely identify answer concepts
+      | r                |
+      | label:friendship |
+      | label:employment |
+      | label:loneliness |
+    When get answers of typeql read query
+      """
+      match not {$_ isa $r;}; relation $r;
+      """
+    Then uniquely identify answer concepts
+      | r                |
+      | label:friendship |
+      | label:employment |
+      | label:loneliness |
+
 
   Scenario: a relation is matchable from role players without specifying relation type
     Given transaction commits
@@ -3224,8 +3256,8 @@ Feature: TypeQL Match Clause
     Then answer size is: 2
 
 
-   Scenario: variable role types with relations playing roles
-     Given typeql schema query
+  Scenario: variable role types with relations playing roles
+    Given typeql schema query
        """
        define
          relation parent relates nested, owns id;
@@ -3233,10 +3265,10 @@ Feature: TypeQL Match Clause
          entity player owns id, plays nested:player;
          attribute id value string;
        """
-     Given transaction commits
+    Given transaction commits
 
-     Given connection open write transaction for database: typedb
-     Given typeql write query
+    Given connection open write transaction for database: typedb
+    Given typeql write query
        """
        insert
          $i1 isa id "i1";
@@ -3248,11 +3280,11 @@ Feature: TypeQL Match Clause
          $par1 isa parent, links (nested: $n1), has id $i1;
          $par2 isa parent, links (nested: $n2), has id $i2;
        """
-     Given transaction commits
-     Given connection open read transaction for database: typedb
+    Given transaction commits
+    Given connection open read transaction for database: typedb
 
      # Force traversal of role edges in each direction: See typedb/typedb#6925
-     When get answers of typeql read query
+    When get answers of typeql read query
        """
        match
          let $boundId1 = "i1";
@@ -3263,9 +3295,9 @@ Feature: TypeQL Match Clause
          not { $role-nested sub! $r1; };
          not { $role-player sub! $r2; };
        """
-     Then answer size is: 1
+    Then answer size is: 1
 
-     When get answers of typeql read query
+    When get answers of typeql read query
        """
        match
          let $boundId1 = "i1";
@@ -3278,7 +3310,7 @@ Feature: TypeQL Match Clause
          not { $role-nested sub! $r1; };
          not { $role-player sub! $r2; };
        """
-     Then answer size is: 1
+    Then answer size is: 1
 
 
   #######################

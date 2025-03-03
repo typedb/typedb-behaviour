@@ -94,11 +94,17 @@ Feature: Concept Relation Type and Role Type
     Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(marriage) delete role: spouse
+    Then relation(marriage) get relates is empty
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(marriage) create role: husband
+    When relation(marriage) create role: wife
     When relation(marriage) delete role: spouse
     Then relation(marriage) get relates do not contain:
       | spouse |
-    When relation(marriage) create role: husband
-    When relation(marriage) create role: wife
     When transaction commits
     When connection open schema transaction for database: typedb
     When delete relation type: marriage
@@ -345,37 +351,34 @@ Feature: Concept Relation Type and Role Type
     Then relation(rel0b) get declared relates contain:
       | rel0b:role0b |
     When relation(rel0b) delete role: role0b
-    Then relation(rel0b) get relates is empty
-    Then relation(rel0b) get relates do not contain:
-      | rel0b:role0b |
-    Then relation(rel0b) get declared relates is empty
     Then transaction commits; fails
 
     When connection open schema transaction for database: typedb
     When create relation type: rel0c
-    When relation(rel0c) set annotation: @abstract
-    Then relation(rel0c) get relates is empty
-    Then relation(rel0c) get declared relates is empty
-    Then transaction commits; fails
-
-    When connection open schema transaction for database: typedb
-    When create relation type: rel0c
-    When relation(rel0c) set annotation: @abstract
     When relation(rel0c) create role: role0c
-    When relation(rel0c) get role(role0c) set annotation: @abstract
-    Then relation(rel0c) get relates contain:
+    When relation(rel0b) set supertype: rel0c
+    Then relation(rel0b) get relates contain:
+      | rel0b:role0b |
       | rel0c:role0c |
-    Then relation(rel0c) get declared relates contain:
+    Then relation(rel0b) get declared relates contain:
+      | rel0b:role0b |
+    When relation(rel0b) delete role: role0b
+    Then relation(rel0b) get relates contain:
       | rel0c:role0c |
+    Then relation(rel0b) get declared relates is empty
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then relation(rel0c) get relates contain:
+    Then relation(rel0b) get relates contain:
       | rel0c:role0c |
-    Then relation(rel0c) get declared relates contain:
-      | rel0c:role0c |
-    When relation(rel0c) unset annotation: @abstract
-    Then transaction commits
+    Then relation(rel0b) get declared relates is empty
+    When create relation type: rel0d
+    Then relation(rel0d) get relates is empty
+    Then relation(rel0d) get declared relates is empty
+    When relation(rel0b) set supertype: rel0d
+    Then relation(rel0b) get relates is empty
+    Then relation(rel0b) get declared relates is empty
+    Then transaction commits; fails
 
   Scenario: Relation types cannot subtype itself
     When create relation type: marriage
@@ -789,6 +792,273 @@ Feature: Concept Relation Type and Role Type
     Then relation(family) get relates(parentship:parent) is implicit: false
     Then relation(family) get constraints for related role(parentship:parent) do not contain: @abstract
 
+  Scenario: Relation type specialisation is preserved if the role type is specialised at least once after specialisation unsets
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: specific-parentship
+    When relation(specific-parentship) set supertype: parentship
+    When relation(specific-parentship) create role: father
+    When relation(specific-parentship) get role(father) set specialise: parent
+    When relation(specific-parentship) create role: mother
+    When relation(specific-parentship) get role(mother) set specialise: parent
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When relation(specific-parentship) get role(father) unset specialise
+    Then relation(specific-parentship) get role(father) get supertype does not exist
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype does not exist
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When relation(specific-parentship) get role(mother) unset specialise
+    Then relation(specific-parentship) get role(father) get supertype does not exist
+    Then relation(specific-parentship) get role(mother) get supertype does not exist
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype does not exist
+    Then relation(specific-parentship) get role(mother) get supertype does not exist
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+
+  Scenario: Relation type specialisation is preserved if the role type is specialised at least once after specialisation changes
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: another-parent
+    When create relation type: specific-parentship
+    When relation(specific-parentship) set supertype: parentship
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: false
+    When relation(specific-parentship) create role: father
+    When relation(specific-parentship) get role(father) set specialise: parent
+    When relation(specific-parentship) create role: mother
+    When relation(specific-parentship) get role(mother) set specialise: parent
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: false
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: false
+    When relation(specific-parentship) get role(father) set specialise: another-parent
+    Then relation(specific-parentship) get role(father) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: true
+    When relation(specific-parentship) get role(mother) set specialise: another-parent
+    Then relation(specific-parentship) get role(father) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: true
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:another-parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+    Then relation(specific-parentship) get relates(parentship:another-parent) is implicit: true
+
+  Scenario: Relation type specialisation is preserved if the role type is specialised at least once after subrole type deletion
+    When create relation type: parentship
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) create role: parent
+    When create relation type: specific-parentship
+    When relation(specific-parentship) set annotation: @abstract
+    When relation(specific-parentship) set supertype: parentship
+    When relation(specific-parentship) create role: father
+    When relation(specific-parentship) get role(father) set specialise: parent
+    When relation(specific-parentship) create role: mother
+    When relation(specific-parentship) get role(mother) set specialise: parent
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) get supertype: parentship:parent
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When relation(specific-parentship) delete role: father
+    Then relation(specific-parentship) get role(father) does not exist
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(specific-parentship) get role(father) does not exist
+    Then relation(specific-parentship) get role(mother) get supertype: parentship:parent
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: true
+    When relation(specific-parentship) delete role: mother
+    Then relation(specific-parentship) get role(father) does not exist
+    Then relation(specific-parentship) get role(mother) does not exist
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(specific-parentship) get role(father) does not exist
+    Then relation(specific-parentship) get role(mother) does not exist
+    Then relation(specific-parentship) get relates(parentship:parent) is implicit: false
+
+  Scenario: Relation type specialisation is not preserved if the role type is specialised only by other relation types after specialisation unsets
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set specialise: parent
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set specialise: parent
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When relation(fathership) get role(father) unset specialise
+    Then relation(fathership) get role(father) get supertype does not exist
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype does not exist
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When relation(mothership) get role(mother) unset specialise
+    Then relation(fathership) get role(father) get supertype does not exist
+    Then relation(mothership) get role(mother) get supertype does not exist
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype does not exist
+    Then relation(mothership) get role(mother) get supertype does not exist
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+
+  Scenario: Relation type specialisation is not preserved if the role type is specialised only by other relation types after specialisation changes
+    When create relation type: parentship
+    When relation(parentship) create role: parent
+    When relation(parentship) create role: another-parent
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set specialise: parent
+    When create relation type: mothership
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set specialise: parent
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: false
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: false
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: false
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: false
+    When relation(fathership) get role(father) set specialise: another-parent
+    Then relation(fathership) get role(father) get supertype: parentship:another-parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: true
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: false
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:another-parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: true
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: false
+    When relation(mothership) get role(mother) set specialise: another-parent
+    Then relation(fathership) get role(father) get supertype: parentship:another-parent
+    Then relation(mothership) get role(mother) get supertype: parentship:another-parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: true
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: true
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:another-parent
+    Then relation(mothership) get role(mother) get supertype: parentship:another-parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+    Then relation(fathership) get relates(parentship:another-parent) is implicit: true
+    Then relation(mothership) get relates(parentship:another-parent) is implicit: true
+
+  Scenario: Relation type specialisation is not preserved if the role type is specialised only by other relation types after subrole type deletion
+    When create relation type: parentship
+    When relation(parentship) set annotation: @abstract
+    When relation(parentship) create role: parent
+    When create relation type: fathership
+    When relation(fathership) set annotation: @abstract
+    When relation(fathership) set supertype: parentship
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set specialise: parent
+    When create relation type: mothership
+    When relation(mothership) set annotation: @abstract
+    When relation(mothership) set supertype: parentship
+    When relation(mothership) create role: mother
+    When relation(mothership) get role(mother) set specialise: parent
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) get supertype: parentship:parent
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: true
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When relation(fathership) delete role: father
+    Then relation(fathership) get role(father) does not exist
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(fathership) get role(father) does not exist
+    Then relation(mothership) get role(mother) get supertype: parentship:parent
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: true
+    When relation(mothership) delete role: mother
+    Then relation(fathership) get role(father) does not exist
+    Then relation(mothership) get role(mother) does not exist
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then relation(fathership) get role(father) does not exist
+    Then relation(mothership) get role(mother) does not exist
+    Then relation(fathership) get relates(parentship:parent) is implicit: false
+    Then relation(mothership) get relates(parentship:parent) is implicit: false
+
 ########################
 # @annotations common
 ########################
@@ -997,12 +1267,13 @@ Feature: Concept Relation Type and Role Type
 # @abstract
 ########################
 
-  Scenario: Abstract relation cannot be created without roles
+  Scenario: Abstract relation can be created without roles
     When create relation type: marriage
     When relation(marriage) set annotation: @abstract
-    When transaction commits; fails
+    When transaction commits
     When connection open read transaction for database: typedb
-    Then relation(marriage) does not exist
+    Then relation(marriage) exists
+    Then relation(marriage) get relates is empty
 
   Scenario: Relation type can be set to abstract while role types remain concrete
     When create relation type: marriage
@@ -1058,14 +1329,17 @@ Feature: Concept Relation Type and Role Type
     Then relation(parentship) get role(child) get constraints do not contain: @abstract
     Then relation(parentship) get role(child) get declared annotations do not contain: @abstract
 
-  Scenario: Relation types must have at least one role even if it's abstract
+  Scenario: Relation types can have zero role types if relation types are abstract
     When create relation type: connection
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
     When create relation type: connection
     When relation(connection) set annotation: @abstract
-    When transaction commits; fails
+    When transaction commits
     When connection open schema transaction for database: typedb
+    Then relation(connection) unset annotation: @abstract; fails
+
+  Scenario: Abstract relation types cannot unset role types if their non-abstract subtypes do not have other role types
     When create relation type: rel00
     When relation(rel00) set annotation: @abstract
     When relation(rel00) create role: role00
@@ -1078,24 +1352,37 @@ Feature: Concept Relation Type and Role Type
     Then relation(rel1) get relates contain:
       | rel01:role01 |
     Then relation(rel1) get declared relates is empty
-    When relation(rel1) set supertype: rel00
+    When relation(rel01) set supertype: rel00
     Then relation(rel1) get relates contain:
       | rel00:role00 |
     Then relation(rel1) get declared relates is empty
     When transaction commits
     When connection open schema transaction for database: typedb
     When relation(rel00) delete role: role00
-    Then relation(rel00) get relates is empty
-    Then relation(rel1) get relates is empty
-    Then relation(rel00) get relates do not contain:
-      | rel00:role00 |
-    Then relation(rel1) get relates do not contain:
-      | rel00:role00 |
+    When relation(rel01) delete role: role01
     Then transaction commits; fails
     When connection open schema transaction for database: typedb
-    When relation(rel1) unset supertype
-    Then relation(rel1) get relates is empty
+    When relation(rel01) delete role: role01
+    When relation(rel00) delete role: role00
     Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(rel01) delete role: role01
+    Then relation(rel1) get relates contain:
+      | rel00:role00 |
+    Then relation(rel00) get relates contain:
+      | rel00:role00 |
+    Then relation(rel01) get relates contain:
+      | rel00:role00 |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then relation(rel1) get relates contain:
+      | rel00:role00 |
+    Then relation(rel00) get relates contain:
+      | rel00:role00 |
+    Then relation(rel01) get relates contain:
+      | rel00:role00 |
+    Then relation(rel1) unset supertype; fails
+    Then relation(rel01) unset supertype; fails
 
   Scenario: Relation type can reset @abstract annotation
     When create relation type: parentship
@@ -1513,6 +1800,74 @@ Feature: Concept Relation Type and Role Type
     When connection open schema transaction for database: typedb
     Then relation(rel00) delete role: role00; fails
 
+  Scenario: Deleting a relation type also deletes its declared role types
+    When create relation type: parentship
+    When create relation type: fathership
+    When relation(fathership) set supertype: parentship
+    When relation(parentship) create role: parent
+    When relation(fathership) create role: father
+    When relation(fathership) get role(father) set specialise: parent
+    Then get role types contain:
+      | parentship:parent |
+      | fathership:father |
+    Then get role types do not contain:
+      | fathership:parent |
+    Then relation(fathership) get declared relates do not contain:
+      | fathership:parent |
+    Then relation(fathership) get declared relates contain:
+      | fathership:father |
+      | parentship:parent |
+    Then relation(fathership) get explicit declared relates do not contain:
+      | parentship:parent |
+      | fathership:parent |
+    Then relation(fathership) get explicit declared relates contain:
+      | fathership:father |
+    Then relation(parentship) get explicit declared relates do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    Then get role types contain:
+      | parentship:parent |
+      | fathership:father |
+    Then get role types do not contain:
+      | fathership:parent |
+    Then relation(fathership) get explicit declared relates do not contain:
+      | parentship:parent |
+      | fathership:parent |
+    Then relation(fathership) get explicit declared relates contain:
+      | fathership:father |
+    Then relation(parentship) get explicit declared relates do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates contain:
+      | parentship:parent |
+    When delete relation type: fathership
+    Then get role types contain:
+      | parentship:parent |
+    Then get role types do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates contain:
+      | parentship:parent |
+    When transaction commits
+    When connection open read transaction for database: typedb
+    Then get role types contain:
+      | parentship:parent |
+    Then get role types do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates do not contain:
+      | fathership:father |
+      | fathership:parent |
+    Then relation(parentship) get explicit declared relates contain:
+      | parentship:parent |
+
 ########################
 # relates (roles) lists
 ########################
@@ -1644,10 +1999,18 @@ Feature: Concept Relation Type and Role Type
     Then get role types do not contain:
       | parentship:parent |
       | parentship:child  |
+    When transaction commits
+    When connection open schema transaction for database: typedb
+    When relation(marriage) delete role: spouse
+    Then get role types do not contain:
+      | marriage:spouse |
+    Then relation(marriage) get relates is empty
+    Then transaction commits; fails
+    When connection open schema transaction for database: typedb
+    When relation(marriage) create role: husband
     When relation(marriage) delete role: spouse
     Then relation(marriage) get relates do not contain:
       | spouse |
-    When relation(marriage) create role: husband
     When relation(marriage) get role(husband) set ordering: ordered
     When relation(marriage) create role: wife
     When relation(marriage) get role(wife) set ordering: ordered

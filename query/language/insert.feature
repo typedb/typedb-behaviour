@@ -1125,6 +1125,112 @@ Parker";
     """
     Then transaction commits
 
+  Scenario: relations of relation types without role types can be inserted, but cannot be committed
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation loneliness, owns ref @key;
+      """
+    When typeql write query
+      """
+      insert $r isa loneliness, has ref 1;
+      """
+    When get answers of typeql read query
+      """
+      match $r isa loneliness;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match $r isa $rt; relation $rt;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+    Then transaction commits; fails with a message containing: "at least one role"
+
+  Scenario: relations of relation types without role types can be inserted, then updated to have role players
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define relation loneliness, owns ref @key;
+      """
+    When typeql write query
+      """
+      insert
+      $r1 isa loneliness, has ref 1;
+      $r2 isa loneliness, has ref 2;
+      """
+    When get answers of typeql read query
+      """
+      match $r isa loneliness;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+      | key:ref:2 |
+    When get answers of typeql read query
+      """
+      match $r isa $rt; relation $rt;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+      | key:ref:2 |
+
+    When typeql schema query
+      """
+      define
+      loneliness relates the-only-player;
+      person plays loneliness:the-only-player;
+      """
+    When typeql write query
+      """
+      match
+      $r2 isa loneliness, has ref 2;
+      insert
+      $p isa person, has ref 2;
+      $r2 links ($p);
+      """
+    When get answers of typeql read query
+      """
+      match $r isa loneliness;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+      | key:ref:2 |
+    When get answers of typeql read query
+      """
+      match $r isa $rt; relation $rt;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:1 |
+      | key:ref:2 |
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r isa loneliness;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:2 |
+    When get answers of typeql read query
+      """
+      match $r isa $rt; relation $rt;
+      """
+    Then uniquely identify answer concepts
+      | r         |
+      | key:ref:2 |
 
   #######################
   # ATTRIBUTE INSERTION #
