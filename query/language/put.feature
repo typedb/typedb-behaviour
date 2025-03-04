@@ -258,6 +258,50 @@ Feature: TypeQL Put Query
     Then answer size is: 2
 
 
+  Scenario: A match-put can be used to create an entity to own an existing attribute
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute ref value integer;
+      person owns ref @key @independent;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $r0 isa ref 0;
+        $r1 isa ref 1;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql read query
+    """
+    match $p isa person;
+    """
+    Then answer size is: 0
+    When typeql write query
+    """
+    match $ref isa ref;
+    put $p isa person, has ref $ref;
+    """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+    When typeql read query
+    """
+    match $p isa person;
+    """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+      | key:ref:1 |
+
+
+
   Scenario: If the entire pattern does not match, put will insert the whole pattern. To insert a partial pattern, pipeline puts.
     Given connection open write transaction for database: typedb
     When typeql write query
@@ -360,9 +404,48 @@ Feature: TypeQL Put Query
     """ match $p isa person, has name "bob"; """
     Then answer size is: 2
 
+  Scenario: Putting an ownership when a subtype is already owned does nothing.
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute first-name sub name;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+    """
+    insert
+      $a isa person, has first-name "alice";
+      $b isa person, has name "bob";
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+    """ match $p isa person, has name "alice"; """
+    Then answer size is: 1
+    When get answers of typeql write query
+    """ put $p isa person, has name "alice"; """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """ match $p isa person, has name "alice"; """
+    Then answer size is: 1
+
+    # bob owns name. 'put' with a first-name "Bob" creates a new entity & ownership.
+    When get answers of typeql read query
+    """ match $p isa person, has name "bob"; """
+    Then answer size is: 1
+    When get answers of typeql write query
+    """ put $p isa person, has first-name "bob"; """
+    Then answer size is: 1
+    When get answers of typeql read query
+    """ match $p isa person, has name "bob"; """
+    Then answer size is: 2
+
 
   Scenario: Trying to put an ownership of an abstract attribute fails even if an ownership of a concrete-subtype is available.
-    # TODO: Add test for owning subtypes when we allow non-abstract super-attributes?
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
