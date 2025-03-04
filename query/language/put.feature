@@ -263,8 +263,8 @@ Feature: TypeQL Put Query
     When typeql schema query
       """
       define
-      attribute ref value integer;
-      person owns ref @key @independent;
+      attribute ref  @independent, value integer;
+      person owns ref @key;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -277,26 +277,26 @@ Feature: TypeQL Put Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    When typeql read query
+    When get answers of typeql read query
     """
     match $p isa person;
     """
     Then answer size is: 0
-    When typeql write query
+    When get answers of typeql write query
     """
     match $ref isa ref;
-    put $p isa person, has ref $ref;
+    put $p isa person, has $ref;
     """
     Then uniquely identify answer concepts
-      | x         |
+      | p         |
       | key:ref:0 |
       | key:ref:1 |
-    When typeql read query
+    When get answers of typeql read query
     """
     match $p isa person;
     """
     Then uniquely identify answer concepts
-      | x         |
+      | p         |
       | key:ref:0 |
       | key:ref:1 |
 
@@ -309,7 +309,6 @@ Feature: TypeQL Put Query
     insert $p2 isa person, has name "bob", has email "bob@email.com";
     """
     Given transaction commits
-
 
     Given connection open write transaction for database: typedb
     # Bad pattern with alice
@@ -363,7 +362,6 @@ Feature: TypeQL Put Query
 
 
   Scenario: Putting an ownership when a subtype already owns the attribute does nothing.
-    # TODO: Add test for owning subtypes when we allow non-abstract super-attributes?
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
@@ -410,6 +408,7 @@ Feature: TypeQL Put Query
       """
       define
       attribute first-name sub name;
+      person owns first-name;
       """
     Given transaction commits
 
@@ -578,11 +577,33 @@ Feature: TypeQL Put Query
   ####################
   #  Validation      #
   ####################
+
   Scenario: Concepts in a put stage must either be an input or be insertable in the put stage.
     Given connection open write transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Ensure the variable is available from a previous stage or is inserted in this stage"
+    Then typeql write query; fails with a message containing: "Ensure the variable is available from a previous stage or is inserted in this stage"
     """
     put $p has age 10;
     """
     Given transaction closes
+
+  Scenario: Put stages may only contain thing statements
+    Given connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+    """
+    put person owns name;
+    """
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; parsing fails
+    """
+    put
+      let $age = 10;
+      $p isa person, has age $age;
+    """
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "Illegal statement 'expression' provided for a put stage. Only 'has', 'links' and 'isa' constraints are allowed."
+    """
+    put $p isa person, has age (10 + 5);
+    """
 
