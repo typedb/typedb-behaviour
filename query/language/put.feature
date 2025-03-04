@@ -301,7 +301,6 @@ Feature: TypeQL Put Query
       | key:ref:1 |
 
 
-
   Scenario: If the entire pattern does not match, put will insert the whole pattern. To insert a partial pattern, pipeline puts.
     Given connection open write transaction for database: typedb
     When typeql write query
@@ -403,6 +402,7 @@ Feature: TypeQL Put Query
     When get answers of typeql read query
     """ match $p isa person, has name "bob"; """
     Then answer size is: 2
+
 
   Scenario: Putting an ownership when a subtype is already owned does nothing.
     Given connection open schema transaction for database: typedb
