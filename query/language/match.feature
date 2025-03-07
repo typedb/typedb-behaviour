@@ -3191,6 +3191,14 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
+      match $person isa person, has $ref;
+      """
+    Then uniquely identify answer concepts
+      | ref        | person    |
+      | attr:ref:0 | key:ref:0 |
+
+    When get answers of typeql read query
+      """
       match
         $ref isa ref;
         { $person isa person, has $ref; } or { $ref == $ref; };
@@ -3213,7 +3221,7 @@ Feature: TypeQL Match Clause
       | attr:ref:1 | empty     |
 
 
-  Scenario: a variable can be repeated across disjunction branches
+  Scenario: a variable can be reused across disjunction branches
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -3236,6 +3244,89 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
+  Scenario: chaining optionally producing disjunctions produces expected results
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person; $y isa person; not { $x is $y; };
+      """
+    Then uniquely identify answer concepts
+      | x         | y         |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:1 | key:ref:0 |
+
+    When get answers of typeql read query
+      """
+      match $x isa person; $y isa person; not { $x is $y; };
+      match { $x has ref $ref; } or { $x isa person; };
+      """
+    Then uniquely identify answer concepts
+      | x         | y         | ref        |
+      | key:ref:0 | key:ref:1 | attr:ref:0 |
+      | key:ref:1 | key:ref:0 | attr:ref:1 |
+      | key:ref:0 | key:ref:1 | empty      |
+      | key:ref:1 | key:ref:0 | empty      |
+
+    When get answers of typeql read query
+      """
+      match $x isa person; $y isa person; not { $x is $y; };
+      match
+          { $x has ref $ref; } or { $x isa person; };
+          { $y has ref $ref; } or { $y isa person; };
+      """
+    Then uniquely identify answer concepts
+      | x         | y         | ref        |
+      | key:ref:0 | key:ref:1 | attr:ref:0 |
+      | key:ref:1 | key:ref:0 | attr:ref:1 |
+      | key:ref:0 | key:ref:1 | attr:ref:1 |
+      | key:ref:1 | key:ref:0 | attr:ref:0 |
+      | key:ref:0 | key:ref:1 | empty      |
+      | key:ref:1 | key:ref:0 | empty      |
+
+
+  Scenario: disjunctions can emulate try blocks
+    Given typeql schema query
+      """
+      define
+        entity specialist sub person;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa specialist, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      with fun f() -> { person }: match $x isa person, has ref $_; return { $x };
+      with fun g($x: person) -> { ref }: match $x has ref $ref; return { $ref };
+      match
+        $x isa specialist;
+        { let $x in f(); } or { let $y in g($x); };
+      """
+    Then uniquely identify answer concepts
+      | x         | y          |
+      | key:ref:1 | empty      |
+      | key:ref:1 | attr:ref:1 |
+
+
   Scenario: optional input variables from disjunctions are handled correctly
     Given transaction commits
 
@@ -3249,6 +3340,15 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $first isa person, has ref $ref; } or { $second isa person, has ref $ref; }; $ref == 1;
+      """
+    Then uniquely identify answer concepts
+      | first     | second    | ref        |
+      | key:ref:1 | empty     | attr:ref:1 |
+      | empty     | key:ref:1 | attr:ref:1 |
+
     When get answers of typeql read query
       """
       match { $first isa person, has ref 0; } or { $second isa person, has ref 1; };
@@ -3270,12 +3370,51 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match { $first isa person, has ref 0; } or { $second isa person, has ref 1; }; $ref isa ref;
-      match $first has ref $fref; $fref == $ref;
+      match $first has $ref;
       """
     Then uniquely identify answer concepts
-      | first     | second    | ref        | fref       |
-      | key:ref:0 | empty     | attr:ref:0 | attr:ref:0 |
+      | first     | second    | ref        |
+      | key:ref:0 | empty     | attr:ref:0 |
 
+
+  Scenario: a disjunction that both binds and consumes a variable can be planned
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+      """
+      with fun hath($x:person) -> name: match $x has name $name; return first $name;
+      match $x has name $a; { let $b = $a; } or { let $a = hath($x); };
+      """
+      
+
+  Scenario: disjunctions don't interfere with correctness
+    Given transaction commits
+
+    # NOTE: schema txn forces statistics update
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $_ isa person,
+          has ref 0,
+          has name "A", has name "B", has name "C", has name "D", has name "E",
+          has name "F", has name "G", has name "H", has name "I", has name "J",
+          has name "K", has name "L", has name "M", has name "N", has name "O",
+          has name "P", has name "Q", has name "R", has name "S", has name "T",
+          has name "U", has name "V", has name "W", has name "X", has name "Y",
+          has name "Z",
+          ;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $_ isa person, has $ref; { $ref isa ref; $ref == 0; } or { $_ isa ref; };
+      """
+    Then answer size is: 27
+      
 
   Scenario: negations can be applied to filtered variables
     Given transaction commits
