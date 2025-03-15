@@ -948,7 +948,7 @@ Feature: TypeQL Delete Query
       insert
       $x isa person, has name "Cook";
       $y isa person, has name "Joshua";
-      $r isa ship-crew (captain: $x, chef: $y, chef: $y), has ref 0;
+      $r isa ship-crew (captain: $x, chef: $y) has ref 0;
       """
     Given transaction commits
 
