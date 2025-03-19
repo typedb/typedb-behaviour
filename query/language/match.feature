@@ -3147,15 +3147,27 @@ Feature: TypeQL Match Clause
 
 
   Scenario: a disjunction that both binds and consumes a variable can be planned
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+        $_ isa person, has ref 2;
+      """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Then get answers of typeql read query
       """
-      with fun hath($x:person) -> name: match $x has name $name; return first $name;
-      match $x has name $a; { let $b = $a; } or { let $a = hath($x); };
+      with fun refof($x:person) -> { ref }: match $x isa person; $_ has ref $ref; return { $ref };
+      match $x has ref $ref; { let $b = $ref; } or { let $ref in refof($x); };
       """
-      
+    Then uniquely identify answer concepts
+      | x         | ref        |
+      | key:ref:0 | attr:ref:0 |
+      | key:ref:1 | attr:ref:1 |
+      | key:ref:2 | attr:ref:2 |
+
 
   Scenario: negations can be applied to filtered variables
     Given transaction commits
