@@ -380,7 +380,7 @@ Feature: Function Definition
     match
       $customer has joining-year $year;
       let $years-completed = (2024 - $year);
-      let $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
+      let $loyalty-bonus = annual_reward($customer) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
     """
     Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
@@ -417,7 +417,7 @@ Feature: Function Definition
     match
       $customer has joining-year $year;
       let $years-completed = (2024 - $year);
-      let $loyalty-bonus = annual_reward($p) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
+      let $loyalty-bonus = annual_reward($customer) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
 
     match

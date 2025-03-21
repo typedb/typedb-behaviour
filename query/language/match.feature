@@ -3123,6 +3123,52 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
+  Scenario: a variable can be reused across disjunction branches
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $first isa person, has ref 0;
+        $second isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { $person isa person, has ref 0; } or { $person isa person, has ref 1; };
+      """
+    Then uniquely identify answer concepts
+      | person    |
+      | key:ref:0 |
+      | key:ref:1 |
+
+
+  Scenario: a disjunction that both binds and consumes a variable can be planned
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+        $_ isa person, has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+      """
+      with fun refof($x:person) -> { ref }: match $x isa person; $_ has ref $ref; return { $ref };
+      match $x has ref $ref; { let $b = $ref; } or { let $ref in refof($x); };
+      """
+    Then uniquely identify answer concepts
+      | x         | ref        |
+      | key:ref:0 | attr:ref:0 |
+      | key:ref:1 | attr:ref:1 |
+      | key:ref:2 | attr:ref:2 |
+
+
   Scenario: negations can be applied to filtered variables
     Given transaction commits
 
