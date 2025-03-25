@@ -125,10 +125,10 @@ Feature: Driver User
     Given typedb starts
     Given connection opens with username 'admin', password 'password'
     When create user with username 'user', password 'password'
-    Then create user with username 'user', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'user', password 'new-password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'admin', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then create user with username 'admin', password 'new-password'; fails with a message containing: "Invalid credential supplied"
+    Then create user with username 'user', password 'password'; fails with a message containing: "already exists"
+    Then create user with username 'user', password 'new-password'; fails with a message containing: "already exists"
+    Then create user with username 'admin', password 'password'; fails with a message containing: "already exists"
+    Then create user with username 'admin', password 'new-password'; fails with a message containing: "already exists"
 
 
   Scenario: User can be created after deletion
