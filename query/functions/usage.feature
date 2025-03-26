@@ -16,8 +16,9 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    entity person, owns name;
+    entity person, owns ref @key, owns name;
     attribute name, value string;
+    attribute ref, value integer;
     """
     Given transaction commits
 
@@ -129,4 +130,36 @@ Feature: Function Usage
       let $five = five();
       let $five = five();
     """
+
+  Scenario: Assigning to an anonymous variable discards the returned value.
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun nameof($person: person) -> { name }:
+    match
+      $person has name $name;
+    return { $name };
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql schema query
+    """
+    insert
+      $_ isa person, has ref 0, has name "Jonathan";
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $person isa person;
+      let $_ = nameof($person);
+    """
+    Then uniquely identify answer concepts
+      | person    |
+      | key:ref:0 |
+    Given transaction closes
 
