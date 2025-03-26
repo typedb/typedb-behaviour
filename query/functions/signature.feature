@@ -36,6 +36,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     return { $x };
     """
 
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
@@ -45,6 +46,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     return { $x, $y };
     """
 
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
@@ -54,6 +56,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     return { $x };
     """
 
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
@@ -63,6 +66,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     return first $x;
     """
 
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
     """
     define
@@ -71,7 +75,6 @@ Feature: Validate Function Signatures Against Definition & Calls
       $x isa person;
     return { $x };
     """
-    Given transaction closes
 
 
   Scenario: Functions which do not return the specified type fail type-inference
@@ -111,7 +114,6 @@ Feature: Validate Function Signatures Against Definition & Calls
       $cat isa cat, has $name;
     return { $cat };
     """
-    Given transaction closes
 
     Given connection open schema transaction for database: typedb
     When typeql schema query

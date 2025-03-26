@@ -149,7 +149,7 @@ Feature: Function Definition
       $arg_with_a_typo has name $name;
     return { $name };
     """
-    Given transaction closes
+    Then transaction is open: false
 
 
   Scenario: Functions are stratified wrt negation

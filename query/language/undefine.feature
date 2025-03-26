@@ -37,49 +37,41 @@ Feature: TypeQL Undefine Query
       undefine entity person;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine person plays employment:employee;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine person owns name;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine person, owns name;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine person owns email @key;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine name @independent;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine name value string;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine name value string;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       undefine name value string @regex(".+@\w+\..+");
@@ -119,7 +111,6 @@ Feature: TypeQL Undefine Query
       """
       undefine sub abstract-type from person;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -249,7 +240,6 @@ Feature: TypeQL Undefine Query
       """
       undefine owns root-attribute from person;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -357,7 +347,6 @@ Feature: TypeQL Undefine Query
       undefine person;
       """
 
-    When transaction closes
     When connection open write transaction for database: typedb
     When typeql write query
       """
@@ -421,7 +410,6 @@ Feature: TypeQL Undefine Query
       """
       undefine sub abstract-relation from employment;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -594,7 +582,6 @@ Feature: TypeQL Undefine Query
       """
       undefine relates mentor from employment;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -645,7 +632,6 @@ Feature: TypeQL Undefine Query
       """
       undefine as employee from part-time-employment relates part-time-employee;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -673,7 +659,6 @@ Feature: TypeQL Undefine Query
       """
       undefine relates employee from part-time-employment;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "there is no defined 'internship relates employee'"
@@ -706,7 +691,6 @@ Feature: TypeQL Undefine Query
       undefine employment;
       """
 
-    When transaction closes
     When connection open schema transaction for database: typedb
     When typeql write query
       """
@@ -800,7 +784,6 @@ Feature: TypeQL Undefine Query
       """
       undefine sub root-attribute from email;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -856,7 +839,6 @@ Feature: TypeQL Undefine Query
       """
       undefine value string from root-attribute;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "there is no defined 'name value datetime-tz', while"
@@ -871,6 +853,7 @@ Feature: TypeQL Undefine Query
       undefine @regex from email;
       """
 
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       undefine @regex from email value string;
@@ -898,15 +881,17 @@ Feature: TypeQL Undefine Query
       undefine value integer from name;
       """
 
+    When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "should be abstract"
       """
       undefine value string from name;
       """
 
+    When connection open schema transaction for database: typedb
     When typeql schema query
-    """
-    define name @abstract;
-    """
+      """
+      define name @abstract;
+      """
     Then typeql schema query
       """
       undefine value string from name;
@@ -937,7 +922,6 @@ Feature: TypeQL Undefine Query
       undefine name;
       """
 
-    When transaction closes
     When connection open schema transaction for database: typedb
     When typeql write query
       """
@@ -1194,7 +1178,6 @@ Feature: TypeQL Undefine Query
       """
       undefine @card from part-time-employment relates employee;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
@@ -1500,7 +1483,6 @@ Feature: TypeQL Undefine Query
       define
       entity player @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1569,7 +1551,6 @@ Feature: TypeQL Undefine Query
       define
       relation parentship @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1639,7 +1620,6 @@ Feature: TypeQL Undefine Query
       define
       attribute description @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1709,7 +1689,6 @@ Feature: TypeQL Undefine Query
       define
       relation parentship @abstract, relates parent @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1779,7 +1758,6 @@ Feature: TypeQL Undefine Query
       define
       relation parentship @abstract, relates parent[] @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1857,7 +1835,6 @@ Feature: TypeQL Undefine Query
       undefine
       @<category> from parentship relates parent;
       """
-    Then transaction commits
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "no defined 'parentship relates child[]', while"
@@ -1865,7 +1842,6 @@ Feature: TypeQL Undefine Query
       undefine
       @<category> from parentship relates child[];
       """
-    Then transaction commits
     Examples:
       | annotation | category |
       | card(1..1) | card     |
@@ -1885,7 +1861,6 @@ Feature: TypeQL Undefine Query
       define
       entity player owns name @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1955,7 +1930,6 @@ Feature: TypeQL Undefine Query
       define
       entity player owns name[] @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -2033,7 +2007,6 @@ Feature: TypeQL Undefine Query
       undefine
       @<category> from player owns name;
       """
-    Then transaction commits
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "no defined 'player owns email[]', while"
@@ -2041,7 +2014,6 @@ Feature: TypeQL Undefine Query
       undefine
       @<category> from player owns email[];
       """
-    Then transaction commits
     Examples:
       | annotation | category |
       | card(1..1) | card     |
@@ -2061,7 +2033,6 @@ Feature: TypeQL Undefine Query
       define
       entity player plays employment:employee @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -2131,7 +2102,6 @@ Feature: TypeQL Undefine Query
       define
       attribute description value string @<annotation>;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -2390,7 +2360,6 @@ Feature: TypeQL Undefine Query
       undefine
       @abstract from fathership;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -2418,7 +2387,6 @@ Feature: TypeQL Undefine Query
       undefine
       sub parentship from fathership;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "not have any role types related"
@@ -2429,7 +2397,6 @@ Feature: TypeQL Undefine Query
       sub parentship from fathership;
       fathership;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "not have any role types related"
@@ -2441,7 +2408,6 @@ Feature: TypeQL Undefine Query
       sub parentship from fathership;
       fathership;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query

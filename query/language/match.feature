@@ -3569,8 +3569,6 @@ Feature: TypeQL Match Clause
       define
       entity 0_leading_digit_fails;
       """
-
-    Given connection open read transaction for database: typedb
     Given get answers of typeql read query
       """
       match
@@ -3585,14 +3583,12 @@ Feature: TypeQL Match Clause
       entity _leading_connector_disallowed;
       """
 
-    Given connection open read transaction for database: typedb
     Given typeql read query; parsing fails
       """
       match
       entity $_leading_connector_disallowed;
       """
 
-    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
