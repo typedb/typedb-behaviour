@@ -144,7 +144,7 @@ Feature: Function Usage
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql schema query
+    Given typeql write query
     """
     insert
       $_ isa person, has ref 0, has name "Jonathan";
