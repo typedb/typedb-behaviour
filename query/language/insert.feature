@@ -226,7 +226,6 @@ Feature: TypeQL Insert Query
       $x isa subperson;
       $x has ref 0;
       """
-    Then transaction closes
     When connection open write transaction for database: typedb
     When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
       """
@@ -234,7 +233,6 @@ Feature: TypeQL Insert Query
       $x isa person, has ref $age;
       $age isa age 10;
       """
-    Then transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query
@@ -559,7 +557,6 @@ Parker";
       match $p has name $_; let $fn = "Alice";
       insert $p has first-name == $fn, has surname "Morgan";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query
@@ -604,7 +601,6 @@ Parker";
       """
       insert $c isa citizen, has name "Alice";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query
@@ -625,7 +621,6 @@ Parker";
       """
       insert $c isa citizen, has document-surname "Morgan";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query
@@ -653,7 +648,6 @@ Parker";
       """
       insert $c isa registered-citizen, has name "Alice";
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -698,7 +692,6 @@ Parker";
       """
       insert $c isa registered-citizen, has name "Morgan";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query
@@ -1633,7 +1626,6 @@ Parker";
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-
     When typeql write query
       """
       insert $x isa base, has ref 0;
@@ -1643,9 +1635,7 @@ Parker";
       insert $y isa derived, has ref 0;
       """
 
-    When transaction closes
     When connection open write transaction for database: typedb
-
     When typeql write query
       """
       insert $y isa derived, has ref 0;
@@ -1748,7 +1738,6 @@ Parker";
       $x isa person, has ref 0, has email "abc@gmail.com";
       $y isa person, has ref 1, has email "abc@gmail.com";
       """
-    When transaction closes
 
     Given connection open write transaction for database: typedb
     Given typeql write query
@@ -2134,7 +2123,6 @@ Parker";
       """
       insert $x isa $t;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query; fails
@@ -2588,7 +2576,7 @@ Parker";
   # TRANSACTIONALITY #
   ####################
 
-  Scenario: if any insert in a transaction fails with a syntax error, none of the inserts are performed
+  Scenario: if any insert in a transaction fails with a syntax error, the transaction stays alive
     Given typeql write query
       """
       insert
@@ -2599,8 +2587,14 @@ Parker";
       insert
       $y qwertyuiop;
       """
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "Derek";
+      """
+    Then answer size is: 1
 
-    When connection open read transaction for database: typedb
+    Given transaction closes
+    Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match $x isa person, has name "Derek";
@@ -2629,7 +2623,6 @@ Parker";
       insert
       $y isa person, has name "Emily", has capacity 1000;
       """
-    When transaction closes
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -2650,7 +2643,6 @@ Parker";
       insert
       $y isa person, has name "Emily", has ref 0;
       """
-    When transaction closes
 
     When connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -2701,7 +2693,6 @@ Parker";
       insert
         $p isa person, has $_;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "not available"
@@ -2709,7 +2700,6 @@ Parker";
       insert
         $p isa employment, links (employee: $_);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Could not determine the value of the insert attribute"

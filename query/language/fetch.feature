@@ -652,8 +652,6 @@ Feature: TypeQL Fetch Query
         "all attributes": $p.*
       };
       """
-    When connection open read transaction for database: typedb
-
 
     When get answers of typeql read query
       """
@@ -898,7 +896,6 @@ Feature: TypeQL Fetch Query
           };
       };
       """
-    Given connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
       match
@@ -913,7 +910,6 @@ Feature: TypeQL Fetch Query
         }
       };
       """
-    Given connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
       match
@@ -928,7 +924,6 @@ Feature: TypeQL Fetch Query
         )
       };
       """
-    Given connection open read transaction for database: typedb
     Then typeql read query
       """
       match
@@ -1499,7 +1494,6 @@ Feature: TypeQL Fetch Query
         ]
       };
       """
-    When connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
       match
@@ -1766,7 +1760,7 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z             |
+      | z                |
       | value:integer:10 |
 
     When get answers of typeql read query
@@ -2128,7 +2122,7 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 2
     Given uniquely identify answer concepts
-      | x            | y             | z            |
+      | x               | y                | z               |
       | value:integer:2 | value:integer:20 | value:integer:2 |
       | value:integer:0 | value:integer:0  | value:integer:0 |
     When get answers of typeql read query
@@ -2172,7 +2166,6 @@ Feature: TypeQL Fetch Query
           };
       """
 
-    When connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
         match
@@ -2186,7 +2179,6 @@ Feature: TypeQL Fetch Query
           };
       """
 
-    When connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
         match
@@ -2200,7 +2192,6 @@ Feature: TypeQL Fetch Query
           };
       """
 
-    When connection open read transaction for database: typedb
     Then typeql read query; parsing fails
       """
         match
@@ -2228,7 +2219,6 @@ Feature: TypeQL Fetch Query
           };
       """
 
-    When connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "returns a non-scalar result"
       """
         match
@@ -2491,7 +2481,7 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z             |
+      | z                |
       | value:integer:10 |
 
     When get answers of typeql read query

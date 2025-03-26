@@ -50,7 +50,6 @@ Feature: TypeQL Update Query
         $p label superperson;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       match
@@ -59,7 +58,6 @@ Feature: TypeQL Update Query
         entity superperson;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       match
@@ -68,7 +66,6 @@ Feature: TypeQL Update Query
         $p owns name;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       match
@@ -77,7 +74,6 @@ Feature: TypeQL Update Query
         $p @abstract;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       match
@@ -86,7 +82,6 @@ Feature: TypeQL Update Query
         $p owns name @card(5..);
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       match
@@ -95,7 +90,6 @@ Feature: TypeQL Update Query
         $n value datetime;
       """
 
-    When connection open schema transaction for database: typedb
     Then typeql write query; parsing fails
       """
       update
@@ -117,7 +111,6 @@ Feature: TypeQL Update Query
       update
         $a isa name "John";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'a' referenced in the update stage is unavailable"
@@ -127,7 +120,6 @@ Feature: TypeQL Update Query
       update
         $a isa name "John";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
@@ -137,7 +129,6 @@ Feature: TypeQL Update Query
       update
         $a isa name "Bob";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
@@ -147,7 +138,6 @@ Feature: TypeQL Update Query
       update
         $a isa name "John";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -155,7 +145,6 @@ Feature: TypeQL Update Query
       update
         $p isa person;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -163,7 +152,6 @@ Feature: TypeQL Update Query
       update
         $p isa parentship;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Illegal statement provided for an update stage"
@@ -188,7 +176,6 @@ Feature: TypeQL Update Query
       update
         $p iid 0x1e00000000001234567890;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -196,7 +183,6 @@ Feature: TypeQL Update Query
       update
         $p isa person;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
@@ -204,25 +190,21 @@ Feature: TypeQL Update Query
       update > 5;
       """
 
-    When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
       """
       update = 5;
       """
 
-    When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
       """
       update 6 > 5;
       """
 
-    When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
       """
       update $p is $f;
       """
 
-    When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
       """
       update person owns name;
@@ -403,7 +385,6 @@ Feature: TypeQL Update Query
       update
         $p has name $n;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "The variable 'n' referenced in the update stage is unavailable"
@@ -414,7 +395,6 @@ Feature: TypeQL Update Query
         $n isa name "Charlie";
         $p has $n;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
@@ -492,9 +472,8 @@ Feature: TypeQL Update Query
       update
         $p has $b + 15;
       """
-    When transaction closes
-    When connection open write transaction for database: typedb
 
+    When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "'b' cannot be declared as both a 'ThingType' and as a 'Attribute'"
       """
       match
@@ -502,9 +481,8 @@ Feature: TypeQL Update Query
       update
         $p has $b < 15;
       """
-    When transaction closes
-    When connection open write transaction for database: typedb
 
+    When connection open write transaction for database: typedb
     Then typeql write query; parsing fails
       """
       match
@@ -544,7 +522,7 @@ Feature: TypeQL Update Query
         let $n = "Bob";
         $p has name $n;
       """
-    When connection open write transaction for database: typedb
+
     Then typeql write query; parsing fails
       """
       insert
@@ -553,7 +531,7 @@ Feature: TypeQL Update Query
         let $n = "Bob";
         $p has name == $n;
       """
-    When connection open write transaction for database: typedb
+
     Then typeql write query; fails with a message containing: "variable 'n' referenced in the update stage is unavailable"
       """
       insert
@@ -911,7 +889,6 @@ Feature: TypeQL Update Query
       update
         $p has ref 2;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then get answers of typeql write query
@@ -1110,7 +1087,6 @@ Feature: TypeQL Update Query
       update
         $p has name "Bob";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When get answers of typeql write query
@@ -1150,7 +1126,6 @@ Feature: TypeQL Update Query
       update
         $p has name "Bob";
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -1169,7 +1144,6 @@ Feature: TypeQL Update Query
       update
         $p has name "Bob";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query
@@ -1413,7 +1387,9 @@ Feature: TypeQL Update Query
     Given uniquely identify answer concepts
       | p         | n                 |
       | key:ref:0 | attr:name:"Alice" |
+    Given transaction commits
 
+    When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
       """
       match
@@ -1422,6 +1398,7 @@ Feature: TypeQL Update Query
         $p has name "Bob";
       """
 
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       redefine person owns name @card(0..1);
@@ -1762,7 +1739,6 @@ Feature: TypeQL Update Query
       update
         $f isa friendship, links ($p);
       """
-    When transaction closes
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
       """
@@ -1772,7 +1748,6 @@ Feature: TypeQL Update Query
         $p isa person, has ref 0;
         $f links ($p);
       """
-    When transaction closes
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "referenced in the update stage is unavailable"
       """
@@ -1810,7 +1785,6 @@ Feature: TypeQL Update Query
       update
         $f <links-changed>;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
@@ -2062,7 +2036,6 @@ Feature: TypeQL Update Query
       update
         $p links (parent: $f);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -2072,7 +2045,6 @@ Feature: TypeQL Update Query
       update
         $p links (parent: $f);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'p' referenced in the update stage is unavailable"
@@ -2082,7 +2054,6 @@ Feature: TypeQL Update Query
       update
         $p isa parentship, links (parent: $f);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'f' referenced in the update stage is unavailable"
@@ -2092,7 +2063,6 @@ Feature: TypeQL Update Query
       update
         $p links (parent: $f);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When get answers of typeql write query
@@ -2128,7 +2098,6 @@ Feature: TypeQL Update Query
       update
         $f links (friend: $p);
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -2148,7 +2117,6 @@ Feature: TypeQL Update Query
       update
         $f links (friend: $p);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
@@ -2159,7 +2127,6 @@ Feature: TypeQL Update Query
       update
         $f links (friend: $p);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query
@@ -2197,7 +2164,6 @@ Feature: TypeQL Update Query
       update
         $f links (best-friend: $p);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     When typeql write query
@@ -2482,7 +2448,9 @@ Feature: TypeQL Update Query
     Given uniquely identify answer concepts
       | f         | p         |
       | key:ref:0 | key:ref:0 |
+    Given transaction commits
 
+    When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "cardinality should not exceed 1"
       """
       match
@@ -2492,6 +2460,7 @@ Feature: TypeQL Update Query
         $f links ($p1);
       """
 
+    When connection open schema transaction for database: typedb
     When typeql schema query
       """
       redefine friendship relates friend @card(0..1);
@@ -2606,7 +2575,6 @@ Feature: TypeQL Update Query
       update
         $_ has $_;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2616,7 +2584,6 @@ Feature: TypeQL Update Query
       update
         $p has $_;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2626,7 +2593,6 @@ Feature: TypeQL Update Query
       update
         $_ has $n;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2634,7 +2600,6 @@ Feature: TypeQL Update Query
       update
         $_ links (parent: $_);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2644,7 +2609,6 @@ Feature: TypeQL Update Query
       update
         $p links (parent: $_);
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2804,7 +2768,6 @@ Feature: TypeQL Update Query
       update
         $p has name "Charlie";
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Left type 'person' across constraint 'links' is not compatible with right type 'friendship:friend'"

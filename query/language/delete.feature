@@ -513,7 +513,6 @@ Feature: TypeQL Delete Query
     delete
       links (employee: $p) of $e;
     """
-    Given transaction closes
 
     Given connection open write transaction for database: typedb
     When typeql write query
@@ -766,6 +765,8 @@ Feature: TypeQL Delete Query
       delete
         has $a of $x;
       """
+
+    Given connection open write transaction for database: typedb
     Then typeql write query; fails
       """
       match
@@ -774,6 +775,8 @@ Feature: TypeQL Delete Query
       delete
         links (employee: $x) of $r;
       """
+
+    Given connection open write transaction for database: typedb
     Then typeql write query; fails
       """
       match
@@ -915,7 +918,6 @@ Feature: TypeQL Delete Query
       delete
         links (employee: $p) of $e;
       """
-    Then transaction closes
 
 
 #  Even when a $role variable matches multiple roles (will always match 'role' unless constrained)
@@ -1456,9 +1458,9 @@ Feature: TypeQL Delete Query
         has $e of $p;
       """
     Then uniquely identify answer concepts
-      | e                                     | p              |
-      | attr:encrypted-email:b0b@typedb.com   | key:name:Alice |
-      | attr:encrypted-email:b0b@typedb.com   | key:name:Bob   |
+      | e                                   | p              |
+      | attr:encrypted-email:b0b@typedb.com | key:name:Alice |
+      | attr:encrypted-email:b0b@typedb.com | key:name:Bob   |
     When get answers of typeql read query
       """
       match $_ has name $n, has encrypted-email $_;
@@ -1872,7 +1874,6 @@ Feature: TypeQL Delete Query
       delete
         has $e of $p;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then get answers of typeql write query
@@ -2165,15 +2166,15 @@ Feature: TypeQL Delete Query
       match $a isa email;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When get answers of typeql read query
       """
       match $_ has email $a;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -2182,15 +2183,15 @@ Feature: TypeQL Delete Query
       match $a isa email;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When get answers of typeql read query
       """
       match $_ has email $a;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
 
     When typeql write query
       """
@@ -2245,15 +2246,15 @@ Feature: TypeQL Delete Query
       match $a isa email;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When get answers of typeql read query
       """
       match $_ has email $a;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When transaction commits
 
     When connection open write transaction for database: typedb
@@ -2267,15 +2268,15 @@ Feature: TypeQL Delete Query
       match $a isa email;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
     When get answers of typeql read query
       """
       match $_ has email $a;
       """
     Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
+      | a                           |
+      | attr:email:"bob@typedb.com" |
 
     When typeql write query
       """
@@ -2370,86 +2371,6 @@ Feature: TypeQL Delete Query
       insert
         $a has email "<deleted-email>";
       """
-    When get answers of typeql read query
-      """
-      match $a isa email;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-      | attr:email:"<deleted-email>" |
-    When get answers of typeql read query
-      """
-      match $_ has email $a;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-      | attr:email:"<deleted-email>" |
-
-    When typeql write query
-      """
-      match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
-      """
-    When get answers of typeql read query
-      """
-      match $a isa email;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-    When get answers of typeql read query
-      """
-      match $_ has email $a;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-    When transaction commits
-
-    When connection open write transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $a isa email;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-    When get answers of typeql read query
-      """
-      match $_ has email $a;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-
-    When typeql write query
-      """
-      match
-        $a isa person, has name "<deleted-name>";
-      insert
-        $a has email "<deleted-email>";
-      """
-    When get answers of typeql read query
-      """
-      match $a isa email;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-      | attr:email:"<deleted-email>" |
-    When get answers of typeql read query
-      """
-      match $_ has email $a;
-      """
-    Then uniquely identify answer concepts
-      | a                            |
-      | attr:email:"bob@typedb.com"  |
-      | attr:email:"<deleted-email>" |
-    When transaction commits
-
-    When connection open write transaction for database: typedb
     When get answers of typeql read query
       """
       match $a isa email;
@@ -2477,8 +2398,48 @@ Feature: TypeQL Delete Query
       match $a isa email;
       """
     Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
+
+    When typeql write query
+      """
+      match
+        $a isa person, has name "<deleted-name>";
+      insert
+        $a has email "<deleted-email>";
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
       | a                            |
       | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
     When get answers of typeql read query
       """
       match $_ has email $a;
@@ -2486,6 +2447,46 @@ Feature: TypeQL Delete Query
     Then uniquely identify answer concepts
       | a                            |
       | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                            |
+      | attr:email:"bob@typedb.com"  |
+      | attr:email:"<deleted-email>" |
+
+    When typeql write query
+      """
+      match $p isa person, has name "<deleted-name>", has email $e;
+      delete $e of $p;
+      """
+    When get answers of typeql read query
+      """
+      match $a isa email;
+      """
+    Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
+    When get answers of typeql read query
+      """
+      match $_ has email $a;
+      """
+    Then uniquely identify answer concepts
+      | a                           |
+      | attr:email:"bob@typedb.com" |
 
     When typeql write query
       """
@@ -2760,7 +2761,6 @@ Feature: TypeQL Delete Query
       delete
         $_ of $_;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"
@@ -2770,7 +2770,6 @@ Feature: TypeQL Delete Query
       delete
         $_ of $p;
       """
-    When transaction closes
 
     When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "anonymous"

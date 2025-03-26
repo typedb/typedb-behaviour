@@ -336,7 +336,6 @@ Feature: TypeQL Define Query
       """
       define person owns name[];
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "different 'person owns start-date[]' is already defined"
@@ -598,7 +597,6 @@ Feature: TypeQL Define Query
       """
       define employment relates employee[];
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "different 'employment relates mentor[]' is already defined"
@@ -1006,7 +1004,6 @@ Feature: TypeQL Define Query
       define
       fathership relates parent;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "'parentship:parent' should be unique in relation type hierarchy"
@@ -1014,7 +1011,6 @@ Feature: TypeQL Define Query
       define
       fathership relates father as parent, relates parent;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -1027,7 +1023,6 @@ Feature: TypeQL Define Query
       define
       fathership relates parent @abstract;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -1201,7 +1196,6 @@ Feature: TypeQL Define Query
       """
       define attribute code-name sub name, value integer;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     When typeql schema query
@@ -1215,7 +1209,6 @@ Feature: TypeQL Define Query
       """
       define attribute code-name value integer;
       """
-    When transaction closes
 
     When connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1640,7 +1633,6 @@ Feature: TypeQL Define Query
       entity player owns description @values(<arg0>, <arg1>, <arg0>);
       """
 
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
@@ -1649,7 +1641,6 @@ Feature: TypeQL Define Query
       entity player owns description @values(<arg0>, <arg0>, <arg1>);
       """
 
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
@@ -1863,7 +1854,6 @@ Feature: TypeQL Define Query
       attribute description value <value-type> @values(<arg0>, <arg1>, <arg0>);
       """
 
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
@@ -1871,7 +1861,6 @@ Feature: TypeQL Define Query
       attribute description value <value-type> @values(<arg0>, <arg0>, <arg1>);
       """
 
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
@@ -1938,35 +1927,30 @@ Feature: TypeQL Define Query
       entity player @abstract(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
       relation parentship @abstract(<args>), relates parent;
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
       attribute characteristics @abstract(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
       relation parentship relates parent @abstract(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
       entity player owns name @abstract(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -1991,7 +1975,6 @@ Feature: TypeQL Define Query
       relation parentship relates parent[] @distinct(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -2070,14 +2053,12 @@ Feature: TypeQL Define Query
       relation parentship relates parent @card(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
       entity player owns name @card(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -2107,7 +2088,6 @@ Feature: TypeQL Define Query
       attribute characteristics @regex(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -2136,7 +2116,6 @@ Feature: TypeQL Define Query
       attribute characteristics @range(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -2159,7 +2138,6 @@ Feature: TypeQL Define Query
       attribute characteristics @values(<args>);
       """
 
-    Given connection open schema transaction for database: typedb
     Then typeql schema query; parsing fails
       """
       define
@@ -2734,7 +2712,6 @@ Feature: TypeQL Define Query
       """
       define attribute name value integer;
       """
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
@@ -2821,7 +2798,6 @@ Feature: TypeQL Define Query
       """
       define name value integer;
       """
-    Given transaction closes
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
@@ -3238,6 +3214,7 @@ Feature: TypeQL Define Query
       entity pigeon sub animal;
       """
 
+    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
@@ -3262,6 +3239,7 @@ Feature: TypeQL Define Query
       entity pigeon2 sub animal;
       """
 
+    Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
