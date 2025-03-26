@@ -1187,6 +1187,72 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: Bounds applied to match queries are recursively applied
+    When get answers of typeql fetch
+      """
+      match
+        $entity label person, plays $role;
+        $rel label employment, relates $role;
+      fetch {
+        "other-employment-roles": [
+          match
+            $rel relates $other-role;
+            not { $other-role is $role; };
+          fetch {
+            "role": $other-role,
+          };
+        ]
+      };
+      """
+    Then fetch answers are
+      """
+      [{
+        "other-employment-roles": [
+          {
+            "role": {
+              "label": "employment:employer",
+              "kind": "relation:role"
+            }
+          }
+        ]
+      }]
+      """
+    When get answers of typeql fetch
+      """
+      match
+        $entity label person, plays $role;
+        $rel label employment, relates $role;
+      fetch {
+        "role": $role,
+        "other-employment-roles": [
+          match
+            $rel relates $other-role;
+            not { $other-role is $role; };
+          fetch {
+            "other-role": $other-role,
+          };
+        ]
+      };
+      """
+    Then fetch answers are
+      """
+      [{
+        "role": {
+          "kind": "relation:role",
+          "label": "employment:employee"
+        },
+        "other-employment-roles": [
+          {
+            "other-role": {
+              "kind": "relation:role",
+              "label": "employment:employer"
+            }
+          }
+        ]
+      }]
+      """
+
+
   Scenario: same fetch parameter names in one fetch object are not permitted
     Then typeql read query; fails with a message containing: "multiple mappings for one key"
       """
