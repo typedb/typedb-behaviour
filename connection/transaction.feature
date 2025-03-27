@@ -93,54 +93,39 @@ Feature: Connection Transaction
       | <type> |
       | <type> |
     Examples:
-      | type |
-      | read |
-# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
-#      | write  |
-#      | schema |
+      | type  |
+      | read  |
+      | write |
 
-# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
-#  Scenario: one database, many transactions of different types
-#    When connection create database: typedb
-#    When connection open transactions for database: typedb, of type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#    Then transactions are open: true
-#    Then transactions have type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
+  Scenario: one database, many transactions of write and read types
+    When connection create database: typedb
+    When connection open transactions for database: typedb, of type:
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+    Then transactions are open: true
+    Then transactions have type:
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
   Scenario Outline: one database, many <type> transactions in parallel
     When connection create database: typedb
@@ -172,55 +157,40 @@ Feature: Connection Transaction
       | <type> |
       | <type> |
     Examples:
-      | type |
-      | read |
-# TODO: Fix multiple write and schema transactions (or create a test that expects an explicit error instead of hanging!)
-#      | write  |
-#      | schema |
+      | type  |
+      | read  |
+      | write |
 
 
-# TODO: Fix the test: if it's impossible to use schema here, move to a separate test with an error expected (now it hangs). Fix write + read
-#  Scenario: one database, many transactions in parallel of different types
-#    When connection create database: typedb
-#    When connection open transactions in parallel for database: typedb, of type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#    Then transactions in parallel are open: true
-#    Then transactions in parallel have type:
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
-#      | read   |
-#      | write  |
-#      | schema |
+  Scenario: one database, many transactions in parallel of read and write types
+    When connection create database: typedb
+    When connection open transactions in parallel for database: typedb, of type:
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+    Then transactions in parallel are open: true
+    Then transactions in parallel have type:
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
+      | read  |
+      | write |
 
   # TODO: Read queries in parallel transactions are successful?
 
@@ -367,6 +337,52 @@ Feature: Connection Transaction
       match $x isa person;
       """
     Then answer size is: 0
+
+  Scenario Outline: can open a <type> transaction after a critical failure of a <prior-type> transaction
+    Given connection create database: typedb
+    When connection open <prior-type> transaction for database: typedb
+    Then transaction has type: <prior-type>
+    Then typeql write query; fails
+      """
+      insert $x isa non-existing-type;
+      """
+    Then transaction is open: false
+    When connection open <type> transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: <type>
+    Examples:
+      | prior-type | type   |
+      | write      | read   |
+      | write      | write  |
+      | write      | schema |
+      | schema     | read   |
+      | schema     | write  |
+      | schema     | schema |
+
+  Scenario Outline: can open a <type> transaction after a non-critical failure and closing of a <prior-type> transaction
+    Given connection create database: typedb
+    When connection open <prior-type> transaction for database: typedb
+    Then transaction has type: <prior-type>
+    Then typeql write query; parsing fails
+      """
+      insert $x isa; # parsing error
+      """
+    When transaction closes
+    Then transaction is open: false
+    When connection open <type> transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: <type>
+    Examples:
+      | prior-type | type   |
+      | read       | read   |
+      | read       | write  |
+      | read       | schema |
+      | write      | read   |
+      | write      | write  |
+      | write      | schema |
+      | schema     | read   |
+      | schema     | write  |
+      | schema     | schema |
 
   # TODO: Uncomment when options are implemented. Decide if it needs the following tag.
 #  @ignore-typedb
