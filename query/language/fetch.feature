@@ -1183,7 +1183,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: Bounds applied to match queries are recursively applied
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
         $entity label person, plays $role;
@@ -1199,20 +1199,17 @@ Feature: TypeQL Fetch Query
         ]
       };
       """
-    Then fetch answers are
+    Then answer contains document:
       """
-      [{
+      {
         "other-employment-roles": [
           {
-            "role": {
-              "label": "employment:employer",
-              "kind": "relation:role"
-            }
+            "role": "employment:employer"
           }
         ]
-      }]
+      }
       """
-    When get answers of typeql fetch
+    When get answers of typeql read query
       """
       match
         $entity label person, plays $role;
@@ -1229,22 +1226,16 @@ Feature: TypeQL Fetch Query
         ]
       };
       """
-    Then fetch answers are
+    Then answer contains document:
       """
-      [{
-        "role": {
-          "kind": "relation:role",
-          "label": "employment:employee"
-        },
+      {
+        "role": "employment:employee",
         "other-employment-roles": [
           {
-            "other-role": {
-              "kind": "relation:role",
-              "label": "employment:employer"
-            }
+            "other-role": "employment:employer"
           }
         ]
-      }]
+      }
       """
 
 
