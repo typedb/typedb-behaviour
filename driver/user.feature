@@ -63,10 +63,10 @@ Feature: Driver User
     Then connection opens with username '<wrong-name>', password 'password'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username '<name>', password 'password'
     Examples:
-      | name                                                                  | wrong-name |
-      | bob                                                                   | BoB        |
-      | BoB                                                                   | Bob        |
-      | Bob                                                                   | bob        |
+      | name | wrong-name |
+      | bob  | BoB        |
+      | BoB  | Bob        |
+      | Bob  | bob        |
       # TODO: Errors with "Credential not supplied"
 #      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c          |
 #      | 資料庫                                                                 | 資料        |
@@ -109,10 +109,10 @@ Feature: Driver User
     Then connection opens with username 'user', password '<wrong-pass>'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username 'user', password '<pass>'
     Examples:
-      | pass                                                                  | wrong-pass    |
-      | bob                                                                   | BoB           |
-      | BoB                                                                   | Bob           |
-      | Bob                                                                   | bob           |
+      | pass | wrong-pass |
+      | bob  | BoB        |
+      | BoB  | Bob        |
+      | Bob  | bob        |
       # TODO: Errors with "Credential not supplied"
 #      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c             |
 #      | ?(!@(**('"'£"                                                         | ?(!@(**('"'£" |
