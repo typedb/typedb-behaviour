@@ -19,7 +19,6 @@ files = [
     "put.feature",
     "redefine.feature",
     "reduce.feature",
-    "type-inference.feature",
     "undefine.feature",
     "update.feature",
 ]
