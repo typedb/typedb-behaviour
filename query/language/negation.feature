@@ -605,5 +605,28 @@ Feature: Negation Resolution
     Then answer size is: 3
 
 
+  Scenario: Negation inputs are handled correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person;
+      $c isa company;
+      $e isa employment, links (employee: $x, employer: $c);
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        not {
+          $x isa person;
+          not {
+            (employee: $x);
+          };
+        };
+      """
+
+
   Scenario: Nested negations
     # TODO: Maybe the subset test
