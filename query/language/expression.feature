@@ -61,7 +61,7 @@ Feature: TypeQL Query with Expressions
       select
         $x, $v;
       """
-    Then typeql read query; fails with a message containing: "The variable 'v' cannot be assigned to, as it was already assigned in a previous stage."
+    Then typeql read query; fails with a message containing: "The variable 'v' may not be assigned to, as it was already bound in a previous stage"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -81,7 +81,7 @@ Feature: TypeQL Query with Expressions
       select
         $x, $v;
       """
-    Then typeql read query; fails with a message containing: "The variable 'v' cannot be assigned to, as it was already assigned in a previous stage"
+    Then typeql read query; fails with a message containing: "The variable 'v' may not be assigned to, as it was already bound in a previous stage"
     """
       match
         $x isa person, has age $a, has height $h;

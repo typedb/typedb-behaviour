@@ -186,3 +186,26 @@ Feature: Function Usage
     Then uniquely identify answer concepts
       | z                |
       | value:integer:1  |
+
+
+  Scenario: A variable that is input from a previous stage may not be assigned to
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert $p isa person, has name "John", has ref 0;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'name' may not be assigned to, as it was already bound in a previous stage"
+    """
+      with
+        fun name_of($p: person) -> { name }:
+        match $p has name $name;
+        return { $name };
+
+
+      match
+        $p isa person, has name $name;
+      match
+        let $name = name_of($p);
+      """
