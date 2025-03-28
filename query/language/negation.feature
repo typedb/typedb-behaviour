@@ -619,10 +619,13 @@ Feature: Negation Resolution
     When get answers of typeql read query
       """
       match
-        not {
+        not { # Must be in a negation so that `$x` is not selected for the entire match stage.
           $x isa person;
           not {
             (employee: $x);
+            # The planner prefers ordering `$_ role-name employee` (which is free) before `$_ links $_:$x` (which has to hit disk).
+            # If `$x` is not marked as input to the negation during lowering, it is not selected by the role name step, and therefore removed from the row.
+            # The links executor then crashes as it expects `$x` to be bound.
           };
         };
       """
