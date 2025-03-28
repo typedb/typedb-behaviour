@@ -302,4 +302,9 @@ Feature: TypeQL pipelines
         let $x = 5;
       select $_;
       """
-
+    Then typeql read query; fails with a message containing: "A non-anonymous variable is expected in this statement for the query"
+      """
+      match
+        let $x = 5;
+      sort $_;
+      """
