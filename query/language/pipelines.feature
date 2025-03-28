@@ -281,3 +281,30 @@ Feature: TypeQL pipelines
         $p has name $n;
       """
     Then answer size is: 0
+
+
+  Scenario: Variables in modifier stages must be named
+    Then typeql read query; fails with a message containing: "A non-anonymous variable is expected in this statement for the query"
+      """
+      match
+        let $x = 5;
+      reduce $sum = sum($x) groupby $_;
+      """
+    Then typeql read query; fails with a message containing: "A non-anonymous variable is expected in this statement for the query"
+      """
+      match
+        let $x = 5;
+      reduce $sum = sum($_) groupby $x;
+      """
+    Then typeql read query; fails with a message containing: "A non-anonymous variable is expected in this statement for the query"
+      """
+      match
+        let $x = 5;
+      select $_;
+      """
+    Then typeql read query; fails with a message containing: "A non-anonymous variable is expected in this statement for the query"
+      """
+      match
+        let $x = 5;
+      sort $_;
+      """
