@@ -679,6 +679,97 @@ Feature: Concept Ownership
     Then entity $ent1 set has: $attr2_1; fails with a message containing: "@unique"
     Then transaction commits
 
+  Scenario: @unique annotation is checked only within the inheritance line of the instance's type
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr
+    When attribute(attr) set value type: string
+    When attribute(attr) set annotation: @independent
+    # Create entity types in a random order to try confusing storage iterators...
+    When create entity type: ent3_2
+    When create entity type: ent1_1
+    When entity(ent1_1) set owns: ref
+    When entity(ent1_1) set owns: attr
+    When entity(ent1_1) get owns(attr) set annotation: @unique
+    When entity(ent1_1) get owns(attr) set annotation: @card(0..)
+    When create entity type: ent3_1
+    When entity(ent3_1) set owns: ref
+    When entity(ent3_1) set owns: attr
+    When entity(ent3_1) get owns(attr) set annotation: @unique
+    When entity(ent3_1) get owns(attr) set annotation: @card(0..)
+    When create entity type: ent1_2
+    When entity(ent1_2) set supertype: ent1_1
+    When create entity type: ent2_1
+    When entity(ent2_1) set owns: ref
+    When entity(ent2_1) set owns: attr
+    When entity(ent2_1) get owns(attr) set annotation: @unique
+    When entity(ent2_1) get owns(attr) set annotation: @card(0..)
+    When entity(ent3_2) set supertype: ent3_1
+    When create entity type: ent2_2
+    When entity(ent2_2) set supertype: ent2_1
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_1 = entity(ent1_1) create new instance with key(ref): ent1_1
+    When $ent1_2 = entity(ent1_2) create new instance with key(ref): ent1_2
+    When $ent2_1 = entity(ent2_1) create new instance with key(ref): ent2_1
+    When $ent2_2 = entity(ent2_2) create new instance with key(ref): ent2_2
+    When $ent3_1 = entity(ent3_1) create new instance with key(ref): ent3_1
+    When $ent3_2 = entity(ent3_2) create new instance with key(ref): ent3_2
+    When $attr = attribute(attr) put instance with value: "one"
+    When $attr-another = attribute(attr) put instance with value: "another"
+    When entity $ent1_1 set has: $attr
+    Then entity $ent1_2 set has: $attr; fails
+    When entity $ent3_2 set has: $attr
+    Then entity $ent3_1 set has: $attr; fails
+    When entity $ent2_1 set has: $attr
+    Then entity $ent2_2 set has: $attr; fails
+    When entity $ent2_1 unset has: $attr
+    Then entity $ent2_2 set has: $attr
+    Then entity $ent2_1 set has: $attr; fails
+    When entity $ent2_1 set has: $attr-another
+    When entity $ent3_1 set has: $attr-another
+    When entity $ent1_2 set has: $attr-another
+    Then entity $ent2_2 set has: $attr-another; fails
+    Then entity $ent3_2 set has: $attr-another; fails
+    Then entity $ent1_1 set has: $attr-another; fails
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1_1 = entity(ent1_1) get instance with key(ref): ent1_1
+    When $ent1_2 = entity(ent1_2) get instance with key(ref): ent1_2
+    When $ent2_1 = entity(ent2_1) get instance with key(ref): ent2_1
+    When $ent2_2 = entity(ent2_2) get instance with key(ref): ent2_2
+    When $ent3_1 = entity(ent3_1) get instance with key(ref): ent3_1
+    When $ent3_2 = entity(ent3_2) get instance with key(ref): ent3_2
+    When $attr = attribute(attr) get instance with value: "one"
+    When $attr-another = attribute(attr) get instance with value: "another"
+    Then entity $ent1_1 get has(attr) contain: $attr
+    Then entity $ent3_2 get has(attr) contain: $attr
+    Then entity $ent2_2 get has(attr) contain: $attr
+    Then entity $ent1_2 get has(attr) does not contain: $attr
+    Then entity $ent3_1 get has(attr) does not contain: $attr
+    Then entity $ent2_1 get has(attr) does not contain: $attr
+    Then entity $ent1_1 get has(attr) does not contain: $attr-another
+    Then entity $ent3_2 get has(attr) does not contain: $attr-another
+    Then entity $ent2_2 get has(attr) does not contain: $attr-another
+    Then entity $ent1_2 get has(attr) contain: $attr-another
+    Then entity $ent3_1 get has(attr) contain: $attr-another
+    Then entity $ent2_1 get has(attr) contain: $attr-another
+    When entity $ent1_2 set has: $attr-another
+    When entity $ent3_1 set has: $attr-another
+    When entity $ent2_1 set has: $attr-another
+    Then entity $ent3_2 set has: $attr-another; fails
+    Then entity $ent2_2 set has: $attr-another; fails
+    Then entity $ent1_1 set has: $attr-another; fails
+    Then entity $ent1_2 set has: $attr; fails
+    When entity $ent1_1 set has: $attr
+    Then entity $ent3_1 set has: $attr; fails
+    When entity $ent3_2 set has: $attr
+    Then entity $ent2_1 set has: $attr; fails
+    Then entity $ent2_2 set has: $attr
+    Then transaction commits
+
     # TODO: Add tests to check what @unique means for lists when it's in the spec
 
   Scenario: A single object can have instances of an attribute type and its subtypes
