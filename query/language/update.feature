@@ -1119,7 +1119,7 @@ Feature: TypeQL Update Query
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 0;
@@ -1137,7 +1137,7 @@ Feature: TypeQL Update Query
     When transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 0;
@@ -2090,7 +2090,7 @@ Feature: TypeQL Update Query
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 0;
@@ -2109,7 +2109,7 @@ Feature: TypeQL Update Query
     When transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 0;
@@ -2119,7 +2119,7 @@ Feature: TypeQL Update Query
       """
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 0;
@@ -2156,7 +2156,7 @@ Feature: TypeQL Update Query
     When transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
         $p isa person, has ref 1;

@@ -2152,7 +2152,7 @@ Feature: TypeQL Match Clause
       | attr:second-name:"Morgan"        |
       | attr:passport-first-name:"Alice" |
 
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    Then typeql read query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       match $a isa! valueless-name;
       """
@@ -2498,7 +2498,7 @@ Feature: TypeQL Match Clause
       """
     Then answer size is: 0
 
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    Then typeql read query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       match
       $a isa! valueless-name;
@@ -2506,7 +2506,7 @@ Feature: TypeQL Match Clause
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then typeql read query; fails with a message containing: "empty-set for some variable"
+    Then typeql read query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       match
       $a isa! birth-info;
