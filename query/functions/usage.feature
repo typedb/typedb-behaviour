@@ -131,6 +131,7 @@ Feature: Function Usage
       let $five = five();
     """
 
+
   Scenario: Assigning to an anonymous variable discards the returned value.
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -163,3 +164,48 @@ Feature: Function Usage
       | key:ref:0 |
     Given transaction closes
 
+
+  Scenario: Function arguments are passed properly according to index (typedb#7407)
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    with
+      fun subtract($y: integer, $x: integer) -> integer:
+        match
+          let $z = $y - $x;
+        return first $z;
+
+    match
+      # Declare $y before $x
+      let $y = 1;
+      let $x = 2;
+       # Pass $x before $y
+      let $z = subtract($x, $y);
+    """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | z                |
+      | value:integer:1  |
+
+
+  Scenario: A variable that is input from a previous stage may not be assigned to
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert $p isa person, has name "John", has ref 0;
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'name' may not be assigned to, as it was already bound in a previous stage"
+    """
+      with
+        fun name_of($p: person) -> { name }:
+        match $p has name $name;
+        return { $name };
+
+
+      match
+        $p isa person, has name $name;
+      match
+        let $name = name_of($p);
+      """
