@@ -219,7 +219,7 @@ Feature: TypeQL Insert Query
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
-    When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    When typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
       $x isa person;
@@ -597,7 +597,7 @@ Parker";
     Given transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert $c isa citizen, has name "Alice";
       """
@@ -617,7 +617,7 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert $c isa citizen, has document-surname "Morgan";
       """
@@ -644,7 +644,7 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert $c isa registered-citizen, has name "Alice";
       """
@@ -688,7 +688,7 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert $c isa registered-citizen, has name "Morgan";
       """
@@ -722,7 +722,7 @@ Parker";
     Then transaction commits
 
     When connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "empty-set for some variable"
+    Then typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert $c isa birthright-citizen, has name "Morgan";
       """

@@ -124,7 +124,7 @@ Feature: Validate Function Signatures Against Definition & Calls
       $cat isa person, has name $name;
     return { $name };
     """
-    Then transaction commits; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    Then transaction commits; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'cat' & 'person'"
 
 
   Scenario: Function calls which do not match the arguments in the signature error

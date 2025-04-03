@@ -469,7 +469,7 @@ Feature: TypeQL Put Query
       match $p isa person, has residential-address "9, Downing Street";
     """
     Then answer size is: 1
-    When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    When typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
     """
       put $p isa person, has address "9, Downing Street";
     """
