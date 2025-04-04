@@ -3169,6 +3169,20 @@ Feature: TypeQL Match Clause
       | key:ref:2 | attr:ref:2 |
 
 
+  Scenario: a conjunction where one disjunction produces a variable, and the other only references it can be planned.
+    Given transaction closes
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match
+    not {
+      { $e isa person; } or { $e isa company; };
+      { $e has $n; } or { $t sub $s; };
+    };
+    """
+    Then answer size is: 1
+
+
   Scenario: negations can be applied to filtered variables
     Given transaction commits
 
