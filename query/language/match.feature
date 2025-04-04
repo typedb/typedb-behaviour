@@ -3216,6 +3216,7 @@ Feature: TypeQL Match Clause
       | x           |
       | label:north |
 
+
   Scenario: pattern variable without named variable is invalid
     Given transaction commits
 
@@ -3223,6 +3224,26 @@ Feature: TypeQL Match Clause
     Then typeql read query; parsing fails
       """
       match $x isa person, has name $a; "bob" isa name;
+      """
+
+
+  Scenario: variable reuse across branches is not permitted without a common binding
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query
+      """
+      match $x has $a; { $x isa person; } or { $x isa company; } or { $a isa name; };
+      """
+    Then typeql read query; fails
+      """
+      match { $x isa person; } or { $x isa company; } or { $a isa name; };
+      """
+    Then typeql read query; fails
+      """
+      match
+        { $x isa person; } or { $a isa age; };
+        { $x isa company; } or { $n isa name; };
       """
 
 
