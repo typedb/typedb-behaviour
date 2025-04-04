@@ -3233,17 +3233,17 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     Then typeql read query
       """
-      match $x has $a; { $x isa person; } or { $x isa company; } or { $a isa name };
+      match $x has $a; { $x isa person; } or { $x isa company; } or { $a isa name; };
       """
     Then typeql read query; fails
       """
-      match { $x isa person; } or { $x isa company; } or { $a isa name };
+      match { $x isa person; } or { $x isa company; } or { $a isa name; };
       """
     Then typeql read query; fails
       """
       match
         { $x isa person; } or { $a isa age; };
-        { $x isa company; } or { $n isa name };
+        { $x isa company; } or { $n isa name; };
       """
 
 
