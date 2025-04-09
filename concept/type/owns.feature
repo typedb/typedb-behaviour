@@ -85,16 +85,16 @@ Feature: Concept Owns
       | birthday |
     Then entity(person) get owns is empty
     Examples:
-      | value-type    | value-type-2 |
-      | integer       | string       |
-      | double        | datetime-tz  |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | integer      |
-      | date          | decimal      |
-      | datetime-tz   | double       |
-      | duration      | boolean      |
-      | custom-struct | integer      |
+      | value-type            | value-type-2 |
+      | integer               | string       |
+      | double                | datetime-tz  |
+      | decimal               | datetime     |
+      | string                | duration     |
+      | boolean               | integer      |
+      | date                  | decimal      |
+      | datetime-tz           | double       |
+      | duration              | boolean      |
+      | struct(custom-struct) | integer      |
 
   Scenario Outline: Entity types can redeclare owning attributes with <value-type> value type
     When create attribute type: name
@@ -108,10 +108,10 @@ Feature: Concept Owns
     When connection open schema transaction for database: typedb
     Then entity(person) set owns: email
     Examples:
-      | value-type    |
-      | integer       |
-      | datetime      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | datetime              |
+      | struct(custom-struct) |
 
   Scenario: Non-abstract entity type can own abstract attribute with and without value type
     When create entity type: player
@@ -240,16 +240,16 @@ Feature: Concept Owns
       | comment       |
     Then relation(marriage) get owns is empty
     Examples:
-      | value-type    | value-type-2 |
-      | integer       | string       |
-      | double        | datetime-tz  |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | integer      |
-      | date          | decimal      |
-      | datetime-tz   | double       |
-      | duration      | boolean      |
-      | custom-struct | integer      |
+      | value-type            | value-type-2 |
+      | integer               | string       |
+      | double                | datetime-tz  |
+      | decimal               | datetime     |
+      | string                | duration     |
+      | boolean               | integer      |
+      | date                  | decimal      |
+      | datetime-tz           | double       |
+      | duration              | boolean      |
+      | struct(custom-struct) | integer      |
 
   Scenario: The schema does not contain redundant owns declarations
     When create attribute type: attr0
@@ -540,11 +540,11 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name-2>) set owns: name
     Then transaction commits; fails
     Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetime-tz   |
-      | entity    | person         | customer     | subscriber     | custom-struct |
-      | relation  | description    | registration | profile        | decimal       |
-      | relation  | description    | registration | profile        | string        |
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type            |
+      | entity    | person         | customer     | subscriber     | datetime-tz           |
+      | entity    | person         | customer     | subscriber     | struct(custom-struct) |
+      | relation  | description    | registration | profile        | decimal               |
+      | relation  | description    | registration | profile        | string                |
 
   Scenario Outline: <root-type> types cannot unset inherited ownership
     When create attribute type: username
@@ -683,16 +683,16 @@ Feature: Concept Owns
       | birthday |
     Then entity(person) get owns is empty
     Examples:
-      | value-type    | value-type-2 |
-      | integer       | string       |
-      | double        | datetime-tz  |
-      | decimal       | datetime     |
-      | string        | duration     |
-      | boolean       | integer      |
-      | date          | decimal      |
-      | datetime-tz   | double       |
-      | duration      | boolean      |
-      | custom-struct | integer      |
+      | value-type            | value-type-2 |
+      | integer               | string       |
+      | double                | datetime-tz  |
+      | decimal               | datetime     |
+      | string                | duration     |
+      | boolean               | integer      |
+      | date                  | decimal      |
+      | datetime-tz           | double       |
+      | duration              | boolean      |
+      | struct(custom-struct) | integer      |
 
   Scenario Outline: Entity types can redeclare ordered ownership
     When create attribute type: name
@@ -714,17 +714,17 @@ Feature: Concept Owns
     Then entity(person) get owns(email) get ordering: unordered
     Then transaction commits
     Examples:
-      | value-type    |
-      | integer       |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | double                |
+      | decimal               |
+      | string                |
+      | boolean               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario: Abstract entity type can set ordered ownership
     When create entity type: player
@@ -808,10 +808,10 @@ Feature: Concept Owns
       | comment       |
     Then relation(marriage) get owns is empty
     Examples:
-      | value-type    | value-type-2 |
-      | integer       | string       |
-      | double        | datetime-tz  |
-      | custom-struct | decimal      |
+      | value-type            | value-type-2 |
+      | integer               | string       |
+      | double                | datetime-tz  |
+      | struct(custom-struct) | decimal      |
 
   Scenario Outline: Relation types can redeclare ordered ownership
     When create attribute type: name
@@ -835,17 +835,17 @@ Feature: Concept Owns
     Then relation(reference) get owns(email) get ordering: unordered
     Then transaction commits
     Examples:
-      | value-type    |
-      | integer       |
-      | double        |
-      | decimal       |
-      | string        |
-      | boolean       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | double                |
+      | decimal               |
+      | string                |
+      | boolean               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario: Abstract relation type can set ordered ownership of abstract attribute
     When create relation type: reference
@@ -970,11 +970,11 @@ Feature: Concept Owns
     When <root-type>(<subtype-name-2>) set owns: name[]
     Then transaction commits; fails
     Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | datetime-tz   |
-      | entity    | person         | customer     | subscriber     | custom-struct |
-      | relation  | description    | registration | profile        | decimal       |
-      | relation  | description    | registration | profile        | string        |
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type            |
+      | entity    | person         | customer     | subscriber     | datetime-tz           |
+      | entity    | person         | customer     | subscriber     | struct(custom-struct) |
+      | relation  | description    | registration | profile        | decimal               |
+      | relation  | description    | registration | profile        | string                |
 
   Scenario Outline: <root-type> types cannot own super and sub attribute types of different orderings
     When create attribute type: name
@@ -1093,9 +1093,9 @@ Feature: Concept Owns
     Then <root-type>(<subtype-name>) get owns(name) get ordering: unordered
     Then <root-type>(<subtype-name-2>) get owns(surname) get ordering: unordered
     Examples:
-      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type    |
-      | entity    | person         | customer     | subscriber     | decimal       |
-      | relation  | description    | registration | profile        | custom-struct |
+      | root-type | supertype-name | subtype-name | subtype-name-2 | value-type            |
+      | entity    | person         | customer     | subscriber     | decimal               |
+      | relation  | description    | registration | profile        | struct(custom-struct) |
 
   Scenario Outline: <root-type> type can only redeclare ownership if it specialises the inherited one with an annotation
     When create attribute type: literal
