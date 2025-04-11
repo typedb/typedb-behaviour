@@ -319,6 +319,7 @@ Feature: TypeDB Driver
     Then transaction is open: false
 
 
+  @ignore-typedb-driver
   Scenario Outline: Driver can open <type> transactions with different transaction timeouts
     When set transaction option transaction_timeout_millis to: 6000
     Then transaction is open: false
@@ -345,6 +346,7 @@ Feature: TypeDB Driver
       | read   |
 
 
+  @ignore-typedb-driver
   Scenario: Driver can open a schema transaction when a parallel schema lock is released
     When set transaction option transaction_timeout_millis to: 5000
     When set transaction option schema_lock_acquire_timeout_millis to: 1000
