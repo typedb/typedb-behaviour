@@ -778,7 +778,7 @@ Feature: TypeDB Driver
         "single attribute type": {
             "kind": "attribute",
             "label": "name",
-            "value_type": "string"
+            "valueType": "string"
         }
     }
     """
@@ -789,7 +789,7 @@ Feature: TypeDB Driver
         "single attribute type": {
             "kind": "attribute",
             "label": "id",
-            "value_type": "integer"
+            "valueType": "integer"
         }
     }
     """
