@@ -66,17 +66,17 @@ Feature: Concept Attribute Type
     When struct(multi-name) create field: first-name, with value type: string
     When struct(multi-name) create field: second-name, with value type: string
     When create attribute type: full-name
-    When attribute(full-name) set value type: multi-name
+    When attribute(full-name) set value type: struct(multi-name)
     Then attribute(full-name) exists
     Then attribute(full-name) get supertype does not exist
-    Then attribute(full-name) get value type: multi-name
-    Then attribute(full-name) get value type declared: multi-name
+    Then attribute(full-name) get value type: struct(multi-name)
+    Then attribute(full-name) get value type declared: struct(multi-name)
     When transaction commits
     When connection open read transaction for database: typedb
     Then attribute(full-name) exists
     Then attribute(full-name) get supertype does not exist
-    Then attribute(full-name) get value type: multi-name
-    Then attribute(full-name) get value type declared: multi-name
+    Then attribute(full-name) get value type: struct(multi-name)
+    Then attribute(full-name) get value type declared: struct(multi-name)
 
   Scenario Outline: Attribute types cannot be recreated with <value-type> value type
     When create attribute type: name
@@ -88,17 +88,17 @@ Feature: Concept Attribute Type
     Then attribute(name) exists
     Then create attribute type: name; fails
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario: Attribute types cannot be created without value types
     When create attribute type: name
@@ -776,33 +776,33 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type-2>
     Then attribute(first-name) set supertype: name; fails
     Examples:
-      | value-type-1  | value-type-2    |
-      | integer       | string          |
-      | integer       | boolean         |
-      | integer       | double          |
-      | integer       | decimal         |
-      | integer       | date            |
-      | integer       | datetime        |
-      | integer       | datetime-tz     |
-      | integer       | duration        |
-      | integer       | custom-struct   |
-      | string        | integer         |
-      | boolean       | string          |
-      | double        | datetime-tz     |
-      | decimal       | datetime        |
-      | date          | decimal         |
-      | datetime      | date            |
-      | datetime-tz   | double          |
-      | duration      | boolean         |
-      | custom-struct | integer         |
-      | custom-struct | string          |
-      | custom-struct | boolean         |
-      | custom-struct | double          |
-      | custom-struct | decimal         |
-      | custom-struct | date            |
-      | custom-struct | datetime        |
-      | custom-struct | datetime-tz     |
-      | custom-struct | custom-struct-2 |
+      | value-type-1          | value-type-2            |
+      | integer               | string                  |
+      | integer               | boolean                 |
+      | integer               | double                  |
+      | integer               | decimal                 |
+      | integer               | date                    |
+      | integer               | datetime                |
+      | integer               | datetime-tz             |
+      | integer               | duration                |
+      | integer               | struct(custom-struct)   |
+      | string                | integer                 |
+      | boolean               | string                  |
+      | double                | datetime-tz             |
+      | decimal               | datetime                |
+      | date                  | decimal                 |
+      | datetime              | date                    |
+      | datetime-tz           | double                  |
+      | duration              | boolean                 |
+      | struct(custom-struct) | integer                 |
+      | struct(custom-struct) | string                  |
+      | struct(custom-struct) | boolean                 |
+      | struct(custom-struct) | double                  |
+      | struct(custom-struct) | decimal                 |
+      | struct(custom-struct) | date                    |
+      | struct(custom-struct) | datetime                |
+      | struct(custom-struct) | datetime-tz             |
+      | struct(custom-struct) | struct(custom-struct-2) |
 
   Scenario Outline: Attribute type subtyping an attribute type with value type <value-type-1> cannot set value type <value-type-2>
     When create attribute type: name
@@ -833,33 +833,33 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type is none
     Then attribute(first-name) get value type: <value-type-2>
     Examples:
-      | value-type-1  | value-type-2    |
-      | integer       | string          |
-      | integer       | boolean         |
-      | integer       | double          |
-      | integer       | decimal         |
-      | integer       | date            |
-      | integer       | datetime        |
-      | integer       | datetime-tz     |
-      | integer       | duration        |
-      | integer       | custom-struct   |
-      | string        | boolean         |
-      | boolean       | string          |
-      | double        | datetime        |
-      | decimal       | datetime-tz     |
-      | date          | decimal         |
-      | datetime      | integer         |
-      | datetime-tz   | double          |
-      | duration      | date            |
-      | custom-struct | integer         |
-      | custom-struct | string          |
-      | custom-struct | boolean         |
-      | custom-struct | double          |
-      | custom-struct | decimal         |
-      | custom-struct | date            |
-      | custom-struct | datetime        |
-      | custom-struct | datetime-tz     |
-      | custom-struct | custom-struct-2 |
+      | value-type-1          | value-type-2            |
+      | integer               | string                  |
+      | integer               | boolean                 |
+      | integer               | double                  |
+      | integer               | decimal                 |
+      | integer               | date                    |
+      | integer               | datetime                |
+      | integer               | datetime-tz             |
+      | integer               | duration                |
+      | integer               | struct(custom-struct)   |
+      | string                | boolean                 |
+      | boolean               | string                  |
+      | double                | datetime                |
+      | decimal               | datetime-tz             |
+      | date                  | decimal                 |
+      | datetime              | integer                 |
+      | datetime-tz           | double                  |
+      | duration              | date                    |
+      | struct(custom-struct) | integer                 |
+      | struct(custom-struct) | string                  |
+      | struct(custom-struct) | boolean                 |
+      | struct(custom-struct) | double                  |
+      | struct(custom-struct) | decimal                 |
+      | struct(custom-struct) | date                    |
+      | struct(custom-struct) | datetime                |
+      | struct(custom-struct) | datetime-tz             |
+      | struct(custom-struct) | struct(custom-struct-2) |
 
   Scenario Outline: Supertype attribute type cannot set <value-type-2> conflicting with <value-type-1> set for one of subtypes
     When create attribute type: name
@@ -939,33 +939,33 @@ Feature: Concept Attribute Type
     Then attribute(second-name) get value type is none
     Then attribute(sub-first-name) get value type is none
     Examples:
-      | value-type-1  | value-type-2    |
-      | integer       | string          |
-      | integer       | boolean         |
-      | integer       | double          |
-      | integer       | decimal         |
-      | integer       | date            |
-      | integer       | datetime        |
-      | integer       | datetime-tz     |
-      | integer       | duration        |
-      | integer       | custom-struct   |
-      | string        | datetime-tz     |
-      | boolean       | date            |
-      | double        | datetime        |
-      | decimal       | double          |
-      | date          | string          |
-      | datetime      | integer         |
-      | datetime-tz   | decimal         |
-      | duration      | boolean         |
-      | custom-struct | integer         |
-      | custom-struct | string          |
-      | custom-struct | boolean         |
-      | custom-struct | double          |
-      | custom-struct | decimal         |
-      | custom-struct | date            |
-      | custom-struct | datetime        |
-      | custom-struct | datetime-tz     |
-      | custom-struct | custom-struct-2 |
+      | value-type-1          | value-type-2            |
+      | integer               | string                  |
+      | integer               | boolean                 |
+      | integer               | double                  |
+      | integer               | decimal                 |
+      | integer               | date                    |
+      | integer               | datetime                |
+      | integer               | datetime-tz             |
+      | integer               | duration                |
+      | integer               | struct(custom-struct)   |
+      | string                | datetime-tz             |
+      | boolean               | date                    |
+      | double                | datetime                |
+      | decimal               | double                  |
+      | date                  | string                  |
+      | datetime              | integer                 |
+      | datetime-tz           | decimal                 |
+      | duration              | boolean                 |
+      | struct(custom-struct) | integer                 |
+      | struct(custom-struct) | string                  |
+      | struct(custom-struct) | boolean                 |
+      | struct(custom-struct) | double                  |
+      | struct(custom-struct) | decimal                 |
+      | struct(custom-struct) | date                    |
+      | struct(custom-struct) | datetime                |
+      | struct(custom-struct) | datetime-tz             |
+      | struct(custom-struct) | struct(custom-struct-2) |
 
   Scenario Outline: Supertype attribute type can set <value-type> set for subtype, but subtype needs to explicitly unset it before commit
     When create attribute type: name
@@ -998,17 +998,17 @@ Feature: Concept Attribute Type
     Then attribute(name) get value type: <value-type>
     Then attribute(first-name) get value type: <value-type>
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Attribute types can set <value-type> value type after subtyping attribute type without value type
     When create attribute type: name
@@ -1023,17 +1023,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type>
     Then attribute(name) get value type is none
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Attribute types can set <value-type> value type before inheriting from an abstract attribute type without value type
     When create attribute type: name
@@ -1048,17 +1048,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get value type: <value-type>
     Then attribute(name) get value type is none
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Attribute types can inherit <value-type> value type from supertype
     When create attribute type: name
@@ -1074,17 +1074,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get supertype: name
     Then attribute(first-name) get value type: <value-type>
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Attribute type of <value-type> value type cannot inherit @abstract annotation, but can set it being a subtype
     When create attribute type: name
@@ -1112,17 +1112,17 @@ Feature: Concept Attribute Type
     Then attribute(first-name) get constraints contain: @abstract
     Then attribute(first-name) get declared annotations contain: @abstract
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario: Attribute types cannot unset @abstract annotation if it does not have value type
     When create attribute type: name
@@ -1344,16 +1344,16 @@ Feature: Concept Attribute Type
     Then attribute(email) get constraints is empty
     Then attribute(email) get declared annotations is empty
     Examples:
-      | value-type    | arg     |
-      | integer       | "value" |
-      | boolean       | "value" |
-      | double        | "value" |
-      | decimal       | "value" |
-      | date          | "value" |
-      | datetime      | "value" |
-      | datetime-tz   | "value" |
-      | duration      | "value" |
-      | custom-struct | "value" |
+      | value-type            | arg     |
+      | integer               | "value" |
+      | boolean               | "value" |
+      | double                | "value" |
+      | decimal               | "value" |
+      | date                  | "value" |
+      | datetime              | "value" |
+      | datetime-tz           | "value" |
+      | duration              | "value" |
+      | struct(custom-struct) | "value" |
 
   Scenario: Attribute type cannot set @regex annotation for none value type, cannot unset value type with @regex annotation
     When create attribute type: name
@@ -1545,7 +1545,7 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: datetime; fails
     Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
-    Then attribute(custom-attribute) set value type: custom-struct; fails
+    Then attribute(custom-attribute) set value type: struct(custom-struct); fails
     When attribute(custom-attribute) set value type: string
     Then attribute(custom-attribute) get value type: string
     When attribute(custom-attribute) unset annotation: @regex
@@ -1566,7 +1566,7 @@ Feature: Concept Attribute Type
     Then attribute(custom-attribute) set value type: datetime; fails
     Then attribute(custom-attribute) set value type: datetime-tz; fails
     Then attribute(custom-attribute) set value type: duration; fails
-    Then attribute(custom-attribute) set value type: custom-struct; fails
+    Then attribute(custom-attribute) set value type: struct(custom-struct); fails
     Then attribute(custom-attribute) get value type: string
 
 ########################
@@ -1591,17 +1591,17 @@ Feature: Concept Attribute Type
     Then attribute(email) get constraints do not contain: @independent
     Then attribute(email) get declared annotations do not contain: @independent
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario: Attribute type can reset @independent annotation
     When create attribute type: name
@@ -2551,17 +2551,17 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) get value type: <value-type>
     Then struct(passport) get field(name) is optional: false
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Struct can be created with multiple fields, including another struct
     When create struct: passport
@@ -2585,17 +2585,17 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) get value type: <value-type-2>
     Then struct(passport) get field(name) is optional: false
     Examples:
-      | value-type-1  | value-type-2  |
-      | integer       | string        |
-      | string        | boolean       |
-      | boolean       | double        |
-      | double        | decimal       |
-      | decimal       | date          |
-      | date          | datetime      |
-      | datetime      | datetime-tz   |
-      | datetime-tz   | duration      |
-      | duration      | custom-struct |
-      | custom-struct | integer       |
+      | value-type-1          | value-type-2          |
+      | integer               | string                |
+      | string                | boolean               |
+      | boolean               | double                |
+      | double                | decimal               |
+      | decimal               | date                  |
+      | date                  | datetime              |
+      | datetime              | datetime-tz           |
+      | datetime-tz           | duration              |
+      | duration              | struct(custom-struct) |
+      | struct(custom-struct) | integer               |
 
   Scenario Outline: Struct can be created with one optional field, including another struct
     When create struct: passport
@@ -2614,17 +2614,17 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(name) get value type: <value-type>
     Then struct(passport) get field(name) is optional: true
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Struct can be created with multiple optional fields, including another struct
     When create struct: passport
@@ -2662,17 +2662,17 @@ Feature: Concept Attribute Type
     Then struct(passport) get field(middle-name) get value type: <value-type-2>
     Then struct(passport) get field(middle-name) is optional: true
     Examples:
-      | value-type-1  | value-type-2  |
-      | integer       | string        |
-      | string        | boolean       |
-      | boolean       | double        |
-      | double        | decimal       |
-      | decimal       | date          |
-      | date          | datetime      |
-      | datetime      | datetime-tz   |
-      | datetime-tz   | duration      |
-      | duration      | custom-struct |
-      | custom-struct | integer       |
+      | value-type-1          | value-type-2          |
+      | integer               | string                |
+      | string                | boolean               |
+      | boolean               | double                |
+      | double                | decimal               |
+      | decimal               | date                  |
+      | date                  | datetime              |
+      | datetime              | datetime-tz           |
+      | datetime-tz           | duration              |
+      | duration              | struct(custom-struct) |
+      | struct(custom-struct) | integer               |
 
   Scenario: Struct without fields can be deleted
     When create struct: passport
@@ -2751,17 +2751,17 @@ Feature: Concept Attribute Type
     Then struct(passport) get fields contain:
       | not-name |
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | boolean       |
-      | double        |
-      | decimal       |
-      | date          |
-      | datetime      |
-      | datetime-tz   |
-      | duration      |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | boolean               |
+      | double                |
+      | decimal               |
+      | date                  |
+      | datetime              |
+      | datetime-tz           |
+      | duration              |
+      | struct(custom-struct) |
 
   Scenario Outline: Struct cannot delete fields of type <value-type> if it doesn't exist
     When create struct: passport
@@ -2774,11 +2774,11 @@ Feature: Concept Attribute Type
     When struct(table) delete field: name
     Then struct(table) delete field: name; fails
     Examples:
-      | value-type    |
-      | integer       |
-      | string        |
-      | date          |
-      | custom-struct |
+      | value-type            |
+      | integer               |
+      | string                |
+      | date                  |
+      | struct(custom-struct) |
 
   Scenario: Struct cannot be redefined
     When create struct: passport

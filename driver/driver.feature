@@ -319,7 +319,53 @@ Feature: TypeDB Driver
     Then transaction is open: false
 
 
-  # TODO: Check options setting and retrieval
+  @ignore-typedb-driver
+  Scenario Outline: Driver can open <type> transactions with different transaction timeouts
+    When set transaction option transaction_timeout_millis to: 6000
+    Then transaction is open: false
+    When connection open <type> transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: <type>
+    When wait 3 seconds
+    Then transaction is open: true
+    Then transaction has type: <type>
+    Then typeql schema query
+      """
+      match entity $x;
+      """
+    When wait 4 seconds
+    Then transaction is open: false
+    Then typeql schema query; fails with a message containing: "no open transaction"
+      """
+      match entity $x;
+      """
+    Examples:
+      | type   |
+      | schema |
+      | write  |
+      | read   |
+
+
+  @ignore-typedb-driver
+  Scenario: Driver can open a schema transaction when a parallel schema lock is released
+    When set transaction option transaction_timeout_millis to: 5000
+    When set transaction option schema_lock_acquire_timeout_millis to: 1000
+    When in background, connection open schema transaction for database: typedb
+    Then transaction is open: false
+    Then connection open schema transaction for database: typedb; fails with a message containing: "timeout"
+    Then transaction is open: false
+    When wait 5 seconds
+    When set transaction option transaction_timeout_millis to: 1000
+    When set transaction option schema_lock_acquire_timeout_millis to: 5000
+    When in background, connection open schema transaction for database: typedb
+    Then transaction is open: false
+    When connection open schema transaction for database: typedb
+    Then transaction is open: true
+    Then transaction has type: schema
+    Then typeql schema query
+      """
+      match entity $x;
+      """
 
 
   # TODO: Fix on_close
@@ -734,7 +780,7 @@ Feature: TypeDB Driver
         "single attribute type": {
             "kind": "attribute",
             "label": "name",
-            "value_type": "string"
+            "valueType": "string"
         }
     }
     """
@@ -745,7 +791,7 @@ Feature: TypeDB Driver
         "single attribute type": {
             "kind": "attribute",
             "label": "id",
-            "value_type": "integer"
+            "valueType": "integer"
         }
     }
     """
