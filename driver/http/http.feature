@@ -28,6 +28,14 @@ Feature: TypeDB HTTP Endpoint
   # AUTHENTICATION #
   ##################
 
+  Scenario: Authentication is invalidated after the authentication token TTL
+    Then connection create database: typedb2
+    When wait authentication token expiration
+    Then connection create database: typedb3; fails with a message containing: "Invalid token"
+
+    When connection opens with default authentication
+    Then connection create database: typedb3
+
   Scenario: Database methods are not available without authentication
     When connection closes
     Then connection is open: false
