@@ -10,7 +10,7 @@
 #noinspection CucumberUndefinedStep
 Feature: TypeDB Driver
 
-  Background: Open connection / create driver, create database
+  Background: Open connection, create driver, create database
     Given typedb starts
     Given connection is open: false
     Given connection opens with default authentication
@@ -329,13 +329,13 @@ Feature: TypeDB Driver
     When wait 3 seconds
     Then transaction is open: true
     Then transaction has type: <type>
-    Then typeql schema query
+    Then typeql read query
       """
       match entity $x;
       """
     When wait 4 seconds
     Then transaction is open: false
-    Then typeql schema query; fails with a message containing: "no open transaction"
+    Then typeql read query; fails with a message containing: "no open transaction"
       """
       match entity $x;
       """
@@ -362,7 +362,7 @@ Feature: TypeDB Driver
     When connection open schema transaction for database: typedb
     Then transaction is open: true
     Then transaction has type: schema
-    Then typeql schema query
+    Then typeql read query
       """
       match entity $x;
       """
