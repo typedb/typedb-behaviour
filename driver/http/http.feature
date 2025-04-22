@@ -139,6 +139,174 @@ Feature: TypeDB HTTP Endpoint
       match entity $x;
       """
 
+  #################################
+  # CONCEPT ROW ANSWERS STRUCTURE #
+  #################################
+
+  Scenario: Transaction read row queries return all concepts correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, plays parentship:parent, owns name;
+        attribute name value string;
+        relation parentship, relates parent;
+      """
+    Given typeql write query
+      """
+      insert
+        $p isa person, has name 'John';
+        $pp isa parentship, links ($p);
+      """
+    Given transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $entity isa $entity-type, has $attribute-type $attribute;
+        $relation isa $relation-type, links ($entity);
+        $relation-type relates $role-type;
+        let $value = $attribute;
+      """
+    Then answer size is: 1
+    Then answer type is: concept rows
+    Then answer type is not: concept documents
+    Then answer contains document:
+    """
+    {
+        "entity": {
+            "kind": "entity",
+            "iid": "0x1e00000000000000000000",
+            "type": {
+                "kind": "entityType",
+                "label": "person"
+            }
+        },
+        "role-type": {
+            "kind": "roleType",
+            "label": "parentship:parent"
+        },
+        "relation": {
+            "kind": "relation",
+            "iid": "0x1f00000000000000000000",
+            "type": {
+                "kind": "relationType",
+                "label": "parentship"
+            }
+        },
+        "relation-type": {
+            "kind": "relationType",
+            "label": "parentship"
+        },
+        "attribute-type": {
+            "kind": "attributeType",
+            "label": "name",
+            "valueType": "string"
+        },
+        "entity-type": {
+            "kind": "entityType",
+            "label": "person"
+        },
+        "value": {
+            "kind": "value",
+            "value": "John",
+            "valueType": "string"
+        },
+        "attribute": {
+            "kind": "attribute",
+            "value": "John",
+            "valueType": "string",
+            "type": {
+                "kind": "attributeType",
+                "label": "name",
+                "valueType": "string"
+            }
+        }
+    }
+    """
+
+  Scenario: One-shot read row queries return all concepts correctly
+    Given one-shot query with commit with schema transaction for database typedb: typeql schema query
+      """
+      define
+        entity person, plays parentship:parent, owns name;
+        attribute name value string;
+        relation parentship, relates parent;
+      """
+    Given one-shot query with commit with write transaction for database typedb: typeql write query
+      """
+      insert
+        $p isa person, has name 'John';
+        $pp isa parentship, links ($p);
+      """
+
+    When set query option include_instance_types to: true
+    Then one-shot query with read transaction for database typedb: get answers of typeql read query
+      """
+      match
+        $entity isa $entity-type, has $attribute-type $attribute;
+        $relation isa $relation-type, links ($entity);
+        $relation-type relates $role-type;
+        let $value = $attribute;
+      """
+    Then answer size is: 1
+    Then answer type is: concept rows
+    Then answer type is not: concept documents
+    Then answer contains document:
+    """
+    {
+        "entity": {
+            "kind": "entity",
+            "iid": "0x1e00000000000000000000",
+            "type": {
+                "kind": "entityType",
+                "label": "person"
+            }
+        },
+        "role-type": {
+            "kind": "roleType",
+            "label": "parentship:parent"
+        },
+        "relation": {
+            "kind": "relation",
+            "iid": "0x1f00000000000000000000",
+            "type": {
+                "kind": "relationType",
+                "label": "parentship"
+            }
+        },
+        "relation-type": {
+            "kind": "relationType",
+            "label": "parentship"
+        },
+        "attribute-type": {
+            "kind": "attributeType",
+            "label": "name",
+            "valueType": "string"
+        },
+        "entity-type": {
+            "kind": "entityType",
+            "label": "person"
+        },
+        "value": {
+            "kind": "value",
+            "value": "John",
+            "valueType": "string"
+        },
+        "attribute": {
+            "kind": "attribute",
+            "value": "John",
+            "valueType": "string",
+            "type": {
+                "kind": "attributeType",
+                "label": "name",
+                "valueType": "string"
+            }
+        }
+    }
+    """
+
   ###########################
   # ONE-SHOT QUERIES COMMON #
   ###########################
@@ -526,7 +694,6 @@ Feature: TypeDB HTTP Endpoint
         $p isa person, has id 1, has name "John";
       """
 
-
   ###############################
   # QUERY OPTIONS: TRANSACTIONS #
   ###############################
@@ -552,17 +719,17 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa one;
       """
     Then answer size is: 1
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa two;
       """
     Then answer size is: 2
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa many;
       """
@@ -573,17 +740,17 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa one;
       """
     Then answer size is: 1
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa two;
       """
     Then answer size is: 2
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa many;
       """
@@ -594,17 +761,17 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa one;
       """
     Then answer size is: 1
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa two;
       """
     Then answer size is: 1
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa many;
       """
@@ -635,7 +802,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $e isa person;
@@ -655,7 +822,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $e isa person;
@@ -685,7 +852,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open write transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       insert
         $e isa person, has name $a;
@@ -705,7 +872,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open write transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       insert
         $e isa person, has name $a;
@@ -737,7 +904,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         attribute $type;
@@ -765,7 +932,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open read transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         attribute $type;
@@ -805,7 +972,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open write transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         attribute $type;
@@ -834,7 +1001,7 @@ Feature: TypeDB HTTP Endpoint
     Then transaction is open: false
     When connection open write transaction for database: typedb
     Then transaction is open: true
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         attribute $type;
