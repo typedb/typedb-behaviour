@@ -508,11 +508,11 @@ Feature: TypeDB Driver
       """
     Then answer size is: 1
     Then answer get row(0) get variable(e) try get label is not none
-    Then answer get row(0) get variable(e) get type get label: person
+    Then answer get row(0) get entity(e) get type get label: person
     Then answer get row(0) get variable(a) try get label is not none
-    Then answer get row(0) get variable(a) get type get label: name
+    Then answer get row(0) get attribute(a) get type get label: name
     Then answer get row(0) get variable(r) try get label is not none
-    Then answer get row(0) get variable(r) get type get label: friendship
+    Then answer get row(0) get relation(r) get type get label: friendship
     When transaction closes
 
     When set query option include_instance_types to: false
@@ -558,11 +558,11 @@ Feature: TypeDB Driver
       """
     Then answer size is: 1
     Then answer get row(0) get variable(e) try get label is not none
-    Then answer get row(0) get variable(e) get type get label: person
+    Then answer get row(0) get entity(e) get type get label: person
     Then answer get row(0) get variable(a) try get label is not none
-    Then answer get row(0) get variable(a) get type get label: name
+    Then answer get row(0) get attribute(a) get type get label: name
     Then answer get row(0) get variable(r) try get label is not none
-    Then answer get row(0) get variable(r) get type get label: friendship
+    Then answer get row(0) get relation(r) get type get label: friendship
     When transaction closes
 
     When set query option include_instance_types to: false
