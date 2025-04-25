@@ -542,12 +542,12 @@ Feature: Recursive Function Execution
 
       entity traversable sub indexable,
           plays pair:start,
-          plays pair:end;
+          plays pair:end_;
 
       entity vertex sub traversable;
       entity node sub traversable;
 
-      relation pair, relates start, relates end;
+      relation pair, relates start, relates end_;
       relation link sub pair;
       relation indirect-link sub pair;
       relation reachable sub pair;
@@ -904,19 +904,19 @@ Feature: Recursive Function Execution
         plays parentship:parent,
         plays parentship:child,
         plays up:start,
-        plays up:end,
+        plays up:end_,
         plays down:start,
-        plays down:end,
+        plays down:end_,
         plays flat:start,
-        plays flat:end;
+        plays flat:end_;
 
       relation parentship, relates parent, relates child;
 
-      relation up, relates start, relates end;
+      relation up, relates start, relates end_;
 
-      relation down, relates start, relates end;
+      relation down, relates start, relates end_;
 
-      relation flat, relates end, relates start;
+      relation flat, relates end_, relates start;
 
       attribute name, value string;
 
@@ -1106,18 +1106,18 @@ Feature: Recursive Function Execution
 
       entity entity2,
         owns index @key,
-        plays P:start, plays P:end,
-        plays R1:start, plays R1:end,
-        plays R2:start, plays R2:end;
+        plays P:start, plays P:end_,
+        plays R1:start, plays R1:end_,
+        plays R2:start, plays R2:end_;
 
       entity start sub entity2;
-      entity end sub entity2;
+      entity end_ sub entity2;
       entity a-entity sub entity2;
       entity b-entity sub entity2;
 
-      relation R1, relates start, relates end;
-      relation R2, relates start, relates end;
-      relation P, relates start, relates end;
+      relation R1, relates start, relates end_;
+      relation R2, relates start, relates end_;
+      relation P, relates start, relates end_;
       attribute index, value string;
 
       # --- pairs ---
@@ -1284,7 +1284,7 @@ Feature: Recursive Function Execution
 
     Then verify answer set is equivalent for query
       """
-      match $y isa $t; { $t label a-entity; } or { $t label end; }; select $y;
+      match $y isa $t; { $t label a-entity; } or { $t label end_; }; select $y;
       """
     Given get answers of typeql read query
       """
@@ -1297,7 +1297,7 @@ Feature: Recursive Function Execution
 
     Then verify answer set is equivalent for query
       """
-      match $y isa $t; { $t label a-entity; } or { $t label end; }; select $y;
+      match $y isa $t; { $t label a-entity; } or { $t label end_; }; select $y;
       """
 
   Scenario: tail recursion test
@@ -1311,12 +1311,12 @@ Feature: Recursive Function Execution
       entity entity2,
         owns index @key,
         plays Q:start,
-        plays Q:end;
+        plays Q:end_;
 
       entity a-entity sub entity2;
       entity b-entity sub entity2;
 
-      relation Q, relates start, relates end;
+      relation Q, relates start, relates end_;
 
       attribute index, value string;
 
@@ -1540,8 +1540,8 @@ Feature: Recursive Function Execution
       entity entity2, owns index @key;
       entity a-entity sub entity2;
 
-      relation Q, relates start, relates end;
-      entity2 plays Q:start, plays Q:end;
+      relation Q, relates start, relates end_;
+      entity2 plays Q:start, plays Q:end_;
 
       attribute index, value string;
 
