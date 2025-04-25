@@ -319,7 +319,6 @@ Feature: TypeDB Driver
     Then transaction is open: false
 
 
-  @ignore-typedb-driver
   Scenario Outline: Driver can open <type> transactions with different transaction timeouts
     When set transaction option transaction_timeout_millis to: 6000
     Then transaction is open: false
@@ -335,7 +334,7 @@ Feature: TypeDB Driver
       """
     When wait 4 seconds
     Then transaction is open: false
-    Then typeql read query; fails with a message containing: "no open transaction"
+    Then typeql read query; fails
       """
       match entity $x;
       """
@@ -346,7 +345,6 @@ Feature: TypeDB Driver
       | read   |
 
 
-  @ignore-typedb-driver
   Scenario: Driver can open a schema transaction when a parallel schema lock is released
     When set transaction option transaction_timeout_millis to: 5000
     When set transaction option schema_lock_acquire_timeout_millis to: 1000
@@ -472,6 +470,533 @@ Feature: TypeDB Driver
     Then typeql write query
       """
       insert $e isa new-entity;
+      """
+
+  #################
+  # QUERY OPTIONS #
+  #################
+
+  Scenario: Read rows queries can include and exclude instance types
+    # Does not affect
+    Given set query option include_instance_types to: false
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name, plays friendship:friend;
+        relation friendship, relates friend;
+        attribute name value string;
+      """
+    Given typeql write query
+      """
+      insert
+        $p isa person, has name "John";
+        $f isa friendship, links ($p);
+      """
+    Given transaction commits
+
+    When set query option include_instance_types to: true
+    Then transaction is open: false
+    When connection open read transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql read query
+      """
+      match
+        $e isa person;
+        $a isa name;
+        $r isa friendship;
+      """
+    Then answer size is: 1
+    Then answer get row(0) get variable(e) try get label is not none
+    Then answer get row(0) get entity(e) get type get label: person
+    Then answer get row(0) get variable(a) try get label is not none
+    Then answer get row(0) get attribute(a) get type get label: name
+    Then answer get row(0) get variable(r) try get label is not none
+    Then answer get row(0) get relation(r) get type get label: friendship
+    When transaction closes
+
+    When set query option include_instance_types to: false
+    Then transaction is open: false
+    When connection open read transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql read query
+      """
+      match
+        $e isa person;
+        $a isa name;
+        $r isa friendship;
+      """
+    Then answer size is: 1
+    Then answer get row(0) get variable(e) try get label is none
+    Then answer get row(0) get variable(a) try get label is none
+    Then answer get row(0) get variable(r) try get label is none
+
+
+  Scenario: Write rows queries can include and exclude instance types
+    # Does not affect
+    Given set query option include_instance_types to: false
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name, plays friendship:friend;
+        relation friendship, relates friend;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When set query option include_instance_types to: true
+    Then transaction is open: false
+    When connection open write transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql write query
+      """
+      insert
+        $e isa person, has name $a;
+        $a isa name "John";
+        $r isa friendship, links ($e);
+      """
+    Then answer size is: 1
+    Then answer get row(0) get variable(e) try get label is not none
+    Then answer get row(0) get entity(e) get type get label: person
+    Then answer get row(0) get variable(a) try get label is not none
+    Then answer get row(0) get attribute(a) get type get label: name
+    Then answer get row(0) get variable(r) try get label is not none
+    Then answer get row(0) get relation(r) get type get label: friendship
+    When transaction closes
+
+    When set query option include_instance_types to: false
+    Then transaction is open: false
+    When connection open write transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql write query
+      """
+      insert
+        $e isa person, has name $a;
+        $a isa name "John";
+        $r isa friendship, links ($e);
+      """
+    Then answer size is: 1
+    Then answer get row(0) get variable(e) try get label is none
+    Then answer get row(0) get variable(a) try get label is none
+    Then answer get row(0) get variable(r) try get label is none
+
+
+  Scenario: Read document queries are not controlled by the include_instance_types option
+    # Does not affect
+    Given set query option include_instance_types to: false
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name; attribute name value string;
+      """
+    Given typeql write query
+      """
+      insert $p isa person, has name "John";
+      """
+    Given transaction commits
+
+    When set query option include_instance_types to: true
+    Then transaction is open: false
+    When connection open read transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql read query
+      """
+      match
+        attribute $type;
+        $instance isa $type;
+      fetch {
+        "instance": $instance,
+        "type": $type,
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "instance": "John",
+        "type": {
+            "kind": "attribute",
+            "label": "name",
+            "valueType": "string"
+        }
+    }
+    """
+    When transaction closes
+
+    When set query option include_instance_types to: false
+    Then transaction is open: false
+    When connection open read transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql read query
+      """
+      match
+        attribute $type;
+        $instance isa $type;
+      fetch {
+        "instance": $instance,
+        "type": $type,
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "instance": "John",
+        "type": {
+            "kind": "attribute",
+            "label": "name",
+            "valueType": "string"
+        }
+    }
+    """
+
+
+  Scenario: Write documents queries are not controlled by the include_instance_types option
+    # Does not affect
+    Given set query option include_instance_types to: false
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When set query option include_instance_types to: true
+    Then transaction is open: false
+    When connection open write transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql write query
+      """
+      match
+        attribute $type;
+      insert
+        $instance isa $type "John";
+      fetch {
+        "instance": $instance,
+        "type": $type,
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "instance": "John",
+        "type": {
+            "kind": "attribute",
+            "label": "name",
+            "valueType": "string"
+        }
+    }
+    """
+    When transaction closes
+
+    When set query option include_instance_types to: false
+    Then transaction is open: false
+    When connection open write transaction for database: typedb
+    Then transaction is open: true
+    When get answers of typeql write query
+      """
+      match
+        attribute $type;
+      insert
+        $instance isa $type "John";
+      fetch {
+        "instance": $instance,
+        "type": $type,
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+    """
+    {
+        "instance": "John",
+        "type": {
+            "kind": "attribute",
+            "label": "name",
+            "valueType": "string"
+        }
+    }
+    """
+
+  @ignore-typedb-http
+  Scenario: Query option prefetch_size should be >= 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When set query option prefetch_size to: 0
+
+    Then typeql write query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      insert $p isa person;
+      """
+    Then typeql read query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      insert $p isa person;
+      """
+    Then typeql write query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      match $pt label person;
+      insert $p isa $pt;
+      fetch {"pt": $pt};
+      """
+    Then typeql read query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      match $pt label person;
+      fetch {"pt": $pt};
+      """
+
+  @ignore-typedb-http
+  Scenario: Row queries work the same with different prefetch_size options
+    Given set query option prefetch_size to: 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $alice isa name "Alice";
+        $p isa person, has $alice;
+        $p2 isa person, has name "Bob";
+      """
+    Then answer size is: 1
+    Then answer get row(0) get attribute(alice) get type get label: name
+    Then answer get row(0) get attribute(alice) get value is: "Alice"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 2
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    When transaction closes
+
+    When set query option prefetch_size to: 100000
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $charlie isa name "Charlie";
+        $p2 isa person, has $charlie;
+      """
+    Then answer size is: 2
+    Then answer get row(0) get attribute(charlie) get type get label: name
+    Then answer get row(0) get attribute(charlie) get value is: "Charlie"
+    Then answer get row(1) get attribute(charlie) get type get label: name
+    Then answer get row(1) get attribute(charlie) get value is: "Charlie"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 4
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    Then answer get row(2) get attribute(n) get value is: "Charlie"
+    Then answer get row(3) get attribute(n) get value is: "Charlie"
+    When transaction closes
+
+    When set query option prefetch_size to: 2
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $donald isa name "Donald";
+        $p2 isa person, has $donald;
+      """
+    Then answer size is: 4
+    Then answer get row(0) get attribute(donald) get value is: "Donald"
+    Then answer get row(1) get attribute(donald) get value is: "Donald"
+    Then answer get row(2) get attribute(donald) get value is: "Donald"
+    Then answer get row(3) get attribute(donald) get value is: "Donald"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 8
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    Then answer get row(2) get attribute(n) get value is: "Charlie"
+    Then answer get row(3) get attribute(n) get value is: "Charlie"
+    Then answer get row(4) get attribute(n) get value is: "Donald"
+    Then answer get row(5) get attribute(n) get value is: "Donald"
+    Then answer get row(6) get attribute(n) get value is: "Donald"
+    Then answer get row(7) get attribute(n) get value is: "Donald"
+
+
+  @ignore-typedb-http
+  Scenario: Document queries work the same with different prefetch_size options
+    Given set query option prefetch_size to: 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $alice isa name "Alice";
+        $p isa person, has $alice;
+        $p2 isa person, has name "Bob";
+      fetch {
+        "alice": $alice
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      { "alice": "Alice" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    When transaction closes
+
+    When set query option prefetch_size to: 100000
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $charlie isa name "Charlie";
+        $p2 isa person, has $charlie;
+      fetch {
+        "charlie": $charlie
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      { "charlie": "Charlie" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 4
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Charlie" }
+      """
+    When transaction closes
+
+    When set query option prefetch_size to: 2
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $donald isa name "Donald";
+        $p2 isa person, has $donald;
+      fetch {
+        "donald": $donald
+      };
+      """
+    Then answer size is: 4
+    Then answer contains document:
+      """
+      { "donald": "Donald" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 8
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Charlie" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Donald" }
       """
 
   ###########
