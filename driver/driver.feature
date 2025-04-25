@@ -722,6 +722,283 @@ Feature: TypeDB Driver
     }
     """
 
+  @ignore-typedb-http
+  Scenario: Query option prefetch_size should be >= 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When set query option prefetch_size to: 0
+
+    Then typeql write query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      insert $p isa person;
+      """
+    Then typeql read query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      insert $p isa person;
+      """
+    Then typeql write query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      match $pt label person;
+      insert $p isa $pt;
+      fetch {"pt": $pt};
+      """
+    Then typeql read query; fails with a message containing: "Invalid query option: prefetch size"
+      """
+      match $pt label person;
+      fetch {"pt": $pt};
+      """
+
+  @ignore-typedb-http
+  Scenario: Row queries work the same with different prefetch_size options
+    Given set query option prefetch_size to: 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $alice isa name "Alice";
+        $p isa person, has $alice;
+        $p2 isa person, has name "Bob";
+      """
+    Then answer size is: 1
+    Then answer get row(0) get attribute(alice) get type get label: name
+    Then answer get row(0) get attribute(alice) get value is: "Alice"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 2
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    When transaction closes
+
+    When set query option prefetch_size to: 100000
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $charlie isa name "Charlie";
+        $p2 isa person, has $charlie;
+      """
+    Then answer size is: 2
+    Then answer get row(0) get attribute(charlie) get type get label: name
+    Then answer get row(0) get attribute(charlie) get value is: "Charlie"
+    Then answer get row(1) get attribute(charlie) get type get label: name
+    Then answer get row(1) get attribute(charlie) get value is: "Charlie"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 4
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    Then answer get row(2) get attribute(n) get value is: "Charlie"
+    Then answer get row(3) get attribute(n) get value is: "Charlie"
+    When transaction closes
+
+    When set query option prefetch_size to: 2
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $donald isa name "Donald";
+        $p2 isa person, has $donald;
+      """
+    Then answer size is: 4
+    Then answer get row(0) get attribute(donald) get value is: "Donald"
+    Then answer get row(1) get attribute(donald) get value is: "Donald"
+    Then answer get row(2) get attribute(donald) get value is: "Donald"
+    Then answer get row(3) get attribute(donald) get value is: "Donald"
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      """
+    Then answer size is: 8
+    Then answer get row(0) get attribute(n) get value is: "Alice"
+    Then answer get row(1) get attribute(n) get value is: "Bob"
+    Then answer get row(2) get attribute(n) get value is: "Charlie"
+    Then answer get row(3) get attribute(n) get value is: "Charlie"
+    Then answer get row(4) get attribute(n) get value is: "Donald"
+    Then answer get row(5) get attribute(n) get value is: "Donald"
+    Then answer get row(6) get attribute(n) get value is: "Donald"
+    Then answer get row(7) get attribute(n) get value is: "Donald"
+
+
+  @ignore-typedb-http
+  Scenario: Document queries work the same with different prefetch_size options
+    Given set query option prefetch_size to: 1
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name value string;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      insert
+        $alice isa name "Alice";
+        $p isa person, has $alice;
+        $p2 isa person, has name "Bob";
+      fetch {
+        "alice": $alice
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      { "alice": "Alice" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    When transaction closes
+
+    When set query option prefetch_size to: 100000
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $charlie isa name "Charlie";
+        $p2 isa person, has $charlie;
+      fetch {
+        "charlie": $charlie
+      };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      { "charlie": "Charlie" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 4
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Charlie" }
+      """
+    When transaction closes
+
+    When set query option prefetch_size to: 2
+
+    When connection open write transaction for database: typedb
+    When get answers of typeql write query
+      """
+      match
+        $p isa person;
+      insert
+        $donald isa name "Donald";
+        $p2 isa person, has $donald;
+      fetch {
+        "donald": $donald
+      };
+      """
+    Then answer size is: 4
+    Then answer contains document:
+      """
+      { "donald": "Donald" }
+      """
+    When transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has $n;
+      sort $n;
+      fetch {
+        "n": $n
+      };
+      """
+    Then answer size is: 8
+    Then answer contains document:
+      """
+      { "n": "Alice" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Bob" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Charlie" }
+      """
+    Then answer contains document:
+      """
+      { "n": "Donald" }
+      """
+
   ###########
   # QUERIES #
   ###########
