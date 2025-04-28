@@ -2779,3 +2779,24 @@ Feature: TypeQL Delete Query
       delete
         $n of $_;
       """
+
+
+  Scenario: Concept deletions do not cause trouble for constraint deletions in the same stage referencing that concept
+    Given typeql write query
+    """
+    insert $john isa person, has name "John";
+    insert $jane isa person, has name "Jane";
+    """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      match $x isa person; $y isa person;
+       { $x has name "John"; $y has name "Jane"; } or
+       { $x has name "Jane"; $y has name "John"; };
+       $x has name $n;
+       delete
+        has $n of $x;
+        $y;
+      """
+    Then transaction commits
