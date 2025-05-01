@@ -14,15 +14,33 @@ Feature: TypeDB HTTP Endpoint
     Given connection create database: typedb
     Given connection has database: typedb
 
-  ##########
-  # HEALTH #
-  ##########
+  ###########
+  # GENERAL #
+  ###########
 
   Scenario: Health check works for both authenticated and non-authenticated connection
     Then connection is healthy: true
     When connection closes
     Then connection is open: false
     Then connection is healthy: true
+
+
+  Scenario: Version and distribution are returned from version
+    Then get endpoint(/v1/version) contains field: distribution
+    Then get endpoint(/v1/version) contains field: version
+    When connection closes
+    Then connection is open: false
+    Then get endpoint(/v1/version) contains field: distribution
+    Then get endpoint(/v1/version) contains field: version
+
+
+  Scenario: Root endpoints redirect to version endpoint
+    Then get endpoint(/v1) redirects to: /v1/version
+    Then get endpoint(/) redirects to: /v1/version
+    When connection closes
+    Then connection is open: false
+    Then get endpoint(/v1) redirects to: /v1/version
+    Then get endpoint(/) redirects to: /v1/version
 
   ##################
   # AUTHENTICATION #
@@ -175,6 +193,7 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
+      "data": {
         "entity": {
             "kind": "entity",
             "iid": "0x1e00000000000000000000",
@@ -223,6 +242,8 @@ Feature: TypeDB HTTP Endpoint
                 "valueType": "string"
             }
         }
+      },
+      "provenanceBitArray": [0, 0, 0, 0, 0, 0, 0, 0]
     }
     """
 
@@ -256,6 +277,7 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
+      "data": {
         "entity": {
             "kind": "entity",
             "iid": "0x1e00000000000000000000",
@@ -304,6 +326,8 @@ Feature: TypeDB HTTP Endpoint
                 "valueType": "string"
             }
         }
+      },
+      "provenanceBitArray": [0, 0, 0, 0, 0, 0, 0, 0]
     }
     """
 
@@ -548,13 +572,13 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "all attributes": {
-            "id": 3,
-            "name": [
-                "Warrior Princess",
-                "Xena"
-            ]
-        }
+      "all attributes": {
+          "id": 3,
+          "name": [
+              "Warrior Princess",
+              "Xena"
+          ]
+      }
     }
     """
     Then answer does not contain document:
@@ -595,23 +619,23 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "single attribute": "Yan",
-        "single attribute type": {
-            "kind": "attribute",
-            "label": "name",
-            "valueType": "string"
-        }
+      "single attribute": "Yan",
+      "single attribute type": {
+          "kind": "attribute",
+          "label": "name",
+          "valueType": "string"
+      }
     }
     """
     Then answer contains document:
     """
     {
-        "single attribute": 1,
-        "single attribute type": {
-            "kind": "attribute",
-            "label": "id",
-            "valueType": "integer"
-        }
+      "single attribute": 1,
+      "single attribute type": {
+          "kind": "attribute",
+          "label": "id",
+          "valueType": "integer"
+      }
     }
     """
 
@@ -634,7 +658,7 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "empty-result": { }
+      "empty-result": { }
     }
     """
 
@@ -657,7 +681,7 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "null-result": null
+      "null-result": null
     }
     """
 
@@ -965,12 +989,12 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "instance": "John",
-        "type": {
-            "kind": "attribute",
-            "label": "name",
-            "valueType": "string"
-        }
+      "instance": "John",
+      "type": {
+          "kind": "attribute",
+          "label": "name",
+          "valueType": "string"
+      }
     }
     """
 
@@ -989,12 +1013,12 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "instance": "John",
-        "type": {
-            "kind": "attribute",
-            "label": "name",
-            "valueType": "string"
-        }
+      "instance": "John",
+      "type": {
+          "kind": "attribute",
+          "label": "name",
+          "valueType": "string"
+      }
     }
     """
 
@@ -1025,12 +1049,12 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "instance": "John",
-        "type": {
-            "kind": "attribute",
-            "label": "name",
-            "valueType": "string"
-        }
+      "instance": "John",
+      "type": {
+          "kind": "attribute",
+          "label": "name",
+          "valueType": "string"
+      }
     }
     """
 
@@ -1050,11 +1074,11 @@ Feature: TypeDB HTTP Endpoint
     Then answer contains document:
     """
     {
-        "instance": "John",
-        "type": {
-            "kind": "attribute",
-            "label": "name",
-            "valueType": "string"
-        }
+      "instance": "John",
+      "type": {
+          "kind": "attribute",
+          "label": "name",
+          "valueType": "string"
+      }
     }
     """
