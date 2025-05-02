@@ -243,7 +243,7 @@ Feature: TypeDB HTTP Endpoint
             }
         }
       },
-      "provenanceBitArray": [0, 0, 0, 0, 0, 0, 0, 0]
+      "involvedBranches": [0]
     }
     """
 
@@ -327,7 +327,7 @@ Feature: TypeDB HTTP Endpoint
             }
         }
       },
-      "provenanceBitArray": [0, 0, 0, 0, 0, 0, 0, 0]
+      "involvedBranches": [0]
     }
     """
 
