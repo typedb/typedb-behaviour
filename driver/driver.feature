@@ -190,7 +190,7 @@ Feature: TypeDB Driver
     When typeql schema query
     """
     redefine
-      attribute age, value integer @range(0..);
+      attribute age value integer @range(0..);
 
       fun age($person: real-person) -> age:
         match
@@ -203,13 +203,14 @@ Feature: TypeDB Driver
       entity person @abstract, owns age @card(1..1);
       entity real-person sub person;
       entity not-real-person @abstract, sub person;
-      attribute age, value integer @range(0..);
+      attribute age, value integer @range(0..150);
       relation friendship, relates friend;
       relation best-friendship sub friendship, relates best-friend as friend;
 
-      fun age($person: real-person) -> age:
+      fun age($person: person) -> age:
         match
-          $person has age $age;
+          $person has $age;
+          $age isa age;
         return first $age;
     """
     Then connection get database(typedb) has type schema:
@@ -218,7 +219,7 @@ Feature: TypeDB Driver
       entity person @abstract, owns age @card(1..1);
       entity real-person sub person;
       entity not-real-person @abstract, sub person;
-      attribute age, value integer @range(0..);
+      attribute age, value integer @range(0..150);
       relation friendship, relates friend;
       relation best-friendship sub friendship, relates best-friend as friend;
     """
