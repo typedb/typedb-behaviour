@@ -126,82 +126,130 @@ Feature: TypeDB Driver
     Then connection has database: typedb
 
 
-# TODO: Implement database schema retrieval. Fix steps if needed.
-#  Scenario: Driver can acquire database schema
-#    Given connection has database: typedb
-#    Then connection get database(typedb) has schema:
-#    """
-#    """
-#    Then connection get database(typedb) has type schema: # TODO: We will probably not have it
-#    """
-#    """
-#
-#    When connection open schema transaction for database: typedb
-#    When typeql schema query
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1);
-#    attribute age, value integer @range(0..150);
-#    """
-#    Then connection get database(typedb) has schema:
-#    """
-#    """
-#    Then connection get database(typedb) has type schema:
-#    """
-#    """
-#    When transaction commits
-#    Then connection get database(typedb) has schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1);
-#    attribute age, value integer @range(0..150);
-#    """
-#    Then connection get database(typedb) has type schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1);
-#    attribute age, value integer @range(0..150);
-#    """
-#
-#    When connection open schema transaction for database: typedb
-#    When typeql schema query
-#    """
-#    redefine
-#    attribute age, value integer @range(0..);
-#    """
-#    When typeql schema query
-#    """
-#    define
-#    entity person owns age @range(0..150);
-#    entity fictional-character owns age;
-#    """
-#    Then connection get database(typedb) has schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1);
-#    attribute age, value integer @range(0..150);
-#    """
-#    Then connection get database(typedb) has type schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1);
-#    attribute age, value integer @range(0..150);
-#    """
-#    When transaction commits
-#    Then connection get database(typedb) has schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1) @range(0..150);
-#    entity fictional-character owns age;
-#    attribute age, value integer @range(0..);
-#    """
-#    Then connection get database(typedb) has type schema:
-#    """
-#    define
-#    entity person @abstract, owns age @card(1..1) @range(0..150);
-#    entity fictional-character owns age;
-#    attribute age, value integer @range(0..);
-#    """
+  Scenario: Driver can acquire database schema
+    Given connection has database: typedb
+    Then connection get database(typedb) has schema:
+    """
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    """
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..150);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+
+      fun age($person: person) -> age:
+        match
+          $person has $age;
+          $age isa age;
+        return first $age;
+    """
+    Then connection get database(typedb) has schema:
+    """
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    """
+    When transaction commits
+    Then connection get database(typedb) has schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..150);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+
+      fun age($person: person) -> age:
+        match
+          $person has $age;
+          $age isa age;
+        return first $age;
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..150);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+    """
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    redefine
+      attribute age value integer @range(0..);
+
+      fun age($person: real-person) -> age:
+        match
+          $person has age $age;
+        return first $age;
+    """
+    Then connection get database(typedb) has schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..150);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+
+      fun age($person: person) -> age:
+        match
+          $person has $age;
+          $age isa age;
+        return first $age;
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..150);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+    """
+
+    When transaction commits
+    Then connection get database(typedb) has schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+
+      fun age($person: real-person) -> age:
+        match
+          $person has age $age;
+        return first $age;
+    """
+    Then connection get database(typedb) has type schema:
+    """
+    define
+      entity person @abstract, owns age @card(1..1);
+      entity real-person sub person;
+      entity not-real-person @abstract, sub person;
+      attribute age, value integer @range(0..);
+      relation friendship, relates friend;
+      relation best-friendship sub friendship, relates best-friend as friend;
+    """
 
 
   Scenario: Driver sees databases updates done by other drivers in background
