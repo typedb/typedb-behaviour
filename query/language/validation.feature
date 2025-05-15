@@ -22,7 +22,6 @@ Feature: TypeQL Validation
       """
     Given transaction commits
 
-  Scenario: Disjunction local variables are not visible in downstream stages
 
   Scenario: Disjunction local variables are not visible in subsequent stages
     Given connection open read transaction for database: typedb
@@ -56,5 +55,16 @@ Feature: TypeQL Validation
        $p isa person;
       reduce $c = count($p);
       select $p;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query
+      """
+      match
+       $p1 isa person;
+       $p2 isa person;
+      reduce $c = count($p1) groupby $p2;
+      select $p2, $c;
       """
     Given transaction closes
