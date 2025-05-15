@@ -2997,3 +2997,29 @@ Feature: TypeQL Fetch Query
         "also known as": "Jon"
       }
       """
+
+  ###############
+  # VALIDATION  #
+  ###############
+
+  Scenario: Fetch clauses cannot access unavailable variables
+    # See: https://github.com/typedb/typedb/issues/7462
+    Then typeql read query; fails with a message containing: "The variable 'p' is not available."
+      """
+      match {$p isa person;} or {$k isa person;}; fetch {"p": $p.name};
+      """
+
+    Then typeql read query; fails with a message containing: "The variable 'p' is required to be bound to a value before it's used"
+    """
+    with fun name($p: person) -> name:
+    match $p has name $n;
+    return first $n;
+
+    match {$p isa person;} or {$k isa person;}; fetch {"name": name($p)};
+
+    """
+
+    Then typeql read query; fails with a message containing: "The variable 'p' is not available."
+    """
+    match {$p isa person;} or {$k isa person;}; fetch {$p.*};
+    """
