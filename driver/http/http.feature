@@ -243,7 +243,7 @@ Feature: TypeDB HTTP Endpoint
             }
         }
       },
-      "involvedBranches": [0]
+      "involvedBlocks": [0]
     }
     """
 
@@ -327,7 +327,7 @@ Feature: TypeDB HTTP Endpoint
             }
         }
       },
-      "involvedBranches": [0]
+      "involvedBlocks": [0]
     }
     """
 
