@@ -69,6 +69,7 @@ Feature: Concept Attribute
       | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789                                                      |
       | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu                                                 |
       | global-date       | datetime-tz | 1990-01-01T11:22:33-0100                                                           |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33Z                                                               |
       | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                                                                 |
 
   Scenario Outline: Attribute with value type <type> can be retrieved by its value
