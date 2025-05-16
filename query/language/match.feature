@@ -3049,6 +3049,32 @@ Feature: TypeQL Match Clause
       | attr:length:20.9 |
 
 
+  Scenario: 'is' can be used to check concept equality.
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $x isa person, has ref 0;
+        $y isa person, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+      """
+      match
+        $x isa person;
+        $y isa person;
+        $x is $y;
+      """
+    Then uniquely identify answer concepts
+      | x         | y         |
+      | key:ref:0 | key:ref:0 |
+      | key:ref:1 | key:ref:1 |
+
+
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
     Given transaction commits
 
