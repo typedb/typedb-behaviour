@@ -7,7 +7,10 @@ package(default_visibility = ["//visibility:public"])
 load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
-    "driver.feature",
+    "concept.feature",
+    "connection.feature",
+    "migration.feature",
+    "query.feature",
     "user.feature",
 ]
 

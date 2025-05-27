@@ -2,9 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# TODO: remove ignores once bootup can be configured through BDD
+# These tests are dedicated to test the required USER functionality of TypeDB drivers. The files in this package
+# can be used to test any client application which aims to support all the operations presented in this file for the
+# complete user experience. The following steps are suitable and strongly recommended for both CORE and CLOUD drivers.
+# NOTE: for complete guarantees, all the drivers are also expected to cover the `connection` package.
 
-# TODO: Change expected error messages when implemented
 #noinspection CucumberUndefinedStep
 Feature: Driver User
 
