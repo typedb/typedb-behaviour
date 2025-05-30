@@ -69,6 +69,12 @@ Feature: Driver Migration
             let $count = count_emojis($content, $like);
           return first $count;
 
+        fun count_loves($content: content) -> integer:
+          match
+            $love isa emoji "love";
+            let $count = count_emojis($content, $love);
+          return first $count;
+
         fun count_emojis($content: content, $emoji: emoji) -> integer:
           match
             $reaction isa reaction, links ($content), has $emoji;
