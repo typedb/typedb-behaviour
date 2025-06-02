@@ -19,6 +19,8 @@ Feature: Driver Migration
     Given connection create database: typedb
     Given connection has database: typedb
 
+
+
   Scenario: Export and import database with tricky schema and data. Verify that the result is identical to the original
     # Define the schema
     Given connection open schema transaction for database: typedb
@@ -39,7 +41,7 @@ Feature: Driver Migration
         relation content-engagement @abstract, sub interaction, relates author as subject;
         relation posting, sub content-engagement, relates page as content, relates post @card(1);
         relation commenting, sub content-engagement, relates parent as content, relates comment @card(1);
-        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..10) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
+        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..3) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
         relation following, relates follower @card(1), relates page @card(1);
 
         attribute address @independent, value string @regex("\b((https?:\/\/)?(www\.)?[a-zA-Z0-9\-]+\.[a-zA-Z]{2,})(\/[^\s]*)?\b");
@@ -97,7 +99,7 @@ Feature: Driver Migration
         relation content-engagement @abstract, sub interaction, relates author as subject;
         relation posting, sub content-engagement, relates page as content, relates post @card(1);
         relation commenting, sub content-engagement, relates parent as content, relates comment @card(1);
-        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..10) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
+        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..3) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
         relation following, relates follower @card(1), relates page @card(1);
 
         attribute address @independent, value string @regex("\b((https?:\/\/)?(www\.)?[a-zA-Z0-9\-]+\.[a-zA-Z]{2,})(\/[^\s]*)?\b");
@@ -337,7 +339,7 @@ Feature: Driver Migration
         relation content-engagement @abstract, sub interaction, relates author as subject;
         relation posting, sub content-engagement, relates page as content, relates post @card(1);
         relation commenting, sub content-engagement, relates parent as content, relates comment @card(1);
-        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..10) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
+        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..3) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
         relation following, relates follower @card(1), relates page @card(1);
 
         attribute address @independent, value string @regex("\b((https?:\/\/)?(www\.)?[a-zA-Z0-9\-]+\.[a-zA-Z]{2,})(\/[^\s]*)?\b");
@@ -399,7 +401,7 @@ Feature: Driver Migration
         relation content-engagement @abstract, sub interaction, relates author as subject;
         relation posting, sub content-engagement, relates page as content, relates post @card(1);
         relation commenting, sub content-engagement, relates parent as content, relates comment @card(1);
-        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..10) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
+        relation reaction, sub content-engagement, relates parent as content, owns emoji @card(0..3) @values("like", "love", "funny", "surprise", "sad", "angry"), owns creation-timestamp @card(1);
         relation following, relates follower @card(1), relates page @card(1);
 
         attribute address @independent, value string @regex("\b((https?:\/\/)?(www\.)?[a-zA-Z0-9\-]+\.[a-zA-Z]{2,})(\/[^\s]*)?\b");
@@ -558,8 +560,8 @@ Feature: Driver Migration
     When transaction closes
 
     # Import the exported database from a data file and a schema description with a small change
-    Given connection does not have database: typedb-exported-2
-    When connection import database(typedb-exported-2) from data file(data.typedb) and schema
+    Given connection does not have database: typedb-exported-relaxed
+    When connection import database(typedb-exported-relaxed) from data file(data.typedb) and schema
     """
       define
         # owns name without card limitations, address @regex without restriction to 'typedb'
@@ -615,10 +617,10 @@ Feature: Driver Migration
             $reaction isa reaction, links ($content), has $love;
             return count($love);
     """
-    Then connection has database: typedb-exported-2
+    Then connection has database: typedb-exported-relaxed
 
     # Check another imported database
-    Then connection get database(typedb-exported-2) has schema:
+    Then connection get database(typedb-exported-relaxed) has schema:
       """
       define
         entity website, owns name, owns address @regex("\b((https?:\/\/)?([a-zA-Z0-9\-]+\.)?[a-zA-Z0-9\-]+\.com(\/[^\s]*)?)\b");
@@ -670,7 +672,7 @@ Feature: Driver Migration
             return count($love);
       """
 
-    Given connection open read transaction for database: typedb-exported-2
+    Given connection open read transaction for database: typedb-exported-relaxed
     When get answers of typeql read query
       """
       match $ct isa creation-timestamp;
@@ -794,8 +796,68 @@ Feature: Driver Migration
     Then answer get row(0) get value(loves) get is: 0
     When transaction closes
 
+    # Verify that cardinalities are correctly restored
+    Given connection open write transaction for database: typedb-exported
+    When typeql write query
+      """
+      match
+        $tp isa text-post, has post-id 1001;
+      insert
+        (parent: $tp) isa reaction, has emoji "funny", has creation-timestamp 2030-03-03T00:00:00;
+      """
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    Given connection open write transaction for database: typedb-exported
+    When typeql write query
+      """
+      match
+        $p isa profile, has profile-id "john-doe-001";
+      insert
+        (author: $p) isa reaction, has emoji "funny", has creation-timestamp 2030-03-03T00:00:00;
+      """
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    Given connection open write transaction for database: typedb-exported
+    When typeql write query
+      """
+      match
+        $p isa profile, has profile-id "john-doe-001";
+        $tp isa text-post, has post-id 1001;
+      insert
+        (parent: $tp, author: $p) isa reaction, has emoji "funny";
+      """
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    Given connection open write transaction for database: typedb-exported
+    When typeql write query
+      """
+      match
+        $p isa profile, has profile-id "john-doe-001";
+        $tp isa text-post, has post-id 1001;
+      insert
+        (parent: $tp, author: $p) isa reaction, has emoji "funny", has emoji "love", has emoji "like", has emoji "angry", has creation-timestamp 2030-03-03T00:00:00;
+      """
+    Then transaction commits; fails with a message containing: "@card(0..3)"
+
+    Given connection open write transaction for database: typedb-exported
+    When typeql write query
+      """
+      match
+        $tp isa text-post, has post-id 1001;
+      insert
+        $tp has post-id 1111;
+      """
+    Then transaction commits; fails with a message containing: "@card(1..1)"
+
+    Given connection open write transaction for database: typedb-exported
+    Then typeql write query; fails with a message containing: "key"
+      """
+      insert
+        $tp isa text-post, has post-id 1001, has post-text "Incorrect post", has creation-timestamp 2010-03-02T00:00:00;
+      """
+
     # Verify that relations without role players are cleaned up after commits
-    Given connection open write transaction for database: typedb-exported-2
+    Given connection open write transaction for database: typedb-exported-relaxed
     When typeql write query
       """
       insert
@@ -805,7 +867,7 @@ Feature: Driver Migration
       """
     When transaction commits
 
-    Given connection open read transaction for database: typedb-exported-2
+    Given connection open read transaction for database: typedb-exported-relaxed
     When get answers of typeql read query
       """
       match $p isa posting;
@@ -839,7 +901,7 @@ Feature: Driver Migration
     When transaction closes
 
     # Verify that dependent attributes without owners are cleaned up after commits
-    Given connection open write transaction for database: typedb-exported-2
+    Given connection open write transaction for database: typedb-exported-relaxed
     When typeql write query
       """
       insert
@@ -860,7 +922,7 @@ Feature: Driver Migration
       """
     When transaction commits
 
-    Given connection open read transaction for database: typedb-exported-2
+    Given connection open read transaction for database: typedb-exported-relaxed
     When get answers of typeql read query
       """
       match $ct isa creation-timestamp;
@@ -913,8 +975,98 @@ Feature: Driver Migration
     Then answer size is: 0
     When transaction closes
 
-    # Verify that cardinalities are correctly restored
+
+  Scenario: Export to an existing file fails
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    Given transaction commits
+
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+    Then connection get database(typedb) export to schema file(schema2.tql), data file(data.typedb); fails with a message containing: "File exists"
+    Then file(schema2.tql) does not exist
+    Then file(data2.typedb) does not exist
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+    Then connection get database(typedb) export to schema file(schema.tql), data file(data2.typedb); fails with a message containing: "File exists"
+    Then file(schema2.tql) does not exist
+    Then file(data2.typedb) does not exist
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+    Then connection get database(typedb) export to schema file(schema2.tql), data file(data2.typedb)
+    Then file(schema2.tql) exists
+    Then file(data2.typedb) exists
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
 
 
-# TODO: Cover errors
+  Scenario: Import to an existing database fails
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then connection import database(typedb) from schema file(schema.tql), data file(data.typedb); fails with a message containing: "already exists"
 
+
+  Scenario: Import to a database with an invalid name fails
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then connection import database(.) from schema file(schema.tql), data file(data.typedb); fails with a message containing: "not a valid database name"
+    Then connection import database(·‿·) from schema file(schema.tql), data file(data.typedb); fails with a message containing: "not a valid database name"
+
+
+  Scenario: Importing corrupted schema and data fails but does not corrupt the server
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    When file(fake-schema.tql) write:
+    """
+      not a typeql query
+    """
+    When file(uncommittable-schema.tql) write:
+    """
+      define entity person, owns name; # what name??
+    """
+    When file(fake-data.typedb) write:
+    """
+    0xDEADBEEF
+    0xBAAAAAAD
+    """
+
+    Then connection import database(typedb-imported) from schema file(fake-schema.tql), data file(data.typedb); fails with a message containing: "query parsing failed"
+    Then connection import database(typedb-imported) from schema file(uncommittable-schema.tql), data file(data.typedb); fails with a message containing: "query failed"
+    Then connection import database(typedb-imported) from schema file(schema.tql), data file(fake-data.typedb); fails with a message containing: "Cannot decode"
