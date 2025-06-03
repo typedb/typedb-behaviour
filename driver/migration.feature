@@ -20,7 +20,6 @@ Feature: Driver Migration
     Given connection has database: typedb
 
 
-
   Scenario: Export and import database with tricky schema and data. Verify that the result is identical to the original
     # Define the schema
     Given connection open schema transaction for database: typedb
@@ -1010,6 +1009,23 @@ Feature: Driver Migration
     Then file(data.typedb) exists
 
 
+  Scenario: Export to two same files fails
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    Given typeql write query
+      """
+      insert $p isa person;
+      """
+    Given transaction commits
+
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection get database(typedb) export to schema file(schema.tql), data file(schema.tql); fails with a message containing: "same file"
+
+
   Scenario: Import to an existing database fails
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1057,9 +1073,13 @@ Feature: Driver Migration
     """
       not a typeql query
     """
+    When file(unrunnable-schema.tql) write:
+    """
+      define entity person, owns name; # no name defined
+    """
     When file(uncommittable-schema.tql) write:
     """
-      define entity person, owns name; # what name??
+      define attribute name; # no value type
     """
     When file(fake-data.typedb) write:
     """
@@ -1068,5 +1088,6 @@ Feature: Driver Migration
     """
 
     Then connection import database(typedb-imported) from schema file(fake-schema.tql), data file(data.typedb); fails with a message containing: "query parsing failed"
-    Then connection import database(typedb-imported) from schema file(uncommittable-schema.tql), data file(data.typedb); fails with a message containing: "query failed"
+    Then connection import database(typedb-imported) from schema file(unrunnable-schema.tql), data file(data.typedb); fails with a message containing: "query failed"
+    Then connection import database(typedb-imported) from schema file(uncommittable-schema.tql), data file(data.typedb); fails with a message containing: "cannot be committed"
     Then connection import database(typedb-imported) from schema file(schema.tql), data file(fake-data.typedb); fails with a message containing: "Cannot decode"
