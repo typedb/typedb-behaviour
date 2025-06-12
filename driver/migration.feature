@@ -1099,7 +1099,7 @@ Feature: Driver Migration
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      match { entity $t; } or { relation $t; } or { attribute $t; };
       """
     Then answer size is: 0
     When transaction closes
@@ -1108,13 +1108,14 @@ Feature: Driver Migration
     Then file(schema.tql) exists
     Then file(data.typedb) exists
     Then file(schema.tql) is empty
-    Then file(data.typedb) is empty
+    # Metadata still exists!
+    Then file(data.typedb) is not empty
     Then connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
 
-    When connection open write transaction for database: typedb-clone
+    When connection open schema transaction for database: typedb-clone
     When get answers of typeql read query
       """
-      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      match { entity $t; } or { relation $t; } or { attribute $t; };
       """
     Then answer size is: 0
     When typeql schema query
@@ -1126,24 +1127,24 @@ Feature: Driver Migration
       """
     When get answers of typeql read query
       """
-      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      match { entity $t; } or { relation $t; } or { attribute $t; };
       """
-    Then answer size is: 4
+    Then answer size is: 3
     When transaction commits
 
     When connection get database(typedb-clone) export to schema file(schema-clone.tql), data file(data-clone.typedb)
     Then file(schema-clone.tql) exists
     Then file(data-clone.typedb) exists
     Then file(schema-clone.tql) is not empty
-    Then file(data-clone.typedb) is empty
-    Then connection import database(typedb-clone-2) from schema file(schema.tql), data file(data.typedb)
+    Then file(data-clone.typedb) is not empty
+    Then connection import database(typedb-clone-2) from schema file(schema-clone.tql), data file(data-clone.typedb)
 
     When connection open read transaction for database: typedb-clone-2
     When get answers of typeql read query
       """
-      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      match { entity $t; } or { relation $t; } or { attribute $t; };
       """
-    Then answer size is: 4
+    Then answer size is: 3
 
 
   Scenario: Export and import of a database with mismatched schema and data fails
@@ -1178,10 +1179,45 @@ Feature: Driver Migration
     When connection get database(typedb) export to schema file(typedb.tql), data file(typedb.typedb)
     When connection get database(untypedb) export to schema file(untypedb.tql), data file(untypedb.typedb)
     When connection get database(notypedb) export to schema file(notypedb.tql), data file(notypedb.typedb)
-    Then connection import database(newtypedb) from schema file(typedb.tql), data file(untypedb.typedb); fails with a message containing: "idk"
-    Then connection import database(newtypedb) from schema file(untypedb.tql), data file(typedb.typedb); fails with a message containing: "idk"
-    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(typedb.typedb); fails with a message containing: "idk"
-    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(untypedb.typedb); fails with a message containing: "idk"
+    Then connection import database(newtypedb) from schema file(typedb.tql), data file(untypedb.typedb); fails with a message containing: "entity type 'name' does not exist"
+    Then connection import database(newtypedb) from schema file(untypedb.tql), data file(typedb.typedb); fails with a message containing: "entity type 'person' does not exist"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(typedb.typedb); fails with a message containing: "entity type 'person' does not exist"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(untypedb.typedb); fails with a message containing: "entity type 'name' does not exist"
     Then connection import database(newtypedb) from schema file(typedb.tql), data file(typedb.typedb)
     Then connection import database(newuntypedb) from schema file(untypedb.tql), data file(untypedb.typedb)
     Then connection import database(newnotypedb) from schema file(notypedb.tql), data file(notypedb.typedb)
+
+    When connection open read transaction for database: newtypedb
+    When get answers of typeql read query
+      """
+      match $e isa person, has name $a;
+      """
+    Then answer size is: 1
+    Then typeql read query; fails with a message containing: "inference error"
+      """
+      match $e isa name, has person $a;
+      """
+    When transaction closes
+
+    When connection open read transaction for database: newuntypedb
+    When get answers of typeql read query
+      """
+      match $e isa name, has person $a;
+      """
+    Then answer size is: 1
+    Then typeql read query; fails with a message containing: "inference error"
+      """
+      match $e isa person, has name $a;
+      """
+    When transaction closes
+
+    When connection open read transaction for database: newnotypedb
+    Then typeql read query; fails with a message containing: "inference error"
+      """
+      match $e isa name, has person $a;
+      """
+    Then typeql read query; fails with a message containing: "inference error"
+      """
+      match $e isa person, has name $a;
+      """
+    When transaction closes
