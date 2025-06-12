@@ -1091,3 +1091,97 @@ Feature: Driver Migration
     Then connection import database(typedb-imported) from schema file(unrunnable-schema.tql), data file(data.typedb); fails with a message containing: "query failed"
     Then connection import database(typedb-imported) from schema file(uncommittable-schema.tql), data file(data.typedb); fails with a message containing: "cannot be committed"
     Then connection import database(typedb-imported) from schema file(schema.tql), data file(fake-data.typedb); fails with a message containing: "Cannot decode"
+
+
+  Scenario: Export and import of a database with no data succeeds
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      """
+    Then answer size is: 0
+    When transaction closes
+
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+    Then file(schema.tql) is empty
+    Then file(data.typedb) is empty
+    Then connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
+
+    When connection open write transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      """
+    Then answer size is: 0
+    When typeql schema query
+      """
+      define
+        entity person, plays fathership:father, owns name;
+        relation fathership, relates father, owns name;
+        attribute name, value string;
+      """
+    When get answers of typeql read query
+      """
+      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      """
+    Then answer size is: 4
+    When transaction commits
+
+    When connection get database(typedb-clone) export to schema file(schema-clone.tql), data file(data-clone.typedb)
+    Then file(schema-clone.tql) exists
+    Then file(data-clone.typedb) exists
+    Then file(schema-clone.tql) is not empty
+    Then file(data-clone.typedb) is empty
+    Then connection import database(typedb-clone-2) from schema file(schema.tql), data file(data.typedb)
+
+    When connection open read transaction for database: typedb-clone-2
+    When get answers of typeql read query
+      """
+      match { entity $t; } or { relation $t; } or { attribute $t; } or { relation $_ relates $t; };
+      """
+    Then answer size is: 4
+
+
+  Scenario: Export and import of a database with mismatched schema and data fails
+    Given connection create database: untypedb
+    Given connection create database: notypedb
+    Given connection has database: typedb
+    Given connection has database: notypedb
+    Given connection has database: notypedb
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person owns name; attribute name value string;
+      """
+    Given typeql write query
+      """
+      insert $e isa person, has name "John";
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: untypedb
+    Given typeql schema query
+      """
+      define entity name owns person; attribute person value string;
+      """
+    Given typeql write query
+      """
+      insert $e isa name, has person "John";
+      """
+    Given transaction commits
+
+    When connection get database(typedb) export to schema file(typedb.tql), data file(typedb.typedb)
+    When connection get database(untypedb) export to schema file(untypedb.tql), data file(untypedb.typedb)
+    When connection get database(notypedb) export to schema file(notypedb.tql), data file(notypedb.typedb)
+    Then connection import database(newtypedb) from schema file(typedb.tql), data file(untypedb.typedb); fails with a message containing: "idk"
+    Then connection import database(newtypedb) from schema file(untypedb.tql), data file(typedb.typedb); fails with a message containing: "idk"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(typedb.typedb); fails with a message containing: "idk"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(untypedb.typedb); fails with a message containing: "idk"
+    Then connection import database(newtypedb) from schema file(typedb.tql), data file(typedb.typedb)
+    Then connection import database(newuntypedb) from schema file(untypedb.tql), data file(untypedb.typedb)
+    Then connection import database(newnotypedb) from schema file(notypedb.tql), data file(notypedb.typedb)
