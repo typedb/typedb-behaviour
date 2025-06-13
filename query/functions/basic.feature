@@ -128,8 +128,9 @@ Feature: Basic Function Execution
     # the (n-1)th triangle number, where n is the number of replies to the first post
     Then answer size is: 10
 
+
   Scenario: Functions can return streams of instances or values.
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -175,7 +176,7 @@ Feature: Basic Function Execution
 
 
   Scenario: Functions can return streams of tuples of instances.
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -206,8 +207,9 @@ Feature: Basic Function Execution
       | key:ref:1 | value:string:Bob   |
     Given transaction closes
 
+
   Scenario: Functions can accept arguments
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -255,7 +257,7 @@ Feature: Basic Function Execution
 
 
   Scenario: Functions can return single instances.
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
@@ -305,6 +307,25 @@ Feature: Basic Function Execution
     Given transaction closes
 
 
+  Scenario: Functions can 'check' if a query has any results
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    with
+      fun is_greater($x: integer, $y: integer) -> boolean:
+      match $x > $y;
+      return check;
+
+    match
+    let $5g3 = is_greater(5, 3);
+    let $3g5 = is_greater(3, 5);
+    """
+    Then uniquely identify answer concepts
+      |      5g3            |      3g5            |
+      | value:boolean:true  | value:boolean:false |
+    Given transaction closes
+
+
   Scenario: A function can return a value derived from an expression
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -329,7 +350,7 @@ Feature: Basic Function Execution
 
 
   Scenario: A function can return a tuple of values derived from a reduce operation
-    Given connection open schema transaction for database: typedb
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
