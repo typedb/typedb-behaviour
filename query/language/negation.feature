@@ -631,5 +631,25 @@ Feature: Negation Resolution
       """
 
 
+  Scenario: negations can be applied to filtered variables
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Jeff", has ref 0;
+      $y isa person, has name "Jenny", has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has name $a; not { $a == "Jeff"; };
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
+
   Scenario: Nested negations
     # TODO: Maybe the subset test
