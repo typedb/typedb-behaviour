@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Optionals
+Feature: TypeQL Optional
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
