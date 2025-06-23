@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Negation Resolution
+Feature: TypeQL Negation
 
   Background: Set up database
     Given typedb starts
@@ -629,6 +629,27 @@ Feature: Negation Resolution
           };
         };
       """
+
+
+  Scenario: negations can be applied to filtered variables
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Jeff";
+      $y isa person, has name "Jenny";
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has name $a; not { $a == "Jeff"; };
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | a               |
+      | attr:name:Jenny |
 
 
   Scenario: Nested negations

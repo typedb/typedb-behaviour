@@ -308,3 +308,50 @@ Feature: TypeQL pipelines
         let $x = 5;
       sort $_;
       """
+
+
+  Scenario: Disjunction local variables are not visible in subsequent stages
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
+      """
+      match
+       { $p isa person; } or { $k isa person; };
+      select $p;
+      """
+    Given transaction closes
+
+
+  Scenario: Deleted variables are not visible in subsequent stages
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
+      """
+      match
+       $p isa person;
+      delete
+       $p;
+      select $p;
+      """
+    Given transaction closes
+
+
+  Scenario: Reduced variables are not visible in subsequent stages
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
+      """
+      match
+       $p isa person;
+      reduce $c = count($p);
+      select $p;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query
+      """
+      match
+       $p1 isa person;
+       $p2 isa person;
+      reduce $c = count($p1) groupby $p2;
+      select $p2, $c;
+      """
+    Given transaction closes
