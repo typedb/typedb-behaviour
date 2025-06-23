@@ -636,8 +636,8 @@ Feature: Negation Resolution
     Given typeql write query
       """
       insert
-      $x isa person, has name "Jeff", has ref 0;
-      $y isa person, has name "Jenny", has ref 1;
+      $x isa person, has name "Jeff";
+      $y isa person, has name "Jenny";
       """
     Given transaction commits
 
@@ -646,9 +646,10 @@ Feature: Negation Resolution
       """
       match $x isa person, has name $a; not { $a == "Jeff"; };
       """
+    Then answer size is: 1
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:1 |
+      | a               |
+      | attr:name:Jenny |
 
 
   Scenario: Nested negations

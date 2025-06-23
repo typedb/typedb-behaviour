@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL pipelines
+Feature: TypeQL Disjunctions
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
@@ -66,7 +66,7 @@ Feature: TypeQL pipelines
       | key:ref:1 |
 
 
-  Scenario: disjunctions with no answers can be limited
+  Scenario: disjunctions with no answers
     Given transaction commits
 
     Given connection open read transaction for database: typedb
@@ -77,7 +77,7 @@ Feature: TypeQL pipelines
     Then answer size is: 0
 
 
-  Scenario: a variable can be reused across disjunction branches
+  Scenario: a variable reused across all branches is returned
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -98,6 +98,20 @@ Feature: TypeQL pipelines
       | person    |
       | key:ref:0 |
       | key:ref:1 |
+
+
+  Scenario: a conjunction where one disjunction produces a variable, and the other only references it can be planned.
+    Given transaction closes
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+    """
+    match
+    not {
+      { $e isa person; } or { $e isa company; };
+      { $e has $n; } or { $t sub $s; };
+    };
+    """
+    Then answer size is: 1
 
 
   Scenario: a disjunction that both binds and consumes a variable can be planned
@@ -122,17 +136,4 @@ Feature: TypeQL pipelines
       | key:ref:1 | attr:ref:1 |
       | key:ref:2 | attr:ref:2 |
 
-
-  Scenario: a conjunction where one disjunction produces a variable, and the other only references it can be planned.
-    Given transaction closes
-    Given connection open read transaction for database: typedb
-    Given get answers of typeql read query
-    """
-    match
-    not {
-      { $e isa person; } or { $e isa company; };
-      { $e has $n; } or { $t sub $s; };
-    };
-    """
-    Then answer size is: 1
 
