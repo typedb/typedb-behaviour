@@ -311,7 +311,6 @@ Feature: TypeQL pipelines
 
 
   Scenario: Disjunction local variables are not visible in subsequent stages
-    Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
       """
       match
@@ -322,7 +321,6 @@ Feature: TypeQL pipelines
 
 
   Scenario: Deleted variables are not visible in subsequent stages
-    Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
       """
       match
@@ -335,7 +333,6 @@ Feature: TypeQL pipelines
 
 
   Scenario: Reduced variables are not visible in subsequent stages
-    Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The variable 'p' was not available in the stage"
       """
       match
