@@ -311,7 +311,7 @@ Feature: TypeQL Reduce Queries
       match $x isa person, has income $y;
       reduce $red_var? = <reduction>($y);
       """
-    Then result is a single row with variable 'red_var': empty
+    Then result is a single row with variable 'red_var': none
 
     Examples:
       | reduction |
@@ -642,5 +642,5 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | x         | std   |
-      | key:ref:0 | empty |
+      | key:ref:0 | none  |
 
