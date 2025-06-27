@@ -170,9 +170,9 @@ Feature: Driver User
     Given connection opens with username 'admin', password 'password'
     When create user with username 'user', password 'password'
     When delete user: user
-    Then delete user: user; fails with a message containing: "User does not exist"
-    Then delete user: user2; fails with a message containing: "User does not exist"
-    Then delete user: surely-non-existing-user; fails with a message containing: "User does not exist"
+    Then delete user: user; fails with a message containing: "User not found"
+    Then delete user: user2; fails with a message containing: "User not found"
+    Then delete user: surely-non-existing-user; fails with a message containing: "User not found"
 
     # TODO: Not sure if it's correct, may be implemented differently
   Scenario: User's name is retrievable only by admin
