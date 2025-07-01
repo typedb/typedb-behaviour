@@ -300,3 +300,20 @@ Feature: TypeQL Optional
       | p          | c          | r          | name               | company_name   |
       | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    | attr:name:Uber |
       | key:ref:31 | none       | none       | attr:name:Somebody | none           |
+
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      try {
+        $p has name $name;
+        try { $c has name $company_name; };
+      };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name               | company_name   |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    | attr:name:Uber |
+      | key:ref:31 | none       | none       | attr:name:Somebody | none           |
+
