@@ -59,6 +59,29 @@ Feature: Driver Connection
     Then connection is open: true
     Then connection has database: typedb
 
+
+  Scenario: Driver can retrieve server version information
+    Then connection contains distribution
+    Then connection contains version
+    When connection closes
+    When connection opens with default authentication
+    Then connection contains distribution
+    Then connection contains version
+
+  ###########
+  # REPLICA #
+  ###########
+  # Cluster-specific, but the API should not lead to crashes even without clustering, and we test it here
+
+  @ignore-typedb-http
+  Scenario: Driver can retrieve server replica list
+    Then connection has 1 replica
+
+
+  @ignore-typedb-http
+  Scenario: Driver can retrieve primary server replica
+    Then connection contains primary replica
+
   #############
   # DATABASES #
   #############
