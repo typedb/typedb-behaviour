@@ -25,6 +25,7 @@ Feature: TypeDB HTTP Endpoint
     Then connection is healthy: true
 
 
+    # TODO: Remove this as we check it in connection now! Cleanup the steps from the server.
   Scenario: Version and distribution are returned from version
     Then get endpoint(/v1/version) contains field: distribution
     Then get endpoint(/v1/version) contains field: version
