@@ -2376,8 +2376,8 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z           |
-      | attr:age:10 |
+      | p         | z           |
+      | key:ref:0 | attr:age:10 |
 
     When get answers of typeql read query
       """

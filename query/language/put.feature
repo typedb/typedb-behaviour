@@ -355,6 +355,7 @@ Feature: TypeQL Put Query
     When get answers of typeql read query
     """
     match $p isa person, has name "bob", has email $email;
+    select $email;
     """
     Then uniquely identify answer concepts
       | email                     |
@@ -570,6 +571,7 @@ Feature: TypeQL Put Query
       $emp isa employment, links (employer: $company, employee: $person);
       $company has name $cname;
       $person has name $pname;
+    select $cname, $pname;
     """
     Then answer size is: 1
     Then uniquely identify answer concepts
