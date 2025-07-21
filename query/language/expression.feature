@@ -194,8 +194,8 @@ Feature: TypeQL Query with Expressions
       select $x, $y;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | attr:name:Lisa  |
+      | x               | y                |
+      | attr:name:Lisa  | attribute:age:16 |
 
 
   Scenario: Value variables and concept variables may not share name

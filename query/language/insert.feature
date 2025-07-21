@@ -1142,8 +1142,8 @@ Parker";
       match $r isa $rt; relation $rt;
       """
     Then uniquely identify answer concepts
-      | r         |
-      | key:ref:1 |
+      | r         | rt               |
+      | key:ref:1 | label:loneliness |
     Then transaction commits; fails with a message containing: "at least one role"
 
   Scenario: relations of relation types without role types can be inserted, then updated to have role players
@@ -1173,9 +1173,9 @@ Parker";
       match $r isa $rt; relation $rt;
       """
     Then uniquely identify answer concepts
-      | r         |
-      | key:ref:1 |
-      | key:ref:2 |
+      | r         | rt               |
+      | key:ref:1 | label:loneliness |
+      | key:ref:2 | label:loneliness |
 
     When typeql schema query
       """
@@ -1204,9 +1204,9 @@ Parker";
       match $r isa $rt; relation $rt;
       """
     Then uniquely identify answer concepts
-      | r         |
-      | key:ref:1 |
-      | key:ref:2 |
+      | r         | rt               |
+      | key:ref:1 | label:loneliness |
+      | key:ref:2 | label:loneliness |
     When transaction commits
 
     When connection open read transaction for database: typedb
@@ -1222,8 +1222,8 @@ Parker";
       match $r isa $rt; relation $rt;
       """
     Then uniquely identify answer concepts
-      | r         |
-      | key:ref:2 |
+      | r         | rt               |
+      | key:ref:2 | label:loneliness |
 
   #######################
   # ATTRIBUTE INSERTION #
@@ -1899,6 +1899,7 @@ Parker";
         $y isa person, has name "Tarja";
       insert
         (employer: $x, employee: $y) isa employment, has ref 10;
+      select $x, $y;
       """
 
     # Should only contain variables mentioned in the insert (so excludes '$z')

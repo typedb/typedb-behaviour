@@ -317,3 +317,5 @@ Feature: TypeQL Optional
       | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    | attr:name:Uber |
       | key:ref:31 | none       | none       | attr:name:Somebody | none           |
 
+  # TODO: Test out assigning to optionals  let $x? = f($y);
+  # TODO: Test out functions returning optionals: fun f(x) -> { person?, name };

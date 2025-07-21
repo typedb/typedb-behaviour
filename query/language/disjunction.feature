@@ -53,9 +53,9 @@ Feature: TypeQL Disjunction
       match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
+      | x         | t             |
+      | key:ref:0 | label:person  |
+      | key:ref:1 | label:company |
     When get answers of typeql read query
       """
       match $x isa $_; { $x has name "Jeff"; } or { $x has name "Amazon"; };
@@ -150,7 +150,7 @@ Feature: TypeQL Disjunction
       """
     Then answers do not contain variable: other
     Then uniquely identify answer concepts
-      | p          |
+      | p         |
       | key:ref:1 |
       | key:ref:2 |
 

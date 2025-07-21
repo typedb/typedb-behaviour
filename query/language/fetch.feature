@@ -1596,10 +1596,10 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 3
     Given uniquely identify answer concepts
-      | z                      |
-      | attr:person-name:Alice |
-      | attr:person-name:Allie |
-      | attr:person-name:Bob   |
+      | p         | z                      |
+      | key:ref:0 | attr:person-name:Alice |
+      | key:ref:0 | attr:person-name:Allie |
+      | key:ref:1 | attr:person-name:Bob   |
 
     Given get answers of typeql read query
       """
@@ -1615,8 +1615,8 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z           |
-      | attr:age:10 |
+      | p         | z           |
+      | key:ref:0 | attr:age:10 |
 
     When get answers of typeql read query
       """
@@ -1731,10 +1731,10 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 3
     Given uniquely identify answer concepts
-      | z                  |
-      | value:string:Alice |
-      | value:string:Allie |
-      | value:string:Bob   |
+      | p         | z                  |
+      | key:ref:0 | value:string:Alice |
+      | key:ref:0 | value:string:Allie |
+      | key:ref:1 | value:string:Bob   |
 
     Given get answers of typeql read query
       """
@@ -1751,8 +1751,8 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z                |
-      | value:integer:10 |
+      | p         | z                |
+      | key:ref:0 | value:integer:10 |
 
     When get answers of typeql read query
       """
@@ -2113,9 +2113,9 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 2
     Given uniquely identify answer concepts
-      | x               | y                | z               |
-      | value:integer:2 | value:integer:20 | value:integer:2 |
-      | value:integer:0 | value:integer:0  | value:integer:0 |
+      | p         | x               | y                | z               |
+      | key:ref:0 | value:integer:2 | value:integer:20 | value:integer:2 |
+      | key:ref:1 | value:integer:0 | value:integer:0  | value:integer:0 |
     When get answers of typeql read query
       """
         match
@@ -2357,10 +2357,10 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 3
     Given uniquely identify answer concepts
-      | z                      |
-      | attr:person-name:Alice |
-      | attr:person-name:Allie |
-      | attr:person-name:Bob   |
+      | p         | z                      |
+      | key:ref:0 | attr:person-name:Alice |
+      | key:ref:0 | attr:person-name:Allie |
+      | key:ref:1 | attr:person-name:Bob   |
 
     Given get answers of typeql read query
       """
@@ -2452,10 +2452,10 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 3
     Given uniquely identify answer concepts
-      | z                  |
-      | value:string:Alice |
-      | value:string:Allie |
-      | value:string:Bob   |
+      | p         | z                  |
+      | key:ref:0 | value:string:Alice |
+      | key:ref:0 | value:string:Allie |
+      | key:ref:1 | value:string:Bob   |
 
     Given get answers of typeql read query
       """
@@ -2472,8 +2472,8 @@ Feature: TypeQL Fetch Query
       """
     Given answer size is: 1
     Given uniquely identify answer concepts
-      | z                |
-      | value:integer:10 |
+      | p         | z                |
+      | key:ref:0 | value:integer:10 |
 
     When get answers of typeql read query
       """

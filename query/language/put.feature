@@ -288,9 +288,9 @@ Feature: TypeQL Put Query
     put $p isa person, has $ref;
     """
     Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
-      | key:ref:1 |
+      | p         | ref        |
+      | key:ref:0 | attr:ref:0 |
+      | key:ref:1 | attr:ref:1 |
     When get answers of typeql read query
     """
     match $p isa person;
@@ -329,6 +329,7 @@ Feature: TypeQL Put Query
     When get answers of typeql read query
     """
     match $p isa person, has name "alice", has email $email;
+    select $email;
     """
     Then uniquely identify answer concepts
       | email                       |
@@ -503,7 +504,8 @@ Feature: TypeQL Put Query
     match
       $emp isa employment, links (employer: $company, employee: $person);
       $company isa company, has name $cname;
-      $person  isa person, has name $pname;
+      $person isa person, has name $pname;
+    select $cname, $pname;
     """
     Then uniquely identify answer concepts
       | cname            | pname           |
@@ -545,6 +547,7 @@ Feature: TypeQL Put Query
       $emp isa employment, links (employer: $company, employee: $person);
       $company has name $cname;
       $person has name $pname;
+    select $cname, $pname;
     """
     Then answer size is: 1
     Then uniquely identify answer concepts

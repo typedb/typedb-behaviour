@@ -645,6 +645,7 @@ Feature: TypeQL Negation
     When get answers of typeql read query
       """
       match $x isa person, has name $a; not { $a == "Jeff"; };
+      select $a;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
