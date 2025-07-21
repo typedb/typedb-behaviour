@@ -41,7 +41,7 @@ Feature: Function Usage
       let $six = five() + 1;
     """
     Then uniquely identify answer concepts
-      | six          |
+      | six             |
       | value:integer:6 |
     Given transaction closes
 
@@ -107,7 +107,7 @@ Feature: Function Usage
       let $ten = five() + five();
     """
     Then uniquely identify answer concepts
-      | ten           |
+      | ten              |
       | value:integer:10 |
     Given transaction closes
 
@@ -184,8 +184,8 @@ Feature: Function Usage
     """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | z                |
-      | value:integer:1  |
+      | x               | y               | z               |
+      | value:integer:2 | value:integer:1 | value:integer:1 |
 
 
   Scenario: A variable that is input from a previous stage may not be assigned to

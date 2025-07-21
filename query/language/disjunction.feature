@@ -53,9 +53,9 @@ Feature: TypeQL Disjunction
       match $x isa $t; { $t label person; } or { $t label company; };
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:1 |
+      | x         | t             |
+      | key:ref:0 | label:person  |
+      | key:ref:1 | label:company |
     When get answers of typeql read query
       """
       match $x isa $_; { $x has name "Jeff"; } or { $x has name "Amazon"; };
@@ -98,6 +98,61 @@ Feature: TypeQL Disjunction
       | person    |
       | key:ref:0 |
       | key:ref:1 |
+
+
+  Scenario: a variable reused across all nested branches of a nested disjunction is returned
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p1 isa person, has ref 10, has name "Alice";
+        $p2 isa person, has ref 11, has name "Bob";
+        $p3 isa person, has ref 12, has name "Charlie";
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match 
+      {
+        { $p has ref 10; } or { $p has ref 11; };
+      } or {
+        { $p has ref 11; } or { $p has ref 12; };
+      };
+      """
+    Then uniquely identify answer concepts
+      | p          |
+      | key:ref:10 |
+      | key:ref:11 |
+      | key:ref:12 |
+
+
+  Scenario: a variable only used in one branch is not returned
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p1 isa person, has ref 1, has name "Dave";
+        $p2 isa person, has ref 2, has name "Eve";
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match 
+      { $p isa person, has ref 1; $other isa person, has ref 2; } or { $p isa person, has ref 2; };
+      """
+    Then answers do not contain variable: other
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:1 |
+      | key:ref:2 |
 
 
   Scenario: a conjunction where one disjunction produces a variable, and the other only references it can be planned.

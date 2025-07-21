@@ -1412,10 +1412,10 @@ Feature: TypeQL Match Clause
        match relation $t; $r isa $t;
        """
     Given uniquely identify answer concepts
-      | r         |
-      | key:ref:1 |
-      | key:ref:2 |
-      | key:ref:3 |
+      | r         | t                |
+      | key:ref:1 | label:employment |
+      | key:ref:2 | label:friendship |
+      | key:ref:3 | label:residency  |
     When get answers of typeql read query
        """
        match ($x) isa $_;
@@ -2536,9 +2536,9 @@ Feature: TypeQL Match Clause
       match $x has name $y;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:0 |
-      | key:ref:2 |
+      | x         | y                  |
+      | key:ref:0 | attr:name:"Leila"  |
+      | key:ref:2 | attr:name:"TypeDB" |
 
 
   Scenario: using the 'attribute' meta label, 'has' can match things that own any attribute with a specified value
@@ -3012,9 +3012,9 @@ Feature: TypeQL Match Clause
         $z isa age;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:1 |
-      | key:ref:2 |
+      | x         | z           |
+      | key:ref:1 | attr:age:25 |
+      | key:ref:2 | attr:age:18 |
 
 
   Scenario: when the answers of a value comparison include both a 'double' and a 'integer', both answers are returned
@@ -3423,9 +3423,9 @@ Feature: TypeQL Match Clause
       match $x isa! $t; $x has name $_;
       """
     Then uniquely identify answer concepts
-      | t         |
-      | label:人   |
-      | label:אדם |
+      | x         | t         |
+      | key:ref:0 | label:人   |
+      | key:ref:1 | label:אדם |
 
     Given get answers of typeql read query
       """

@@ -56,10 +56,10 @@ Feature: TypeQL Optional
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa person; $y isa person; try { $r isa employment ($x, $y); };
+      match $p isa person; $c isa company; try { $r isa employment ($p, $c); };
       """
     Then uniquely identify answer concepts
-      | x         | y         | r         |
+      | p         | c         | r         |
       | key:ref:0 | key:ref:1 | key:ref:2 |
 
 
@@ -98,7 +98,9 @@ Feature: TypeQL Optional
       match $x isa person, has name "Charlie"; $y isa company, has name "Google"; try { $r isa employment ($x, $y), has ref 100; };
       """
     Then answer size is: 1
-    And answer has no variable: r
+    Then uniquely identify answer concepts
+      | x         | y         | r    |
+      | key:ref:0 | key:ref:1 | none |
 
 
   Scenario: a conjunction can contain multiple sibling optionals
@@ -116,7 +118,7 @@ Feature: TypeQL Optional
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match 
+      match
       $x isa person, has name "Dave";
       try { $y isa company, has name "Microsoft"; $r1 isa employment ($x, $y); };
       try { $z isa company, has name "Apple"; $r2 isa employment ($x, $z); };
@@ -139,9 +141,9 @@ Feature: TypeQL Optional
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa person, has name "Eve"; 
-      try { 
-        $y isa company, has name "Netflix"; 
+      match $x isa person, has name "Eve";
+      try {
+        $y isa company, has name "Netflix";
         $r isa employment ($x, $y);
         try { $y has name "Netflix"; };
       };
@@ -151,18 +153,8 @@ Feature: TypeQL Optional
       | key:ref:12 | key:ref:13 | key:ref:14 |
 
 
-  Scenario: an optional can be nested within a disjunction
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "Frank", has ref 15;
-      $y isa company, has name "Tesla", has ref 16;
-      $r isa employment, links (employee: $x, employer: $y), has ref 17;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
+  Scenario: an optional cannot be used within a disjunction
+    When  typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
       """
       match $x isa person, has name "Frank";
       {
@@ -172,27 +164,158 @@ Feature: TypeQL Optional
         try { $y isa company, has name "Tesla"; $r isa employment ($x, $y); };
       };
       """
-    Then uniquely identify answer concepts
-      | x          | y          | r          |
-      | key:ref:15 | key:ref:16 | key:ref:17 |
 
 
   Scenario: an optional cannot be used in a negation
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
+    Then typeql read query; fails with a message containing: "Optionals are not allowed in negations"
       """
-      match $x isa person; not { try { $y isa company; } };
+      match $x isa person; not { try { $y isa company; }; };
       """
-    Then the query is invalid, with error: ILLEGAL_STATE_QUERY_ILLEGAL_OPTIONAL_IN_NEGATION
 
 
-  Scenario: sibling optionals must share the same parent variables, but overlap shared optional variables
+  Scenario: sibling optionals may share the same parent variables, but not overlap shared optional variables
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Eve", has ref 1;
+      $y isa company, has name "Netflix", has ref 2;
+      $r isa employment, links (employee: $x, employer: $y), has ref 3;
+      """
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
+    """
+      match
+      $x isa person, has name "Eve";
+      try { $r1 isa employment ($x); };
+      try { $r2 isa employment ($x); };
       """
-      match 
-      $x isa person, has name "Grace";
+    Then uniquely identify answer concepts
+      | x         | r1        | r2        |
+      | key:ref:1 | key:ref:3 | key:ref:3 |
+    Then typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
+    """
+      match
+      $x isa person, has name "Eve";
       try { $y isa company; $r1 isa employment ($x, $y); };
       try { $y isa company; $r2 isa employment ($x, $y); };
       """
-    Then the query is invalid, with error: ILLEGAL_STATE_QUERY_OPTIONAL_VARIABLES_UNBOUNDED
+
+
+  Scenario: an optional variable can be used non-optionally in the next match stage of the pipeline
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has name "Grace", has ref 30;
+      $p2 isa person, has name "Somebody", has ref 31;
+      $c1 isa company, has name "Uber", has ref 32;
+      $r1 isa employment, links (employee: $p1, employer: $c1), has ref 33;
+      """
+    Given transaction commits
+
+    # a None variable used in a subsequent match causes that row to be filtered out (in this case, the "Somebody" row)
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      $p has name $name;
+      $c has name $company_name;
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name            | company_name   |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace | attr:name:Uber |
+
+    # a None variable used in a subsequent match, even inside every branch of a Disjunction, causes that row to be filtered out (in this case, the "Somebody" row)
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      $p has name $name;
+      { $c has name $attr; $attr == "Uber"; } or { $c has ref $attr; $attr == 32; };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name            | attr           |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace | attr:name:Uber |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace | attr:ref:32    |
+
+    # a None variable used in a subsequent match can cause only 1 branch of a disjunction to fail
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      $p has name $name;
+      { $c has name $attr; $attr == "Uber"; } or { $p has ref 30; } or { $p has ref 31; };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name               |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    |
+      | key:ref:31 | none       | none       | attr:name:Somebody |
+
+    # a None variable used in a subsequent match, even inside a Negation, causes that row to be filtered out (in this case, the "Somebody" row)
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      $p has name $name;
+      not { $c has ref 100000; };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name               |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    |
+      | key:ref:31 | none       | none       | attr:name:Somebody |
+
+
+  Scenario: an optional variable can be used optionally in the next match stage of the pipeline
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has name "Grace", has ref 30;
+      $p2 isa person, has name "Somebody", has ref 31;
+      $c1 isa company, has name "Uber", has ref 32;
+      $r1 isa employment, links (employee: $p1, employer: $c1), has ref 33;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      $p has name $name;
+      try { $c has name $company_name; };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name               | company_name   |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    | attr:name:Uber |
+      | key:ref:31 | none       | none       | attr:name:Somebody | none           |
+
+    When get answers of typeql read query
+      """
+      match
+      $p isa person;
+      try { $c isa company; $r isa employment ($p, $c); };
+      match
+      try {
+        $p has name $name;
+        try { $c has name $company_name; };
+      };
+      """
+    Then uniquely identify answer concepts
+      | p          | c          | r          | name               | company_name   |
+      | key:ref:30 | key:ref:32 | key:ref:33 | attr:name:Grace    | attr:name:Uber |
+      | key:ref:31 | none       | none       | attr:name:Somebody | none           |
+
+  # TODO: Test out assigning to optionals  let $x? = f($y);
+  # TODO: Test out functions returning optionals: fun f(x) -> { person?, name };

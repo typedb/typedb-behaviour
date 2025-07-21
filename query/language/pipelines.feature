@@ -149,8 +149,8 @@ Feature: TypeQL pipelines
     limit 1;
     """
     Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
+      | p         | name            |
+      | key:ref:0 | attr:name:Alice |
 
     Given get answers of typeql read query
     """
@@ -160,8 +160,8 @@ Feature: TypeQL pipelines
     limit 1;
     """
     Then uniquely identify answer concepts
-      | p         |
-      | key:ref:1 |
+      | p         | name            |
+      | key:ref:1 | attr:name:Bob   |
 
 
   Scenario: Sort, offset, limit can be combined
@@ -264,6 +264,7 @@ Feature: TypeQL pipelines
       match
         $r isa naming (named: $p, name: $nc);
         $nc has name $n;
+      select $p, $n;
       """
     Then uniquely identify answer concepts
       | p         | n                 |

@@ -75,7 +75,6 @@ Feature: TypeQL Query with Expressions
     """
       match
         $x isa person, has age $a, has height $h;
-        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
         { let $v = $a * 2; } or { let $v = 0; };
         { let $v = $h * 2; } or { let $v = 1; };
       select
@@ -85,7 +84,6 @@ Feature: TypeQL Query with Expressions
     """
       match
         $x isa person, has age $a, has height $h;
-        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
         { let $v = $a * 2; } or { let $v = 1; };
       match
         { let $v = $h * 2; } or { let $v = 2; };
@@ -96,7 +94,6 @@ Feature: TypeQL Query with Expressions
     """
       match
         $x isa person, has age $a, has height $h;
-        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
         { let $v = $a * 2; } or { let $v = $h * 2; };
       select
         $v;
@@ -110,7 +107,6 @@ Feature: TypeQL Query with Expressions
     """
       match
         $x isa person, has age $a, has height $h;
-        let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
         { let $v = 12; } or {
           let $v1 = $v;
           { let $v = $a * 2; } or { let $v = $h * 2; };
@@ -198,8 +194,8 @@ Feature: TypeQL Query with Expressions
       select $x, $y;
       """
     Then uniquely identify answer concepts
-      | x               |
-      | attr:name:Lisa  |
+      | x               | y                |
+      | attr:name:Lisa  | attr:age:16 |
 
 
   Scenario: Value variables and concept variables may not share name
@@ -243,7 +239,6 @@ Feature: TypeQL Query with Expressions
       """
       match
       $p isa person;
-      let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
       { $p has age $a; let $v = $a; } or
       { $p has name $n; let $v = $n; };
       """
@@ -251,7 +246,6 @@ Feature: TypeQL Query with Expressions
       """
       match
       $p isa person, has age $a;
-      let $v0 = $v; # TODO: Remove. once rebased on Dmitrii's changes
       { let $v = $a * 2; } or
       { let $v = $a / 2.0; };
       """

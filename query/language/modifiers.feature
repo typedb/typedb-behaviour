@@ -79,10 +79,10 @@ Feature: TypeQL Query Modifiers
       | attr:<attr>:<val1> |
 
     Examples:
-      | attr          | type     | val4       | val2             | val3             | val1       |
-      | colour        | string   | "blue"     | "green"          | "red"            | "yellow"   |
-      | score         | integer     | -38        | -4               | 18               | 152        |
-      | correlation   | double   | -29.7      | -0.9             | 0.01             | 100.0      |
+      | attr        | type    | val4   | val2    | val3  | val1     |
+      | colour      | string  | "blue" | "green" | "red" | "yellow" |
+      | score       | integer | -38    | -4      | 18    | 152      |
+      | correlation | double  | -29.7  | -0.9    | 0.01  | 100.0    |
 #      | date-of-birth | datetime | 1970-01-01 | 1999-12-31T23:00 | 1999-12-31T23:01 | 2020-02-29 |
 
 
@@ -105,22 +105,22 @@ Feature: TypeQL Query Modifiers
       sort $y asc;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:3 | attr:name:Brenda     |
-      | key:ref:2 | attr:name:Frederick  |
-      | key:ref:0 | attr:name:Gary       |
-      | key:ref:1 | attr:name:Jemima     |
+      | x         | y                   |
+      | key:ref:3 | attr:name:Brenda    |
+      | key:ref:2 | attr:name:Frederick |
+      | key:ref:0 | attr:name:Gary      |
+      | key:ref:1 | attr:name:Jemima    |
     When get answers of typeql read query
       """
       match $x isa person, has name $y;
       sort $y desc;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:1 | attr:name:Jemima     |
-      | key:ref:0 | attr:name:Gary       |
-      | key:ref:2 | attr:name:Frederick  |
-      | key:ref:3 | attr:name:Brenda     |
+      | x         | y                   |
+      | key:ref:1 | attr:name:Jemima    |
+      | key:ref:0 | attr:name:Gary      |
+      | key:ref:2 | attr:name:Frederick |
+      | key:ref:3 | attr:name:Brenda    |
 
 
   Scenario: the default sort order is ascending
@@ -142,11 +142,11 @@ Feature: TypeQL Query Modifiers
       sort $y;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:3 | attr:name:Brenda     |
-      | key:ref:2 | attr:name:Frederick  |
-      | key:ref:0 | attr:name:Gary       |
-      | key:ref:1 | attr:name:Jemima     |
+      | x         | y                   |
+      | key:ref:3 | attr:name:Brenda    |
+      | key:ref:2 | attr:name:Frederick |
+      | key:ref:0 | attr:name:Gary      |
+      | key:ref:1 | attr:name:Jemima    |
 
 
   Scenario: Sorting on value variables is supported
@@ -171,7 +171,7 @@ Feature: TypeQL Query Modifiers
         $to20 desc;
       """
     Then order of answer concepts is
-      | x         | to20         |
+      | x         | to20            |
       | key:ref:1 | value:integer:6 |
       | key:ref:3 | value:integer:4 |
       | key:ref:0 | value:integer:2 |
@@ -197,11 +197,11 @@ Feature: TypeQL Query Modifiers
       sort $y, $a, $r asc;
       """
     Then order of answer concepts is
-      | y                 |  a           | x         |
-      | attr:name:Brenda  | attr:age:12  | key:ref:3 |
-      | attr:name:Gary    | attr:age:5   | key:ref:1 |
-      | attr:name:Gary    | attr:age:15  | key:ref:0 |
-      | attr:name:Gary    | attr:age:25  | key:ref:2 |
+      | y                | a           | x         |
+      | attr:name:Brenda | attr:age:12 | key:ref:3 |
+      | attr:name:Gary   | attr:age:5  | key:ref:1 |
+      | attr:name:Gary   | attr:age:15 | key:ref:0 |
+      | attr:name:Gary   | attr:age:25 | key:ref:2 |
 
 
   Scenario: multiple sort variables may be used to sort ascending or descending
@@ -223,11 +223,11 @@ Feature: TypeQL Query Modifiers
       sort $y asc, $a desc, $r desc;
       """
     Then order of answer concepts is
-      | y                 |  a           | x         |
-      | attr:name:Brenda  | attr:age:12  | key:ref:3 |
-      | attr:name:Gary    | attr:age:25  | key:ref:2 |
-      | attr:name:Gary    | attr:age:15  | key:ref:0 |
-      | attr:name:Gary    | attr:age:5   | key:ref:1 |
+      | y                | a           | x         |
+      | attr:name:Brenda | attr:age:12 | key:ref:3 |
+      | attr:name:Gary   | attr:age:25 | key:ref:2 |
+      | attr:name:Gary   | attr:age:15 | key:ref:0 |
+      | attr:name:Gary   | attr:age:5  | key:ref:1 |
 
 
   Scenario: a sorted result set can be limited to a specific size
@@ -250,10 +250,10 @@ Feature: TypeQL Query Modifiers
       limit 3;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:3 | attr:name:Brenda     |
-      | key:ref:2 | attr:name:Frederick  |
-      | key:ref:0 | attr:name:Gary       |
+      | x         | y                   |
+      | key:ref:3 | attr:name:Brenda    |
+      | key:ref:2 | attr:name:Frederick |
+      | key:ref:0 | attr:name:Gary      |
 
 
   Scenario: sorted results can be retrieved starting from a specific offset
@@ -276,9 +276,9 @@ Feature: TypeQL Query Modifiers
       offset 2;
       """
     Then order of answer concepts is
-      | x         | y                 |
-      | key:ref:0 | attr:name:Gary    |
-      | key:ref:1 | attr:name:Jemima  |
+      | x         | y                |
+      | key:ref:0 | attr:name:Gary   |
+      | key:ref:1 | attr:name:Jemima |
 
 
   Scenario: 'offset' and 'limit' can be used together to restrict the answer set
@@ -302,9 +302,9 @@ Feature: TypeQL Query Modifiers
       limit 2;
       """
     Then order of answer concepts is
-      | x         | y                    |
-      | key:ref:2 | attr:name:Frederick  |
-      | key:ref:0 | attr:name:Gary       |
+      | x         | y                   |
+      | key:ref:2 | attr:name:Frederick |
+      | key:ref:0 | attr:name:Gary      |
 
 
   Scenario: when the answer size is limited to 0, an empty answer set is returned
@@ -371,12 +371,12 @@ Feature: TypeQL Query Modifiers
       sort $x asc;
       """
     Then order of answer concepts is
-      | x                       |
-      | attr:name:007           |
-      | attr:name:Bond          |
-      | attr:name:James Bond    |
-      | attr:name:agent         |
-      | attr:name:secret agent  |
+      | x                      |
+      | attr:name:007          |
+      | attr:name:Bond         |
+      | attr:name:James Bond   |
+      | attr:name:agent        |
+      | attr:name:secret agent |
 
 
   Scenario: sort is able to correctly handle duplicates in the value set
@@ -400,9 +400,9 @@ Feature: TypeQL Query Modifiers
       limit 2;
       """
     Then order of answer concepts is
-      | x         | y           |
-      | key:ref:0 | attr:age:2  |
-      | key:ref:4 | attr:age:2  |
+      | x         | y          |
+      | key:ref:0 | attr:age:2 |
+      | key:ref:4 | attr:age:2 |
     When get answers of typeql read query
       """
       match $x isa person, has age $y;
@@ -411,9 +411,9 @@ Feature: TypeQL Query Modifiers
       limit 2;
       """
     Then order of answer concepts is
-      | x         | y           |
-      | key:ref:1 | attr:age:6  |
-      | key:ref:3 | attr:age:6  |
+      | x         | y          |
+      | key:ref:1 | attr:age:6 |
+      | key:ref:3 | attr:age:6 |
 
 
   Scenario: when sorting by a variable not contained in the answer set, an error is thrown
@@ -555,11 +555,11 @@ Feature: TypeQL Query Modifiers
       | attr:<attr>:<pivot>   |
 
     Examples:
-      | attr          | type     | pivot      | lesser       | greater          |
-      | colour        | string   | "green"    | "blue"       | "red"            |
-      | score         | integer     | -4         | -38          | 18               |
-      | correlation   | double   | -0.9       | -1.2         | 0.01             |
-      | date-of-birth | datetime | 1970-02-01 |  1970-01-01  | 1999-12-31T23:01 |
+      | attr          | type     | pivot      | lesser     | greater          |
+      | colour        | string   | "green"    | "blue"     | "red"            |
+      | score         | integer  | -4         | -38        | 18               |
+      | correlation   | double   | -0.9       | -1.2       | 0.01             |
+      | date-of-birth | datetime | 1970-02-01 | 1970-01-01 | 1999-12-31T23:01 |
 
 
   Scenario Outline: sorting and query predicates produce order ignoring types
@@ -721,10 +721,10 @@ Feature: TypeQL Query Modifiers
       # NOTE: fourthValuePivot is expected to be the middle of the sort order (pivot)
       | firstAttr   | firstType | firstValue1 | firstValue2 | secondAttr | secondType | secondValue | thirdAttr | thirdType | thirdValue | fourthAttr | fourthType | fourthValuePivot |
       | colour      | string    | "green"     | "blue"      | name       | string     | "alice"     | shape     | string    | "square"   | street     | string     | "carnaby"        |
-      | score       | integer      | 4           | -38         | quantity   | integer       | -50         | area      | integer      | 100        | length     | integer       | 0                |
+      | score       | integer   | 4           | -38         | quantity   | integer    | -50         | area      | integer   | 100        | length     | integer    | 0                |
       | correlation | double    | 4.1         | -38.999     | quantity   | double     | -101.4      | area      | double    | 110.0555   | length     | double     | 0.5              |
-      | dob         | datetime  | 2970-01-01   | 1970-02-01 | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
-      | score       | integer      | 4           | -38         | quantity   | double     | -55.123     | area      | integer      | 100        | length     | double     | 0.5              |
+      | dob         | datetime  | 2970-01-01  | 1970-02-01  | start-date | datetime   | 1970-01-01  | end-date  | datetime  | 3100-11-20 | last-date  | datetime   | 2000-08-03       |
+      | score       | integer   | 4           | -38         | quantity   | double     | -55.123     | area      | integer   | 100        | length     | double     | 0.5              |
 
 
   Scenario: Fetch queries can use sort, offset, limit
@@ -796,9 +796,9 @@ Feature: TypeQL Query Modifiers
       sort $r; offset 1; limit 2;
       """
     Then uniquely identify answer concepts
-      | x         |
-      | key:ref:1 |
-      | key:ref:2 |
+      | x         | r          |
+      | key:ref:1 | attr:ref:1 |
+      | key:ref:2 | attr:ref:2 |
 
 
   Scenario: Match delete queries can use sort, offset, limit
@@ -832,10 +832,9 @@ Feature: TypeQL Query Modifiers
       sort $n;
       """
     Then uniquely identify answer concepts
-      | x         | n                   |
-      | key:ref:3 | attr:name:Brenda    |
-      | key:ref:0 | attr:name:Gary      |
-
+      | x         | n                |
+      | key:ref:3 | attr:name:Brenda |
+      | key:ref:0 | attr:name:Gary   |
 
 
   Scenario: Match update queries can use sort, offset, limit
@@ -898,8 +897,8 @@ Feature: TypeQL Query Modifiers
       select $z, $x;
       """
     Then uniquely identify answer concepts
-      | z         | x               |
-      | key:ref:0 | attr:name:Lisa  |
+      | z         | x              |
+      | key:ref:0 | attr:name:Lisa |
 
 
   Scenario: when a 'select' has unbound variables, an error is thrown
@@ -930,8 +929,8 @@ Feature: TypeQL Query Modifiers
       select $z, $x, $b;
       """
     Then uniquely identify answer concepts
-      | z         | x              | b                |
-      | key:ref:0 | attr:name:Lisa | value:integer:2001  |
+      | z         | x              | b                  |
+      | key:ref:0 | attr:name:Lisa | value:integer:2001 |
 
 
   # Guards against regression of #6967
@@ -955,8 +954,8 @@ Feature: TypeQL Query Modifiers
       select $n, $r;
       """
     Then uniquely identify answer concepts
-      | n               | r               |
-      | attr:name:Klaus | attr:ref:0      |
+      | n               | r          |
+      | attr:name:Klaus | attr:ref:0 |
 
     When get answers of typeql read query
       """
@@ -968,6 +967,6 @@ Feature: TypeQL Query Modifiers
       sort $r; # The sort triggered the bug
       """
     Then uniquely identify answer concepts
-      | n               | r               |
-      | attr:name:Klaus | attr:ref:0      |
+      | n               | r          |
+      | attr:name:Klaus | attr:ref:0 |
 
