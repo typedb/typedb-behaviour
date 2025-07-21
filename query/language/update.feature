@@ -367,8 +367,8 @@ Feature: TypeQL Update Query
         $p has $n;
       """
     Then uniquely identify answer concepts
-      | p         |
-      | key:ref:0 |
+      | n                 | p         |
+      | attr:name:Charlie | key:ref:0 |
     When get answers of typeql read query
       """
       match $p isa person, has name $n;
@@ -1045,7 +1045,7 @@ Feature: TypeQL Update Query
       """
     Then uniquely identify answer concepts
       | sn                  | p         |
-      | attr:surname:Morgan | key:ref:0 |
+      | attr:surname:Marley | key:ref:0 |
     When get answers of typeql read query
       """
       match $p isa person, has name $n;
