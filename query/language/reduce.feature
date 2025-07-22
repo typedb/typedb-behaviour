@@ -142,10 +142,10 @@ Feature: TypeQL Reduce Queries
     Then result is a single row with variable 'red_var': value:<val_type>:<red_val>
 
     Examples:
-      | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
-      | age    | integer   | 6    | 30   | 14   | sum       | integer     | 50      |
-      | weight | double | 61.8 | 86.5 | 24.8 | sum       | double   | 173.1   |
-
+      |  attr          |  type     |  val1     |  val2     |  val3     |  reduction  |  val_type  |  red_val   |
+      |  age           |  integer  |  6        |  30       |  14       |  sum        |  integer   |  50        |
+      |  weight        |  double   |  61.8     |  86.5     |  24.8     |  sum        |  double    |  173.1     |
+      |  bank-balance  |  decimal  |  61.8dec  |  86.5dec  |  24.8dec  |  sum        |  decimal   |  173.1dec  |
 
   Scenario Outline: the <reduction> of an answer set of '<type>' must be assigned to an optional variable
     Given connection open schema transaction for database: typedb
@@ -176,15 +176,27 @@ Feature: TypeQL Reduce Queries
     Then result is a single row with variable 'red_var': value:<val_type>:<red_val>
 
     Examples:
-      | attr   | type   | val1 | val2 | val3 | reduction | val_type | red_val |
-      | age    | integer   | 6    | 30   | 14   | max       | integer     | 30      |
-      | age    | integer   | 6    | 30   | 14   | min       | integer     | 6       |
-      | age    | integer   | 6    | 30   | 14   | mean      | double   | 16.6667 |
-      | age    | integer   | 6    | 30   | 14   | median    | double   | 14      |
-      | weight | double | 61.8 | 86.5 | 24.8 | max       | double   | 86.5    |
-      | weight | double | 61.8 | 86.5 | 24.8 | min       | double   | 24.8    |
-      | weight | double | 61.8 | 86.5 | 24.8 | mean      | double   | 57.7    |
-      | weight | double | 61.8 | 86.5 | 24.8 | median    | double   | 61.8    |
+      | attr              | type        | val1                 | val2                      | val3                      | reduction | val_type    | red_val                   |
+      | age               | integer     | 6                    | 30                        | 14                        | max       | integer     | 30                        |
+      | age               | integer     | 6                    | 30                        | 14                        | min       | integer     | 6                         |
+      | age               | integer     | 6                    | 30                        | 14                        | mean      | double      | 16.6667                   |
+      | age               | integer     | 6                    | 30                        | 14                        | median    | double      | 14                        |
+      | weight            | double      | 61.8                 | 86.5                      | 24.8                      | max       | double      | 86.5                      |
+      | weight            | double      | 61.8                 | 86.5                      | 24.8                      | min       | double      | 24.8                      |
+      | weight            | double      | 61.8                 | 86.5                      | 24.8                      | mean      | double      | 57.7                      |
+      | weight            | double      | 61.8                 | 86.5                      | 24.8                      | median    | double      | 61.8                      |
+      | bank-balance      | decimal     | 61.8dec              | 86.5dec                   | 24.8dec                   | max       | decimal     | 86.5dec                   |
+      | bank-balance      | decimal     | 61.8dec              | 86.5dec                   | 24.8dec                   | min       | decimal     | 24.8dec                   |
+      | bank-balance      | decimal     | 61.8dec              | 86.5dec                   | 24.8dec                   | mean      | decimal     | 57.7dec                   |
+      | bank-balance      | decimal     | 61.8dec              | 86.5dec                   | 24.8dec                   | median    | decimal     | 61.8dec                   |
+      | name              | string      | "Alice"              | "Gina"                    | "Talia"                   | max       | string      | "Talia"                   |
+      | name              | string      | "Alice"              | "Gina"                    | "Talia"                   | min       | string      | "Alice"                   |
+      | birth-date        | date        | 2000-12-01           | 2001-11-11                | 2003-03-03                | max       | date        | 2003-03-03                |
+      | birth-date        | date        | 2000-12-01           | 2001-11-11                | 2003-03-03                | min       | date        | 2000-12-01                |
+      | birth-datetime    | datetime    | 2000-12-01T12:00:00  | 2001-11-11T12:34:56       | 2003-03-03T00:00:01       | max       | datetime    | 2003-03-03T00:00:01       |
+      | birth-datetime    | datetime    | 2000-12-01T12:00:00  | 2001-11-11T12:34:56       | 2003-03-03T00:00:01       | min       | datetime    | 2000-12-01T12:00:00       |
+      | birth-datetime-tz | datetime-tz | 2000-12-01T12:00:00Z | 2001-11-11T12:34:56+12:00 | 2003-03-03T00:00:01-13:00 | max       | datetime-tz | 2003-03-03T00:00:01-13:00 |
+      | birth-datetime-tz | datetime-tz | 2000-12-01T12:00:00Z | 2001-11-11T12:34:56+12:00 | 2003-03-03T00:00:01-13:00 | min       | datetime-tz | 2000-12-01T12:00:00Z      |
 
 
   Scenario: the sample standard deviation can be retrieved for an answer set of 'double' values
@@ -366,7 +378,6 @@ Feature: TypeQL Reduce Queries
       reduce $min = min($x);
       """
 
-  # TODO: 3.x: Commented out rows in the example table
   Scenario Outline: an error is thrown when getting the '<reduction>' of attributes that have the inapplicable type, '<type>'
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -395,7 +406,7 @@ Feature: TypeQL Reduce Queries
       | attr       | type     | value      | reduction |
       | name       | string   | "Talia"    | sum       |
       | is-awake   | boolean  | true       | sum       |
-#      | birth-date | datetime | 2000-01-01 | sum       |
+      | birth-date | datetime | 2000-01-01 | sum       |
 
 
   Scenario Outline: an error is thrown when getting the fallible '<reduction>' of attributes that have the inapplicable type, '<type>'
@@ -424,8 +435,6 @@ Feature: TypeQL Reduce Queries
       """
     Examples:
       | attr       | type     | value      | reduction |
-      | name       | string   | "Talia"    | max       |
-      | name       | string   | "Talia"    | min       |
       | name       | string   | "Talia"    | mean      |
       | name       | string   | "Talia"    | median    |
       | name       | string   | "Talia"    | std       |
@@ -434,11 +443,9 @@ Feature: TypeQL Reduce Queries
       | is-awake   | boolean  | true       | mean      |
       | is-awake   | boolean  | true       | median    |
       | is-awake   | boolean  | true       | std       |
-#      | birth-date | datetime | 2000-01-01 | max       |
-#      | birth-date | datetime | 2000-01-01 | min       |
-#      | birth-date | datetime | 2000-01-01 | mean      |
-#      | birth-date | datetime | 2000-01-01 | median    |
-#      | birth-date | datetime | 2000-01-01 | std       |
+      | birth-date | datetime | 2000-01-01 | mean      |
+      | birth-date | datetime | 2000-01-01 | median    |
+      | birth-date | datetime | 2000-01-01 | std       |
 
 
   Scenario: when taking the sum of a set of attributes, where some are numeric and others are strings, an error is thrown
