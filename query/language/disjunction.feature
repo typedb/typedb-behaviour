@@ -192,3 +192,23 @@ Feature: TypeQL Disjunction
       | key:ref:2 | attr:ref:2 |
 
 
+  Scenario: Variables appearing outside the disjunction and in only some branches of the disjunction
+    must be input to the disjunction. See #7475
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has ref 0;
+        $_ isa person, has ref 1;
+        $_ isa person, has ref 2;
+      """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    Then get answers of typeql read query
+      """
+      match
+        { $a isa! $_; } or { $_ isa! $_; };
+        { $a is $b; $b isa! $_; } or { $a isa! $_; };
+      """
+    # If we don't crash in the previous step, we're good.
+    Then transaction closes
+
