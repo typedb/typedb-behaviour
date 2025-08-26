@@ -1302,6 +1302,53 @@ Parker";
       | published-date | datetime | 2020-01-01 |
 
 
+  Scenario Outline: Attributes of type '<type>' can be inserted from the values of other attributes
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute src-<attr> @independent, value <type>;
+      attribute dst-<attr> @independent, value <type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa src-<attr> <value>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $x isa dst-<attr> <value>;
+      """
+    Given answer size is: 0
+
+    When typeql write query
+      """
+      match $x isa src-<attr> == <value>;
+      insert $a isa dst-<attr> == $x;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa dst-<attr> <value>;
+      """
+    Then answer size is: 1
+    Examples:
+      | attr           | type     | value      |
+      | title          | string   | "Prologue" |
+      | page-number    | integer  | 233        |
+      | price          | double   | 15.99      |
+      | purchased      | boolean  | true       |
+      | published-date | datetime | 2020-01-01 |
+
+
   Scenario: insert a regex attribute errors if not conforming to regex
     Given transaction closes
     Given connection open schema transaction for database: typedb
