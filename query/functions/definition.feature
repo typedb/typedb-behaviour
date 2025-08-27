@@ -180,9 +180,9 @@ Feature: Function Definition
        };
     return { $nickname };
     """
-    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     Given connection open read transaction for database: typedb
-    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
     fun nickname_of($p: person) -> { nickname }:
@@ -235,9 +235,9 @@ Feature: Function Definition
       $nickname-mapping has nickname $nickname;
     return { $nickname };
     """
-    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Given transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     Given connection open read transaction for database: typedb
-    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Given typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
     fun nickname_of($p: person) -> { nickname }:
@@ -281,10 +281,10 @@ Feature: Function Definition
     reduce $sum = sum($number);
     return first $sum;
     """
-    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
     fun sum_numbers() -> integer:
@@ -318,10 +318,10 @@ Feature: Function Definition
       };
     return sum($number);
     """
-    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
     fun sum_numbers() -> integer:
@@ -337,6 +337,19 @@ Feature: Function Definition
     match
       let $number = sum_numbers();
     """
+
+
+  Scenario: Functions are stratified wrt single return statements
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun last_number() -> integer:
+    match
+      let $number = last_number() + 1;
+    return last $number;
+    """
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
 
 
   Scenario: Functions are stratified wrt aggregates, over multiple hops
@@ -383,10 +396,10 @@ Feature: Function Definition
       let $loyalty-bonus = annual_reward($customer) * (1 + $years-completed * 0.01); # An extra 1% per year!!!
     return { $loyalty-bonus };
     """
-    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then transaction commits; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation or reduction"
+    Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
     fun annual_reward($customer: person) -> {double}:
