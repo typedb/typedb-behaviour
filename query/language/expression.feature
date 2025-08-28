@@ -143,7 +143,7 @@ Feature: TypeQL Query with Expressions
       match
         $x isa person, has age $a, has height $h;
         $v > $h;
-        not { let $v = $a / 2;};
+        not { let $v = $a / 2; };
       select
         $x, $v;
       """

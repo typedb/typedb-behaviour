@@ -29,7 +29,7 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun people_pairs_with($who: person) -> { person } :
+      fun people_pairs_with($who: person) -> { person }:
       match
         $who isa person;
         $friend isa person;
@@ -91,12 +91,12 @@ Feature: Basic Function Execution
 
       fun message-successor-pairs() -> { post, post }:
         match
-          (original:$p, reply:$s) isa reply-of;
+          (original: $p, reply: $s) isa reply-of;
           $s has creation-date $d1;
           $d1 < $d2;
-          (original:$p, reply:$r) isa reply-of;
+          (original: $p, reply: $r) isa reply-of;
           $r has creation-date $d2;
-        return {$s, $r};
+        return { $s, $r };
       """
     Given transaction commits
 
@@ -112,11 +112,11 @@ Feature: Basic Function Execution
       $x4 isa post, has creation-date 2020-07-05;
       $x5 isa post, has creation-date 2020-07-06;
 
-      (original:$x, reply:$x1) isa reply-of;
-      (original:$x, reply:$x2) isa reply-of;
-      (original:$x, reply:$x3) isa reply-of;
-      (original:$x, reply:$x4) isa reply-of;
-      (original:$x, reply:$x5) isa reply-of;
+      (original: $x, reply: $x1) isa reply-of;
+      (original: $x, reply: $x2) isa reply-of;
+      (original: $x, reply: $x3) isa reply-of;
+      (original: $x, reply: $x4) isa reply-of;
+      (original: $x, reply: $x5) isa reply-of;
       """
     Given transaction commits
 
@@ -143,12 +143,12 @@ Feature: Basic Function Execution
     Given typeql schema query
     """
     define
-    fun all_persons() -> { person } :
+    fun all_persons() -> { person }:
     match
       $p isa person;
     return { $p };
 
-    fun name_values() -> { string } :
+    fun name_values() -> { string }:
     match
       $p isa person, has name $name_attr;
       let $name_value = $name_attr;
@@ -189,7 +189,7 @@ Feature: Basic Function Execution
     Given typeql schema query
     """
     define
-    fun name_owners() -> { person, string } :
+    fun name_owners() -> { person, string }:
     match
       $p isa person, has name $name_attr;
       let $name_value = $name_attr;
@@ -222,12 +222,12 @@ Feature: Basic Function Execution
     Given typeql schema query
     """
     define
-    fun persons_of_name_attribute($name: name) -> { person } :
+    fun persons_of_name_attribute($name: name) -> { person }:
     match
       $p isa person, has name $name;
     return { $p };
 
-    fun persons_of_name_value($name: string) -> { person } :
+    fun persons_of_name_value($name: string) -> { person }:
     match
       $p isa person, has name == $name;
     return { $p };
@@ -363,7 +363,7 @@ Feature: Basic Function Execution
     Given typeql schema query
       """
       define
-      fun ref_sum_and_sum_squares() -> integer, integer :
+      fun ref_sum_and_sum_squares() -> integer, integer:
       match
         $ref isa ref;
         let $ref_2 = $ref * $ref;

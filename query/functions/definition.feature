@@ -27,7 +27,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
@@ -40,7 +40,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
@@ -75,7 +75,7 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 4;
     return first $five;
@@ -96,7 +96,7 @@ Feature: Function Definition
     When typeql schema query
     """
     redefine
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
@@ -119,7 +119,7 @@ Feature: Function Definition
     When typeql schema query
     """
     define
-    fun get_attr($arg: doesnotexist) -> integer :
+    fun get_attr($arg: doesnotexist) -> integer:
     match
       $arg has $a;
       let $x = $a;
@@ -131,7 +131,7 @@ Feature: Function Definition
     When typeql schema query
     """
     define
-    fun pi() -> irrational :
+    fun pi() -> irrational:
     match
       let $x = 3.2;
     return first $x;
@@ -144,7 +144,7 @@ Feature: Function Definition
     When typeql schema query; fails with a message containing: "Function argument variable 'arg' is unused."
     """
     define
-    fun get_attr($arg: person) -> { name } :
+    fun get_attr($arg: person) -> { name }:
     match
       $arg_with_a_typo has name $name;
     return { $name };
@@ -368,7 +368,7 @@ Feature: Function Definition
     Given typeql schema query
   """
     define
-    fun annual_reward($customer: person) -> {double}:
+    fun annual_reward($customer: person) -> { double }:
     match
       let $dummy = $reward;
       { $purchase isa purchase ($customer, $item); let $reward in purchase_reward($item); } or
@@ -382,7 +382,7 @@ Feature: Function Definition
       let $reward = 1.1 * $price;
     return { $reward };
 
-    fun special_rewards($customer: person) -> {double}:
+    fun special_rewards($customer: person) -> { double }:
     match
        let $joining_bonus = 1000;
        let $loyalty = loyalty_bonus($customer);
@@ -402,7 +402,7 @@ Feature: Function Definition
     Then typeql read query; fails with a message containing: "Detected a recursive cycle through a negation, reduction or single return"
     """
     with
-    fun annual_reward($customer: person) -> {double}:
+    fun annual_reward($customer: person) -> { double }:
     match
       let $dummy = $reward;
       { $purchase isa purchase ($customer, $item); let $reward in purchase_reward($item); } or
@@ -418,7 +418,7 @@ Feature: Function Definition
     return { $reward };
 
     with
-    fun special_rewards($customer: person) -> {double}:
+    fun special_rewards($customer: person) -> { double }:
     match
        let $joining_bonus = 1000;
        let $loyalty = loyalty_bonus($customer);

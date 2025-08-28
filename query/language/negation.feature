@@ -199,7 +199,7 @@ Feature: TypeQL Negation
     """
       match
         $x has age $y;
-        not {$y == 20;};
+        not { $y == 20; };
 
       """
     Then answer size is: 1
@@ -229,7 +229,7 @@ Feature: TypeQL Negation
     """
       match
         $x has $y;
-        not {$y isa name;};
+        not { $y isa name; };
       """
     Then answer size is: 2
     Then verify answer set is equivalent for query
@@ -285,7 +285,7 @@ Feature: TypeQL Negation
         $f1 isa friendship, links (friend: $a, friend: $b);
         $f2 isa friendship, links (friend: $b, friend: $c);
         $f3 isa friendship, links (friend: $c, friend: $d);
-        not {$c isa dog;};
+        not { $c isa dog; };
 
       """
     # Eliminates (cdzd, zdzd)
@@ -357,7 +357,7 @@ Feature: TypeQL Negation
         $f1 isa friendship, links (friend: $a, friend: $b);
         $f2 isa friendship, links (friend: $b, friend: $c);
         $z isa dog;
-        not {$b has name "d";};
+        not { $b has name "d"; };
 
       """
 
@@ -384,7 +384,7 @@ Feature: TypeQL Negation
       """
       match
         $e isa employment, links ($r1: $x);
-        not {$r1 label employment:employer;};
+        not { $r1 label employment:employer; };
 
       """
     Then answer size is: 1
@@ -587,7 +587,7 @@ Feature: TypeQL Negation
       $e1 isa employment, links (employee: $x, employer: $c);
       $e2 isa employment, links (employee: $y, employer: $d);
       """
-    # We match $x isa person and not {$x isa person; ...}; answers can still be returned because of the conjunction
+    # We match $x isa person and not { $x isa person; ...}; answers can still be returned because of the conjunction
     Given transaction commits
 
     Given connection open read transaction for database: typedb
@@ -623,7 +623,7 @@ Feature: TypeQL Negation
           $x isa person;
           not {
             (employee: $x);
-            # The planner prefers ordering `$_ role-name employee` (which is free) before `$_ links $_:$x` (which has to hit disk).
+            # The planner prefers ordering `$_ role-name employee` (which is free) before `$_ links $_: $x` (which has to hit disk).
             # If `$x` is not marked as input to the negation during lowering, it is not selected by the role name step, and therefore removed from the row.
             # The links executor then crashes as it expects `$x` to be bound.
           };

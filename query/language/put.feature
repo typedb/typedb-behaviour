@@ -203,7 +203,7 @@ Feature: TypeQL Put Query
     """
     match
     $o isa! $t;
-    {$t sub person; } or { $t sub age; };
+    { $t sub person; } or { $t sub age; };
     select $t;
     """
     Then answer size is: 0
@@ -218,7 +218,7 @@ Feature: TypeQL Put Query
     """
     match
     $o isa! $t;
-    {$t sub person; } or { $t sub age; };
+    { $t sub person; } or { $t sub age; };
     select $t;
     """
     Then uniquely identify answer concepts

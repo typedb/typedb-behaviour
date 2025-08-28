@@ -29,6 +29,17 @@ Feature: TypeQL Define Query
 
     Given connection open schema transaction for database: typedb
 
+  ###########
+  # PARSING #
+  ###########
+
+  Scenario: empty defines are valid
+    When typeql schema query
+      """
+      define
+      """
+    Then transaction commits
+
   ################
   # ENTITY TYPES #
   ################
