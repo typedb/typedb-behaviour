@@ -92,7 +92,7 @@ Feature: Negation Resolution
       match
         $continent isa continent;
         $area isa area;
-        not {(superior: $continent, subordinate: $area) isa location-hierarchy;};
+        not { (superior: $continent, subordinate: $area) isa location-hierarchy; };
 
       """
     Then verify answer size is: 0
@@ -380,7 +380,7 @@ Feature: Negation Resolution
       rule unreachability-rule: when {
           $x isa node;
           $y isa node;
-          not {(from: $x, to: $y) isa reachable;};
+          not {(from: $x, to: $y) isa reachable; };
       } then {
           (from: $x, to: $y) isa unreachable;
       };
@@ -460,8 +460,8 @@ Feature: Negation Resolution
               $common-superior isa place;
               (superior: $common-superior, subordinate: $from) isa location-hierarchy;
               (from: $common-superior, to: $to) isa passage;
-              not {$common-superior is $to;};
-              not {(superior: $to, subordinate: $from) isa location-hierarchy;};
+              not { $common-superior is $to; };
+              not {(superior: $to, subordinate: $from) isa location-hierarchy; };
           } then {
               (from: $from, to: $to) isa reachable;
           };

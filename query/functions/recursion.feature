@@ -70,27 +70,27 @@ Feature: Recursive Function Execution
       match
         location-hierarchy (subordinate: $x, superior: $y);
         location-hierarchy (subordinate: $y, superior: $z);
-      return {$x, $z};
+      return { $x, $z };
 
       fun big_location_hierarchy_pairs() -> { place, place }:
       match
         let $x, $y in transitive_location_hierarchy_pairs();
         $x isa big-place;
         $y isa big-place;
-      return {$x, $y};
+      return { $x, $y };
 
 
       fun transitive_location_hierarchy_directed($x: place) -> { place }:
       match
         location-hierarchy (subordinate: $x, superior: $y);
         location-hierarchy (subordinate: $y, superior: $z);
-      return {$z};
+      return { $z };
 
       fun big_location_hierarchy_directed($x: big-place) -> { big-place }:
       match
         let $y in transitive_location_hierarchy_directed($x);
         $y isa big-place;
-      return {$y};
+      return { $y };
       """
     Given transaction commits
 
@@ -135,7 +135,7 @@ Feature: Recursive Function Execution
       person plays parentship:parent, plays parentship:child;
 
 
-      fun ancestor_pairs() -> { person, person } :
+      fun ancestor_pairs() -> { person, person }:
         match
          $x isa person; $y isa person;
          { parentship (parent: $x, child: $y); } or
@@ -146,7 +146,7 @@ Feature: Recursive Function Execution
           };
         return { $x, $y };
 
-      fun ancestors_directed($x: person) -> { person } :
+      fun ancestors_directed($x: person) -> { person }:
         match
          $y isa person;
          { parentship (parent: $x, child: $y); } or
@@ -197,7 +197,7 @@ Feature: Recursive Function Execution
       """
       match
         $Y isa person, has name $name;
-        {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+        { $name == 'aaa'; } or { $name == 'aab'; } or { $name == 'aaaa'; };
       select $Y, $name;
       """
     Given get answers of typeql read query
@@ -213,7 +213,7 @@ Feature: Recursive Function Execution
       """
       match
         $Y isa person, has name $name;
-        {$name == 'aaa';} or {$name == 'aab';} or {$name == 'aaaa';};
+        { $name == 'aaa'; } or { $name == 'aab'; } or { $name == 'aaaa'; };
       select $Y, $name;
       """
 
@@ -227,11 +227,11 @@ Feature: Recursive Function Execution
       match
         $Y isa person, has name $nameY;
         $X isa person, has name $nameX;
-        {$nameX == 'a';$nameY == 'aa';} or {$nameX == 'a';$nameY == 'ab';} or
-        {$nameX == 'a';$nameY == 'aaa';} or {$nameX == 'a';$nameY == 'aab';} or
-        {$nameX == 'a';$nameY == 'aaaa';} or {$nameX == 'aa';$nameY == 'aaa';} or
-        {$nameX == 'aa';$nameY == 'aab';} or {$nameX == 'aa';$nameY == 'aaaa';} or
-        {$nameX == 'aaa';$nameY == 'aaaa';} or {$nameX == 'c';$nameY == 'ca';};
+        { $nameX == 'a';$nameY == 'aa'; } or { $nameX == 'a';$nameY == 'ab'; } or
+        { $nameX == 'a';$nameY == 'aaa'; } or { $nameX == 'a';$nameY == 'aab'; } or
+        { $nameX == 'a';$nameY == 'aaaa'; } or { $nameX == 'aa';$nameY == 'aaa'; } or
+        { $nameX == 'aa';$nameY == 'aab'; } or { $nameX == 'aa';$nameY == 'aaaa'; } or
+        { $nameX == 'aaa';$nameY == 'aaaa'; } or { $nameX == 'c';$nameY == 'ca'; };
       select $X, $Y;
       """
     Given transaction closes
@@ -316,7 +316,7 @@ Feature: Recursive Function Execution
       """
       match
         $Y has name $name;
-        {$name == 'd';} or {$name == 'g';};
+        { $name == 'd'; } or { $name == 'g'; };
       select $Y;
       """
 
@@ -332,7 +332,7 @@ Feature: Recursive Function Execution
       """
       match
         $X has name $name;
-        {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
+        { $name == 'a'; } or { $name == 'b'; } or { $name == 'c'; };
       select $X;
       """
     Given get answers of typeql read query
@@ -347,7 +347,7 @@ Feature: Recursive Function Execution
       """
       match
         $X has name $name;
-        {$name == 'a';} or {$name == 'b';} or {$name == 'c';};
+        { $name == 'a'; } or { $name == 'b'; } or { $name == 'c'; };
       select $X;
       """
 
@@ -437,7 +437,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has name $name;
-        {$name == 'f';} or {$name == 'a';};
+        { $name == 'f'; } or { $name == 'a'; };
       select $y;
       """
     Given get answers of typeql read query
@@ -452,7 +452,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has name $name;
-        {$name == 'f';} or {$name == 'a';};
+        { $name == 'f'; } or { $name == 'a'; };
       select $y;
       """
 
@@ -474,13 +474,13 @@ Feature: Recursive Function Execution
 
       attribute index, value string;
 
-      fun ntc_pairs() -> { entity2, entity2 } :
+      fun ntc_pairs() -> { entity2, entity2 }:
       match
         $x isa q;
         let $x, $y in tc_pairs();
       return { $x, $y };
 
-      fun tc_pairs() -> { entity2, entity2 } :
+      fun tc_pairs() -> { entity2, entity2 }:
       match
         $x isa entity2; $y isa entity2;
         { P (roleA: $x, roleB: $y); } or
@@ -557,7 +557,7 @@ Feature: Recursive Function Execution
 
     # --- pairs ---
 
-      fun reachable_pairs() -> {traversable, traversable}:
+      fun reachable_pairs() -> { traversable, traversable }:
       match
         $x isa traversable; $y isa traversable;
         { link (start: $x, end_: $y); } or
@@ -566,15 +566,15 @@ Feature: Recursive Function Execution
           let $z, $y1 in reachable_pairs();
           $y1 is $y;
         };
-      return {$x, $y};
+      return { $x, $y };
 
       fun indirect_link_pairs() -> { traversable, traversable }:
         match
           let $x, $y in reachable_pairs();
-          not { link (start: $x, end_: $y);};
+          not { link (start: $x, end_: $y); };
         return { $x, $y };
 
-      fun unreachable_pairs() -> {traversable, traversable}:
+      fun unreachable_pairs() -> { traversable, traversable }:
         match
           $x isa vertex;
           $y isa vertex;
@@ -585,7 +585,7 @@ Feature: Recursive Function Execution
         return { $x, $y };
 
       # --- directed ---
-      fun reachable_from($x: traversable) -> {traversable}:
+      fun reachable_from($x: traversable) -> { traversable }:
       match
         $x isa traversable; $y isa traversable;
         { link (start: $x, end_: $y); } or
@@ -602,7 +602,7 @@ Feature: Recursive Function Execution
           not {link (start: $x, end_: $y); };
         return { $y };
 
-      fun unreachable_from($x: traversable) -> {traversable}:
+      fun unreachable_from($x: traversable) -> { traversable }:
         match
           $x isa vertex;
           $y isa vertex;
@@ -642,13 +642,13 @@ Feature: Recursive Function Execution
       match
         $x has index $indX;
         $y has index $indY;
-        {$indX == 'aa';$indY == 'bb';} or
-        {$indX == 'bb';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'cc';} or
-        {$indX == 'bb';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'dd';};
+        { $indX == 'aa';$indY == 'bb'; } or
+        { $indX == 'bb';$indY == 'cc'; } or
+        { $indX == 'cc';$indY == 'cc'; } or
+        { $indX == 'cc';$indY == 'dd'; } or
+        { $indX == 'aa';$indY == 'cc'; } or
+        { $indX == 'bb';$indY == 'dd'; } or
+        { $indX == 'aa';$indY == 'dd'; };
       select $x, $y;
       """
     Given get answers of typeql read query
@@ -663,13 +663,13 @@ Feature: Recursive Function Execution
       match
         $x has index $indX;
         $y has index $indY;
-        {$indX == 'aa';$indY == 'bb';} or
-        {$indX == 'bb';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'cc';} or
-        {$indX == 'cc';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'cc';} or
-        {$indX == 'bb';$indY == 'dd';} or
-        {$indX == 'aa';$indY == 'dd';};
+        { $indX == 'aa';$indY == 'bb'; } or
+        { $indX == 'bb';$indY == 'cc'; } or
+        { $indX == 'cc';$indY == 'cc'; } or
+        { $indX == 'cc';$indY == 'dd'; } or
+        { $indX == 'aa';$indY == 'cc'; } or
+        { $indX == 'bb';$indY == 'dd'; } or
+        { $indX == 'aa';$indY == 'dd'; };
       select $x, $y;
       """
 
@@ -751,7 +751,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has index $indY;
-        {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
+        { $indY == 'a'; } or { $indY == 'b'; } or { $indY == 'c'; } or { $indY == 'd'; };
       select $y;
       """
 
@@ -767,7 +767,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has index $indY;
-        {$indY == 'a';} or {$indY == 'b';} or {$indY == 'c';} or {$indY == 'd';};
+        { $indY == 'a'; } or { $indY == 'b'; } or { $indY == 'c'; } or { $indY == 'd'; };
       select $y;
       """
 
@@ -815,7 +815,7 @@ Feature: Recursive Function Execution
           parentship (parent: $z, child: $x);
           parentship (parent: $z, child: $y);
         };
-      return {$x, $y};
+      return { $x, $y };
 
       # --- directed ---
       fun same_gen_directed($x: person) -> { person }:
@@ -870,7 +870,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has name $name;
-        {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
+        { $name == 'ann'; } or { $name == 'bill'; } or { $name == 'peter'; };
       select $y;
       """
     Given get answers of typeql read query
@@ -885,7 +885,7 @@ Feature: Recursive Function Execution
       """
       match
         $y has name $name;
-        {$name == 'ann';} or {$name == 'bill';} or {$name == 'peter';};
+        { $name == 'ann'; } or { $name == 'bill'; } or { $name == 'peter'; };
       select $y;
       """
 
@@ -929,7 +929,7 @@ Feature: Recursive Function Execution
         let $y1, $x1 in rev_sg_pairs();
         down (start: $y1, end_: $y);
       };
-      return {$x, $y};
+      return { $x, $y };
 
 
       fun rev_sg_directed_from_bound($x: person) -> { person }:
@@ -941,7 +941,7 @@ Feature: Recursive Function Execution
         let $y1 in rev_sg_directed_to_bound($x1);
         down (start: $y1, end_: $y);
       };
-      return {$y};
+      return { $y };
 
 
       fun rev_sg_directed_to_bound($y: person) -> { person }:
@@ -953,7 +953,7 @@ Feature: Recursive Function Execution
         let $x1 in rev_sg_directed_from_bound($y1);
         down (start: $y1, end_: $y);
       };
-      return {$x};
+      return { $x };
       """
     Given transaction commits
 
@@ -1014,7 +1014,7 @@ Feature: Recursive Function Execution
       """
       match
         $y isa person, has name $name;
-        {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
+        { $name == 'b'; } or { $name == 'c'; } or { $name == 'd'; };
       select $y;
       """
     Given get answers of typeql read query
@@ -1027,12 +1027,12 @@ Feature: Recursive Function Execution
       match
         $x has name $nameX;
         $y has name $nameY;
-        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
-        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
-        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
-        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
-        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
-        {$nameX == 'f';$nameY == 'k';};
+        { $nameX == 'a';$nameY == 'b'; } or { $nameX == 'a';$nameY == 'c'; } or
+        { $nameX == 'a';$nameY == 'd'; } or { $nameX == 'm';$nameY == 'n'; } or
+        { $nameX == 'm';$nameY == 'o'; } or { $nameX == 'p';$nameY == 'm'; } or
+        { $nameX == 'g';$nameY == 'f'; } or { $nameX == 'h';$nameY == 'f'; } or
+        { $nameX == 'i';$nameY == 'f'; } or { $nameX == 'j';$nameY == 'f'; } or
+        { $nameX == 'f';$nameY == 'k'; };
       select $x, $y;
       """
 
@@ -1048,7 +1048,7 @@ Feature: Recursive Function Execution
       """
       match
         $y isa person, has name $name;
-        {$name == 'b';} or {$name == 'c';} or {$name == 'd';};
+        { $name == 'b'; } or { $name == 'c'; } or { $name == 'd'; };
       select $y;
       """
     Given get answers of typeql read query
@@ -1063,12 +1063,12 @@ Feature: Recursive Function Execution
       match
         $x has name $nameX;
         $y has name $nameY;
-        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
-        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
-        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
-        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
-        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
-        {$nameX == 'f';$nameY == 'k';};
+        { $nameX == 'a';$nameY == 'b'; } or { $nameX == 'a';$nameY == 'c'; } or
+        { $nameX == 'a';$nameY == 'd'; } or { $nameX == 'm';$nameY == 'n'; } or
+        { $nameX == 'm';$nameY == 'o'; } or { $nameX == 'p';$nameY == 'm'; } or
+        { $nameX == 'g';$nameY == 'f'; } or { $nameX == 'h';$nameY == 'f'; } or
+        { $nameX == 'i';$nameY == 'f'; } or { $nameX == 'j';$nameY == 'f'; } or
+        { $nameX == 'f';$nameY == 'k'; };
       select $x, $y;
       """
     Given get answers of typeql read query
@@ -1083,12 +1083,12 @@ Feature: Recursive Function Execution
       match
         $x has name $nameX;
         $y has name $nameY;
-        {$nameX == 'a';$nameY == 'b';} or {$nameX == 'a';$nameY == 'c';} or
-        {$nameX == 'a';$nameY == 'd';} or {$nameX == 'm';$nameY == 'n';} or
-        {$nameX == 'm';$nameY == 'o';} or {$nameX == 'p';$nameY == 'm';} or
-        {$nameX == 'g';$nameY == 'f';} or {$nameX == 'h';$nameY == 'f';} or
-        {$nameX == 'i';$nameY == 'f';} or {$nameX == 'j';$nameY == 'f';} or
-        {$nameX == 'f';$nameY == 'k';};
+        { $nameX == 'a';$nameY == 'b'; } or { $nameX == 'a';$nameY == 'c'; } or
+        { $nameX == 'a';$nameY == 'd'; } or { $nameX == 'm';$nameY == 'n'; } or
+        { $nameX == 'm';$nameY == 'o'; } or { $nameX == 'p';$nameY == 'm'; } or
+        { $nameX == 'g';$nameY == 'f'; } or { $nameX == 'h';$nameY == 'f'; } or
+        { $nameX == 'i';$nameY == 'f'; } or { $nameX == 'j';$nameY == 'f'; } or
+        { $nameX == 'f';$nameY == 'k'; };
       select $x, $y;
       """
 
@@ -1324,7 +1324,7 @@ Feature: Recursive Function Execution
       match $x isa entity2; # no-op purely for binding
       return { $x };
 
-      fun p_pairs() -> {entity2, entity2}:
+      fun p_pairs() -> { entity2, entity2 }:
       match
         let $x in identity($x1);
         let $y in identity($y1);
@@ -1335,7 +1335,7 @@ Feature: Recursive Function Execution
         };
       return { $x, $y };
 
-      fun p_directed($x: entity2) -> {entity2}:
+      fun p_directed($x: entity2) -> { entity2 }:
       match
         let $y in identity($y1);
         { Q (start: $x, end_: $y1); } or
@@ -1563,7 +1563,7 @@ Feature: Recursive Function Execution
       return { $x, $y };
 
       # --- directed ---
-      fun p_directed($x: entity2) -> {entity2 }:
+      fun p_directed($x: entity2) -> { entity2 }:
       match
       $x isa entity2; $y isa entity2;
       { Q (start: $x, end_: $y); } or

@@ -39,6 +39,17 @@ Feature: TypeQL Redefine Query
 
     Given connection open schema transaction for database: typedb
 
+  ###########
+  # PARSING #
+  ###########
+
+  Scenario: empty redefines are valid
+    When typeql schema query
+      """
+      redefine
+      """
+    Then transaction commits
+
   ################
   # ENTITY TYPES #
   ################

@@ -31,6 +31,14 @@ Feature: TypeQL Undefine Query
   # PARSING #
   ###########
 
+  Scenario: empty undefines are valid
+    When typeql schema query
+      """
+      undefine
+      """
+    Then transaction commits
+
+
   Scenario: cannot use untargeted define-like syntax in undefine
     Then typeql schema query; parsing fails
       """

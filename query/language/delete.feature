@@ -2004,7 +2004,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2042,7 +2042,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2105,7 +2105,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2159,7 +2159,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2239,7 +2239,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2261,7 +2261,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2391,7 +2391,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2471,7 +2471,7 @@ Feature: TypeQL Delete Query
     When typeql write query
       """
       match $p isa person, has name "<deleted-name>", has email $e;
-      delete $e of $p;
+      delete has $e of $p;
       """
     When get answers of typeql read query
       """
@@ -2759,7 +2759,7 @@ Feature: TypeQL Delete Query
     Then typeql write query; fails with a message containing: "anonymous"
       """
       delete
-        $_ of $_;
+        has $_ of $_;
       """
 
     When connection open write transaction for database: typedb
@@ -2768,7 +2768,7 @@ Feature: TypeQL Delete Query
       insert
         $p isa person, has name "John";
       delete
-        $_ of $p;
+        has $_ of $p;
       """
 
     When connection open write transaction for database: typedb
@@ -2777,7 +2777,7 @@ Feature: TypeQL Delete Query
       insert
         $n isa name "John";
       delete
-        $n of $_;
+        has $n of $_;
       """
 
 

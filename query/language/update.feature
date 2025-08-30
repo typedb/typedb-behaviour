@@ -1039,7 +1039,7 @@ Feature: TypeQL Update Query
       match
         $p isa person, has surname $sn;
       delete
-        $sn of $p;
+        has $sn of $p;
       update
         $p has old-surname "Morgan";
       """

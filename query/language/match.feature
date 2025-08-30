@@ -1088,7 +1088,7 @@ Feature: TypeQL Match Clause
       | label:loneliness |
     When get answers of typeql read query
       """
-      match not {$_ isa $r;}; relation $r;
+      match not { $_ isa $r; }; relation $r;
       """
     Then uniquely identify answer concepts
       | r                |
@@ -1272,14 +1272,14 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $r isa comparator (compared:$r);
+      $r isa comparator (compared: $r);
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r isa comparator (compared:$r);
+      match $r isa comparator (compared: $r);
       """
     Then answer size is: 1
 
@@ -1300,7 +1300,7 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $r isa comparator (compared: $v, compared:$r);
+      $r isa comparator (compared: $v, compared: $r);
       $v isa variable;
       """
     Given transaction commits
@@ -1308,7 +1308,7 @@ Feature: TypeQL Match Clause
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $r  isa comparator (compared: $v, compared:$r);
+      match $r  isa comparator (compared: $v, compared: $r);
       """
     Then answer size is: 1
 

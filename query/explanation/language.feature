@@ -239,7 +239,7 @@ Feature: TypeQL Reasoning Explanation
     Then get answers of typeql read query
       """
       match $com isa company;
-      {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
+      { $com has name $n1; $n1 "the-company"; } or { $com has name $n2; $n2 "another-company"; };
 
       """
 
@@ -254,7 +254,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                            |
-      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";}; }; |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company"; } or { $com isa company; $com has name $n2; $n2 == "another-company"; }; }; |
       | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                            |
 
   @ignore-typedb-driver
@@ -288,7 +288,7 @@ Feature: TypeQL Reasoning Explanation
     Then get answers of typeql read query
       """
       match $com isa company;
-      {$com has name $n1; $n1 "the-company";} or {$com has name $n2; {$n2 "another-company";} or {$n2 "third-company";};};
+      { $com has name $n1; $n1 "the-company"; } or { $com has name $n2; { $n2 "another-company"; } or { $n2 "third-company"; }; };
 
       """
 
@@ -303,5 +303,5 @@ Feature: TypeQL Reasoning Explanation
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                              |
-      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company";} or {$com isa company; $com has name $n2; $n2 == "another-company";} or {$com isa company; $com has name $n2; $n2 == "third-company";}; }; |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company"; } or { $com isa company; $com has name $n2; $n2 == "another-company"; } or { $com isa company; $com has name $n2; $n2 == "third-company"; }; }; |
       | 1 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                              |

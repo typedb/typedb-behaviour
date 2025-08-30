@@ -340,8 +340,8 @@ Feature: TypeQL Reasoning Explanation
     Then get answers of typeql read query
       """
       match $com isa company;
-      {$com has name $n1; $n1 "the-company";} or {$com has name $n2; $n2 "another-company";};
-      not {$com has is-liable $liability;};
+      { $com has name $n1; $n1 "the-company"; } or { $com has name $n2; $n2 "another-company"; };
+      not { $com has is-liable $liability; };
 
       """
 
@@ -360,7 +360,7 @@ Feature: TypeQL Reasoning Explanation
 
     Then answers contain explanation tree
       |   | children | vars    | identifiers | explanation | pattern                                                                                                                                                                                                                                                      |
-      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company"; not { { $com has is-liable $liability; }; }; } or {$com isa company; $com has name $n2; $n2 == "another-company"; not { { $com has is-liable $liability; }; }; }; }; |
+      | 0 | 1        | com     | ACO         | disjunction | { $com iid <answer.com.iid>; { $com isa company; $com has name $n1; $n1 == "the-company"; not { { $com has is-liable $liability; }; }; } or { $com isa company; $com has name $n2; $n2 == "another-company"; not { { $com has is-liable $liability; }; }; }; }; |
       | 1 | 2        | com, n2 | ACO, N2     | negation    | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; not { { $com has is-liable $liability; }; }; };                                                                                          |
       | 2 | -        | com, n2 | ACO, N2     | lookup      | { $com isa company; $com has name $n2; $n2 == "another-company"; $com iid <answer.com.iid>; $n2 iid <answer.n2.iid>; };                                                                                                                                       |
 

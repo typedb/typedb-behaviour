@@ -28,7 +28,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
@@ -51,12 +51,12 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
 
-    fun six() -> integer :
+    fun six() -> integer:
     match
       let $six = 6;
     return first $six;
@@ -94,7 +94,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
@@ -117,7 +117,7 @@ Feature: Function Usage
     Given typeql schema query
     """
     define
-    fun five() -> integer :
+    fun five() -> integer:
     match
       let $five = 5;
     return first $five;
