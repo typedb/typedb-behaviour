@@ -1107,7 +1107,10 @@ Feature: Driver Migration
     When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
     Then file(schema.tql) exists
     Then file(data.typedb) exists
-    Then file(schema.tql) is empty
+    Then file(schema.tql) has schema:
+    """
+    define
+    """
     # Metadata still exists!
     Then file(data.typedb) is not empty
     Then connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
