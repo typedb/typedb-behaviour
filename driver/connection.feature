@@ -32,7 +32,7 @@ Feature: Driver Connection
     When connection closes
     When connection opens with a wrong port; fails
     Then connection is open: false
-    When connection opens with a wrong host; fails with a message containing: "failed to lookup address information"
+    When connection opens with a wrong host; fails with a message containing: "dns error"
     Then connection is open: false
     When connection opens with default authentication
     Then connection is open: true
