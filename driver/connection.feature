@@ -130,6 +130,7 @@ Feature: Driver Connection
     Given connection has database: typedb
     Then connection get database(typedb) has schema:
     """
+    define
     """
     Then connection get database(typedb) has type schema:
     """
@@ -154,9 +155,11 @@ Feature: Driver Connection
     """
     Then connection get database(typedb) has schema:
     """
+    define
     """
     Then connection get database(typedb) has type schema:
     """
+    define
     """
     When transaction commits
     Then connection get database(typedb) has schema:
