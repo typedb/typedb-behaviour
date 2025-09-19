@@ -29,9 +29,26 @@ Feature: Basic Analyze queries
       """
       match $x isa person;
       """
-    Then analyze result contains:
+    Then analyzed query structure is:
     """
     {
+      "query": {
+        "variables": "(ignored)",
+        "conjunctions": [
+          [
+            {
+              "textSpan": "(ignored)",
+              "tag": "isa",
+              "instance": {"tag": "variable"},
+              "type": {"tag": "label", "type": {"label": "person"} }
+            }
+          ]
+        ],
+        "pipeline": [
+          { "tag": "match", "block": 0 }
+        ]
+      },
+      "preamble": []
     }
     """
     Given transaction closes
