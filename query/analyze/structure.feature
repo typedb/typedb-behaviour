@@ -27,12 +27,19 @@ Feature: Basic Analyze queries
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
       """
-      match $x isa person;
+      match $x isa person; $n isa name;
+      insert $x has $n;
       """
     Then analyzed query pipeline structure is:
     """
     Pipeline([
-      Match([Isa($x, person)])
+      Match([
+        Isa($x, person),
+        Isa($n, name)
+      ]),
+      Insert([
+        Has($x, $n)
+      ])
     ])
     """
     Given transaction closes
