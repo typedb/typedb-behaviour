@@ -55,11 +55,13 @@ Feature: Basic Analyze queries
       return { $p };
 
       with
-      fun name_of($p: person) -> { name }:
+      fun name_of($p: person) -> name:
       match $p has name $n;
-      return { $n };
+      return first $n;
 
-      match $x isa person;
+      match
+        let $p in persons();
+        let $n = name_of($p);
       """
     Then analyzed query preamble contains:
     """
@@ -75,7 +77,7 @@ Feature: Basic Analyze queries
     """
     Function(
       [$p],
-      Stream([$n]),
+      Single(first, [$n]),
       Pipeline([
         Match([
           Has($p, $n),
@@ -83,5 +85,14 @@ Feature: Basic Analyze queries
         ])
       ])
     )
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        FunctionCall(persons(),[$p],[]),
+        FunctionCall(name_of($p),[$n],[$p])
+      ])
+    ])
     """
     Given transaction closes
