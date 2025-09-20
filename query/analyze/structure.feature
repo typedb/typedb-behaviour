@@ -23,21 +23,58 @@ Feature: Basic Analyze queries
     Given transaction commits
 
 
-  Scenario: Analyze returns the constraints in a query, and the pipeline structure
+  Scenario: Analyze returns the structure of each stage in the query
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
       """
       match $x isa person;
       """
-    Then analyzed query structure is:
+    Then analyzed query pipeline structure is:
     """
-    QueryStructure(
-      Query(
-        Pipeline([
-          Match([Isa($x, person)])
+    Pipeline([
+      Match([Isa($x, person)])
+    ])
+    """
+    Given transaction closes
+
+
+  Scenario: Analyze returns the structure of each function in the preamble
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      with
+      fun persons() -> { person }:
+      match $p isa person;
+      return { $p };
+
+      with
+      fun name_of($p: person) -> { name }:
+      match $p has name $n;
+      return { $n };
+
+      match $x isa person;
+      """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [],
+      Stream([$p]),
+      Pipeline([
+        Match([Isa($p, person)])
+      ])
+    )
+    """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [$p],
+      Stream([$n]),
+      Pipeline([
+        Match([
+          Has($p, $n),
+          Isa($n, name)
         ])
-      ),
-      Preamble([])
+      ])
     )
     """
     Given transaction closes
