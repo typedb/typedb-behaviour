@@ -96,3 +96,28 @@ Feature: Basic Analyze queries
     ])
     """
     Given transaction closes
+
+
+  Scenario: Nested patterns can be reconstructed from the analyzed query
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      match
+        $p isa person;
+        { $p has name "John"; } or { $p has ref 0; };
+        not { $p has name "Doe"; };
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Isa($p, person),
+        Or([
+          [Comparison($_, "John", ==), Has($p, $_), Isa($_, name) ],
+          [Comparison($_, 0, ==), Has($p, $_), Isa($_, ref)]
+        ]),
+        Not([Comparison($_, "Doe", ==), Has($p, $_), Isa($_, name)])
+      ])
+    ])
+    """
+    Given transaction closes
