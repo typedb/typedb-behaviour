@@ -184,3 +184,58 @@ Feature: Basic Analyze queries
     ])
     """
     Given transaction closes
+
+
+  Scenario: All stages in a pipeline are present in the structure
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+    """
+    match
+     $p isa person;
+     $q isa person;
+     $n isa name == "John";
+    insert
+     $p has $n;
+    delete
+      has $n of $p;
+      $q;
+    update
+      $p has $n;
+    put
+      $p has $n;
+    distinct;
+    match
+      try { $p has ref $ref; };
+    require $ref;
+    select $ref, $n;
+    reduce $ref_sum = sum($ref) groupby $n;
+    sort $n desc;
+    offset 1;
+    limit 1;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
+      ),
+      Insert([Has($p, $n)]),
+      Delete([$q], [Has($p, $n)]),
+      Update([Has($p, $n)]),
+      Put([Has($p, $n)]),
+      Distinct(),
+      Match([
+        Try([Has($p, $ref), Isa($ref, ref)])
+      ]),
+      Require([$ref]),
+      Select([$ref,$n]),
+      Reduce(
+        [ReduceAssign($ref_sum, Reducer(sum, [$ref]))],
+        [$n]
+      ),
+      Sort([desc($n)]),
+      Offset(1),
+      Limit(1)
+    ])
+    """
+    Given transaction closes
