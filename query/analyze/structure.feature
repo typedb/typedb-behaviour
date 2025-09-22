@@ -140,6 +140,7 @@ Feature: Basic Analyze queries
         $n1 contains "son";
         $f isa friendship, links (friend: $p1, $p2);
         $p1 is $p2;
+        $p2 iid 0x1234567890112345678901;
         let $x = ceil(2 * pi());
       """
     Then analyzed query pipeline structure is:
@@ -150,8 +151,35 @@ Feature: Basic Analyze queries
         Comparison($n1, "son", contains),
         Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
         Is($p1, $p2),
+        Iid($p2, 0x1234567890112345678901),
         FunctionCall(pi(), [$_], []),
         Expression(let $x = ceil(2 * pi()), [$x], [$_])
+      ])
+    ])
+    """
+
+    When get answers of typeql analyze query
+      """
+      match
+        entity $p1;
+        $p1 sub! person, owns $n1;
+        $n1 label name;
+        $n1 value string;
+        $f sub friendship, relates friend;
+        $p1 plays friendship:friend;
+        $p2 plays $role;
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Kind(entity, $p1),
+        SubExact($p1, person), Owns($p1, $n1),
+        Label($n1, name),
+        Value($n1, string),
+        Sub($f, friendship), Relates($f, friend),
+        Plays($p1, friendship:friend),
+        Plays($p2, $role)
       ])
     ])
     """
