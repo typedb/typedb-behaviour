@@ -228,7 +228,7 @@ Feature: Basic Analyze queries
         Try([Has($p, $ref), Isa($ref, ref)])
       ]),
       Require([$ref]),
-      Select([$ref,$n]),
+      Select([$n, $ref]),
       Reduce(
         [ReduceAssign($ref_sum, Reducer(sum, [$ref]))],
         [$n]
