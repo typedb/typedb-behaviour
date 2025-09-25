@@ -1019,6 +1019,141 @@ Feature: Driver Query
       """
 
 
+  Scenario: Driver processes query structure correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute ref value integer;
+      attribute name value string;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql analyze query
+      """
+      with
+      fun pi() -> double:
+        match let $pi = 3.14; # close enough?
+      return first $pi;
+
+      match
+        $p1 isa! person, has name $n1;
+        $n1 contains "son";
+        $f isa friendship, links (friend: $p1, $p2);
+        $p1 is $p2;
+        $p2 iid 0x1234567890112345678901;
+        let $x = ceil(2 * pi());
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        IsaExact($p1, person), Has($p1, $n1), Isa($n1, name),
+        Comparison($n1, "son", contains),
+        Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
+        Is($p1, $p2),
+        Iid($p2, 0x1234567890112345678901),
+        FunctionCall(pi(), [$_], []),
+        Expression(let $x = ceil(2 * pi()), [$x], [$_])
+      ])
+    ])
+    """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [$p],
+      Single(first, [$n]),
+      Pipeline([
+        Match([
+          Has($p, $n),
+          Isa($n, name)
+        ])
+      ])
+    )
+    """
+    When get answers of typeql analyze query
+      """
+      match
+        entity $p1;
+        $p1 sub! person, owns $n1;
+        $n1 label name;
+        $n1 value string;
+        $f sub friendship, relates friend;
+        $p1 plays friendship:friend;
+        $p2 plays $role;
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Kind(entity, $p1),
+        SubExact($p1, person), Owns($p1, $n1),
+        Label($n1, name),
+        Value($n1, string),
+        Sub($f, friendship), Relates($f, friend),
+        Plays($p1, friendship:friend),
+        Plays($p2, $role)
+      ])
+    ])
+    """
+    When get answers of typeql analyze query
+    """
+    match
+     $p isa person;
+     $q isa person;
+     $n isa name == "John";
+    insert
+     $p has $n;
+    delete
+      has $n of $p;
+      $q;
+    update
+      $p has $n;
+    put
+      $p has $n;
+    distinct;
+    match
+      try { $p has ref $ref; };
+    require $ref;
+    select $ref, $n;
+    reduce $ref_sum = sum($ref) groupby $n;
+    sort $n desc;
+    offset 1;
+    limit 1;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
+      ),
+      Insert([Has($p, $n)]),
+      Delete([$q], [Has($p, $n)]),
+      Update([Has($p, $n)]),
+      Put([Has($p, $n)]),
+      Distinct(),
+      Match([
+        Try([Has($p, $ref), Isa($ref, ref)])
+      ]),
+      Require([$ref]),
+      Select([$n, $ref]),
+      Reduce(
+        [ReduceAssign($ref_sum, Reducer(sum, [$ref]))],
+        [$n]
+      ),
+      Sort([desc($n)]),
+      Offset(1),
+      Limit(1)
+    ])
+    """
+    Given transaction closes
+
+
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
     Given typeql schema query
