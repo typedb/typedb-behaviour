@@ -1037,9 +1037,9 @@ Feature: Driver Query
     Then get answers of typeql analyze query
       """
       with
-      fun pi() -> double:
-        match let $pi = 3.14; # close enough?
-      return first $pi;
+      fun n_pi($n: integer) -> double:
+        match let $n_pi = $n * 3.14; # close enough?
+      return first $n_pi;
 
       match
         $p1 isa! person, has name $n1;
@@ -1047,8 +1047,10 @@ Feature: Driver Query
         $f isa friendship, links (friend: $p1, $p2);
         $p1 is $p2;
         $p2 iid 0x1234567890112345678901;
-        let $x = ceil(2 * pi());
+        let $three = 3;
+        let $x = ceil(2 * n_pi($three));
     """
+
     Then analyzed query pipeline structure is:
     """
     Pipeline([
@@ -1058,24 +1060,25 @@ Feature: Driver Query
         Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
         Is($p1, $p2),
         Iid($p2, 0x1234567890112345678901),
-        FunctionCall(pi(), [$_], []),
-        Expression(let $x = ceil(2 * pi()), [$x], [$_])
+        expression(let $three = 3,[$three],[]),
+        FunctionCall(n_pi($three), [$_], [$three]),
+        Expression(let $x = ceil(2 * n_pi($three)), [$x], [$_])
       ])
     ])
     """
     Then analyzed query preamble contains:
     """
     Function(
-      [$p],
-      Single(first, [$n]),
+      [$n],
+      Single(first, [$n_pi]),
       Pipeline([
         Match([
-          Has($p, $n),
-          Isa($n, name)
+          Expression(let $n_pi = $n * 3.14, [$n_pi], [$n])
         ])
       ])
     )
     """
+
     When get answers of typeql analyze query
       """
       match
@@ -1101,6 +1104,7 @@ Feature: Driver Query
       ])
     ])
     """
+
     When get answers of typeql analyze query
     """
     match
