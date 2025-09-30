@@ -1573,16 +1573,15 @@ Feature: TypeQL Match Clause
        """
        define
        person plays parentship:parent, plays parentship:child;
-       relation parentship relates parent, relates child @card(1..4);
+       relation parentship relates parent, relates child @card(1);
        """
-    # Insert a player
+    # Insert initial players
     Given typeql write query
        """
        insert
        $p1 isa person, has ref 1;
        $p2 isa person, has ref 2;
-       $p3 isa person, has ref 3;
-       (parent: $p1, child: $p2, child: $p3) isa parentship;
+       (parent: $p1, child: $p2) isa parentship;
        """
     When get answers of typeql read query
        """
@@ -1592,11 +1591,11 @@ Feature: TypeQL Match Clause
        """
     Then answer size is: 1
 
-    # Change the card to 0..5
+    # Change the card to 0..4
     When typeql schema query
        """
        define
-       parentship relates parent @card(0..5);
+       parentship relates parent @card(0..4);
        """
     When get answers of typeql read query
        """
@@ -1605,6 +1604,125 @@ Feature: TypeQL Match Clause
        $result links (parent: $p1, child: $_);
        """
     Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 0
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, child: $_);
+       """
+    Then answer size is: 1
+    When transaction commits
+
+    # New transaction
+    When connection open schema transaction for database: typedb
+    # Change the card to inf
+    When typeql schema query
+       """
+       redefine
+       parentship relates parent @card(0..);
+       """
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa person, has ref 1;
+       $result links (parent: $p1, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 0
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, child: $_);
+       """
+    Then answer size is: 1
+
+    # Insert a player
+    When typeql write query
+       """
+       match
+       $p1 isa person, has ref 1;
+       $parentship isa parentship, links ($p1);
+       insert
+       $p3 isa person, has ref 3;
+       $parentship links (parent: $p3);
+       """
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa person, has ref 1;
+       $result links (parent: $p1, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p3 isa person, has ref 3;
+       $result links (parent: $p3, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 2
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, child: $_);
+       """
+    Then answer size is: 2
+
+    # Change the card back to 0..4
+    When typeql schema query
+       """
+       redefine
+       parentship relates parent @card(0..4);
+       """
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa person, has ref 1;
+       $result links (parent: $p1, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p3 isa person, has ref 3;
+       $result links (parent: $p3, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 2
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, child: $_);
+       """
+    Then answer size is: 2
 
     # Insert a player
     When typeql write query
@@ -1626,15 +1744,26 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
        """
        match
+       $p4 isa person, has ref 4;
+       $result links (parent: $p4, child: $_);
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 3
+    When get answers of typeql read query
+       """
+       match
        $p isa person;
        $result links (parent: $p, child: $_);
        """
-    Then answer size is: 2
-    When transaction commits
+    Then answer size is: 3
 
-    # New transaction
-    When connection open schema transaction for database: typedb
-    # Change the card to inf
+    # Change the card to inf !again! (same state for the first and the last inserted players in the transaction)
     When typeql schema query
        """
        redefine
@@ -1658,9 +1787,16 @@ Feature: TypeQL Match Clause
        """
        match
        $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 3
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
        $result links (parent: $p, child: $_);
        """
-    Then answer size is: 2
+    Then answer size is: 3
 
     # Insert a player
     When typeql write query
@@ -1690,16 +1826,21 @@ Feature: TypeQL Match Clause
        """
        match
        $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 4
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
        $result links (parent: $p, child: $_);
        """
-    Then answer size is: 3
+    Then answer size is: 4
+    When transaction commits
 
-    # Change the card back to 0..5
-    When typeql schema query
-       """
-       redefine
-       parentship relates parent @card(0..5);
-       """
+    # Verify that the result is retrieved correctly in all transactions
+    # Schema
+    When connection open schema transaction for database: typedb
     When get answers of typeql read query
        """
        match
@@ -1718,34 +1859,9 @@ Feature: TypeQL Match Clause
        """
        match
        $p isa person;
-       $result links (parent: $p, child: $_);
+       $result links (parent: $p, parent: $_);
        """
-    Then answer size is: 3
-
-    # Insert a player
-    When typeql write query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $parentship isa parentship, links ($p1);
-       insert
-       $p6 isa person, has ref 6;
-       $parentship links (parent: $p6);
-       """
-    When get answers of typeql read query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $result links (parent: $p1, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p6 isa person, has ref 6;
-       $result links (parent: $p6, child: $_);
-       """
-    Then answer size is: 1
+    Then answer size is: 4
     When get answers of typeql read query
        """
        match
@@ -1753,92 +1869,6 @@ Feature: TypeQL Match Clause
        $result links (parent: $p, child: $_);
        """
     Then answer size is: 4
-
-    # Change the card to inf !again! (same state for the first and the last inserted players in the transaction)
-    When typeql schema query
-       """
-       redefine
-       parentship relates parent @card(0..);
-       """
-    When get answers of typeql read query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $result links (parent: $p1, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p6 isa person, has ref 6;
-       $result links (parent: $p6, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p isa person;
-       $result links (parent: $p, child: $_);
-       """
-    Then answer size is: 4
-
-    # Insert a player
-    When typeql write query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $parentship isa parentship, links ($p1);
-       insert
-       $p7 isa person, has ref 7;
-       $parentship links (parent: $p7);
-       """
-    When get answers of typeql read query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $result links (parent: $p1, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p7 isa person, has ref 7;
-       $result links (parent: $p7, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p isa person;
-       $result links (parent: $p, child: $_);
-       """
-    Then answer size is: 5
-    When transaction commits
-
-    # Verify that the result is retrieved correctly in all transactions
-    # Schema
-    When connection open schema transaction for database: typedb
-    When get answers of typeql read query
-       """
-       match
-       $p1 isa person, has ref 1;
-       $result links (parent: $p1, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p7 isa person, has ref 7;
-       $result links (parent: $p7, child: $_);
-       """
-    Then answer size is: 1
-    When get answers of typeql read query
-       """
-       match
-       $p isa person;
-       $result links (parent: $p, child: $_);
-       """
-    Then answer size is: 5
     When transaction closes
 
     # Write
@@ -1853,17 +1883,24 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
        """
        match
-       $p7 isa person, has ref 7;
-       $result links (parent: $p7, child: $_);
+       $p5 isa person, has ref 5;
+       $result links (parent: $p5, child: $_);
        """
     Then answer size is: 1
     When get answers of typeql read query
        """
        match
        $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 4
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
        $result links (parent: $p, child: $_);
        """
-    Then answer size is: 5
+    Then answer size is: 4
     When transaction closes
 
     # Read
@@ -1878,17 +1915,24 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
        """
        match
-       $p7 isa person, has ref 7;
-       $result links (parent: $p7, child: $_);
+       $p5 isa person, has ref 5;
+       $result links (parent: $p5, child: $_);
        """
     Then answer size is: 1
     When get answers of typeql read query
        """
        match
        $p isa person;
+       $result links (parent: $p, parent: $_);
+       """
+    Then answer size is: 4
+    When get answers of typeql read query
+       """
+       match
+       $p isa person;
        $result links (parent: $p, child: $_);
        """
-    Then answer size is: 5
+    Then answer size is: 4
 
 
   Scenario Outline: Relations with players can be matched with small and big cardinalities before and after commits (<playscard1> <playscard2> <relatescard1> <relatescard2>)
@@ -2380,6 +2424,7 @@ Feature: TypeQL Match Clause
       | playscard1 | playscard2 | relatescard1 | relatescard2 |
       | 0..1       | 0..1       | 0..1         | 0..1         |
       | 0..        | 0..        | 0..          | 0..          |
+      | 0..1       | 0..1       | 0..2         | 1..3         |
       | 0..1       | 0..10      | 1..10        | 0..          |
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
