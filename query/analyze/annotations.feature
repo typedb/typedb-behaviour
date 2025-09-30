@@ -194,3 +194,40 @@ Feature: Basic Analyze queries
       ])
     ])
     """
+
+
+  Scenario: Analyze returns the annotations of functions in the preamble
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      with
+      fun names_of($p: person) -> { name }:
+      match $p has name $n;
+      return { $n };
+
+      match
+        $p isa person;
+        let $n in names_of($p);
+      """
+
+    Then analyzed preamble annotations contains:
+      """
+      Function(
+        [thing([person])],
+        stream([thing([name])]),
+        Pipeline([
+          Match([
+            Trunk({ $n: thing([name]), $p: thing([person]) })
+          ])
+        ])
+      )
+      """
+
+    Then analyzed query pipeline annotations are:
+      """
+      Pipeline([
+        Match([
+          Trunk({ $n: thing([name]), $p: thing([person]) })
+        ])
+      ])
+      """
