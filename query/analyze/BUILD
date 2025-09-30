@@ -8,6 +8,7 @@ load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
     "structure.feature",
+    "annotations.feature",
 ]
 
 filegroup(
