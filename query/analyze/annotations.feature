@@ -169,6 +169,22 @@ Feature: Basic Analyze queries
     ])
     """
 
+    When get answers of typeql analyze query
+      """
+      match
+        let $x = 1;
+        let $y = "why";
+      """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match([Trunk({
+        $x: value([integer]),
+        $y: value([string])
+      })])
+    ])
+    """
+
   Scenario: Analyze returns the annotations of each subpattern in the query
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
@@ -231,3 +247,100 @@ Feature: Basic Analyze queries
         ])
       ])
       """
+
+
+  Scenario: Analyze returns the annotations of fetch
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      match $n isa name;
+      fetch { "names": $n };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { names: [string] }
+    """
+
+    When get answers of typeql analyze query
+      """
+      match let $x = 5;
+      fetch { "x": $x };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { x: [integer] }
+    """
+
+    When get answers of typeql analyze query
+      """
+      match $x isa person;
+      fetch {
+        $x.*
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    {
+        name: [string],
+        ref: [integer]
+    }
+    """
+
+    When get answers of typeql analyze query
+      """
+      match 1==1;
+      fetch {
+        "names" : [ match $n isa name; return { $n }; ]
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { names: List([string]) }
+    """
+
+    When get answers of typeql analyze query
+      """
+      match 1==1;
+      fetch {
+        "names" : (match $n isa name; return first $n; )
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { names: [string] }
+    """
+
+    When get answers of typeql analyze query
+      """
+      with
+      fun names() -> { name }:
+      match $n isa name;
+      return { $n };
+
+      match 1==1;
+      fetch {
+        "names" : [names()]
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { names: List([string]) }
+    """
+
+    When get answers of typeql analyze query
+      """
+      with
+      fun one_name() -> name:
+      match $n isa name;
+      return first $n;
+
+      match 1==1;
+      fetch {
+        "names" : one_name()
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    { names: [string] }
+    """
+
