@@ -2422,10 +2422,1091 @@ Feature: TypeQL Match Clause
 
     Examples:
       | playsparentcard | playschildcard | relatesparentcard | relateschildcard |
-      | 0..1       | 0..1       | 0..1         | 0..1         |
-      | 0..        | 0..        | 0..          | 0..          |
-      | 0..1       | 0..1       | 0..2         | 1..3         |
-      | 0..1       | 0..10      | 1..10        | 0..          |
+      | 0..1            | 0..1           | 0..1              | 0..1             |
+      | 0..             | 0..            | 0..               | 0..              |
+      | 0..1            | 0..1           | 0..2              | 1..3             |
+      | 0..1            | 0..10          | 1..10             | 0..              |
+
+
+  Scenario: Cardinalities of owns, relates, and plays do not affect match results
+    # Init and validate the first database with set, mostly limited cardinalities
+    Given transaction closes
+    Given connection create database: typedb-origin
+    When connection open schema transaction for database: typedb-origin
+    When typeql schema query
+      """
+      define
+        entity person,
+          plays parentship:parent @card(0..3),
+          plays parentship:child @card(0..1),
+          plays friendship:friend @card(0..),
+          owns name @card(0..3),
+          owns age @card(0..1),
+          owns email @card(0..);
+
+        relation parentship,
+          relates parent @card(0..3),
+          relates child @card(0..1);
+
+        relation friendship,
+          relates friend @card(0..);
+
+        attribute name value string;
+        attribute age value integer;
+        attribute email value string;
+      """
+    When typeql write query
+      """
+      insert
+        $p1 isa person,
+          has name "P1",
+          has name "P1 Name",
+          has name "P1 Name Full",
+          has age 101,
+          has email "p1@typedb.com",
+          has email "p1@gmail.com";
+        $p2 isa person,
+          has name "P2",
+          has name "P2 Name",
+          has age 102,
+          has email "p2@typedb.com",
+          has email "p2@gmail.com";
+        $p3 isa person,
+          has name "P3",
+          has email "p3@typedb.com";
+        $p4 isa person,
+          has name "P4";
+        $p5 isa person,
+          has name "P5";
+        (parent: $p1, parent: $p2, parent: $p3, child: $p4) isa parentship;
+        (parent: $p1, parent: $p2, child: $p3) isa parentship;
+        (parent: $p5, child: $p2) isa parentship;
+        (child: $p1) isa parentship;
+        (friend: $p1, friend: $p4) isa friendship;
+        (friend: $p1) isa friendship;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    # Init and validate another database with infinite cardinalities. Match should work the same for the same data
+    When connection create database: typedb-alternative
+    When connection open schema transaction for database: typedb-alternative
+    When typeql schema query
+      """
+      define
+        entity person,
+          plays parentship:parent @card(0..),
+          plays parentship:child @card(0..),
+          plays friendship:friend @card(0..),
+          owns name @card(0..),
+          owns age @card(0..),
+          owns email @card(0..);
+
+        relation parentship,
+          relates parent @card(0..),
+          relates child @card(0..);
+
+        relation friendship,
+          relates friend @card(0..);
+
+        attribute name value string;
+        attribute age value integer;
+        attribute email value string;
+      """
+    When typeql write query
+      """
+      insert
+        $p1 isa person,
+          has name "P1",
+          has name "P1 Name",
+          has name "P1 Name Full",
+          has age 101,
+          has email "p1@typedb.com",
+          has email "p1@gmail.com";
+        $p2 isa person,
+          has name "P2",
+          has name "P2 Name",
+          has age 102,
+          has email "p2@typedb.com",
+          has email "p2@gmail.com";
+        $p3 isa person,
+          has name "P3",
+          has email "p3@typedb.com";
+        $p4 isa person,
+          has name "P4";
+        $p5 isa person,
+          has name "P5";
+        (parent: $p1, parent: $p2, parent: $p3, child: $p4) isa parentship;
+        (parent: $p1, parent: $p2, child: $p3) isa parentship;
+        (parent: $p5, child: $p2) isa parentship;
+        (child: $p1) isa parentship;
+        (friend: $p1, friend: $p4) isa friendship;
+        (friend: $p1) isa friendship;
+      """
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    # TODO: https://github.com/typedb/typedb/issues/7597
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    # Validate the first database one more time through a read transaction
+    When connection open read transaction for database: typedb-origin
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    # TODO: https://github.com/typedb/typedb/issues/7597
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+    When transaction closes
+
+    # Validate the second database one more time through a read transaction
+    When connection open read transaction for database: typedb-alternative
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    # TODO: https://github.com/typedb/typedb/issues/7597
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+#      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+    When transaction closes
+
+    # Set cardinalities to potentially influence relation indices, revalidate
+    When connection open schema transaction for database: typedb-alternative
+    When typeql schema query
+      """
+      redefine person plays parentship:parent @card(0..3);
+      """
+    When typeql schema query
+      """
+      redefine person plays parentship:child @card(0..1);
+      """
+    When typeql schema query
+      """
+      redefine person owns name @card(0..3);
+      """
+    When typeql schema query
+      """
+      redefine person owns age @card(0..1);
+      """
+    When typeql schema query
+      """
+      redefine parentship relates parent @card(0..3);
+      """
+    When typeql schema query
+      """
+      redefine parentship relates child @card(0..1);
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    # TODO: https://github.com/typedb/typedb/issues/7597
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+    When transaction commits
+
+    # Validate the second database again through a read transaction
+    When connection open read transaction for database: typedb-alternative
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        ($p) isa parentship;
+      """
+    Then answer size is: 5
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p) isa parentship;
+      """
+    Then answer size is: 4
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, child: $_) isa parentship;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        (child: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1";
+        (parent: $p, parent: $_) isa parentship;
+      """
+    Then answer size is: 1
+    # TODO: https://github.com/typedb/typedb/issues/7597
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+#    When get answers of typeql read query
+#      """
+#      match
+#        $p isa person, has name "P1";
+#        (parent: $p, parent: $_, parent: $_, child: $_) isa parentship;
+#      """
+#    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        (parent: $p1, parent: $p2) isa parentship;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p2 isa person, has name "P2";
+        $parentship isa parentship, links (parent: $p1, parent: $p2);
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+        $p3 isa person, has name "P3";
+        $parentship isa parentship, links (parent: $p1, parent: $p3);
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p1 isa person, has name "P1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p2 isa person, has name "P2";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p4 isa person, has name "P4";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P1 Name";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name "P2 Name";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p1@typedb.com";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email "p3@typedb.com";
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has email $e;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P1", has name $n;
+      """
+    Then answer size is: 3
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name "P4", has email $n;
+      """
+    Then answer size is: 0
+
 
   Scenario: When some relations do not satisfy the query, the correct ones are still found
     Given typeql schema query
