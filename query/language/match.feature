@@ -1591,7 +1591,7 @@ Feature: TypeQL Match Clause
        """
     Then answer size is: 1
 
-    # Change the card to 0..4
+    # Change the card to 0..4 (so the sum card of all the relationship's relates is <= 5, relation index limit)
     When typeql schema query
        """
        define
@@ -1935,7 +1935,7 @@ Feature: TypeQL Match Clause
     Then answer size is: 4
 
 
-  Scenario Outline: Relations with players can be matched with small and big cardinalities before and after commits (<playscard1> <playscard2> <relatescard1> <relatescard2>)
+  Scenario Outline: Relations with players can be matched with small and big cardinalities before and after commits (<playsparentcard> <playschildcard> <relatesparentcard> <relateschildcard>)
     Given typeql schema query
        """
        define
@@ -2064,8 +2064,8 @@ Feature: TypeQL Match Clause
     When typeql schema query
        """
        define
-       person plays parentship:parent @card(<playscard1>), plays parentship:child @card(<playscard2>);
-       relation parentship relates parent @card(<relatescard1>), relates child @card(<relatescard2>);
+       person plays parentship:parent @card(<playsparentcard>), plays parentship:child @card(<playschildcard>);
+       relation parentship relates parent @card(<relatesparentcard>), relates child @card(<relateschildcard>);
        """
     When typeql write query
        """
@@ -2421,7 +2421,7 @@ Feature: TypeQL Match Clause
     Then answer size is: 1
 
     Examples:
-      | playscard1 | playscard2 | relatescard1 | relatescard2 |
+      | playsparentcard | playschildcard | relatesparentcard | relateschildcard |
       | 0..1       | 0..1       | 0..1         | 0..1         |
       | 0..        | 0..        | 0..          | 0..          |
       | 0..1       | 0..1       | 0..2         | 1..3         |
