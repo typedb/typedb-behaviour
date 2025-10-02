@@ -1159,7 +1159,58 @@ Feature: Driver Query
 
 
   Scenario: Analyze returns the annotations of variables in the query
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute ref value integer;
+      attribute name value string;
+      entity dummy;
+      entity subdummy sub dummy;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
+      """
+    Given transaction commits
+
     Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      match
+        $x isa person, has name $n, has ref $r;
+        { $r == 2; } or { $r == 3; };
+      select $n, $x;
+      delete $n;
+      insert $x has name "John";
+      match $n1 isa name == "J";
+      put $x has name $n1;
+      """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match([
+        Trunk({ $n: thing([name]), $r: thing([ref]), $x: thing([person]) }),
+        Or([
+          [Trunk({ $r: thing([ref]) })],
+          [Trunk({ $r: thing([ref]) })]
+        ])
+      ]),
+      Select(),
+      Delete([
+        Trunk({ $n: thing([name]), $x: thing([person]) })
+      ]),
+      Insert([
+        Trunk({ $_: thing([name]), $x: thing([person]) })
+      ]),
+      Match([
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
+      ]),
+      Put([
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
+      ])
+    ])
+    """
     When get answers of typeql analyze query
       """
       with
@@ -1180,17 +1231,37 @@ Feature: Driver Query
         ]
       };
       """
-    Then analyzed query pipeline annotations are:
-    """TODO"""
     Then analyzed preamble annotations contains:
-    """TODO"""
-    Then analyzed fetch annotations are:
-    """TODO"""
-
-    When get answers of typeql analyze query
-    """TODO: One with big pipelines"""
+      """
+      Function(
+        [thing([person])],
+        stream([thing([name])]),
+        Pipeline([
+          Match([
+            Trunk({ $n: thing([name]), $p: thing([person]) })
+          ])
+        ])
+      )
+      """
     Then analyzed query pipeline annotations are:
-    """TODO"""
+      """
+      Pipeline([
+        Match([
+          Trunk({ $n: thing([name]), $p: thing([person]) })
+        ])
+      ])
+      """
+    Then analyzed fetch annotations are:
+    """
+      {
+        friends: List({
+          name: [string]
+        }),
+        ref: [integer]
+      }
+    """
+
+
 
 
 
