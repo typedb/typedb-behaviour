@@ -1219,15 +1219,15 @@ Feature: Driver Query
       return { $n };
 
       match
-        $p isa person;
-        let $n in names_of($p);
+        $p isa person, has ref $r;
       fetch {
-        "name": $n,
+        "ref": $r,
+        "names": [names_of($p)],
         "friends": [
           match $_ isa friendship, links (friend: $p, friend: $f);
           fetch {
             "name": (match $f has name $nf; return first $nf;)
-          }
+          };
         ]
       };
       """
@@ -1247,7 +1247,7 @@ Feature: Driver Query
       """
       Pipeline([
         Match([
-          Trunk({ $n: thing([name]), $p: thing([person]) })
+          Trunk({ $p: thing([person]), $r: thing([ref]) })
         ])
       ])
       """
@@ -1257,12 +1257,10 @@ Feature: Driver Query
         friends: List({
           name: [string]
         }),
+        names: List([string]),
         ref: [integer]
       }
     """
-
-
-
 
 
   Scenario: Driver can concurrently process read queries without interruptions
