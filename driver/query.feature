@@ -1158,6 +1158,42 @@ Feature: Driver Query
     Given transaction closes
 
 
+  Scenario: Analyze returns the annotations of variables in the query
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      with
+      fun names_of($p: person) -> { name }:
+      match $p has name $n;
+      return { $n };
+
+      match
+        $p isa person;
+        let $n in names_of($p);
+      fetch {
+        "name": $n,
+        "friends": [
+          match $_ isa friendship, links (friend: $p, friend: $f);
+          fetch {
+            "name": (match $f has name $nf; return first $nf;)
+          }
+        ]
+      };
+      """
+    Then analyzed query pipeline annotations are:
+    """TODO"""
+    Then analyzed preamble annotations contains:
+    """TODO"""
+    Then analyzed fetch annotations are:
+    """TODO"""
+
+    When get answers of typeql analyze query
+    """TODO: One with big pipelines"""
+    Then analyzed query pipeline annotations are:
+    """TODO"""
+
+
+
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
     Given typeql schema query
