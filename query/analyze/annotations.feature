@@ -185,6 +185,7 @@ Feature: Basic Analyze queries
     ])
     """
 
+
   Scenario: Analyze returns the annotations of each subpattern in the query
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
@@ -250,6 +251,7 @@ Feature: Basic Analyze queries
 
 
   Scenario: Analyze returns the annotations of fetch
+    # Basic concept
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
       """
@@ -261,6 +263,7 @@ Feature: Basic Analyze queries
     { names: [string] }
     """
 
+    # Basic value
     When get answers of typeql analyze query
       """
       match let $x = 5;
@@ -271,6 +274,7 @@ Feature: Basic Analyze queries
     { x: [integer] }
     """
 
+    # Wildcard
     When get answers of typeql analyze query
       """
       match $x isa person;
@@ -286,6 +290,7 @@ Feature: Basic Analyze queries
     }
     """
 
+    # Subquery returning list
     When get answers of typeql analyze query
       """
       match 1==1;
@@ -298,6 +303,7 @@ Feature: Basic Analyze queries
     { names: List([string]) }
     """
 
+    # Subquery returning single
     When get answers of typeql analyze query
       """
       match 1==1;
@@ -310,6 +316,7 @@ Feature: Basic Analyze queries
     { names: [string] }
     """
 
+    # Function returning list
     When get answers of typeql analyze query
       """
       with
@@ -327,6 +334,7 @@ Feature: Basic Analyze queries
     { names: List([string]) }
     """
 
+    # Function returning single
     When get answers of typeql analyze query
       """
       with
@@ -344,3 +352,40 @@ Feature: Basic Analyze queries
     { names: [string] }
     """
 
+    # Nested single
+    When get answers of typeql analyze query
+      """
+      match $n isa name;
+      fetch {
+        "nested": {
+          "name": $n
+        }
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    {
+      nested: {
+        name: [string]
+      }
+    }
+    """
+
+    # Nested list
+    When get answers of typeql analyze query
+      """
+      match 1 == 1;
+      fetch {
+        "nested": {
+          "names": [ match $n isa name; return { $n }; ]
+        }
+      };
+      """
+    Then analyzed fetch annotations are:
+    """
+    {
+      nested: {
+        names: List([string])
+      }
+    }
+    """
