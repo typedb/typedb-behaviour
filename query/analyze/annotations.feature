@@ -245,10 +245,10 @@ Feature: Basic Analyze queries
         Trunk({ $_: thing([name]), $x: thing([person]) })
       ]),
       Match([
-        Trunk({ $_: thing([name]), $n1:thing([name]), $x: thing([person]) })
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
       ]),
       Put([
-        Trunk({ $_: thing([name]), $n1:thing([name]), $x: thing([person]) })
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
       ])
     ])
     """
