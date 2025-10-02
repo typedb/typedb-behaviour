@@ -213,6 +213,47 @@ Feature: Basic Analyze queries
     """
 
 
+  Scenario: Analyze returns the annotations of every stage in the query
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      match
+        $x isa person, has name $n, has ref $r;
+        { $r == 2; } or { $r == 3; };
+      select $n, $x;
+      delete $n;
+      insert $x has name "John";
+      match $n1 isa name == "J";
+      put $x has name $n1;
+      """
+    # Not ideal that the anonymous variable persists beyond the insert
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match([
+        Trunk({ $n: thing([name]), $r: thing([ref]), $x: thing([person]) }),
+        Or([
+          [Trunk({ $r: thing([ref]) })],
+          [Trunk({ $r: thing([ref]) })]
+        ])
+      ]),
+      Select(),
+      Delete([
+        Trunk({ $n: thing([name]), $x: thing([person]) })
+      ]),
+      Insert([
+        Trunk({ $_: thing([name]), $x: thing([person]) })
+      ]),
+      Match([
+        Trunk({ $_: thing([name]), $n1:thing([name]), $x: thing([person]) })
+      ]),
+      Put([
+        Trunk({ $_: thing([name]), $n1:thing([name]), $x: thing([person]) })
+      ])
+    ])
+    """
+
+
   Scenario: Analyze returns the annotations of functions in the preamble
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze query
@@ -326,7 +367,7 @@ Feature: Basic Analyze queries
 
       match 1==1;
       fetch {
-        "names" : [names()]
+        "names": [names()]
       };
       """
     Then analyzed fetch annotations are:
@@ -388,4 +429,31 @@ Feature: Basic Analyze queries
         names: List([string])
       }
     }
+    """
+
+    # Nested fetch
+    When get answers of typeql analyze query
+    """
+      match
+        $p isa person, has ref $r;
+      fetch {
+        "ref": $r,
+        "friends": [
+          match
+            $_ isa friendship, links (friend: $p, friend: $f);
+            $f has name $nf;
+          fetch {
+            "name": $nf
+          };
+        ]
+      };
+    """
+    Then analyzed fetch annotations are:
+    """
+      {
+        friends: List({
+          name: [string]
+        }),
+        ref: [integer]
+      }
     """
