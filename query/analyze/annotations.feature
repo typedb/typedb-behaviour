@@ -226,7 +226,6 @@ Feature: Basic Analyze queries
       match $n1 isa name == "J";
       put $x has name $n1;
       """
-    # Not ideal that the anonymous variable persists beyond the insert
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
