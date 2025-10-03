@@ -1263,6 +1263,80 @@ Feature: Driver Query
     """
 
 
+  Scenario: Analyze handles unsatisfiable schema queries and errors properly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person;
+      relation friendship, relates friend;
+      relation new-relation, relates new-role;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+    """
+    match
+     $p sub! person;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [SubExact($p, person)]
+      )
+    ])
+    """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        [Trunk({$p: type([])})]
+      )
+    ])
+    """
+
+    When get answers of typeql analyze query
+    """
+    match
+     $r sub friendship, relates new-role;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Sub($r, friendship), Relates($r, new-role)]
+      )
+    ])
+    """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        [Trunk({$r: type([])})]
+      )
+    ])
+    """
+
+    Given transaction closes
+
+    # Errors
+    Given connection open read transaction for database: typedb
+    When typeql analyze query; parsing fails
+    """
+    match
+     This isnt valid TypeQL;
+    """
+
+    When typeql analyze query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    """
+    match
+     $p sub! person; $x isa! $p;
+    """
+    Given transaction closes
+
+
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
     Given typeql schema query
