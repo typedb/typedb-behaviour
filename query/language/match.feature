@@ -1479,7 +1479,6 @@ Feature: TypeQL Match Clause
       """
     Then transaction is open: true
 
-  # TODO: 3.x: Do we not want to allow multiple specialistaions of the same role?
   # [SVL13] Relation type 'hetero-marriage' is already specialised by a supertype for 'marriage:spouse'
   @ignore
   Scenario: Relations can be queried with pairings of relation and role types that are not directly related to each other
