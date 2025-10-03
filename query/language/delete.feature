@@ -744,6 +744,37 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
+  Scenario: deletes are idempotent when deleting uncommitted concepts
+    Given get answers of typeql write query
+      """
+      insert
+      $x isa person, has name "Alex";
+      $y isa person, has name "Bob";
+      $r isa friendship, links (friend: $x, friend: $y),
+         has ref 0;
+      $n isa name "John";
+      """
+    Then uniquely identify answer concepts
+      | x             | y            | r         | n              |
+      | key:name:Alex | key:name:Bob | key:ref:0 | attr:name:John |
+
+    When typeql write query
+      """
+      match
+        $r isa friendship, links ($x);
+      delete
+        $r;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa friendship;
+      """
+    Then answer size is: 0
+
+
   Scenario: when deleting incompatible ownerships or role players, an error is thrown
     Given typeql write query
       """
@@ -2779,6 +2810,112 @@ Feature: TypeQL Delete Query
       delete
         has $n of $_;
       """
+
+
+  Scenario: an optional binding is deleted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John";
+      $jane isa person, has name "Jane", has email "jane@doe.com";
+    """
+    When get answers of typeql write query
+    """
+    match $p isa person, has name $name; try { $p has email $email; };
+    delete try { has $email of $p; };
+    """
+    Then uniquely identify answer concepts
+      | p             | name           |
+      | key:name:John | attr:name:John |
+      | key:name:Jane | attr:name:Jane |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has email $email;
+    """
+    Then answer size is: 0
+
+
+  Scenario: a has edge depending on an optional binding is deleted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John";
+      $jane isa person, has name "Jane", has email "jane@doe.com";
+    """
+    When get answers of typeql write query
+    """
+    match $p isa person, has name $name; try { $p has email $email; };
+    delete try { has $email of $p; };
+    """
+    Then uniquely identify answer concepts
+      | p             | name           |
+      | key:name:John | attr:name:John |
+      | key:name:Jane | attr:name:Jane |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has email $email;
+    """
+    Then answer size is: 0
+
+
+  Scenario: an optional relation is deleted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John";
+      $jane isa person, has name "Jane";
+      friendship (friend: $john, friend: $jane), has ref 0;
+      $eve isa person, has name "Eve";
+    """
+    When get answers of typeql write query
+    """
+    match $p isa person, has name $name; try { $f isa friendship, links ($p); };
+    delete try { $f; };
+    """
+    Then uniquely identify answer concepts
+      | p             | name           |
+      | key:name:John | attr:name:John |
+      | key:name:Jane | attr:name:Jane |
+      | key:name:Eve  | attr:name:Eve  |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person; $f isa friendship, links ($p);
+    """
+    Then answer size is: 0
+
+
+  Scenario: a links edge depending on an optional binding is deleted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John";
+      $jane isa person, has name "Jane";
+      friendship (friend: $john, friend: $jane), has ref 0;
+      $eve isa person, has name "Eve";
+    """
+    When get answers of typeql write query
+    """
+    match $p isa person, has name $name; try { $f isa friendship, links ($p); };
+    delete try { links ($p) of $f; };
+    """
+    Then uniquely identify answer concepts
+      | p             | name           |
+      | key:name:John | attr:name:John |
+      | key:name:Jane | attr:name:Jane |
+      | key:name:Eve  | attr:name:Eve  |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person; $f isa friendship, links ($p);
+    """
+    Then answer size is: 0
 
 
   Scenario: Concept deletions do not cause trouble for constraint deletions in the same stage referencing that concept
