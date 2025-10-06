@@ -1310,11 +1310,12 @@ Feature: Driver Query
       )
     ])
     """
+    # Rolename introduces an intermediate variable.
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
       Match(
-        [Trunk({$r: type([])})]
+        [Trunk({$_: type([]), $r: type([])})]
       )
     ])
     """
