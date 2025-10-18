@@ -1019,6 +1019,325 @@ Feature: Driver Query
       """
 
 
+  Scenario: Driver processes query structure correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute ref value integer;
+      attribute name value string;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql analyze query
+      """
+      with
+      fun n_pi($n: integer) -> double:
+        match let $n_pi = $n * 3.14; # close enough?
+      return first $n_pi;
+
+      match
+        $p1 isa! person, has name $n1;
+        $n1 contains "son";
+        $f isa friendship, links (friend: $p1, $p2);
+        $p1 is $p2;
+        $p2 iid 0x1234567890112345678901;
+        let $three = 3;
+        let $x = ceil(2 * n_pi($three));
+    """
+
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        IsaExact($p1, person), Has($p1, $n1), Isa($n1, name),
+        Comparison($n1, "son", contains),
+        Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
+        Is($p1, $p2),
+        Iid($p2, 0x1234567890112345678901),
+        expression(let $three = 3,[$three],[]),
+        FunctionCall(n_pi($three), [$_], [$three]),
+        Expression(let $x = ceil(2 * n_pi($three)), [$x], [$_])
+      ])
+    ])
+    """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [$n],
+      Single(first, [$n_pi]),
+      Pipeline([
+        Match([
+          Expression(let $n_pi = $n * 3.14, [$n_pi], [$n])
+        ])
+      ])
+    )
+    """
+
+    When get answers of typeql analyze query
+      """
+      match
+        entity $p1;
+        $p1 sub! person, owns $n1;
+        $n1 label name;
+        $n1 value string;
+        $f sub friendship, relates friend;
+        $p1 plays friendship:friend;
+        $p2 plays $role;
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Kind(entity, $p1),
+        SubExact($p1, person), Owns($p1, $n1),
+        Label($n1, name),
+        Value($n1, string),
+        Sub($f, friendship), Relates($f, friend),
+        Plays($p1, friendship:friend),
+        Plays($p2, $role)
+      ])
+    ])
+    """
+
+    When get answers of typeql analyze query
+    """
+    match
+     $p isa person;
+     $q isa person;
+     $n isa name == "John";
+    insert
+     $p has $n;
+    delete
+      has $n of $p;
+      $q;
+    update
+      $p has $n;
+    put
+      $p has $n;
+    distinct;
+    match
+      try { $p has ref $ref; };
+    require $ref;
+    select $ref, $n;
+    reduce $ref_sum = sum($ref) groupby $n;
+    sort $n desc;
+    offset 1;
+    limit 1;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
+      ),
+      Insert([Has($p, $n)]),
+      Delete([$q], [Has($p, $n)]),
+      Update([Has($p, $n)]),
+      Put([Has($p, $n)]),
+      Distinct(),
+      Match([
+        Try([Has($p, $ref), Isa($ref, ref)])
+      ]),
+      Require([$ref]),
+      Select([$n, $ref]),
+      Reduce(
+        [ReduceAssign($ref_sum, Reducer(sum, [$ref]))],
+        [$n]
+      ),
+      Sort([desc($n)]),
+      Offset(1),
+      Limit(1)
+    ])
+    """
+    Given transaction closes
+
+
+  Scenario: Analyze returns the annotations of variables in the query
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute ref value integer;
+      attribute name value string;
+      entity dummy;
+      entity subdummy sub dummy;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+      """
+      match
+        $x isa person, has name $n, has ref $r;
+        { $r == 2; } or { $r == 3; };
+      select $n, $x;
+      delete $n;
+      insert $x has name "John";
+      match $n1 isa name == "J";
+      put $x has name $n1;
+      """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match([
+        Trunk({ $n: thing([name]), $r: thing([ref]), $x: thing([person]) }),
+        Or([
+          [Trunk({ $r: thing([ref]) })],
+          [Trunk({ $r: thing([ref]) })]
+        ])
+      ]),
+      Select(),
+      Delete([
+        Trunk({ $n: thing([name]), $x: thing([person]) })
+      ]),
+      Insert([
+        Trunk({ $_: thing([name]), $x: thing([person]) })
+      ]),
+      Match([
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
+      ]),
+      Put([
+        Trunk({ $n1:thing([name]), $x: thing([person]) })
+      ])
+    ])
+    """
+    When get answers of typeql analyze query
+      """
+      with
+      fun names_of($p: person) -> { name }:
+      match $p has name $n;
+      return { $n };
+
+      match
+        $p isa person, has ref $r;
+      fetch {
+        "ref": $r,
+        "names": [names_of($p)],
+        "friends": [
+          match $_ isa friendship, links (friend: $p, friend: $f);
+          fetch {
+            "name": (match $f has name $nf; return first $nf;)
+          };
+        ]
+      };
+      """
+    Then analyzed preamble annotations contains:
+      """
+      Function(
+        [thing([person])],
+        stream([thing([name])]),
+        Pipeline([
+          Match([
+            Trunk({ $n: thing([name]), $p: thing([person]) })
+          ])
+        ])
+      )
+      """
+    Then analyzed query pipeline annotations are:
+      """
+      Pipeline([
+        Match([
+          Trunk({ $p: thing([person]), $r: thing([ref]) })
+        ])
+      ])
+      """
+    Then analyzed fetch annotations are:
+    """
+      {
+        friends: List({
+          name: [string]
+        }),
+        names: List([string]),
+        ref: [integer]
+      }
+    """
+
+
+  Scenario: Analyze handles unsatisfiable schema queries and errors properly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      entity person;
+      relation friendship, relates friend;
+      relation new-relation, relates new-role;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze query
+    """
+    match
+     $p sub! person;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [SubExact($p, person)]
+      )
+    ])
+    """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        [Trunk({$p: type([])})]
+      )
+    ])
+    """
+
+    When get answers of typeql analyze query
+    """
+    match
+     $r sub friendship, relates new-role;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Sub($r, friendship), Relates($r, new-role)]
+      )
+    ])
+    """
+    # Rolename introduces an intermediate variable.
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        [Trunk({$_: type([]), $r: type([])})]
+      )
+    ])
+    """
+
+    Given transaction closes
+
+    # Errors
+    Given connection open read transaction for database: typedb
+    When typeql analyze query; parsing fails
+    """
+    match
+     This isnt valid TypeQL;
+    """
+
+    When typeql analyze query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    """
+    match
+     $p sub! person; $x isa! $p;
+    """
+    Given transaction closes
+
+
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
     Given typeql schema query
