@@ -996,7 +996,6 @@ Feature: Driver Query
     """
 
 
-  @ignore-typedb-http
   Scenario: Driver processes query structure correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1136,7 +1135,6 @@ Feature: Driver Query
     Given transaction closes
 
 
-  @ignore-typedb-http
   Scenario: Analyze returns the annotations of variables in the query
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1241,7 +1239,7 @@ Feature: Driver Query
       }
     """
 
-  @ignore-typedb-http
+
   Scenario: Analyze handles unsatisfiable schema queries and errors properly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
