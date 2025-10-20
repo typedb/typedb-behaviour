@@ -610,3 +610,107 @@ Feature: TypeQL Put Query
     put $p isa person, has age (10 + 5);
     """
 
+
+#############
+# OPTIONALS #
+#############
+
+
+  Scenario: a has edge depending on an optional binding can be inserted
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute ref value integer;
+      relation friendship,
+        relates friend @card(0..),
+        owns ref @key;
+      person
+        plays friendship:friend,
+        owns ref @key;
+      entity also-person
+        plays friendship:friend,
+        owns age,
+        owns ref @key;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1, has age 33;
+      friendship (friend: $john, friend: $jane), has ref 0;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person, has ref $ref; try { $p has age $age; };
+    put $q isa also-person, has $ref; try { $q has $age; };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | age         |
+      | key:ref:0 | key:ref:0 | attr:age:33 |
+      | key:ref:1 | key:ref:1 | none        |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then answer size is: 1
+
+
+  Scenario: a relation linking an optional player is inserted
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      attribute ref value integer;
+      relation friendship,
+        relates friend @card(0..),
+        owns ref @key;
+      person
+        plays friendship:friend,
+        owns ref @key;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1, has email "jane@doe.com";
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person;
+      try { $q isa person, has email $_; not { $q is $p; }; };
+    put
+      try { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | f    |
+      | key:ref:0 | key:ref:1 | none |
+      | key:ref:1 | none      | none |
+    When get answers of typeql write query
+    """
+    match
+      $p isa person, has ref $ref;
+      try { $q isa person, has email $_; not { $q is $p; }; };
+    put
+      $f isa friendship, links(friend: $p), has $ref;
+      try { $f links (friend: $q); };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | f         |
+      | key:ref:0 | key:ref:1 | key:ref:0 |
+      | key:ref:1 | none      | key:ref:1 |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $f isa friendship;
+    """
+    Then answer size is: 2

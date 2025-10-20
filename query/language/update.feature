@@ -20,7 +20,9 @@ Feature: TypeQL Update Query
         plays parentship:parent,
         plays parentship:child,
         owns name,
-        owns ref @key;
+        owns age,
+        owns ref @key,
+        owns email @unique @card(0..);
       relation friendship,
         relates friend,
         owns ref @key;
@@ -30,6 +32,8 @@ Feature: TypeQL Update Query
         owns ref;
       attribute name value string;
       attribute ref @independent, value integer;
+      attribute age @independent, value integer;
+      attribute email value string;
       """
     Given transaction commits
     Given connection open write transaction for database: typedb
@@ -2882,3 +2886,96 @@ Feature: TypeQL Update Query
       | p         | x         | y         |
       | key:ref:0 | key:ref:1 | key:ref:0 |
       | key:ref:1 | key:ref:3 | key:ref:2 |
+
+
+#############
+# OPTIONALS #
+#############
+
+
+  Scenario: a has edge depending on an optional binding can be updated
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1, has age 33;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person; try { $p has age $age; };
+    update try { $p has age $age + 1; };
+    """
+    Then uniquely identify answer concepts
+      | p             | age           |
+      | key:name:John | none          |
+      | key:name:Jane | attr:age:33   |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then answer size is: 1
+
+
+  Scenario: a relation linking an optional player is updated
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1;
+      $f isa friendship, links ($john), has ref 0;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person; $q isa person; not { $p is $q; };
+      try { $f links ($p); };
+    update
+      try { $f links (friend: $q); };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | f         |
+      | key:ref:0 | key:ref:1 | key:ref:0 |
+      | key:ref:1 | key:ref:0 | none      |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $f isa friendship, links($q);
+    """
+    Then uniquely identify answer concepts
+      | q         | f         |
+      | key:ref:1 | key:ref:0 |
+
+
+  Scenario: a try update is only executed if all optional inputs are bound
+    Given typeql write query
+    """
+    insert
+      $jane isa person, has ref 1, has name "Jane", has age 33;
+      $john isa person, has ref 2, has name "John";
+      $anon isa person, has ref 3, has age 45;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person;
+      try { $p has age $age; };
+      try { $p has name $name; };
+    insert try { $q isa person, has ref 0; $q has $age, has $name; };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | age         | name           |
+      | key:ref:1 | key:ref:0 | attr:age:33 | attr:name:Jane |
+      | key:ref:2 | none      | none        | attr:name:John |
+      | key:ref:3 | none      | attr:age:45 | none           |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then answer size is: 3
+
