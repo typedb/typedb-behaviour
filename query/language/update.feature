@@ -2917,18 +2917,27 @@ Feature: TypeQL Update Query
         $p has age $age;
         let $new-age-val = $age + 1;
       };
-    insert try { $new-age isa age == $new-age-val; };
-    update try { $p has $new-age; };
+    update try { $p has age == $new-age-val; };
     """
     Then uniquely identify answer concepts
-      | p             | age           |
-      | key:name:John | none          |
-      | key:name:Jane | attr:age:33   |
+      | p             | age           | new-age-val      |
+      | key:name:John | none          | none             |
+      | key:name:Jane | attr:age:33   | value:integer:34 |
     Then transaction commits
     Then connection open write transaction for database: typedb
     Then get answers of typeql read query
     """
     match $p isa person, has age $age;
+    """
+    Then answer size is: 1
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age 33;
+    """
+    Then answer size is: 0
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age 34;
     """
     Then answer size is: 1
 
