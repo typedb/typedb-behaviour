@@ -46,7 +46,7 @@ Feature: TypeQL Update Query
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; parsing fails
+    Then typeql schema query; fails
       """
       match
         $p label person;
@@ -54,7 +54,7 @@ Feature: TypeQL Update Query
         $p label superperson;
       """
 
-    Then typeql schema query; parsing fails
+    Then typeql schema query; fails
       """
       match
         $p label person;
@@ -62,7 +62,7 @@ Feature: TypeQL Update Query
         entity superperson;
       """
 
-    Then typeql schema query; parsing fails
+    Then typeql schema query; fails
       """
       match
         $p label person;
@@ -78,7 +78,7 @@ Feature: TypeQL Update Query
         $p @abstract;
       """
 
-    Then typeql schema query; parsing fails
+    Then typeql schema query; fails
       """
       match
         $p label person;
@@ -86,7 +86,7 @@ Feature: TypeQL Update Query
         $p owns name @card(5..);
       """
 
-    Then typeql schema query; parsing fails
+    Then typeql schema query; fails
       """
       match
         $n label name;
@@ -94,7 +94,7 @@ Feature: TypeQL Update Query
         $n value datetime;
       """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       update
         entity superperson;
@@ -199,17 +199,17 @@ Feature: TypeQL Update Query
       update = 5;
       """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       update 6 > 5;
       """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       update $p is $f;
       """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       update person owns name;
       """
@@ -401,7 +401,7 @@ Feature: TypeQL Update Query
       """
 
     When connection open write transaction for database: typedb
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       match
         $p isa person;
@@ -518,7 +518,7 @@ Feature: TypeQL Update Query
 
 
   Scenario: Cannot declare new attribute and value variables in an update stage
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       insert
         $p isa person, has ref 0, has name "Alice";
@@ -527,7 +527,7 @@ Feature: TypeQL Update Query
         $p has name $n;
       """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
       """
       insert
         $p isa person, has ref 0, has name "Alice";

@@ -593,12 +593,12 @@ Feature: TypeQL Put Query
 
   Scenario: Put stages may only contain thing statements
     Given connection open write transaction for database: typedb
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
     """
     put person owns name;
     """
 
-    Then typeql write query; parsing fails
+    Then typeql write query; fails
     """
     put
       let $age = 10;
