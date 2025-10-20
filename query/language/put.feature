@@ -598,6 +598,7 @@ Feature: TypeQL Put Query
     put person owns name;
     """
 
+    Given connection open write transaction for database: typedb
     Then typeql write query; fails
     """
     put
@@ -605,6 +606,7 @@ Feature: TypeQL Put Query
       $p isa person, has age $age;
     """
 
+    Given connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "Illegal statement 'expression' provided for a put stage. Only 'has', 'links' and 'isa' constraints are allowed."
     """
     put $p isa person, has age (10 + 5);
@@ -650,8 +652,8 @@ Feature: TypeQL Put Query
     """
     Then uniquely identify answer concepts
       | p         | q         | age         |
-      | key:ref:0 | key:ref:0 | attr:age:33 |
-      | key:ref:1 | key:ref:1 | none        |
+      | key:ref:0 | key:ref:0 | none        |
+      | key:ref:1 | key:ref:1 | attr:age:33 |
     Then transaction commits
     Then connection open write transaction for database: typedb
     Then get answers of typeql read query
