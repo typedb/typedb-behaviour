@@ -46,31 +46,34 @@ Feature: TypeQL Update Query
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
+    Then typeql write query; fails
       """
       match
         $p label person;
       update
         $p label superperson;
       """
+    Given connection open schema transaction for database: typedb
 
-    Then typeql schema query; fails
+    Then typeql write query; fails
       """
       match
         $p label person;
       update
         entity superperson;
       """
+    Given connection open schema transaction for database: typedb
 
-    Then typeql schema query; fails
+    Then typeql write query; fails
       """
       match
         $p label person;
       update
         $p owns name;
       """
+    Given connection open schema transaction for database: typedb
 
-    Then typeql schema query; parsing fails
+    Then typeql write query; parsing fails
       """
       match
         $p label person;
@@ -78,21 +81,23 @@ Feature: TypeQL Update Query
         $p @abstract;
       """
 
-    Then typeql schema query; fails
+    Then typeql write query; fails
       """
       match
         $p label person;
       update
         $p owns name @card(5..);
       """
+    Given connection open schema transaction for database: typedb
 
-    Then typeql schema query; fails
+    Then typeql write query; fails
       """
       match
         $n label name;
       update
         $n value datetime;
       """
+    Given connection open schema transaction for database: typedb
 
     Then typeql write query; fails
       """
@@ -203,11 +208,13 @@ Feature: TypeQL Update Query
       """
       update 6 > 5;
       """
+    When connection open write transaction for database: typedb
 
     Then typeql write query; fails
       """
       update $p is $f;
       """
+    When connection open write transaction for database: typedb
 
     Then typeql write query; fails
       """
@@ -527,6 +534,7 @@ Feature: TypeQL Update Query
         $p has name $n;
       """
 
+    When connection open write transaction for database: typedb
     Then typeql write query; fails
       """
       insert
@@ -536,6 +544,7 @@ Feature: TypeQL Update Query
         $p has name == $n;
       """
 
+    When connection open write transaction for database: typedb
     Then typeql write query; fails with a message containing: "variable 'n' referenced in the update stage is unavailable"
       """
       insert
@@ -2903,8 +2912,13 @@ Feature: TypeQL Update Query
     When get answers of typeql write query
     """
     match
-      $p isa person; try { $p has age $age; };
-    update try { $p has age $age + 1; };
+      $p isa person;
+      try {
+        $p has age $age;
+        let $new-age-val = $age + 1;
+      };
+    insert try { $new-age isa age == $new-age-val; };
+    update try { $p has $new-age; };
     """
     Then uniquely identify answer concepts
       | p             | age           |
