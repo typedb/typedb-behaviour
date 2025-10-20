@@ -996,29 +996,7 @@ Feature: Driver Query
     """
 
 
-  Scenario: Driver processes query errors correctly
-    Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
-      """
-      """
-    Then typeql schema query; fails
-      """
-
-      """
-    Then typeql read query; fails with a message containing: "Error analysing query"
-      """
-      match $r label non-existing;
-      """
-    Then typeql schema query; fails with a message containing: "Query parsing failed"
-      """
-      define entity entity;
-      """
-    Then typeql schema query; fails with a message containing: "Failed to execute define query"
-      """
-      define attribute name owns name;
-      """
-
-
+  @ignore-typedb-http
   Scenario: Driver processes query structure correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1158,6 +1136,7 @@ Feature: Driver Query
     Given transaction closes
 
 
+  @ignore-typedb-http
   Scenario: Analyze returns the annotations of variables in the query
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1262,7 +1241,7 @@ Feature: Driver Query
       }
     """
 
-
+  @ignore-typedb-http
   Scenario: Analyze handles unsatisfiable schema queries and errors properly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1337,6 +1316,28 @@ Feature: Driver Query
     """
     Given transaction closes
 
+
+  Scenario: Driver processes query errors correctly
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      """
+    Then typeql schema query; fails
+      """
+
+      """
+    Then typeql read query; fails with a message containing: "Error analysing query"
+      """
+      match $r label non-existing;
+      """
+    Then typeql schema query; fails with a message containing: "Query parsing failed"
+      """
+      define entity entity;
+      """
+    Then typeql schema query; fails with a message containing: "Failed to execute define query"
+      """
+      define attribute name owns name;
+      """
 
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
