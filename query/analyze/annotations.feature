@@ -37,9 +37,9 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
-        $x: thing([person])
-      })])
+      Match(
+        And({ $x: thing([person]) }, [])
+      )
     ])
     """
 
@@ -50,9 +50,9 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
-        $x: thing([dummy, subdummy])
-      })])
+      Match(
+        And({ $x: thing([dummy, subdummy]) }, [])
+      )
     ])
     """
 
@@ -63,10 +63,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $n: thing([name,ref]),
         $x: thing([person])
-      })])
+      }, []))
     ])
     """
 
@@ -77,11 +77,13 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
-        $f: thing([friendship]),
-        $p: thing([person]),
-        $r: type([friendship:friend])
-      })])
+      Match(
+        And({
+          $f: thing([friendship]),
+          $p: thing([person]),
+          $r: type([friendship:friend])
+        }, [])
+      )
     ])
     """
 
@@ -92,10 +94,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $t: type([dummy, friendship, name, person, ref, subdummy]),
         $x: thing([dummy, friendship, name, person, ref, subdummy])
-      })])
+      }, []))
     ])
     """
 
@@ -106,10 +108,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $s: type([dummy, friendship, friendship:friend, name, person, ref, subdummy]),
         $t: type([dummy, friendship, friendship:friend, name, person, ref, subdummy])
-      })])
+      }, []))
     ])
     """
 
@@ -120,10 +122,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $s: type([subdummy]),
         $t: type([dummy])
-      })])
+      }, []))
     ])
     """
 
@@ -134,10 +136,9 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
-        $a: type([name, ref]),
-        $o: type([person])
-      })])
+      Match(
+        And({ $a: type([name, ref]), $o: type([person]) }, [])
+      )
     ])
     """
 
@@ -148,10 +149,9 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
-        $rel: type([friendship]),
-        $role: type([friendship:friend])
-      })])
+      Match(
+        And({ $rel: type([friendship]), $role: type([friendship:friend]) }, [])
+      )
     ])
     """
 
@@ -162,10 +162,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $p: type([person]),
         $role: type([friendship:friend])
-      })])
+      }, []))
     ])
     """
 
@@ -178,10 +178,10 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([Trunk({
+      Match(And({
         $x: value([integer]),
         $y: value([string])
-      })])
+      }, []))
     ])
     """
 
@@ -198,17 +198,18 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([
-        Trunk({
-          $p: thing([person]),
-          $x: thing([person, subdummy])
-        }),
-        Or([
-          [Trunk({ $x: thing([person]) })],
-          [Trunk({ $x: thing([subdummy]) })]
-        ]),
-        Not([Trunk({ $n: thing([name]), $x: thing([person]) })])
-      ])
+      Match(
+        And(
+          { $p: thing([person]), $x: thing([person, subdummy]) },
+          [
+            Or([
+              And({ $x: thing([person]) }, []),
+              And({ $x: thing([subdummy]) }, [])
+            ]),
+            Not(And({ $n: thing([name]), $x: thing([person]) }, []))
+          ]
+        )
+      )
     ])
     """
 
@@ -229,26 +230,22 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([
-        Trunk({ $n: thing([name]), $r: thing([ref]), $x: thing([person]) }),
-        Or([
-          [Trunk({ $r: thing([ref]) })],
-          [Trunk({ $r: thing([ref]) })]
-        ])
-      ]),
+      Match(
+        And(
+          { $n: thing([name]), $r: thing([ref]), $x: thing([person]) },
+          [
+            Or([
+              And({ $r: thing([ref]) }, []),
+              And({ $r: thing([ref]) }, [])
+            ])
+          ]
+        )
+      ),
       Select(),
-      Delete([
-        Trunk({ $n: thing([name]), $x: thing([person]) })
-      ]),
-      Insert([
-        Trunk({ $_: thing([name]), $x: thing([person]) })
-      ]),
-      Match([
-        Trunk({ $n1:thing([name]), $x: thing([person]) })
-      ]),
-      Put([
-        Trunk({ $n1:thing([name]), $x: thing([person]) })
-      ])
+      Delete(And({ $n: thing([name]), $x: thing([person]) }, [])),
+      Insert(And({ $_: thing([name]), $x: thing([person]) }, [])),
+      Match(And({ $n1:thing([name]), $x: thing([person]) }, [])),
+      Put(And({ $n1:thing([name]), $x: thing([person]) }, []))
     ])
     """
 
@@ -273,9 +270,9 @@ Feature: Basic Analyze queries
         [thing([person])],
         stream([thing([name])]),
         Pipeline([
-          Match([
-            Trunk({ $n: thing([name]), $p: thing([person]) })
-          ])
+          Match(
+            And({ $n: thing([name]), $p: thing([person]) }, [])
+          )
         ])
       )
       """
@@ -283,9 +280,9 @@ Feature: Basic Analyze queries
     Then analyzed query pipeline annotations are:
       """
       Pipeline([
-        Match([
-          Trunk({ $n: thing([name]), $p: thing([person]) })
-        ])
+        Match(
+          And({ $n: thing([name]), $p: thing([person]) }, [])
+        )
       ])
       """
 
