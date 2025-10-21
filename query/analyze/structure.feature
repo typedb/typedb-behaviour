@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Query structure
+Feature: Analyzed query structure
 
   Background: Set up database
     Given typedb starts

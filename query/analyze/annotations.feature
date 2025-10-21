@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: Basic Analyze queries
+Feature: Analyzed query annotations
 
   Background: Set up database
     Given typedb starts
