@@ -18,11 +18,16 @@ Feature: TypeQL Insert Query
       define
 
       entity person
+        plays friendship:friend,
         plays employment:employee,
         owns name @card(0..),
         owns age,
         owns ref @key,
         owns email @unique @card(0..);
+
+      relation friendship,
+        relates friend @card(0..),
+        owns ref @key;
 
       entity company
         plays employment:employer,
@@ -2755,3 +2760,95 @@ Parker";
       insert
         $p isa person, has name $_;
       """
+
+
+#############
+# OPTIONALS #
+#############
+
+
+  Scenario: a has edge depending on an optional binding can be inserted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1, has age 33;
+      friendship (friend: $john, friend: $jane), has ref 0;
+    """
+    When get answers of typeql write query
+    """
+    match
+      friendship ($p, $q);
+      $p isa person; try { $p has age $age; };
+    insert try { $q has $age; };
+    """
+    Then uniquely identify answer concepts
+      | p             | q             |
+      | key:name:John | key:name:Jane |
+      | key:name:Jane | key:name:John |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then answer size is: 2
+
+
+  Scenario: a relation linking an optional player is inserted
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John", has ref 0;
+      $jane isa person, has name "Jane", has ref 1, has email "jane@doe.com";
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person;
+      try { $q isa person, has email $_; not { $q is $p; }; };
+    insert
+      try { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | f         |
+      | key:ref:0 | key:ref:1 | key:ref:0 |
+      | key:ref:1 | none      | none      |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $f isa friendship;
+    """
+    Then answer size is: 1
+
+
+  Scenario: a try insert is only executed if all optional inputs are bound
+    Given typeql write query
+    """
+    insert
+      $jane isa person, has ref 1, has name "Jane", has age 33;
+      $john isa person, has ref 2, has name "John";
+      $anon isa person, has ref 3, has age 45;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person;
+      try { $p has age $age; };
+      try { $p has name $name; };
+    insert try { $q isa person, has ref 0; $q has $age, has $name; };
+    """
+    Then uniquely identify answer concepts
+      | p         | q         | age         | name           |
+      | key:ref:1 | key:ref:0 | attr:age:33 | attr:name:Jane |
+      | key:ref:2 | none      | none        | attr:name:John |
+      | key:ref:3 | none      | attr:age:45 | none           |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then answer size is: 3
+

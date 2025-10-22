@@ -170,7 +170,22 @@ Feature: TypeQL Reduce Queries
     Given connection open write transaction for database: typedb
     When get answers of typeql read query
       """
-      match $x isa person, has <attr> $y;
+      match $x isa person; $x has <attr> $y;
+      reduce $red_var? = <reduction>($y);
+      """
+    Then result is a single row with variable 'red_var': value:<val_type>:<red_val>
+
+    Given typeql write query
+      """
+      insert
+      $p4 isa person, has ref 3;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person; try { $x has <attr> $y; };
       reduce $red_var? = <reduction>($y);
       """
     Then result is a single row with variable 'red_var': value:<val_type>:<red_val>

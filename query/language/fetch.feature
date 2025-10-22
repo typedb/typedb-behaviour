@@ -878,6 +878,47 @@ Feature: TypeQL Fetch Query
       }
       """
 
+
+  Scenario: fetch can handle optional objects
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { employment (employee: $p, employer: $e); };
+          fetch {
+            "person": { $p.* },
+            "employer": { $e.* }
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Alice", "Allie" ],
+          "age": 10.0,
+          "karma": [ 123.4567891 ],
+          "ref": 0.0
+        },
+        "employer": {
+          "company-name": "TypeDB",
+          "description": [ "Nice and shy guys" ],
+          "company-achievement": "Green BDD tests for fetch",
+          "ref": 2.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Bob" ],
+          "ref": 1.0
+        },
+        "employer": null
+      }
+      """
+
   ##############
   # SUBQUERIES #
   ##############
