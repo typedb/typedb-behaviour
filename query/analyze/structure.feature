@@ -28,7 +28,7 @@ Feature: Analyzed query structure
 
   Scenario: Analyze returns the structure of each stage in the query
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x isa person; $n isa name;
       insert $x has $n;
@@ -50,7 +50,7 @@ Feature: Analyzed query structure
 
   Scenario: Analyze returns the structure of each function in the preamble
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun persons() -> { person }:
@@ -103,7 +103,7 @@ Feature: Analyzed query structure
 
   Scenario: Nested patterns can be reconstructed from the analyzed query
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         $p isa person;
@@ -128,7 +128,7 @@ Feature: Analyzed query structure
 
   Scenario: All relevant constraints are present in the structure
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun pi() -> double:
@@ -158,7 +158,7 @@ Feature: Analyzed query structure
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         entity $p1;
@@ -188,7 +188,7 @@ Feature: Analyzed query structure
 
   Scenario: All stages in a pipeline are present in the structure
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $p isa person;
@@ -252,7 +252,7 @@ Feature: Analyzed query structure
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $p sub! person;
@@ -266,7 +266,7 @@ Feature: Analyzed query structure
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $r sub friendship, relates new-role;
@@ -285,13 +285,13 @@ Feature: Analyzed query structure
 
   Scenario: Errors in the query are returned as errors
     Given connection open read transaction for database: typedb
-    When typeql analyze query; parsing fails
+    When typeql analyze; parsing fails
     """
     match
      This isnt valid TypeQL;
     """
 
-    When typeql analyze query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    When typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
     """
     match
      $p sub! person; $x isa! $p;

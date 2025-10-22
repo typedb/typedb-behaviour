@@ -1011,7 +1011,7 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql analyze query
+    Then get answers of typeql analyze
       """
       with
       fun n_pi($n: integer) -> double:
@@ -1056,7 +1056,7 @@ Feature: Driver Query
     )
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         entity $p1;
@@ -1081,7 +1081,7 @@ Feature: Driver Query
       ])
     ])
     """
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         $p isa person;
@@ -1104,7 +1104,7 @@ Feature: Driver Query
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $p isa person;
@@ -1174,7 +1174,7 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         $x isa person, has name $n, has ref $r;
@@ -1214,7 +1214,7 @@ Feature: Driver Query
       )
     ])
     """
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun names_of($p: person) -> { name }:
@@ -1278,7 +1278,7 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $p sub! person;
@@ -1300,7 +1300,7 @@ Feature: Driver Query
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
     match
      $r sub friendship, relates new-role;
@@ -1327,13 +1327,13 @@ Feature: Driver Query
 
     # Errors
     Given connection open read transaction for database: typedb
-    When typeql analyze query; parsing fails
+    When typeql analyze; parsing fails
     """
     match
      This isnt valid TypeQL;
     """
 
-    When typeql analyze query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    When typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
     """
     match
      $p sub! person; $x isa! $p;
