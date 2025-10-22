@@ -153,7 +153,7 @@ Feature: Analyzed query structure
         Is($p1, $p2),
         Iid($p2, 0x1234567890112345678901),
         FunctionCall(pi(), [$_], []),
-        Expression(let $x = ceil(2 * pi()), $x, [$_])
+        Expression(let $x = ceil(2 * pi()), [$x], [$_])
       ])
     ])
     """
