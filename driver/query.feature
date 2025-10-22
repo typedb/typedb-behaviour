@@ -1037,9 +1037,9 @@ Feature: Driver Query
         Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
         Is($p1, $p2),
         Iid($p2, 0x1234567890112345678901),
-        expression(let $three = 3,[$three],[]),
+        expression(let $three = 3, $three, []),
         FunctionCall(n_pi($three), [$_], [$three]),
-        Expression(let $x = ceil(2 * n_pi($three)), [$x], [$_])
+        Expression(let $x = ceil(2 * n_pi($three)), $x, [$_])
       ])
     ])
     """
@@ -1050,7 +1050,7 @@ Feature: Driver Query
       Single(first, [$n_pi]),
       Pipeline([
         Match([
-          Expression(let $n_pi = $n * 3.14, [$n_pi], [$n])
+          Expression(let $n_pi = $n * 3.14, $n_pi, [$n])
         ])
       ])
     )
@@ -1078,6 +1078,28 @@ Feature: Driver Query
         Sub($f, friendship), Relates($f, friend),
         Plays($p1, friendship:friend),
         Plays($p2, $role)
+      ])
+    ])
+    """
+    When get answers of typeql analyze query
+      """
+      match
+        $p isa person;
+        { $p has name $id; } or { $p has ref $id; };
+        not { $id == 5; };
+        try { $f isa friendship, links (friend: $p); };
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Isa($p, person),
+        Or([
+          [Has($p, $id), Isa($id, name)],
+          [Has($p, $id), Isa($id, ref)]
+        ]),
+        not([Comparison($id, 5, ==)]),
+        Try([Isa($f, friendship), Links($f, $p, friend)])
       ])
     ])
     """
@@ -1166,26 +1188,30 @@ Feature: Driver Query
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
-      Match([
-        Trunk({ $n: thing([name]), $r: thing([ref]), $x: thing([person]) }),
-        Or([
-          [Trunk({ $r: thing([ref]) })],
-          [Trunk({ $r: thing([ref]) })]
-        ])
-      ]),
+      Match(
+        And(
+          { $n: thing([name]), $r: thing([ref]), $x: thing([person]) },
+          [
+            Or([
+              And({ $r: thing([ref]) }, []),
+              And({ $r: thing([ref]) }, [])
+            ])
+          ]
+        )
+      ),
       Select(),
-      Delete([
-        Trunk({ $n: thing([name]), $x: thing([person]) })
-      ]),
-      Insert([
-        Trunk({ $_: thing([name]), $x: thing([person]) })
-      ]),
-      Match([
-        Trunk({ $n1:thing([name]), $x: thing([person]) })
-      ]),
-      Put([
-        Trunk({ $n1:thing([name]), $x: thing([person]) })
-      ])
+      Delete(
+        And({ $n: thing([name]), $x: thing([person]) }, [])
+      ),
+      Insert(
+        And({ $_: thing([name]), $x: thing([person]) }, [])
+      ),
+      Match(
+        And({ $n1:thing([name]), $x: thing([person]) }, [])
+      ),
+      Put(
+        And({ $n1:thing([name]), $x: thing([person]) }, [])
+      )
     ])
     """
     When get answers of typeql analyze query
@@ -1214,18 +1240,18 @@ Feature: Driver Query
         [thing([person])],
         stream([thing([name])]),
         Pipeline([
-          Match([
-            Trunk({ $n: thing([name]), $p: thing([person]) })
-          ])
+          Match(
+            And({ $n: thing([name]), $p: thing([person]) }, [])
+          )
         ])
       )
       """
     Then analyzed query pipeline annotations are:
       """
       Pipeline([
-        Match([
-          Trunk({ $p: thing([person]), $r: thing([ref]) })
-        ])
+        Match(
+          And({ $p: thing([person]), $r: thing([ref]) }, [])
+        )
       ])
       """
     Then analyzed fetch annotations are:
@@ -1269,7 +1295,7 @@ Feature: Driver Query
     """
     Pipeline([
       Match(
-        [Trunk({$p: type([])})]
+        And({$p: type([])}, [])
       )
     ])
     """
@@ -1292,7 +1318,7 @@ Feature: Driver Query
     """
     Pipeline([
       Match(
-        [Trunk({$_: type([]), $r: type([])})]
+        And({$_: type([]), $r: type([])}, [])
       )
     ])
     """
