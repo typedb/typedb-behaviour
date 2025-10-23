@@ -1142,7 +1142,7 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     When transaction commits
     When connection open schema transaction for database: typedb
-    When attribute(name) get value type: string
+    Then attribute(name) get value type: string
     Then attribute(name) get constraints is empty
 
   Scenario: Attribute types can be subtypes of other attribute types with and without @abstract annotation

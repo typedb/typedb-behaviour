@@ -2750,7 +2750,7 @@ Feature: TypeQL Define Query
 
     # TODO: 3.x: handle type statement annotations
 #    Given connection open read transaction for database: typedb
-#    Then get answers of typeql read query
+#    When get answers of typeql read query
 #      """
 #      match $x @regex("^A.*$");
 #      """

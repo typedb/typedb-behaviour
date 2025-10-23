@@ -826,7 +826,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch can have nested documents
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
         match
           $p isa person, has person-name $name;
@@ -1339,7 +1339,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch subqueries can contain complex streams
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
       $p isa! $t, has person-name $n;

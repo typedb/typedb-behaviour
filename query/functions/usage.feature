@@ -124,7 +124,7 @@ Feature: Function Usage
     """
     Given transaction commits
     Given connection open read transaction for database: typedb
-    When typeql read query; fails
+    Then typeql read query; fails
     """
     match
       let $five = five();

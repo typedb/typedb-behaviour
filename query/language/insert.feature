@@ -244,7 +244,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
     Then connection open write transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match $x isa person;
     """
@@ -257,7 +257,7 @@ Feature: TypeQL Insert Query
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match $x isa person;
     """

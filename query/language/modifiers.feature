@@ -365,7 +365,7 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa name;
       sort $x asc;
@@ -825,7 +825,7 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
       $x isa person, has name $n;
@@ -863,7 +863,7 @@ Feature: TypeQL Query Modifiers
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
       $x isa person, has email "dummy@gmail.com";

@@ -522,7 +522,7 @@ Feature: TypeQL Delete Query
     delete
       links (employee: $p) of $e;
     """
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match $e isa employment, links (employee: $p);
     """
@@ -540,7 +540,7 @@ Feature: TypeQL Delete Query
     delete
       links (intern: $p) of $e;
     """
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match $e isa employment, links (employee: $p);
     """
@@ -1876,7 +1876,7 @@ Feature: TypeQL Delete Query
       """
 
     When connection open write transaction for database: typedb
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         $p isa worker;
@@ -1900,7 +1900,7 @@ Feature: TypeQL Delete Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         $p isa worker;
@@ -1924,7 +1924,7 @@ Feature: TypeQL Delete Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         $p isa worker;
@@ -1947,7 +1947,7 @@ Feature: TypeQL Delete Query
     When transaction closes
 
     When connection open write transaction for database: typedb
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         $p isa worker;
