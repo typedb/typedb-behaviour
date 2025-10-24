@@ -30,7 +30,7 @@ Feature: Analyzed query annotations
 
   Scenario: Analyze returns the annotations of variables in the query
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x isa person;
       """
@@ -43,7 +43,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x isa dummy;
       """
@@ -56,7 +56,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x has $n;
       """
@@ -70,7 +70,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $f links ($r: $p);
       """
@@ -87,7 +87,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x isa $t;
       """
@@ -101,7 +101,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $s sub $t;
       """
@@ -115,7 +115,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $s sub! $t;
       """
@@ -129,7 +129,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $o owns $a;
       """
@@ -142,7 +142,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $rel relates $role;
       """
@@ -155,7 +155,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $p plays $role;
       """
@@ -169,7 +169,7 @@ Feature: Analyzed query annotations
     ])
     """
 
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         let $x = 1;
@@ -188,7 +188,7 @@ Feature: Analyzed query annotations
 
   Scenario: Analyze returns the annotations of each subpattern in the query
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         $p isa person;
@@ -216,7 +216,7 @@ Feature: Analyzed query annotations
 
   Scenario: Analyze returns the annotations of every stage in the query
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match
         $x isa person, has name $n, has ref $r;
@@ -252,7 +252,7 @@ Feature: Analyzed query annotations
 
   Scenario: Analyze returns the annotations of functions in the preamble
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun names_of($p: person) -> { name }:
@@ -290,7 +290,7 @@ Feature: Analyzed query annotations
   Scenario: Analyze returns the annotations of fetch
     # Basic concept
     Given connection open read transaction for database: typedb
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $n isa name;
       fetch { "names": $n };
@@ -301,7 +301,7 @@ Feature: Analyzed query annotations
     """
 
     # Basic value
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match let $x = 5;
       fetch { "x": $x };
@@ -312,7 +312,7 @@ Feature: Analyzed query annotations
     """
 
     # Wildcard
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $x isa person;
       fetch {
@@ -328,7 +328,7 @@ Feature: Analyzed query annotations
     """
 
     # Subquery returning list
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match 1==1;
       fetch {
@@ -341,7 +341,7 @@ Feature: Analyzed query annotations
     """
 
     # Subquery returning single
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match 1==1;
       fetch {
@@ -354,7 +354,7 @@ Feature: Analyzed query annotations
     """
 
     # Function returning list
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun names() -> { name }:
@@ -372,7 +372,7 @@ Feature: Analyzed query annotations
     """
 
     # Function returning single
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       with
       fun one_name() -> name:
@@ -390,7 +390,7 @@ Feature: Analyzed query annotations
     """
 
     # Nested single
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match $n isa name;
       fetch {
@@ -409,7 +409,7 @@ Feature: Analyzed query annotations
     """
 
     # Nested list
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
       """
       match 1 == 1;
       fetch {
@@ -428,7 +428,7 @@ Feature: Analyzed query annotations
     """
 
     # Nested fetch
-    When get answers of typeql analyze query
+    When get answers of typeql analyze
     """
       match
         $p isa person, has ref $r;
