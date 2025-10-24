@@ -111,6 +111,12 @@ Feature: TypeQL Reduce Queries
       reduce $count = count($x);
       """
     Then result is a single row with variable 'count': value:integer:0
+    When get answers of typeql read query
+      """
+      match $x isa person; try { $x has name $name; };
+      reduce $count = count($name);
+      """
+    Then result is a single row with variable 'count': value:integer:0
 
 
   Scenario Outline: the <reduction> of an answer set of '<type>' values can be retrieved
@@ -322,7 +328,7 @@ Feature: TypeQL Reduce Queries
     Then result is a single row with variable 'median': value:double:36.5
 
 
-  Scenario Outline: when an answer set is empty, calling '<reduction>' on it returns an empty answer
+  Scenario Outline: when an answer set is empty, calling '<reduction>' on it returns '<answer>'
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -338,15 +344,33 @@ Feature: TypeQL Reduce Queries
       match $x isa person, has income $y;
       reduce $red_var? = <reduction>($y);
       """
-    Then result is a single row with variable 'red_var': none
+    Then result is a single row with variable 'red_var': <answer>
+    Then transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert $x isa person, has ref 0;
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person; try { $x has income $y; };
+      reduce $red_var? = <reduction>($y);
+      """
+    Then result is a single row with variable 'red_var': <answer>
 
     Examples:
-      | reduction |
-      | max       |
-      | min       |
-      | mean      |
-      | median    |
-      | std       |
+      | reduction | answer          |
+      | count     | value:integer:0 |
+      | sum       | value:double:0  |
+      | max       | none            |
+      | min       | none            |
+      | mean      | none            |
+      | median    | none            |
+      | std       | none            |
 
 
   Scenario Outline: an error is thrown when getting the '<reduction>' of an undefined variable in a reduce query
