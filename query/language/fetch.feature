@@ -919,6 +919,69 @@ Feature: TypeQL Fetch Query
       }
       """
 
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { employment (employee: $p, employer: $e); };
+          fetch {
+            "person": { $p.* },
+            "employer": [ match $e has company-name $name; return { $name }; ]
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Alice", "Allie" ],
+          "age": 10.0,
+          "karma": [ 123.4567891 ],
+          "ref": 0.0
+        },
+        "employer": [ "TypeDB" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Bob" ],
+          "ref": 1.0
+        },
+        "employer": []
+      }
+      """
+
+
+  Scenario: fetch can handle optional objects
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { $p has karma $k; };
+          fetch {
+            "name": [ $p.person-name ],
+            "adjusted-karma": $k - 100.0
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "name": [ "Alice", "Allie" ],
+        "adjusted-karma": 23.4567891
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": [ "Bob" ],
+        "adjusted-karma": null
+      }
+      """
+
+
   ##############
   # SUBQUERIES #
   ##############
@@ -3080,5 +3143,5 @@ Feature: TypeQL Fetch Query
 
     Then typeql read query; fails with a message containing: "The variable 'p' is not available."
     """
-    match { $p isa person; } or { $k isa person; }; fetch { $p.*};
+    match { $p isa person; } or { $k isa person; }; fetch { $p.* };
     """
