@@ -1011,7 +1011,7 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql analyze
+    When get answers of typeql analyze
       """
       with
       fun n_pi($n: integer) -> double:
