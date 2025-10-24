@@ -172,7 +172,7 @@ Feature: TypeQL Put Query
       | p         |
       | key:ref:0 |
 
-    Then get answers of typeql write query
+    When get answers of typeql write query
     """
     put $p isa person, has ref 0;
     """

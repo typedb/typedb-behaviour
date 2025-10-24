@@ -90,7 +90,7 @@ Feature: TypeQL Query with Expressions
       select
         $x, $v;
       """
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
       match
         $x isa person, has age $a, has height $h;
@@ -103,7 +103,7 @@ Feature: TypeQL Query with Expressions
       | value:integer:20  |
       | value:integer:360 |
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
       match
         $x isa person, has age $a, has height $h;
@@ -261,7 +261,7 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $x isa age;

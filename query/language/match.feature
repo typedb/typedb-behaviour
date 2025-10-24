@@ -505,7 +505,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When typeql read query; fails
+    Then typeql read query; fails
       """
       match $x plays close-friendship:friend;
       """
@@ -991,7 +991,7 @@ Feature: TypeQL Match Clause
       """
       match $x isa! shop;
       """
-    Then get answers of templated typeql read query
+    When get answers of templated typeql read query
       """
       match $x iid <answer.x.iid>; $x isa grocery, has address "123 street";
       """
@@ -1111,7 +1111,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa person; $r links (employee: $x);
       """
@@ -1165,7 +1165,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
        """
        match $r links ($x, $y), isa employment;
        """
@@ -1471,7 +1471,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: when matching a roleplayer in a relation that can't actually play that role, an error is thrown
-    When typeql read query; fails
+    Then typeql read query; fails
       """
       match
       $x isa company;
@@ -4723,7 +4723,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $x isa person, has graduation-date $date;
@@ -4999,7 +4999,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $x isa person;
@@ -5232,7 +5232,7 @@ Feature: TypeQL Match Clause
 
 
   Scenario: the first variable in a negation can be unbound, as integer as it is connected to a bound variable
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         attribute $a;
@@ -5255,7 +5255,7 @@ Feature: TypeQL Match Clause
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
        """
        match
          $x isa person, has name "Tim";
@@ -5267,7 +5267,7 @@ Feature: TypeQL Match Clause
        """
     Then answer size is: 1
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
        """
        match
          $x isa person, has name "Tim";

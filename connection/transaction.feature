@@ -278,12 +278,12 @@ Feature: Connection Transaction
       """
       define entity person;
       """
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match entity $x;
       """
     Then answer size is: 1
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match entity $x;
       """

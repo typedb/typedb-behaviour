@@ -180,7 +180,7 @@ Feature: TypeQL Disjunction
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       with fun refof($x:person) -> { ref }: match $x isa person; $_ has ref $ref; return { $ref };
       match $x has ref $ref; { let $b = $ref; } or { let $ref in refof($x); };
@@ -203,7 +203,7 @@ Feature: TypeQL Disjunction
       """
     Given transaction commits
     When connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         { $a isa! $_; } or { $_ isa! $_; };

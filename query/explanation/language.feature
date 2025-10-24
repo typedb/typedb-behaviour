@@ -33,7 +33,7 @@ Feature: TypeQL Reasoning Explanation
       $p isa person, has name "Alice";
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $p isa person;
       """
@@ -77,7 +77,7 @@ Feature: TypeQL Reasoning Explanation
       (superior: $cit, subordinate: $ar) isa location-hierarchy;
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
       $k isa area, has name $n;
@@ -135,7 +135,7 @@ Feature: TypeQL Reasoning Explanation
       (superior: $cou, subordinate: $cit) isa location-hierarchy;
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
       $k isa area, has name $n;
@@ -189,7 +189,7 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $com isa company, has name $n; not { $n "the-company"; };
       """
@@ -236,7 +236,7 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $com isa company;
       { $com has name $n1; $n1 "the-company"; } or { $com has name $n2; $n2 "another-company"; };
@@ -285,7 +285,7 @@ Feature: TypeQL Reasoning Explanation
       $c2 has name $n2; $n2 "another-company";
       """
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $com isa company;
       { $com has name $n1; $n1 "the-company"; } or { $com has name $n2; { $n2 "another-company"; } or { $n2 "third-company"; }; };

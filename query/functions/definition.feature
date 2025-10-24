@@ -64,7 +64,7 @@ Feature: Function Definition
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    When typeql read query; fails with a message containing: "Could not resolve function with name 'five'."
+    Then typeql read query; fails with a message containing: "Could not resolve function with name 'five'."
     """
     match let $five = five();
     """

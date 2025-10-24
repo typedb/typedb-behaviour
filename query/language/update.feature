@@ -904,7 +904,7 @@ Feature: TypeQL Update Query
       """
 
     When connection open write transaction for database: typedb
-    Then get answers of typeql write query
+    When get answers of typeql write query
       """
       match
         $p isa person, has ref 0;

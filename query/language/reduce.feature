@@ -268,7 +268,7 @@ Feature: TypeQL Reduce Queries
       reduce $sum = sum($z);
       """
     Then result is a single row with variable 'sum': value:integer:65
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match $x isa person, has name $y, has age $z;
       select $y, $z;
@@ -587,7 +587,7 @@ Feature: TypeQL Reduce Queries
       | key:ref:0 | key:ref:3 | key:ref:4 |
       | key:ref:1 | key:ref:4 | key:ref:2 |
       | key:ref:1 | key:ref:4 | key:ref:3 |
-    Then get answers of typeql read query
+    When get answers of typeql read query
       """
       match
         $x isa company;

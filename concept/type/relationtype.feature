@@ -2721,7 +2721,7 @@ Feature: Concept Relation Type and Role Type
     When connection open read transaction for database: typedb
     When relation(parentship) get role(parent) get declared annotations contain: @<annotation>
     When relation(fathership) get role(father) get declared annotations contain: @<annotation>
-    When relation(fathership) get constraints for related role(fathership:father) contain: @<annotation>
+    Then relation(fathership) get constraints for related role(fathership:father) contain: @<annotation>
     Examples:
       | annotation |
       | distinct   |
