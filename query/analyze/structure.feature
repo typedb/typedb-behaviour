@@ -285,13 +285,13 @@ Feature: Analyzed query structure
 
   Scenario: Errors in the query are returned as errors
     Given connection open read transaction for database: typedb
-    When typeql analyze; parsing fails
+    Then typeql analyze; parsing fails
     """
     match
      This isnt valid TypeQL;
     """
 
-    When typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    Then typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
     """
     match
      $p sub! person; $x isa! $p;
