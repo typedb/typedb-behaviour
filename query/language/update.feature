@@ -2974,31 +2974,63 @@ Feature: TypeQL Update Query
 
 
   Scenario: a try update is only executed if all optional inputs are bound
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity also-person
+        owns name,
+        owns age,
+        owns ref @key;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
     Given typeql write query
     """
     insert
-      $jane isa person, has ref 1, has name "Jane", has age 33;
-      $john isa person, has ref 2, has name "John";
-      $anon isa person, has ref 3, has age 45;
+      $jane isa person, has ref 0, has name "Jane", has age 33;
+      $john isa person, has ref 1, has name "John";
+      $anon isa person, has ref 2, has age 45;
     """
     When get answers of typeql write query
     """
     match
-      $p isa person;
+      $p isa person, has ref $ref;
       try { $p has age $age; };
       try { $p has name $name; };
-    insert try { $q isa person, has ref 0; $q has $age, has $name; };
+    insert $q isa also-person, has $ref;
+    update try { $q has $age, has $name; };
     """
     Then uniquely identify answer concepts
       | p         | q         | age         | name           |
-      | key:ref:1 | key:ref:0 | attr:age:33 | attr:name:Jane |
-      | key:ref:2 | none      | none        | attr:name:John |
-      | key:ref:3 | none      | attr:age:45 | none           |
+      | key:ref:0 | key:ref:0 | attr:age:33 | attr:name:Jane |
+      | key:ref:1 | key:ref:1 | none        | attr:name:John |
+      | key:ref:2 | key:ref:2 | attr:age:45 | none           |
     Then transaction commits
-    Then connection open write transaction for database: typedb
+
+    Then connection open read transaction for database: typedb
     Then get answers of typeql read query
     """
-    match $p isa person, has age $age;
+    match $q isa also-person, has age $age;
     """
-    Then answer size is: 3
+    Then uniquely identify answer concepts
+      | q         | age         |
+      | key:ref:0 | attr:age:33 |
+    Then get answers of typeql read query
+    """
+    match $q isa also-person, has name $name;
+    """
+    Then uniquely identify answer concepts
+      | q         | name           |
+      | key:ref:0 | attr:name:Jane |
 
+
+  Scenario: nested try blocks in insert are disallowed
+    Given typeql write query; fails
+    """
+    match $p isa person; try { $p has name $name, has age $age; };
+    update try { $p has $name; try { $p has $age; }; };
+    """

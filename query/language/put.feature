@@ -677,6 +677,7 @@ Feature: TypeQL Put Query
         owns ref @key;
       """
     Given transaction commits
+
     Given connection open write transaction for database: typedb
     Given typeql write query
     """
@@ -710,9 +711,19 @@ Feature: TypeQL Put Query
       | key:ref:0 | key:ref:1 | key:ref:0 |
       | key:ref:1 | none      | key:ref:1 |
     Then transaction commits
-    Then connection open write transaction for database: typedb
+
+    Then connection open read transaction for database: typedb
     Then get answers of typeql read query
     """
     match $f isa friendship;
     """
     Then answer size is: 2
+
+
+  Scenario: nested try blocks in put are disallowed
+    Given connection open write transaction for database: typedb
+    Given typeql write query; fails
+    """
+    match $p isa person; try { $p has name $name, has age $age; };
+    put $q isa person; try { $q has $name; try { $q has $age; }; };
+    """

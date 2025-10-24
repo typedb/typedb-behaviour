@@ -2852,3 +2852,9 @@ Parker";
     """
     Then answer size is: 3
 
+  Scenario: nested try blocks in delete are disallowed
+    Given typeql write query; fails
+    """
+    match $p isa person; try { $p has name $name, has age $age; };
+    insert $q isa person; try { $q has $name; try { $q has $age; }; };
+    """

@@ -20,7 +20,8 @@ Feature: TypeQL Delete Query
         plays friendship:friend,
         plays employment:employee,
         owns name @key,
-        owns email @card(0..);
+        owns email @card(0..),
+        owns age @card(0..);
       entity company,
         plays employment:employer;
       relation friendship,
@@ -33,6 +34,7 @@ Feature: TypeQL Delete Query
       attribute name @independent, value string;
       attribute email @independent, value string;
       attribute ref @independent, value integer;
+      attribute age @independent, value integer;
       """
     Given transaction commits
 
@@ -2812,6 +2814,27 @@ Feature: TypeQL Delete Query
       """
 
 
+  Scenario: Concept deletions do not cause trouble for constraint deletions in the same stage referencing that concept
+    Given typeql write query
+    """
+    insert $john isa person, has name "John";
+    insert $jane isa person, has name "Jane";
+    """
+    Given transaction commits
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      match $x isa person; $y isa person;
+       { $x has name "John"; $y has name "Jane"; } or
+       { $x has name "Jane"; $y has name "John"; };
+       $x has name $n;
+       delete
+        has $n of $x;
+        $y;
+      """
+    Then transaction commits
+
+
   Scenario: an optional binding is deleted
     Given typeql write query
     """
@@ -2822,7 +2845,7 @@ Feature: TypeQL Delete Query
     When get answers of typeql write query
     """
     match $p isa person, has name $name; try { $p has email $email; };
-    delete try { has $email of $p; };
+    delete try { $email; };
     """
     Then uniquely identify answer concepts
       | p             | name           |
@@ -2850,9 +2873,9 @@ Feature: TypeQL Delete Query
     delete try { has $email of $p; };
     """
     Then uniquely identify answer concepts
-      | p             | name           |
-      | key:name:John | attr:name:John |
-      | key:name:Jane | attr:name:Jane |
+      | p             | name           | email                   |
+      | key:name:John | attr:name:John | none                    |
+      | key:name:Jane | attr:name:Jane | attr:email:jane@doe.com |
     Then transaction commits
     Then connection open write transaction for database: typedb
     Then get answers of typeql read query
@@ -2860,6 +2883,47 @@ Feature: TypeQL Delete Query
     match $p isa person, has email $email;
     """
     Then answer size is: 0
+
+
+  Scenario: multiple edges in a single try block are only deleted when all optional variables are bound
+    Given typeql write query
+    """
+    insert
+      $john isa person, has name "John";
+      $jane isa person, has name "Jane", has email "jane@doe.com";
+      $alice isa person, has name "Alice", has age 33;
+      $bob isa person, has name "Bob", has email "bob@ross.com", has age 22;
+    """
+    When get answers of typeql write query
+    """
+    match
+      $p isa person;
+      try { $p has email $email; };
+      try { $p has age $age; };
+    delete try { has $email of $p; has $age of $p; };
+    """
+    Then uniquely identify answer concepts
+      | p              | email                   | age         |
+      | key:name:John  | none                    | none        |
+      | key:name:Jane  | attr:email:jane@doe.com | none        |
+      | key:name:Alice | none                    | attr:age:33 |
+      | key:name:Bob   | attr:email:bob@ross.com | attr:age:22 |
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has email $email;
+    """
+    Then uniquely identify answer concepts
+      | p              | email                   |
+      | key:name:Jane  | attr:email:jane@doe.com |
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then uniquely identify answer concepts
+      | p              | age         |
+      | key:name:Alice | attr:age:33 |
 
 
   Scenario: an optional relation is deleted
@@ -2905,10 +2969,10 @@ Feature: TypeQL Delete Query
     delete try { links ($p) of $f; };
     """
     Then uniquely identify answer concepts
-      | p             | name           |
-      | key:name:John | attr:name:John |
-      | key:name:Jane | attr:name:Jane |
-      | key:name:Eve  | attr:name:Eve  |
+      | p             | name           | f         |
+      | key:name:John | attr:name:John | key:ref:0 |
+      | key:name:Jane | attr:name:Jane | key:ref:0 |
+      | key:name:Eve  | attr:name:Eve  | none      |
     Then transaction commits
     Then connection open write transaction for database: typedb
     Then get answers of typeql read query
@@ -2918,22 +2982,9 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
-  Scenario: Concept deletions do not cause trouble for constraint deletions in the same stage referencing that concept
-    Given typeql write query
+  Scenario: nested try blocks in delete are disallowed
+    Given typeql write query; parsing fails
     """
-    insert $john isa person, has name "John";
-    insert $jane isa person, has name "Jane";
+    match $p isa person; try { $p has email $email, has age $age; };
+    delete try { has $email of $p; try { has $age of $p; }; };
     """
-    Given transaction commits
-    When connection open write transaction for database: typedb
-    Then typeql write query
-      """
-      match $x isa person; $y isa person;
-       { $x has name "John"; $y has name "Jane"; } or
-       { $x has name "Jane"; $y has name "John"; };
-       $x has name $n;
-       delete
-        has $n of $x;
-        $y;
-      """
-    Then transaction commits
