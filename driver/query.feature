@@ -1190,27 +1190,27 @@ Feature: Driver Query
     Pipeline([
       Match(
         And(
-          { $n: thing([name]), $r: thing([ref]), $x: thing([person]) },
+          { $n: instance([name]), $r: instance([ref]), $x: instance([person]) },
           [
             Or([
-              And({ $r: thing([ref]) }, []),
-              And({ $r: thing([ref]) }, [])
+              And({ $r: instance([ref]) }, []),
+              And({ $r: instance([ref]) }, [])
             ])
           ]
         )
       ),
       Select(),
       Delete(
-        And({ $n: thing([name]), $x: thing([person]) }, [])
+        And({ $n: instance([name]), $x: instance([person]) }, [])
       ),
       Insert(
-        And({ $_: thing([name]), $x: thing([person]) }, [])
+        And({ $_: instance([name]), $x: instance([person]) }, [])
       ),
       Match(
-        And({ $n1:thing([name]), $x: thing([person]) }, [])
+        And({ $n1:instance([name]), $x: instance([person]) }, [])
       ),
       Put(
-        And({ $n1:thing([name]), $x: thing([person]) }, [])
+        And({ $n1:instance([name]), $x: instance([person]) }, [])
       )
     ])
     """
@@ -1237,11 +1237,11 @@ Feature: Driver Query
     Then analyzed preamble annotations contains:
       """
       Function(
-        [thing([person])],
-        stream([thing([name])]),
+        [instance([person])],
+        stream([instance([name])]),
         Pipeline([
           Match(
-            And({ $n: thing([name]), $p: thing([person]) }, [])
+            And({ $n: instance([name]), $p: instance([person]) }, [])
           )
         ])
       )
@@ -1250,7 +1250,7 @@ Feature: Driver Query
       """
       Pipeline([
         Match(
-          And({ $p: thing([person]), $r: thing([ref]) }, [])
+          And({ $p: instance([person]), $r: instance([ref]) }, [])
         )
       ])
       """
