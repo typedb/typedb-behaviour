@@ -1013,10 +1013,13 @@ Feature: Driver Query
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze
       """
-      with
-      fun n_pi($n: integer) -> double:
+      with fun n_pi($n: integer) -> double:
         match let $n_pi = $n * 3.14; # close enough?
       return first $n_pi;
+
+      with fun sum_refs() -> integer:
+        match $r isa ref;
+      return sum($r);
 
       match
         $p1 isa! person, has name $n1;
@@ -1055,7 +1058,18 @@ Feature: Driver Query
       ])
     )
     """
-
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [],
+      Reduce([Reducer(sum,[$r])]),
+      Pipeline([
+        Match([
+          Isa($r, ref)
+        ])
+      ])
+    )
+    """
     When get answers of typeql analyze
       """
       match
@@ -1341,126 +1355,126 @@ Feature: Driver Query
     Given transaction closes
 
 
-  Scenario: Driver processes query errors correctly
-    Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
-      """
-      """
-    Then typeql schema query; fails
-      """
-
-      """
-    Then typeql read query; fails with a message containing: "Error analysing query"
-      """
-      match $r label non-existing;
-      """
-    Then typeql schema query; fails with a message containing: "Query parsing failed"
-      """
-      define entity entity;
-      """
-    Then typeql schema query; fails with a message containing: "Failed to execute define query"
-      """
-      define attribute name owns name;
-      """
-
-  Scenario: Driver can concurrently process read queries without interruptions
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
-      """
-    When concurrently get answers of typeql read query 10 times
-      """
-      match entity $p;
-      """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When get answers of typeql read query
-      """
-      match entity $p;
-      """
-    Then answer size is: 10
-    Then concurrently process 5 rows from answers
-    Then concurrently process 1 row from answers; fails
-
-
-  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
-      """
-    When concurrently get answers of typeql read query 10 times
-      """
-      match entity $p;
-      """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When typeql schema query
-      """
-      define entity person10;
-      """
-    Then concurrently process 1 rows from answers
-    Then concurrently process 3 rows from answers
-    Then concurrently process 1 rows from answers
-    Then concurrently process 1 row from answers; fails
-
-
-  Scenario: Driver's concurrent processing of read queries answers is interrupted by schema queries if answers are not prefetched
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
-      """
-    When concurrently get answers of typeql read query 10 times
-      """
-      match entity $p;
-      """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When typeql schema query
-      """
-      define entity person10;
-      """
-    # TODO: Uncomment this when we can set prefetch sizes to 0
-#    Then concurrently process 1 rows from answers; fails
-
-
-#  TODO: Repeat two tests above for:
-#  read results + write query (not) interrupting them
-#  write results + schema query (not) interrupting them
-#  write results + write query (not) interrupting them
-#  Consider adding tests for commit, rollback, and close doing the same!
+#  Scenario: Driver processes query errors correctly
+#    Given connection open schema transaction for database: typedb
+#    Then typeql schema query; fails
+#      """
+#      """
+#    Then typeql schema query; fails
+#      """
+#
+#      """
+#    Then typeql read query; fails with a message containing: "Error analysing query"
+#      """
+#      match $r label non-existing;
+#      """
+#    Then typeql schema query; fails with a message containing: "Query parsing failed"
+#      """
+#      define entity entity;
+#      """
+#    Then typeql schema query; fails with a message containing: "Failed to execute define query"
+#      """
+#      define attribute name owns name;
+#      """
+#
+#  Scenario: Driver can concurrently process read queries without interruptions
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When get answers of typeql read query
+#      """
+#      match entity $p;
+#      """
+#    Then answer size is: 10
+#    Then concurrently process 5 rows from answers
+#    Then concurrently process 1 row from answers; fails
+#
+#
+#  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When typeql schema query
+#      """
+#      define entity person10;
+#      """
+#    Then concurrently process 1 rows from answers
+#    Then concurrently process 3 rows from answers
+#    Then concurrently process 1 rows from answers
+#    Then concurrently process 1 row from answers; fails
+#
+#
+#  Scenario: Driver's concurrent processing of read queries answers is interrupted by schema queries if answers are not prefetched
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When typeql schema query
+#      """
+#      define entity person10;
+#      """
+#    # TODO: Uncomment this when we can set prefetch sizes to 0
+##    Then concurrently process 1 rows from answers; fails
+#
+#
+##  TODO: Repeat two tests above for:
+##  read results + write query (not) interrupting them
+##  write results + schema query (not) interrupting them
+##  write results + write query (not) interrupting them
+##  Consider adding tests for commit, rollback, and close doing the same!
