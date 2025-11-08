@@ -546,6 +546,25 @@ Feature: Driver Query
       { "n": "Donald" }
       """
 
+
+  Scenario: Row queries can request the query structure to be included in response
+    Given set query option include_query_structure to: true
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match let $x = 1;
+    """
+    Then answers have query structure:
+    """
+    Pipeline([
+      Match([
+        Expression(let $x = 1, $x, [])
+      ])
+    ])
+    """
+    Given transaction closes
+
+
   ###########
   # QUERIES #
   ###########
