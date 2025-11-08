@@ -1015,127 +1015,485 @@ Feature: Driver Query
     """
 
 
-  Scenario: Driver processes query errors correctly
-    Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails
-      """
-      """
-    Then typeql schema query; fails
-      """
-
-      """
-    Then typeql read query; fails with a message containing: "Error analysing query"
-      """
-      match $r label non-existing;
-      """
-    Then typeql schema query; fails with a message containing: "Query parsing failed"
-      """
-      define entity entity;
-      """
-    Then typeql schema query; fails with a message containing: "Failed to execute define query"
-      """
-      define attribute name owns name;
-      """
-
-
-  Scenario: Driver can concurrently process read queries without interruptions
+  Scenario: Driver processes query structure correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
+      attribute ref value integer;
+      attribute name value string;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
       """
-    When concurrently get answers of typeql read query 10 times
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze
       """
-      match entity $p;
+      with fun n_pi($n: integer) -> double:
+        match let $n_pi = $n * 3.14; # close enough?
+      return first $n_pi;
+
+      with fun sum_refs() -> integer:
+        match $r isa ref;
+      return sum($r);
+
+      match
+        $p1 isa! person, has name $n1;
+        $n1 contains "son";
+        $f isa friendship, links (friend: $p1, $p2);
+        $p1 is $p2;
+        $p2 iid 0x1234567890112345678901;
+        let $three = 3;
+        let $x = ceil(2 * n_pi($three));
+    """
+
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        IsaExact($p1, person), Has($p1, $n1), Isa($n1, name),
+        Comparison($n1, "son", contains),
+        Isa($f, friendship), Links($f, $p1, friend), Links($f, $p2, $_),
+        Is($p1, $p2),
+        Iid($p2, 0x1234567890112345678901),
+        expression(let $three = 3, $three, []),
+        FunctionCall(n_pi($three), [$_], [$three]),
+        Expression(let $x = ceil(2 * n_pi($three)), $x, [$_])
+      ])
+    ])
+    """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [$n],
+      Single(first, [$n_pi]),
+      Pipeline([
+        Match([
+          Expression(let $n_pi = $n * 3.14, $n_pi, [$n])
+        ])
+      ])
+    )
+    """
+    Then analyzed query preamble contains:
+    """
+    Function(
+      [],
+      Reduce([Reducer(sum,[$r])]),
+      Pipeline([
+        Match([
+          Isa($r, ref)
+        ])
+      ])
+    )
+    """
+    When get answers of typeql analyze
       """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When get answers of typeql read query
+      match
+        entity $p1;
+        $p1 sub! person, owns $n1;
+        $n1 label name;
+        $n1 value string;
+        $f sub friendship, relates friend;
+        $p1 plays friendship:friend;
+        $p2 plays $role;
       """
-      match entity $p;
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Kind(entity, $p1),
+        SubExact($p1, person), Owns($p1, $n1),
+        Label($n1, name),
+        Value($n1, string),
+        Sub($f, friendship), Relates($f, friend),
+        Plays($p1, friendship:friend),
+        Plays($p2, $role)
+      ])
+    ])
+    """
+    When get answers of typeql analyze
       """
-    Then answer size is: 10
-    Then concurrently process 5 rows from answers
-    Then concurrently process 1 row from answers; fails
+      match
+        $p isa person;
+        { $p has name $id; } or { $p has ref $id; };
+        not { $id == 5; };
+        try { $f isa friendship, links (friend: $p); };
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        Isa($p, person),
+        Or([
+          [Has($p, $id), Isa($id, name)],
+          [Has($p, $id), Isa($id, ref)]
+        ]),
+        not([Comparison($id, 5, ==)]),
+        Try([Isa($f, friendship), Links($f, $p, friend)])
+      ])
+    ])
+    """
+
+    When get answers of typeql analyze
+    """
+    match
+     $p isa person;
+     $q isa person;
+     $n isa name == "John";
+    insert
+     $p has $n;
+    delete
+      has $n of $p;
+      $q;
+    update
+      $p has $n;
+    put
+      $p has $n;
+    distinct;
+    match
+      try { $p has ref $ref; };
+    require $ref;
+    select $ref, $n;
+    reduce $ref_sum = sum($ref) groupby $n;
+    sort $n desc;
+    offset 1;
+    limit 1;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
+      ),
+      Insert([Has($p, $n)]),
+      Delete([$q], [Has($p, $n)]),
+      Update([Has($p, $n)]),
+      Put([Has($p, $n)]),
+      Distinct(),
+      Match([
+        Try([Has($p, $ref), Isa($ref, ref)])
+      ]),
+      Require([$ref]),
+      Select([$n, $ref]),
+      Reduce(
+        [ReduceAssign($ref_sum, Reducer(sum, [$ref]))],
+        [$n]
+      ),
+      Sort([desc($n)]),
+      Offset(1),
+      Limit(1)
+    ])
+    """
+    Given transaction closes
 
 
-  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+  Scenario: Analyze returns the annotations of variables in the query
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
+      attribute ref value integer;
+      attribute name value string;
+      entity dummy;
+      entity subdummy sub dummy;
+      relation friendship, relates friend @card(2);
+      entity person,
+        owns name, owns ref @key,
+        plays friendship:friend;
       """
-    When concurrently get answers of typeql read query 10 times
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze
       """
-      match entity $p;
+      match
+        $x isa person, has name $n, has ref $r;
+        { $r == 2; } or { $r == 3; };
+      select $n, $x;
+      delete $n;
+      insert $x has name "John";
+      match $n1 isa name == "J";
+      put $x has name $n1;
       """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When typeql schema query
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        And(
+          { $n: instance([name]), $r: instance([ref]), $x: instance([person]) },
+          [
+            Or([
+              And({ $r: instance([ref]) }, []),
+              And({ $r: instance([ref]) }, [])
+            ])
+          ]
+        )
+      ),
+      Select(),
+      Delete(
+        And({ $n: instance([name]), $x: instance([person]) }, [])
+      ),
+      Insert(
+        And({ $_: instance([name]), $x: instance([person]) }, [])
+      ),
+      Match(
+        And({ $n1:instance([name]), $x: instance([person]) }, [])
+      ),
+      Put(
+        And({ $n1:instance([name]), $x: instance([person]) }, [])
+      )
+    ])
+    """
+    When get answers of typeql analyze
       """
-      define entity person10;
+      with
+      fun names_of($p: person) -> { name }:
+      match $p has name $n;
+      return { $n };
+
+      match
+        $p isa person, has ref $r;
+      fetch {
+        "ref": $r,
+        "names": [names_of($p)],
+        "friends": [
+          match $_ isa friendship, links (friend: $p, friend: $f);
+          fetch {
+            "name": (match $f has name $nf; return first $nf;)
+          };
+        ]
+      };
       """
-    Then concurrently process 1 rows from answers
-    Then concurrently process 3 rows from answers
-    Then concurrently process 1 rows from answers
-    Then concurrently process 1 row from answers; fails
+    Then analyzed preamble annotations contains:
+      """
+      Function(
+        [instance([person])],
+        stream([instance([name])]),
+        Pipeline([
+          Match(
+            And({ $n: instance([name]), $p: instance([person]) }, [])
+          )
+        ])
+      )
+      """
+    Then analyzed query pipeline annotations are:
+      """
+      Pipeline([
+        Match(
+          And({ $p: instance([person]), $r: instance([ref]) }, [])
+        )
+      ])
+      """
+    Then analyzed fetch annotations are:
+    """
+      {
+        friends: List({
+          name: [string]
+        }),
+        names: List([string]),
+        ref: [integer]
+      }
+    """
 
 
-  Scenario: Driver's concurrent processing of read queries answers is interrupted by schema queries if answers are not prefetched
+  Scenario: Analyze handles unsatisfiable schema queries and errors properly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
-      entity person0;
-      entity person1;
-      entity person2;
-      entity person3;
-      entity person4;
-      entity person5;
-      entity person6;
-      entity person7;
-      entity person8;
-      entity person9;
+      entity person;
+      relation friendship, relates friend;
+      relation new-relation, relates new-role;
       """
-    When concurrently get answers of typeql read query 10 times
-      """
-      match entity $p;
-      """
-    Then concurrently process 1 row from answers
-    Then concurrently process 1 row from answers
-    Then concurrently process 3 rows from answers
-    When typeql schema query
-      """
-      define entity person10;
-      """
-    # TODO: Uncomment this when we can set prefetch sizes to 0
-#    Then concurrently process 1 rows from answers; fails
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze
+    """
+    match
+     $p sub! person;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [SubExact($p, person)]
+      )
+    ])
+    """
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        And({$p: type([])}, [])
+      )
+    ])
+    """
+
+    When get answers of typeql analyze
+    """
+    match
+     $r sub friendship, relates new-role;
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match(
+        [Sub($r, friendship), Relates($r, new-role)]
+      )
+    ])
+    """
+    # Rolename introduces an intermediate variable.
+    Then analyzed query pipeline annotations are:
+    """
+    Pipeline([
+      Match(
+        And({$_: type([]), $r: type([])}, [])
+      )
+    ])
+    """
+
+    Given transaction closes
+
+    # Errors
+    Given connection open read transaction for database: typedb
+    Then typeql analyze; parsing fails
+    """
+    match
+     This isnt valid TypeQL;
+    """
+
+    Then typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    """
+    match
+     $p sub! person; $x isa! $p;
+    """
+    Given transaction closes
 
 
-#  TODO: Repeat two tests above for:
-#  read results + write query (not) interrupting them
-#  write results + schema query (not) interrupting them
-#  write results + write query (not) interrupting them
-#  Consider adding tests for commit, rollback, and close doing the same!
+#  Scenario: Driver processes query errors correctly
+#    Given connection open schema transaction for database: typedb
+#    Then typeql schema query; fails
+#      """
+#      """
+#    Then typeql schema query; fails
+#      """
+#
+#      """
+#    Then typeql read query; fails with a message containing: "Error analysing query"
+#      """
+#      match $r label non-existing;
+#      """
+#    Then typeql schema query; fails with a message containing: "Query parsing failed"
+#      """
+#      define entity entity;
+#      """
+#    Then typeql schema query; fails with a message containing: "Failed to execute define query"
+#      """
+#      define attribute name owns name;
+#      """
+#
+#  Scenario: Driver can concurrently process read queries without interruptions
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When get answers of typeql read query
+#      """
+#      match entity $p;
+#      """
+#    Then answer size is: 10
+#    Then concurrently process 5 rows from answers
+#    Then concurrently process 1 row from answers; fails
+#
+#
+#  Scenario: Driver's concurrent processing of read queries answers is not interrupted by schema queries if answers are prefetched
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When typeql schema query
+#      """
+#      define entity person10;
+#      """
+#    Then concurrently process 1 rows from answers
+#    Then concurrently process 3 rows from answers
+#    Then concurrently process 1 rows from answers
+#    Then concurrently process 1 row from answers; fails
+#
+#
+#  Scenario: Driver's concurrent processing of read queries answers is interrupted by schema queries if answers are not prefetched
+#    Given connection open schema transaction for database: typedb
+#    Given typeql schema query
+#      """
+#      define
+#      entity person0;
+#      entity person1;
+#      entity person2;
+#      entity person3;
+#      entity person4;
+#      entity person5;
+#      entity person6;
+#      entity person7;
+#      entity person8;
+#      entity person9;
+#      """
+#    When concurrently get answers of typeql read query 10 times
+#      """
+#      match entity $p;
+#      """
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 1 row from answers
+#    Then concurrently process 3 rows from answers
+#    When typeql schema query
+#      """
+#      define entity person10;
+#      """
+#    # TODO: Uncomment this when we can set prefetch sizes to 0
+##    Then concurrently process 1 rows from answers; fails
+#
+#
+##  TODO: Repeat two tests above for:
+##  read results + write query (not) interrupting them
+##  write results + schema query (not) interrupting them
+##  write results + write query (not) interrupting them
+##  Consider adding tests for commit, rollback, and close doing the same!

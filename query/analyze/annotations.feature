@@ -38,7 +38,7 @@ Feature: Analyzed query annotations
     """
     Pipeline([
       Match(
-        And({ $x: thing([person]) }, [])
+        And({ $x: instance([person]) }, [])
       )
     ])
     """
@@ -51,7 +51,7 @@ Feature: Analyzed query annotations
     """
     Pipeline([
       Match(
-        And({ $x: thing([dummy, subdummy]) }, [])
+        And({ $x: instance([dummy, subdummy]) }, [])
       )
     ])
     """
@@ -64,8 +64,8 @@ Feature: Analyzed query annotations
     """
     Pipeline([
       Match(And({
-        $n: thing([name,ref]),
-        $x: thing([person])
+        $n: instance([name,ref]),
+        $x: instance([person])
       }, []))
     ])
     """
@@ -79,8 +79,8 @@ Feature: Analyzed query annotations
     Pipeline([
       Match(
         And({
-          $f: thing([friendship]),
-          $p: thing([person]),
+          $f: instance([friendship]),
+          $p: instance([person]),
           $r: type([friendship:friend])
         }, [])
       )
@@ -96,7 +96,7 @@ Feature: Analyzed query annotations
     Pipeline([
       Match(And({
         $t: type([dummy, friendship, name, person, ref, subdummy]),
-        $x: thing([dummy, friendship, name, person, ref, subdummy])
+        $x: instance([dummy, friendship, name, person, ref, subdummy])
       }, []))
     ])
     """
@@ -200,13 +200,13 @@ Feature: Analyzed query annotations
     Pipeline([
       Match(
         And(
-          { $p: thing([person]), $x: thing([person, subdummy]) },
+          { $p: instance([person]), $x: instance([person, subdummy]) },
           [
             Or([
-              And({ $x: thing([person]) }, []),
-              And({ $x: thing([subdummy]) }, [])
+              And({ $x: instance([person]) }, []),
+              And({ $x: instance([subdummy]) }, [])
             ]),
-            Not(And({ $n: thing([name]), $x: thing([person]) }, []))
+            Not(And({ $n: instance([name]), $x: instance([person]) }, []))
           ]
         )
       )
@@ -232,20 +232,20 @@ Feature: Analyzed query annotations
     Pipeline([
       Match(
         And(
-          { $n: thing([name]), $r: thing([ref]), $x: thing([person]) },
+          { $n: instance([name]), $r: instance([ref]), $x: instance([person]) },
           [
             Or([
-              And({ $r: thing([ref]) }, []),
-              And({ $r: thing([ref]) }, [])
+              And({ $r: instance([ref]) }, []),
+              And({ $r: instance([ref]) }, [])
             ])
           ]
         )
       ),
       Select(),
-      Delete(And({ $n: thing([name]), $x: thing([person]) }, [])),
-      Insert(And({ $_: thing([name]), $x: thing([person]) }, [])),
-      Match(And({ $n1:thing([name]), $x: thing([person]) }, [])),
-      Put(And({ $n1:thing([name]), $x: thing([person]) }, []))
+      Delete(And({ $n: instance([name]), $x: instance([person]) }, [])),
+      Insert(And({ $_: instance([name]), $x: instance([person]) }, [])),
+      Match(And({ $n1:instance([name]), $x: instance([person]) }, [])),
+      Put(And({ $n1:instance([name]), $x: instance([person]) }, []))
     ])
     """
 
@@ -267,11 +267,11 @@ Feature: Analyzed query annotations
     Then analyzed preamble annotations contains:
       """
       Function(
-        [thing([person])],
-        stream([thing([name])]),
+        [instance([person])],
+        stream([instance([name])]),
         Pipeline([
           Match(
-            And({ $n: thing([name]), $p: thing([person]) }, [])
+            And({ $n: instance([name]), $p: instance([person]) }, [])
           )
         ])
       )
@@ -281,7 +281,7 @@ Feature: Analyzed query annotations
       """
       Pipeline([
         Match(
-          And({ $n: thing([name]), $p: thing([person]) }, [])
+          And({ $n: instance([name]), $p: instance([person]) }, [])
         )
       ])
       """
