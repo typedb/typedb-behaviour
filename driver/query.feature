@@ -1373,6 +1373,8 @@ Feature: Driver Query
     """
     Given transaction closes
 
+  Scenario: Driver can reconstruct constraints involved in answer
+    TODO
 
 #  Scenario: Driver processes query errors correctly
 #    Given connection open schema transaction for database: typedb
