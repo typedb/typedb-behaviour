@@ -1366,7 +1366,7 @@ Feature: Driver Query
      This isnt valid TypeQL;
     """
 
-    Then typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a constraint"
+    Then typeql analyze; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'x' & 'p' across a 'isa' constraint"
     """
     match
      $p sub! person; $x isa! $p;
