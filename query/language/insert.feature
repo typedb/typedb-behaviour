@@ -232,7 +232,7 @@ Feature: TypeQL Insert Query
       $x has ref 0;
       """
     When connection open write transaction for database: typedb
-    When typeql write query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    When typeql write query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables"
       """
       insert
       $x isa person, has ref $age;
