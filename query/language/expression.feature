@@ -526,6 +526,20 @@ Feature: TypeQL Query with Expressions
       | round    | decimal | -12.5dec | integer     | -12        |
 
 
+  Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match
+        let $a = <function>(<val>);
+      """
+    Examples:
+      | function | type    | val      |
+      | ceil     | integer | 0        |
+      | floor    | integer | 0        |
+      | round    | integer | 0        |
+
+
   Scenario: Test operators on variables
     Given connection open write transaction for database: typedb
     Given typeql write query
