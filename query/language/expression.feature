@@ -528,7 +528,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "Built-in function '<function>' cannot be applied to arguments of type '<type>'."
     """
       match
         let $a = <function>(<val>);
