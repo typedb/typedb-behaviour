@@ -470,6 +470,75 @@ Feature: TypeQL Query with Expressions
 #      | value:integer:2 | value:integer:-5 |
 
 
+  Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $in = <val>;
+        let $out = <function>($in);
+      select
+        $in, $out;
+      """
+    Then uniquely identify answer concepts
+      | in                 | out                              |
+      | value:<type>:<val> | value:<output-type>:<output-val> |
+    Examples:
+      | function | type    | val      | output-type | output-val |
+      | abs      | integer | 6        | integer     | 6          |
+      | abs      | integer | 0        | integer     | 0          |
+      | abs      | integer | -1       | integer     | 1          |
+      | abs      | double  | 6.4      | double      | 6.4        |
+      | abs      | double  | 0.0      | double      | 0.0        |
+      | abs      | double  | -1.3     | double      | 1.3        |
+      | ceil     | double  | 11.0     | integer     | 11         |
+      | ceil     | double  | 11.5     | integer     | 12         |
+      | ceil     | double  | 12.5     | integer     | 13         |
+      | ceil     | double  | -11.5    | integer     | -11        |
+      | ceil     | double  | -12.5    | integer     | -12        |
+      | floor    | double  | 11.0     | integer     | 11         |
+      | floor    | double  | 11.5     | integer     | 11         |
+      | floor    | double  | 12.5     | integer     | 12         |
+      | floor    | double  | -11.5    | integer     | -12        |
+      | floor    | double  | -12.5    | integer     | -13        |
+      | round    | double  | 11.0     | integer     | 11         |
+      | round    | double  | 11.5     | integer     | 12         |
+      | round    | double  | 12.5     | integer     | 12         |
+      | round    | double  | -11.5    | integer     | -12        |
+      | round    | double  | -12.5    | integer     | -12        |
+      | abs      | decimal | 6.4dec   | decimal     | 6.4dec     |
+      | abs      | decimal | 0.0dec   | decimal     | 0.0dec     |
+      | abs      | decimal | -1.3dec  | decimal     | 1.3dec     |
+      | ceil     | decimal | 11.0dec  | integer     | 11         |
+      | ceil     | decimal | 11.5dec  | integer     | 12         |
+      | ceil     | decimal | 12.5dec  | integer     | 13         |
+      | ceil     | decimal | -11.5dec | integer     | -11        |
+      | ceil     | decimal | -12.5dec | integer     | -12        |
+      | floor    | decimal | 11.0dec  | integer     | 11         |
+      | floor    | decimal | 11.5dec  | integer     | 11         |
+      | floor    | decimal | 12.5dec  | integer     | 12         |
+      | floor    | decimal | -11.5dec | integer     | -12        |
+      | floor    | decimal | -12.5dec | integer     | -13        |
+      | round    | decimal | 11.0dec  | integer     | 11         |
+      | round    | decimal | 11.5dec  | integer     | 12         |
+      | round    | decimal | 12.5dec  | integer     | 12         |
+      | round    | decimal | -11.5dec | integer     | -12        |
+      | round    | decimal | -12.5dec | integer     | -12        |
+
+
+  Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Built-in function '<function>' cannot be applied to arguments of type '<type>'."
+    """
+      match
+        let $a = <function>(<val>);
+      """
+    Examples:
+      | function | type    | val      |
+      | ceil     | integer | 0        |
+      | floor    | integer | 0        |
+      | round    | integer | 0        |
+
 
   Scenario: Test operators on variables
     Given connection open write transaction for database: typedb
