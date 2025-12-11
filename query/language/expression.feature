@@ -194,8 +194,8 @@ Feature: TypeQL Query with Expressions
       select $x, $y;
       """
     Then uniquely identify answer concepts
-      | x               | y                |
-      | attr:name:Lisa  | attr:age:16 |
+      | x              | y           |
+      | attr:name:Lisa | attr:age:16 |
 
 
   Scenario: Value variables and concept variables may not share name
@@ -270,8 +270,8 @@ Feature: TypeQL Query with Expressions
         let $minus-negative = $x - -10;
       """
     Then uniquely identify answer concepts
-      | x            | const              | plus-negative    | minus-negative    |
-      | attr:age:16  | value:integer:-10  | value:integer:6  | value:integer:26  |
+      | x           | const             | plus-negative   | minus-negative   |
+      | attr:age:16 | value:integer:-10 | value:integer:6 | value:integer:26 |
 
 
   Scenario: Test operator definitions - double double
@@ -287,8 +287,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                | b                | c                 | d                 |
-      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+      | a                | b                | c                 | d                |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - integer integer
@@ -305,8 +305,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a               | b               | c                | d                 |
-      | value:integer:9 | value:integer:3 | value:integer:18 | value:double:2.0  |
+      | a               | b               | c                | d                |
+      | value:integer:9 | value:integer:3 | value:integer:18 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - double integer
@@ -323,8 +323,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                | b                | c                 | d                 |
-      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+      | a                | b                | c                 | d                |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - integer double
@@ -341,8 +341,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                | b                | c                 | d                 |
-      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+      | a                | b                | c                 | d                |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - decimal decimal
@@ -358,8 +358,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+      | a                 | b                 | c                  | d                |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - integer decimal
@@ -376,8 +376,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+      | a                 | b                 | c                  | d                |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - decimal integer
@@ -393,8 +393,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                 |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0  |
+      | a                 | b                 | c                  | d                |
+      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - double decimal
@@ -410,8 +410,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                | b                | c                 | d                 |
-      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+      | a                | b                | c                 | d                |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
   Scenario: Test operator definitions - decimal double
@@ -427,8 +427,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                | b                | c                 | d                 |
-      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0  |
+      | a                | b                | c                 | d                |
+      | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
   Scenario: Test functions
@@ -456,19 +456,52 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | a               | b                |
       | value:integer:1 | value:double:0.5 |
-#    # TODO: 3.x: Re-enable once implemented
-#    When get answers of typeql read query
-#    """
-#      match
-#        let $a = max(2, -3);
-#        let $b = min(2, -3, -5);
-#      select
-#        $a, $b;
-#      """
-#    Then uniquely identify answer concepts
-#      | a               | b                |
-#      | value:integer:2 | value:integer:-5 |
 
+    When get answers of typeql read query
+      """
+      match
+        let $a = max(2, -3);
+        let $b = min(2, -3);
+        let $c = max(10.2dec, 13.5dec);
+        let $d = min(10.2dec, 13.5dec);
+        let $e = max(10.2, 13.5);
+        let $f = min(10.2, 13.5);
+      select
+        $a, $b, $c, $d, $e, $f;
+      """
+    Then uniquely identify answer concepts
+      | a               | b                | c                     | d                     | e                 | f                 |
+      | value:integer:2 | value:integer:-3 | value:decimal:13.5dec | value:decimal:10.2dec | value:double:13.5 | value:double:10.2 |
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '0' arguments."
+      """
+      match let $x = min();
+      """
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '1' arguments."
+      """
+      match let $x = min(10);
+      """
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '3' arguments."
+      """
+      match let $x = min(10, 12, 14);
+      """
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '0' arguments."
+      """
+      match let $x = max();
+      """
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '1' arguments."
+      """
+      match let $x = max(10);
+      """
+
+    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '3' arguments."
+      """
+      match let $x = max(10, 12, 14);
+      """
 
   Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
     Given connection open read transaction for database: typedb
@@ -569,8 +602,8 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             | hours-since-18       | bmi                    |
-      | attr:name:Steve  | value:double:17532.0 | value:double:23.4375   |
+      | name            | hours-since-18       | bmi                  |
+      | attr:name:Steve | value:double:17532.0 | value:double:23.4375 |
 
 
   Scenario: Test predicates between value variables and constants
@@ -597,7 +630,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
 
     When get answers of typeql read query
@@ -611,7 +644,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
       | attr:name:b25.0 |
 
@@ -641,7 +674,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
 
     When get answers of typeql read query
@@ -656,7 +689,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
       | attr:name:b25.0 |
 
@@ -686,7 +719,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
 
     When get answers of typeql read query
@@ -701,7 +734,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
       | attr:name:b25.0 |
 
@@ -731,7 +764,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
 
     When get answers of typeql read query
@@ -746,7 +779,7 @@ Feature: TypeQL Query with Expressions
       """
 
     Then uniquely identify answer concepts
-      | name             |
+      | name            |
       | attr:name:b22.2 |
       | attr:name:b25.0 |
 
@@ -781,8 +814,8 @@ Feature: TypeQL Query with Expressions
       let $b = 3 + 4 * 5;
     """
     Then uniquely identify answer concepts
-      | a                 | b                 |
-      | value:integer:23  | value:integer:23  |
+      | a                | b                |
+      | value:integer:23 | value:integer:23 |
     Given get answers of typeql read query
     """
     match
@@ -846,6 +879,6 @@ Feature: TypeQL Query with Expressions
       let $c = 2 ^ (2 ^ (2 ^ 2));
     """
     Then uniquely identify answer concepts
-      | a                  | b                  | c                  |
-      | value:double:65536 | value:double:256   | value:double:65536 |
+      | a                  | b                | c                  |
+      | value:double:65536 | value:double:256 | value:double:65536 |
 
