@@ -431,7 +431,7 @@ Feature: TypeQL Query with Expressions
       | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
-  Scenario: Test functions
+  Scenario: Test builtin math functions
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
@@ -456,7 +456,6 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | a               | b                |
       | value:integer:1 | value:double:0.5 |
-
     When get answers of typeql read query
       """
       match
@@ -473,37 +472,33 @@ Feature: TypeQL Query with Expressions
       | a               | b                | c                     | d                     | e                 | f                 |
       | value:integer:2 | value:integer:-3 | value:decimal:13.5dec | value:decimal:10.2dec | value:double:13.5 | value:double:10.2 |
 
-    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '0' arguments."
+  Scenario Outline: Test builtin math function <function> errors
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "<error>"
       """
-      match let $x = min();
+      match let $x = <function>(<args>);
       """
+    Examples:
+      | function | args       | error                                  |
+      | abs      |            | expects '1' arguments but received '0' |
+      | abs      | 10, 12     | expects '1' arguments but received '2' |
+      | ceil     |            | expects '1' arguments but received '0' |
+      | ceil     | 10, 12     | expects '1' arguments but received '2' |
+      | floor    |            | expects '1' arguments but received '0' |
+      | floor    | 10, 12     | expects '1' arguments but received '2' |
+      | round    |            | expects '1' arguments but received '0' |
+      | round    | 10, 12     | expects '1' arguments but received '2' |
+      | min      |            | expects '2' arguments but received '0' |
+      | min      | 10         | expects '2' arguments but received '1' |
+      | min      | 10, 11, 12 | expects '2' arguments but received '3' |
+      | max      |            | expects '2' arguments but received '0' |
+      | max      | 10         | expects '2' arguments but received '1' |
+      | max      | 10, 11, 12 | expects '2' arguments but received '3' |
+      | min      | 10, 12.2   | expects matching argument types        |
+      | max      | 10, 12.2   | expects matching argument types        |
 
-    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '1' arguments."
-      """
-      match let $x = min(10);
-      """
 
-    Then typeql read query; fails with a message containing: "Built-in expression function 'min' expects '2' arguments but received '3' arguments."
-      """
-      match let $x = min(10, 12, 14);
-      """
-
-    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '0' arguments."
-      """
-      match let $x = max();
-      """
-
-    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '1' arguments."
-      """
-      match let $x = max(10);
-      """
-
-    Then typeql read query; fails with a message containing: "Built-in expression function 'max' expects '2' arguments but received '3' arguments."
-      """
-      match let $x = max(10, 12, 14);
-      """
-
-  Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
+  Scenario Outline: test builtin unary function <function> when applied to <type> produces correct result
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
@@ -567,10 +562,10 @@ Feature: TypeQL Query with Expressions
         let $a = <function>(<val>);
       """
     Examples:
-      | function | type    | val      |
-      | ceil     | integer | 0        |
-      | floor    | integer | 0        |
-      | round    | integer | 0        |
+      | function | type    | val |
+      | ceil     | integer | 0   |
+      | floor    | integer | 0   |
+      | round    | integer | 0   |
 
 
   Scenario: Test operators on variables
