@@ -236,41 +236,41 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraint categories contain: @<annotation-category>
     Then attribute(name) get declared annotations contain: @<annotation>
     Examples:
-      | value-type  | annotation                              | annotation-category |
-      | integer     | abstract                                | abstract            |
-      | integer     | independent                             | independent         |
-      | integer     | values(1)                               | values              |
-      | integer     | range(1..3)                             | range               |
-      | string      | abstract                                | abstract            |
-      | string      | independent                             | independent         |
-      | string      | regex("\S+")                            | regex               |
-      | string      | values("1")                             | values              |
-      | string      | range("1".."3")                         | range               |
-      | boolean     | abstract                                | abstract            |
-      | boolean     | independent                             | independent         |
-      | boolean     | values(true)                            | values              |
-      | boolean     | range(false..true)                      | range               |
-      | double      | abstract                                | abstract            |
-      | double      | independent                             | independent         |
-      | double      | values(1.0)                             | values              |
-      | double      | range(1.0..3.0)                         | range               |
-      | decimal     | abstract                                | abstract            |
-      | decimal     | independent                             | independent         |
-      | decimal     | values(1.0dec)                          | values              |
-      | decimal     | range(1.0dec..3.0dec)                   | range               |
-      | date        | abstract                                | abstract            |
-      | date        | independent                             | independent         |
-      | datetime    | abstract                                | abstract            |
-      | datetime    | independent                             | independent         |
-      | datetime    | values(2024-05-06)                      | values              |
-      | datetime    | range(2024-05-06..2024-05-07)           | range               |
-      | datetime-tz | abstract                                | abstract            |
-      | datetime-tz | independent                             | independent         |
-      | datetime-tz | values(2024-05-06+0010)                 | values              |
-      | datetime-tz | range(2024-05-06+0100..2024-05-07+0100) | range               |
-      | duration    | abstract                                | abstract            |
-      | duration    | independent                             | independent         |
-      | duration    | values(P1Y)                             | values              |
+      | value-type  | annotation                                          | annotation-category |
+      | integer     | abstract                                            | abstract            |
+      | integer     | independent                                         | independent         |
+      | integer     | values(1)                                           | values              |
+      | integer     | range(1..3)                                         | range               |
+      | string      | abstract                                            | abstract            |
+      | string      | independent                                         | independent         |
+      | string      | regex("\S+")                                        | regex               |
+      | string      | values("1")                                         | values              |
+      | string      | range("1".."3")                                     | range               |
+      | boolean     | abstract                                            | abstract            |
+      | boolean     | independent                                         | independent         |
+      | boolean     | values(true)                                        | values              |
+      | boolean     | range(false..true)                                  | range               |
+      | double      | abstract                                            | abstract            |
+      | double      | independent                                         | independent         |
+      | double      | values(1.0)                                         | values              |
+      | double      | range(1.0..3.0)                                     | range               |
+      | decimal     | abstract                                            | abstract            |
+      | decimal     | independent                                         | independent         |
+      | decimal     | values(1.0dec)                                      | values              |
+      | decimal     | range(1.0dec..3.0dec)                               | range               |
+      | date        | abstract                                            | abstract            |
+      | date        | independent                                         | independent         |
+      | datetime    | abstract                                            | abstract            |
+      | datetime    | independent                                         | independent         |
+      | datetime    | values(2024-05-06)                                  | values              |
+      | datetime    | range(2024-05-06..2024-05-07)                       | range               |
+      | datetime-tz | abstract                                            | abstract            |
+      | datetime-tz | independent                                         | independent         |
+      | datetime-tz | values(2024-05-06T00:00+0010)                       | values              |
+      | datetime-tz | range(2024-05-06T00:00+0100..2024-05-07T00:00+0100) | range               |
+      | duration    | abstract                                            | abstract            |
+      | duration    | independent                                         | independent         |
+      | duration    | values(P1Y)                                         | values              |
 
   Scenario Outline: Attribute type can unset not set @<annotation>
     When create attribute type: name
@@ -1307,16 +1307,16 @@ Feature: Concept Attribute Type
     Then attribute(email) get constraint categories do not contain: @regex
     Then attribute(email) get declared annotations do not contain: @regex(<arg>)
     Examples:
-      | value-type | arg                 |
-      | string     | "value"             |
-      | string     | "123.456"           |
-      | string     | "\S+"               |
-      | string     | "\S+@\S+\.\S+"      |
-      | string     | "^starts"           |
-      | string     | "ends$"             |
-      | string     | "^starts and ends$" |
-      | string     | "^(not)$"           |
-      | string     | "2024-06-04+0100"   |
+      | value-type | arg                     |
+      | string     | "value"                 |
+      | string     | "123.456"               |
+      | string     | "\S+"                   |
+      | string     | "\S+@\S+\.\S+"          |
+      | string     | "^starts"               |
+      | string     | "ends$"                 |
+      | string     | "^starts and ends$"     |
+      | string     | "^(not)$"               |
+      | string     | "2024-06-04T00:00+0100" |
 
   Scenario: Attribute types with none value types can't have @regex annotation
     When create attribute type: email
@@ -1770,12 +1770,11 @@ Feature: Concept Attribute Type
       | double      | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
       | double      | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
       | decimal     | 0.0dec                                                                                                                                                                                                                                                                                                                                                                                               |
-      | decimal     | 0dec                                                                                                                                                                                                                                                                                                                                                                                                 |
       | decimal     | 1.1dec                                                                                                                                                                                                                                                                                                                                                                                               |
       | decimal     | -2.45dec                                                                                                                                                                                                                                                                                                                                                                                             |
       | decimal     | -3.444dec, 3.445dec                                                                                                                                                                                                                                                                                                                                                                                  |
       | decimal     | 0.00001dec, 0.0001dec, 0.001dec, 0.01dec                                                                                                                                                                                                                                                                                                                                                             |
-      | decimal     | -333.553dec, 33895dec, 98984.4555dec, 902394.44dec, 1000000000dec, 0.00001dec, 0.3dec, 3.14159265358979323dec                                                                                                                                                                                                                                                                                        |
+      | decimal     | -333.553dec, 33895.0dec, 98984.4555dec, 902394.44dec, 1000000000.0dec, 0.00001dec, 0.3dec, 3.14159265358979323dec                                                                                                                                                                                                                                                                                    |
       | date        | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 1970-01-01                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 1970-01-01, 0001-01-01, 2024-06-04, 2024-02-02                                                                                                                                                                                                                                                                                                                                                       |
@@ -1786,15 +1785,15 @@ Feature: Concept Attribute Type
       | datetime    | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
       | datetime    | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
       | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                           |
-      | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
-      | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
+      | datetime-tz | 2024-06-04T00:00+0000                                                                                                                                                                                                                                                                                                                                                                                |
+      | datetime-tz | 2024-06-04T00:00 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                      |
+      | datetime-tz | 2024-06-04T00:00+0100                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime-tz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime-tz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
       | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
       | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
       | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                                                                         |
+      | datetime-tz | 2024-06-04T00:00:00+0001, 2024-06-04T00:00:00 Asia/Kathmandu, 2024-06-04T00:00:00+0002, 2024-06-04T00:00:00+0010, 2024-06-04T00:00:00+0100, 2024-06-04T00:00:00-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                   |
       | duration    | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -1803,7 +1802,7 @@ Feature: Concept Attribute Type
       | duration    | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
       | duration    | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
-      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
+      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1.01S, P1Y1M1DT1H1M0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                          |
 
   Scenario Outline: Attribute type @values annotation correctly validates nanoseconds
     When create attribute type: today
@@ -1873,16 +1872,16 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints contain: @values(<init-args>)
     Then attribute(name) get constraints do not contain: @values(<reset-args>)
     Examples:
-      | value-type  | init-args        | reset-args      |
-      | integer     | 1, 5             | 7, 9            |
-      | double      | 1.1, 1.5         | -8.0, 88.3      |
-      | decimal     | -8.0dec, 88.3dec | 1.1dec, 1.5dec  |
-      | string      | "s"              | "not s"         |
-      | boolean     | true             | false           |
-      | date        | 2024-05-05       | 2024-06-05      |
-      | datetime    | 2024-05-05       | 2024-06-05      |
-      | datetime-tz | 2024-05-05+0100  | 2024-05-05+0010 |
-      | duration    | P1Y              | P2Y             |
+      | value-type  | init-args                | reset-args               |
+      | integer     | 1, 5                     | 7, 9                     |
+      | double      | 1.1, 1.5                 | -8.0, 88.3               |
+      | decimal     | -8.0dec, 88.3dec         | 1.1dec, 1.5dec           |
+      | string      | "s"                      | "not s"                  |
+      | boolean     | true                     | false                    |
+      | date        | 2024-05-05               | 2024-06-05               |
+      | datetime    | 2024-05-05               | 2024-06-05               |
+      | datetime-tz | 2024-05-05T00:00:00+0100 | 2024-05-05T00:00:00+0010 |
+      | duration    | P1Y                      | P2Y                      |
 
   Scenario Outline: Attribute type cannot have @values annotation for <value-type> value type with duplicated args
     When create attribute type: name
@@ -1986,16 +1985,16 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations contain: @values(<args-specialise>)
     Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-specialise                            |
-      | integer     | 1, 10, 20, 30                                                                | 10, 30                                     |
-      | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
-      | decimal     | 0.0dec, 1.0dec                                                               | 0.0dec                                     |
-      | string      | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
-      | boolean     | true, false                                                                  | true                                       |
-      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
-      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
+      | value-type  | args                                                                                                 | args-specialise                                        |
+      | integer     | 1, 10, 20, 30                                                                                        | 10, 30                                                 |
+      | double      | 1.0, 2.0, 3.0, 4.5                                                                                   | 2.0                                                    |
+      | decimal     | 0.0dec, 1.0dec                                                                                       | 0.0dec                                                 |
+      | string      | "john", "John", "Johnny", "johnny"                                                                   | "John", "Johnny"                                       |
+      | boolean     | true, false                                                                                          | true                                                   |
+      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2024-06-04, 2024-06-06                                 |
+      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2024-06-04, 2024-06-06                                 |
+      | datetime-tz | 2024-06-04T00:00+0010, 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010, 2024-06-05T00:00+0100 | 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010 |
+      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                                          | P6M, P1Y3M, P1Y4M, P1Y6M                               |
 
   Scenario Outline: Inherited @values annotation on attribute types for <value-type> value type cannot be specialised by the @values of not a subset of arguments
     When create attribute type: name
@@ -2020,16 +2019,16 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get constraints contain: @values(<args>)
     Then attribute(specialised-name) get declared annotations do not contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-specialise          |
-      | integer     | 1, 10, 20, 30                                                                | 10, 31                   |
-      | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
-      | decimal     | 0.0dec, 1.0dec                                                               | 0.01dec                  |
-      | string      | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
-      | boolean     | false                                                                        | true                     |
-      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
-      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
+      | value-type  | args                                                                                                 | args-specialise                |
+      | integer     | 1, 10, 20, 30                                                                                        | 10, 31                         |
+      | double      | 1.0, 2.0, 3.0, 4.5                                                                                   | 2.001                          |
+      | decimal     | 0.0dec, 1.0dec                                                                                       | 0.01dec                        |
+      | string      | "john", "John", "Johnny", "johnny"                                                                   | "Jonathan"                     |
+      | boolean     | false                                                                                                | true                           |
+      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2020-06-04, 2020-06-06         |
+      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2020-06-04, 2020-06-06         |
+      | datetime-tz | 2024-06-04T00:00+0010, 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010, 2024-06-05T00:00+0100 | 2024-06-04T00:00 Europe/London |
+      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                                          | P3M, P1Y3M, P1Y4M, P1Y6M       |
 
   Scenario: Attribute type can change value type and @values through @values resetting
     When create attribute type: name
@@ -2153,10 +2152,9 @@ Feature: Concept Attribute Type
       | date        | 2024-06-04                        | 2025-01-01                                            |
       | date        | 1970-01-01                        | 9999-12-12                                            |
       | datetime    | 2024-06-04T16:35:02.10            | 2024-06-04T16:35:02.11                                |
-      | datetime-tz | 2024-06-04+0000                   | 2024-06-05+0000                                       |
-      | datetime-tz | 2024-06-04+0100                   | 2048-06-04+0100                                       |
+      | datetime-tz | 2024-06-04T00:00+0000             | 2024-06-05T00:00+0000                                 |
+      | datetime-tz | 2024-06-04T00:00+0100             | 2048-06-04T00:00+0100                                 |
       | datetime-tz | 2024-06-04T16:35:02.103+0100      | 2024-06-04T16:35:02.104+0100                          |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu         | 2024-06-05 Asia/Kathmandu                             |
       | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin | 2024-05-05T00:00:00 Europe/London                     |
 
   Scenario Outline: Attribute types with <value-type> value type cannot set @range annotation
@@ -2239,15 +2237,15 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints is empty
     Then attribute(name) get declared annotations is empty
     Examples:
-      | value-type  | arg0                     |
-      | integer     | 1                        |
-      | double      | 1.0                      |
-      | decimal     | 1.0dec                   |
-      | string      | "123"                    |
-      | boolean     | false                    |
-      | date        | 2030-06-04               |
-      | datetime    | 2030-06-04               |
-      | datetime-tz | 2030-06-04 Europe/London |
+      | value-type  | arg0                           |
+      | integer     | 1                              |
+      | double      | 1.0                            |
+      | decimal     | 1.0dec                         |
+      | string      | "123"                          |
+      | boolean     | false                          |
+      | date        | 2030-06-04                     |
+      | datetime    | 2030-06-04                     |
+      | datetime-tz | 2030-06-04T00:00 Europe/London |
 
   Scenario Outline: Attribute type with <value-type> value type can reset @range annotation
     When create attribute type: name
@@ -2279,14 +2277,14 @@ Feature: Concept Attribute Type
     Then attribute(name) get constraints do not contain: @range(<reset-args>)
     Then attribute(name) get declared annotations do not contain: @range(<reset-args>)
     Examples:
-      | value-type  | init-args                        | reset-args                       |
-      | integer     | 1..5                             | 7..9                             |
-      | double      | 1.1..1.5                         | -8.0..88.3                       |
-      | decimal     | -8.0dec..88.3dec                 | 1.1dec..1.5dec                   |
-      | string      | "S".."s"                         | "not s".."xxxxxxxxx"             |
-      | date        | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
-      | datetime    | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
-      | datetime-tz | 2024-05-05+0100..2024-05-06+0100 | 2024-05-05+0100..2024-05-07+0100 |
+      | value-type  | init-args                                    | reset-args                                   |
+      | integer     | 1..5                                         | 7..9                                         |
+      | double      | 1.1..1.5                                     | -8.0..88.3                                   |
+      | decimal     | -8.0dec..88.3dec                             | 1.1dec..1.5dec                               |
+      | string      | "S".."s"                                     | "not s".."xxxxxxxxx"                         |
+      | date        | 2024-05-05..2024-05-06                       | 2024-06-05..2024-06-06                       |
+      | datetime    | 2024-05-05..2024-05-06                       | 2024-06-05..2024-06-06                       |
+      | datetime-tz | 2024-05-05T00:00+0100..2024-05-06T00:00+0100 | 2024-05-05T00:00+0100..2024-05-07T00:00+0100 |
 
   Scenario: Attribute type cannot reset inherited @range annotation
     When create attribute type: name
@@ -2372,14 +2370,14 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get declared annotations contain: @range(<args-specialise>)
     Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-specialise                           |
-      | integer     | 1..10                            | 1..5                                      |
-      | double      | 1.0..10.0                        | 2.0..10.0                                 |
-      | decimal     | 0.0dec..1.0dec                   | 0.0dec..0.999999dec                       |
-      | string      | "A".."Z"                         | "J".."Z"                                  |
-      | date        | 2024-06-04..2024-06-06           | 2024-06-04..2024-06-05                    |
-      | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
+      | value-type  | args                                         | args-specialise                                 |
+      | integer     | 1..10                                        | 1..5                                            |
+      | double      | 1.0..10.0                                    | 2.0..10.0                                       |
+      | decimal     | 0.0dec..1.0dec                               | 0.0dec..0.999999dec                             |
+      | string      | "A".."Z"                                     | "J".."Z"                                        |
+      | date        | 2024-06-04..2024-06-06                       | 2024-06-04..2024-06-05                          |
+      | datetime    | 2024-06-04..2024-06-05                       | 2024-06-04..2024-06-04T12:00:00                 |
+      | datetime-tz | 2024-06-04T00:00+0010..2024-06-05T00:00+0010 | 2024-06-04T00:00+0010..2024-06-04T12:00:00+0010 |
 
   Scenario Outline: Inherited @range annotation on attribute types for <value-type> value type cannot be specialised by the @range of not a subset of arguments
     When create attribute type: name
@@ -2404,14 +2402,14 @@ Feature: Concept Attribute Type
     Then attribute(specialised-name) get constraints contain: @range(<args>)
     Then attribute(specialised-name) get declared annotations do not contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-specialise                           |
-      | integer     | 1..10                            | -1..5                                     |
-      | double      | 1.0..10.0                        | 0.0..150.0                                |
-      | decimal     | 0.0dec..1.0dec                   | -0.0001dec..0.999999dec                   |
-      | string      | "A".."Z"                         | "A".."z"                                  |
-      | date        | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04                    |
-      | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
+      | value-type  | args                                         | args-specialise                                 |
+      | integer     | 1..10                                        | -1..5                                           |
+      | double      | 1.0..10.0                                    | 0.0..150.0                                      |
+      | decimal     | 0.0dec..1.0dec                               | -0.0001dec..0.999999dec                         |
+      | string      | "A".."Z"                                     | "A".."z"                                        |
+      | date        | 2024-06-04..2024-06-05                       | 2023-06-04..2024-06-04                          |
+      | datetime    | 2024-06-04..2024-06-05                       | 2023-06-04..2024-06-04T12:00:00                 |
+      | datetime-tz | 2024-06-04T00:00+0010..2024-06-05T00:00+0010 | 2024-06-04T00:00+0010..2024-06-05T01:00:00+0010 |
 
   Scenario: Attribute type can change value type and @range through @range resetting
     When create attribute type: name

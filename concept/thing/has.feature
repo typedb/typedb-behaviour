@@ -290,35 +290,35 @@ Feature: Concept Ownership
     Then entity $p get has(limited-value) contain: $suc
     Then entity $p get has(limited-value) do not contain: $fail
     Examples:
-      | value-type  | values-args                               | fail-val                      | suc-val                       |
-      | integer     | 1, 5, 4                                   | 2                             | 1                             |
-      | integer     | 1                                         | 2                             | 1                             |
-      | double      | 1.1, 1.5, 0.01                            | 0.1                           | 0.01                          |
-      | double      | 0.01                                      | 0.1                           | 0.01                          |
-      | double      | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
-      | double      | 0.01, 0.0001                              | 1.0                           | 0.01                          |
-      | decimal     | -8.0, 88.3, 0.001                         | 0.01                          | 0.001                         |
-      | decimal     | 0.001                                     | 0.01                          | 0.001                         |
-      | decimal     | 0.01                                      | 0.1                           | 0.01                          |
-      | decimal     | 0.01, 0.0001                              | 0.001                         | 0.0001                        |
-      | decimal     | 0.01, 0.0001                              | 1.0                           | 0.01                          |
-      | string      | "s", "sss", "S"                           | "ss"                          | "sss"                         |
-      | string      | "s", "sss"                                | "S"                           | "s"                           |
-      | string      | "sss"                                     | "ss"                          | "sss"                         |
-      | boolean     | true                                      | false                         | true                          |
-      | boolean     | false                                     | true                          | false                         |
-      | date        | 2024-05-05, 2024-05-07                    | 2024-05-06                    | 2024-05-05                    |
-      | date        | 2024-05-05                                | 2024-05-06                    | 2024-05-05                    |
-      | datetime    | 2024-05-05T16:01:59, 2024-05-05T16:01:58  | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
-      | datetime    | 2024-05-05T16:01:59                       | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
-      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.12345678  | 2024-05-05T16:01:59.123456789 |
-      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.123456788 | 2024-05-05T16:01:59.123456789 |
-      | datetime    | 2024-05-05T16:01:59.123456789             | 2024-05-05T16:01:57.12345679  | 2024-05-05T16:01:59.123456789 |
-      | datetime-tz | 2024-05-05+0100, 2024-05-05T16:31:59+0100 | 2024-05-05+0000               | 2024-05-05T16:31:59+0100      |
-      | datetime-tz | 2024-05-05T16:31:59+0100                  | 2024-05-05+0000               | 2024-05-05T16:31:59+0100      |
-      | duration    | P1Y, P1Y5M8H                              | P2Y                           | P1Y                           |
-      | duration    | P1Y                                       | P2Y                           | P1Y                           |
-      | duration    | P1Y, P1Y1M1DT1H1M0.000001S                | P1Y1M1DT1H1M0.00001S          | P1Y1M1DT1H1M0.000001S         |
+      | value-type  | values-args                                     | fail-val                      | suc-val                       |
+      | integer     | 1, 5, 4                                         | 2                             | 1                             |
+      | integer     | 1                                               | 2                             | 1                             |
+      | double      | 1.1, 1.5, 0.01                                  | 0.1                           | 0.01                          |
+      | double      | 0.01                                            | 0.1                           | 0.01                          |
+      | double      | 0.01, 0.0001                                    | 0.001                         | 0.0001                        |
+      | double      | 0.01, 0.0001                                    | 1.0                           | 0.01                          |
+      | decimal     | -8.0dec, 88.3dec, 0.001dec                      | 0.01dec                       | 0.001dec                      |
+      | decimal     | 0.001dec                                        | 0.01dec                       | 0.001dec                      |
+      | decimal     | 0.01dec                                         | 0.1dec                        | 0.01dec                       |
+      | decimal     | 0.01dec, 0.0001dec                              | 0.001dec                      | 0.0001dec                     |
+      | decimal     | 0.01dec, 0.0001dec                              | 1.0dec                        | 0.01dec                       |
+      | string      | "s", "sss", "S"                                 | "ss"                          | "sss"                         |
+      | string      | "s", "sss"                                      | "S"                           | "s"                           |
+      | string      | "sss"                                           | "ss"                          | "sss"                         |
+      | boolean     | true                                            | false                         | true                          |
+      | boolean     | false                                           | true                          | false                         |
+      | date        | 2024-05-05, 2024-05-07                          | 2024-05-06                    | 2024-05-05                    |
+      | date        | 2024-05-05                                      | 2024-05-06                    | 2024-05-05                    |
+      | datetime    | 2024-05-05T16:01:59, 2024-05-05T16:01:58        | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
+      | datetime    | 2024-05-05T16:01:59                             | 2024-05-05T16:01:57           | 2024-05-05T16:01:59           |
+      | datetime    | 2024-05-05T16:01:59.123456789                   | 2024-05-05T16:01:57.12345678  | 2024-05-05T16:01:59.123456789 |
+      | datetime    | 2024-05-05T16:01:59.123456789                   | 2024-05-05T16:01:57.123456788 | 2024-05-05T16:01:59.123456789 |
+      | datetime    | 2024-05-05T16:01:59.123456789                   | 2024-05-05T16:01:57.12345679  | 2024-05-05T16:01:59.123456789 |
+      | datetime-tz | 2024-05-05T00:00+0100, 2024-05-05T16:31:59+0100 | 2024-05-05T00:00+0000         | 2024-05-05T16:31:59+0100      |
+      | datetime-tz | 2024-05-05T16:31:59+0100                        | 2024-05-05T00:00+0000         | 2024-05-05T16:31:59+0100      |
+      | duration    | P1Y, P1Y5MT8H                                   | P2Y                           | P1Y                           |
+      | duration    | P1Y                                             | P2Y                           | P1Y                           |
+      | duration    | P1Y, P1Y1M1DT1H1M0.000001S                      | P1Y1M1DT1H1M0.00001S          | P1Y1M1DT1H1M0.000001S         |
 
   Scenario Outline: Cannot create instances of attribute type of value type <value-type> with values not matching @range(<range-args>) annotation
     Given transaction closes
@@ -354,11 +354,11 @@ Feature: Concept Ownership
       | double      | -0.01..0.1                                                           | -0.011                            | 0.01                              |
       | double      | -0.01..0.1                                                           | 0.11                              | -0.01                             |
       | double      | 19.337..339.0                                                        | 19.336                            | 78.838482823782                   |
-      | decimal     | 0.01..0.1                                                            | 0.001                             | 0.01                              |
-      | decimal     | 0.01..0.1                                                            | 0.11                              | 0.0111111                         |
-      | decimal     | -0.01..0.1                                                           | -0.011                            | 0.01                              |
-      | decimal     | -0.01..0.1                                                           | 0.11                              | -0.01                             |
-      | decimal     | 19.337..339.0                                                        | 19.336                            | 78.838482823782                   |
+      | decimal     | 0.01dec..0.1dec                                                      | 0.001dec                          | 0.01dec                           |
+      | decimal     | 0.01dec..0.1dec                                                      | 0.11dec                           | 0.0111111dec                      |
+      | decimal     | -0.01dec..0.1dec                                                     | -0.011dec                         | 0.01dec                           |
+      | decimal     | -0.01dec..0.1dec                                                     | 0.11dec                           | -0.01dec                          |
+      | decimal     | 19.337dec..339.0dec                                                  | 19.336dec                         | 78.838482823782dec                |
       | string      | "1".."3"                                                             | "0"                               | "1"                               |
       | string      | "1".."3"                                                             | "#"                               | "2"                               |
       | string      | "1".."3"                                                             | "4"                               | "3"                               |
