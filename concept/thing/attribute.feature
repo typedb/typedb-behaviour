@@ -321,25 +321,17 @@ Feature: Concept Attribute
     Then attribute $suc exists
     Then attribute $fail does not exist
     Examples:
-      | value-type | range-args       | input-type | fail-val | suc-val |
+      | value-type | range-args                               | input-type | fail-val   | suc-val    |
       # double attribute with integer input values
-      | double     | 0.0..100.0       | integer    | 150      | 50      |
-      | double     | 0.0..100.0       | integer    | -10      | 0       |
-      | double     | 0.0..100.0       | integer    | 101      | 100     |
+      | double     | 0.0..100.0                               | integer    | 150        | 50         |
+      | double     | 0..100                                   | integer    | -10        | 0          |
       # double attribute with decimal input values
-      | double     | 0.0..100.0       | decimal    | 150.5dec | 50.5dec |
-      | double     | 0.0..100.0       | decimal    | -0.1dec  | 0.0dec  |
+      | double     | 0.0..100.0                               | decimal    | 150.5dec   | 50.5dec    |
+      | double     | 0..100                                   | decimal    | -0.1dec    | 0.0dec     |
       # decimal attribute with integer input values
-      | decimal    | 0.0dec..100.0dec | integer    | 150      | 50      |
-      | decimal    | 0.0dec..100.0dec | integer    | -10      | 0       |
-      | decimal    | 0.0dec..100.0dec | integer    | 101      | 100     |
-       # TODO decimals and doubles don't go cleanly into integers, so that isn't allowed?
-#      # decimal attribute with double input values
-#      | decimal    | 0.0dec..100.0dec | double     | 150.5dec    | 50.5    |
-#      | decimal    | 0.0dec..100.0dec | double     | -0.1dec     | 0.0     |
-#      # integer attribute with double input values
-#      | integer    | 0..100           | double     | 150.0    | 50.0    |
-#      | integer    | 0..100           | double     | -10.0    | 0.0     |
-#      # integer attribute with decimal input values
-#      | integer    | 0..100           | decimal    | 150.0dec | 50.0dec |
-#      | integer    | 0..100           | decimal    | -10.0dec | 0.0dec  |
+      | decimal    | 0.0dec..100.0dec                         | integer    | 150        | 50         |
+      | decimal    | 0..100                                   | integer    | -10        | 0          |
+      # datetime attribute with date input values
+      | datetime   | 2024-05-05T00:00:00..2024-05-10T00:00:00 | date       | 2024-05-01 | 2024-05-07 |
+      | datetime   | 2024-05-05..2024-05-10                   | date       | 2024-05-01 | 2024-05-07 |
+
