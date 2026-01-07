@@ -2671,10 +2671,12 @@ Feature: Concept Owns Annotations
       | string      | "AA"                              | "AAA"                                                 |
       | string      | "short string"                    | "very-very-very-very-very-very-very-very long string" |
       | boolean     | false                             | true                                                  |
+      | double      | 0.0                               | 1                                                     |
       | double      | 0.0                               | 0.0001                                                |
       | double      | 0.01                              | 1.0                                                   |
       | double      | 123.123                           | 123123123123.122                                      |
       | double      | -2.45                             | 2.45                                                  |
+      | decimal     | 0.0dec                            | 1                                                     |
       | decimal     | 0.0dec                            | 0.0001dec                                             |
       | decimal     | 0.01dec                           | 1.0dec                                                |
       | decimal     | 123.123dec                        | 123123123123.122dec                                   |
