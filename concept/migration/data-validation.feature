@@ -185,16 +185,16 @@ Feature: Data validation
       | name |
     When transaction commits
     Examples:
-      | value-type  | value           |
-      | integer     | 1               |
-      | double      | 1.0             |
-      | decimal     | 1.0dec          |
-      | string      | "alice"         |
-      | boolean     | true            |
-      | date        | 2024-05-04      |
-      | datetime    | 2024-05-04      |
-      | datetime-tz | 2024-05-04+0010 |
-      | duration    | P1Y             |
+      | value-type  | value                    |
+      | integer     | 1                        |
+      | double      | 1.0                      |
+      | decimal     | 1.0dec                   |
+      | string      | "alice"                  |
+      | boolean     | true                     |
+      | date        | 2024-05-04               |
+      | datetime    | 2024-05-04T00:00:00      |
+      | datetime-tz | 2024-05-04T00:00:00+0010 |
+      | duration    | P1Y                      |
 
 
   Scenario Outline: Ordered owns that have instances of type <value-type> cannot be unset
@@ -222,16 +222,16 @@ Feature: Data validation
       | name |
     When transaction commits
     Examples:
-      | value-type  | value           |
-      | integer     | 1               |
-      | double      | 1.0             |
-      | decimal     | 1.0dec          |
-      | string      | "alice"         |
-      | boolean     | true            |
-      | date        | 2024-05-04      |
-      | datetime    | 2024-05-04      |
-      | datetime-tz | 2024-05-04+0010 |
-      | duration    | P1Y             |
+      | value-type  | value                    |
+      | integer     | 1                        |
+      | double      | 1.0                      |
+      | decimal     | 1.0dec                   |
+      | string      | "alice"                  |
+      | boolean     | true                     |
+      | date        | 2024-05-04               |
+      | datetime    | 2024-05-04T00:00:00      |
+      | datetime-tz | 2024-05-04T00:00:00+0010 |
+      | duration    | P1Y                      |
 
 
   Scenario: Plays that have instances cannot be unset

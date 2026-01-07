@@ -2099,13 +2099,12 @@ Feature: Concept Owns Annotations
       | double      | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
       | double      | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
       | double      | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
-      | decimal     | 0.0                                                                                                                                                                                                                                                                                                                                                                                                  |
-      | decimal     | 0                                                                                                                                                                                                                                                                                                                                                                                                    |
-      | decimal     | 1.1                                                                                                                                                                                                                                                                                                                                                                                                  |
-      | decimal     | -2.45                                                                                                                                                                                                                                                                                                                                                                                                |
-      | decimal     | -3.444, 3.445                                                                                                                                                                                                                                                                                                                                                                                        |
-      | decimal     | 0.00001, 0.0001, 0.001, 0.01                                                                                                                                                                                                                                                                                                                                                                         |
-      | decimal     | -333.553, 33895, 98984.4555, 902394.44, 1000000000, 0.00001, 0.3, 3.14159265358979323                                                                                                                                                                                                                                                                                                                |
+      | decimal     | 0.0dec                                                                                                                                                                                                                                                                                                                                                                                               |
+      | decimal     | 1.1dec                                                                                                                                                                                                                                                                                                                                                                                               |
+      | decimal     | -2.45dec                                                                                                                                                                                                                                                                                                                                                                                             |
+      | decimal     | -3.444dec, 3.445dec                                                                                                                                                                                                                                                                                                                                                                                  |
+      | decimal     | 0.00001dec, 0.0001dec, 0.001dec, 0.01dec                                                                                                                                                                                                                                                                                                                                                             |
+      | decimal     | -333.553dec, 33895, 98984.4555dec, 902394.44dec, 1000000000.0dec, 0.00001dec, 0.3dec, 3.14159265358979323dec                                                                                                                                                                                                                                                                                         |
       | date        | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
       | date        | 2024-06-04, 2024-06-09, 2020-07-10                                                                                                                                                                                                                                                                                                                                                                   |
       | datetime    | 2024-06-04                                                                                                                                                                                                                                                                                                                                                                                           |
@@ -2115,15 +2114,13 @@ Feature: Concept Owns Annotations
       | datetime    | 2024-06-04T16:35:02.10                                                                                                                                                                                                                                                                                                                                                                               |
       | datetime    | 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                                                                                                                              |
       | datetime    | 2024-06-04, 2024-06-04T16:35, 2024-06-04T16:35:02, 2024-06-04T16:35:02.01, 2024-06-04T16:35:02.10, 2024-06-04T16:35:02.103                                                                                                                                                                                                                                                                           |
-      | datetime-tz | 2024-06-04+0000                                                                                                                                                                                                                                                                                                                                                                                      |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                            |
-      | datetime-tz | 2024-06-04+0100                                                                                                                                                                                                                                                                                                                                                                                      |
+      | datetime-tz | 2024-06-04T00:00:00 Asia/Kathmandu                                                                                                                                                                                                                                                                                                                                                                   |
       | datetime-tz | 2024-06-04T16:35+0100                                                                                                                                                                                                                                                                                                                                                                                |
       | datetime-tz | 2024-06-04T16:35:02+0100                                                                                                                                                                                                                                                                                                                                                                             |
       | datetime-tz | 2024-06-04T16:35:02.1+0100                                                                                                                                                                                                                                                                                                                                                                           |
       | datetime-tz | 2024-06-04T16:35:02.10+0100                                                                                                                                                                                                                                                                                                                                                                          |
       | datetime-tz | 2024-06-04T16:35:02.103+0100                                                                                                                                                                                                                                                                                                                                                                         |
-      | datetime-tz | 2024-06-04+0001, 2024-06-04 Asia/Kathmandu, 2024-06-04+0002, 2024-06-04+0010, 2024-06-04+0100, 2024-06-04-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                                                                         |
+      | datetime-tz | 2024-06-04T00:00+0001, 2024-06-04T00:00 Asia/Kathmandu, 2024-06-04T00:00+0002, 2024-06-04T00:00+0010, 2024-06-04T00:00+0100, 2024-06-04T00:00-0100, 2024-06-04T16:35-0100, 2024-06-04T16:35:02+0200, 2024-06-04T16:35:02.10+1000                                                                                                                                                                     |
       | duration    | P1Y                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P2M                                                                                                                                                                                                                                                                                                                                                                                                  |
       | duration    | P1Y2M                                                                                                                                                                                                                                                                                                                                                                                                |
@@ -2132,7 +2129,7 @@ Feature: Concept Owns Annotations
       | duration    | P1Y2M3DT4H5M                                                                                                                                                                                                                                                                                                                                                                                         |
       | duration    | P1Y2M3DT4H5M6S                                                                                                                                                                                                                                                                                                                                                                                       |
       | duration    | P1Y2M3DT4H5M6.789S                                                                                                                                                                                                                                                                                                                                                                                   |
-      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1S0.1S, P1Y1M1DT1H1M1S0.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                       |
+      | duration    | P1Y, P1Y1M, P1Y1M1D, P1Y1M1DT1H, P1Y1M1DT1H1M, P1Y1M1DT1H1M1S, P1Y1M1DT1H1M1.1S, P1Y1M1DT1H1M1.001S, P1Y1M1DT1H1M0.000001S                                                                                                                                                                                                                                                                           |
 
     # TODO: Struct parsing is not supported in concept api tests now
 #  Scenario: Owns cannot set @values annotation for struct value type
@@ -2195,16 +2192,16 @@ Feature: Concept Owns Annotations
     When entity(person) get owns(custom-attribute) set annotation: @values(<args>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @values(<args>)
     Examples:
-      | value-type  | args                             |
-      | integer     | 1, 2                             |
-      | double      | 1.0, 2.0                         |
-      | decimal     | 1.0, 2.0                         |
-      | string      | "str", "str another"             |
-      | boolean     | false, true                      |
-      | date        | 2024-05-06, 2024-05-08           |
-      | datetime    | 2024-05-06, 2024-05-08           |
-      | datetime-tz | 2024-05-07+0100, 2024-05-10+0100 |
-      | duration    | P1Y, P2Y                         |
+      | value-type  | args                                         |
+      | integer     | 1, 2                                         |
+      | double      | 1.0, 2.0                                     |
+      | decimal     | 1.0dec, 2.0dec                               |
+      | string      | "str", "str another"                         |
+      | boolean     | false, true                                  |
+      | date        | 2024-05-06, 2024-05-08                       |
+      | datetime    | 2024-05-06, 2024-05-08                       |
+      | datetime-tz | 2024-05-07T00:00+0100, 2024-05-10T00:00+0100 |
+      | duration    | P1Y, P2Y                                     |
 
   Scenario Outline: Owns can reset @values annotation with different arguments
     When create attribute type: custom-attribute
@@ -2219,16 +2216,16 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @values(<reset-args>)
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @values(<args>)
     Examples:
-      | value-type  | args            | reset-args      |
-      | integer     | 1, 5            | 7, 9            |
-      | double      | 1.1, 1.5        | -8.0, 88.3      |
-      | decimal     | -8.0, 88.3      | 1.1, 1.5        |
-      | string      | "s"             | "not s"         |
-      | boolean     | true            | false           |
-      | date        | 2024-05-05      | 2024-06-05      |
-      | datetime    | 2024-05-05      | 2024-06-05      |
-      | datetime-tz | 2024-05-05+0100 | 2024-05-05+0010 |
-      | duration    | P1Y             | P2Y             |
+      | value-type  | args                  | reset-args            |
+      | integer     | 1, 5                  | 7, 9                  |
+      | double      | 1.1, 1.5              | -8.0, 88.3            |
+      | decimal     | -8.0dec, 88.3dec      | 1.1dec, 1.5dec        |
+      | string      | "s"                   | "not s"               |
+      | boolean     | true                  | false                 |
+      | date        | 2024-05-05            | 2024-06-05            |
+      | datetime    | 2024-05-05            | 2024-06-05            |
+      | datetime-tz | 2024-05-05T00:00+0100 | 2024-05-05T00:00+0010 |
+      | duration    | P1Y                   | P2Y                   |
 
   Scenario Outline: Owns-related @values annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: custom-attribute
@@ -2343,16 +2340,16 @@ Feature: Concept Owns Annotations
     Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-specialise                            |
-      | integer     | 1, 10, 20, 30                                                                | 10, 30                                     |
-      | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.0                                        |
-      | decimal     | 0.0, 1.0                                                                     | 0.0                                        |
-      | string      | "john", "John", "Johnny", "johnny"                                           | "John", "Johnny"                           |
-      | boolean     | true, false                                                                  | true                                       |
-      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2024-06-04, 2024-06-06                     |
-      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Asia/Kathmandu, 2024-06-05+0010 |
-      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P6M, P1Y3M, P1Y4M, P1Y6M                   |
+      | value-type  | args                                                                                                 | args-specialise                                        |
+      | integer     | 1, 10, 20, 30                                                                                        | 10, 30                                                 |
+      | double      | 1.0, 2.0, 3.0, 4.5                                                                                   | 2.0                                                    |
+      | decimal     | 0.0dec, 1.0dec                                                                                       | 0.0dec                                                 |
+      | string      | "john", "John", "Johnny", "johnny"                                                                   | "John", "Johnny"                                       |
+      | boolean     | true, false                                                                                          | true                                                   |
+      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2024-06-04, 2024-06-06                                 |
+      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2024-06-04, 2024-06-06                                 |
+      | datetime-tz | 2024-06-04T00:00+0010, 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010, 2024-06-05T00:00+0100 | 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010 |
+      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                                          | P6M, P1Y3M, P1Y4M, P1Y6M                               |
 
   Scenario Outline: Inherited @values annotation on owns for <value-type> value type can be reset or specialised by the @values of not a subset of arguments
     When create attribute type: custom-attribute
@@ -2433,16 +2430,16 @@ Feature: Concept Owns Annotations
     Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @values(<args>)
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @values(<args>)
     Examples:
-      | value-type  | args                                                                         | args-specialise          |
-      | integer     | 1, 10, 20, 30                                                                | 10, 31                   |
-      | double      | 1.0, 2.0, 3.0, 4.5                                                           | 2.001                    |
-      | decimal     | 0.0, 1.0                                                                     | 0.01                     |
-      | string      | "john", "John", "Johnny", "johnny"                                           | "Jonathan"               |
-      | boolean     | false                                                                        | true                     |
-      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                           | 2020-06-04, 2020-06-06   |
-      | datetime-tz | 2024-06-04+0010, 2024-06-04 Asia/Kathmandu, 2024-06-05+0010, 2024-06-05+0100 | 2024-06-04 Europe/London |
-      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                  | P3M, P1Y3M, P1Y4M, P1Y6M |
+      | value-type  | args                                                                                                 | args-specialise                |
+      | integer     | 1, 10, 20, 30                                                                                        | 10, 31                         |
+      | double      | 1.0, 2.0, 3.0, 4.5                                                                                   | 2.001                          |
+      | decimal     | 0.0dec, 1.0dec                                                                                       | 0.01dec                        |
+      | string      | "john", "John", "Johnny", "johnny"                                                                   | "Jonathan"                     |
+      | boolean     | false                                                                                                | true                           |
+      | date        | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2020-06-04, 2020-06-06         |
+      | datetime    | 2024-06-04, 2024-06-05, 2024-06-06                                                                   | 2020-06-04, 2020-06-06         |
+      | datetime-tz | 2024-06-04T00:00+0010, 2024-06-04T00:00 Asia/Kathmandu, 2024-06-05T00:00+0010, 2024-06-05T00:00+0100 | 2024-06-04T00:00 Europe/London |
+      | duration    | P6M, P1Y, P1Y1M, P1Y2M, P1Y3M, P1Y4M, P1Y6M                                                          | P3M, P1Y3M, P1Y4M, P1Y6M       |
 
   Scenario Outline: Values can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
@@ -2674,14 +2671,16 @@ Feature: Concept Owns Annotations
       | string      | "AA"                              | "AAA"                                                 |
       | string      | "short string"                    | "very-very-very-very-very-very-very-very long string" |
       | boolean     | false                             | true                                                  |
+      | double      | 0.0                               | 1                                                     |
       | double      | 0.0                               | 0.0001                                                |
       | double      | 0.01                              | 1.0                                                   |
       | double      | 123.123                           | 123123123123.122                                      |
       | double      | -2.45                             | 2.45                                                  |
-      | decimal     | 0.0                               | 0.0001                                                |
-      | decimal     | 0.01                              | 1.0                                                   |
-      | decimal     | 123.123                           | 123123123123.122                                      |
-      | decimal     | -2.45                             | 2.45                                                  |
+      | decimal     | 0.0dec                            | 1                                                     |
+      | decimal     | 0.0dec                            | 0.0001dec                                             |
+      | decimal     | 0.01dec                           | 1.0dec                                                |
+      | decimal     | 123.123dec                        | 123123123123.122dec                                   |
+      | decimal     | -2.45dec                          | 2.45dec                                               |
       | date        | 2024-06-04                        | 2024-06-05                                            |
       | date        | 2024-06-04                        | 2024-07-03                                            |
       | date        | 2024-06-04                        | 2025-01-01                                            |
@@ -2691,10 +2690,8 @@ Feature: Concept Owns Annotations
       | datetime    | 2024-06-04                        | 2025-01-01                                            |
       | datetime    | 1970-01-01                        | 9999-12-12                                            |
       | datetime    | 2024-06-04T16:35:02.10            | 2024-06-04T16:35:02.11                                |
-      | datetime-tz | 2024-06-04+0000                   | 2024-06-05+0000                                       |
-      | datetime-tz | 2024-06-04+0100                   | 2048-06-04+0100                                       |
       | datetime-tz | 2024-06-04T16:35:02.103+0100      | 2024-06-04T16:35:02.104+0100                          |
-      | datetime-tz | 2024-06-04 Asia/Kathmandu         | 2024-06-05 Asia/Kathmandu                             |
+      | datetime-tz | 2024-06-04T00:00 Asia/Kathmandu   | 2024-06-05T00:00 Asia/Kathmandu                       |
       | datetime-tz | 2024-05-05T00:00:00 Europe/Berlin | 2024-05-05T00:00:00 Europe/London                     |
 
     # TODO: Struct parsing is not supported now
@@ -2780,15 +2777,15 @@ Feature: Concept Owns Annotations
     When entity(person) get owns(custom-attribute) set annotation: @range(<args>)
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args>)
     Examples:
-      | value-type  | args                             |
-      | integer     | 1..2                             |
-      | double      | 1.0..2.0                         |
-      | decimal     | 1.0..2.0                         |
-      | string      | "str".."str another"             |
-      | boolean     | false..true                      |
-      | date        | 2024-05-06..2024-05-08           |
-      | datetime    | 2024-05-06..2024-05-08           |
-      | datetime-tz | 2024-05-07+0100..2024-05-10+0100 |
+      | value-type  | args                                         |
+      | integer     | 1..2                                         |
+      | double      | 1.0..2.0                                     |
+      | decimal     | 1.0dec..2.0dec                               |
+      | string      | "str".."str another"                         |
+      | boolean     | false..true                                  |
+      | date        | 2024-05-06..2024-05-08                       |
+      | datetime    | 2024-05-06..2024-05-08                       |
+      | datetime-tz | 2024-05-07T00:00+0100..2024-05-10T00:00+0100 |
 
   Scenario Outline: Owns can reset @range annotation with different arguments
     When create attribute type: custom-attribute
@@ -2812,14 +2809,14 @@ Feature: Concept Owns Annotations
     Then entity(person) get owns(custom-attribute) get constraints contain: @range(<args>)
     Then entity(person) get owns(custom-attribute) get constraints do not contain: @range(<reset-args>)
     Examples:
-      | value-type  | args                             | reset-args                       |
-      | integer     | 1..5                             | 7..9                             |
-      | double      | 1.1..1.5                         | -8.0..88.3                       |
-      | decimal     | -8.0..88.3                       | 1.1..1.5                         |
-      | string      | "S".."s"                         | "not s".."xxxxxxxxx"             |
-      | date        | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
-      | datetime    | 2024-05-05..2024-05-06           | 2024-06-05..2024-06-06           |
-      | datetime-tz | 2024-05-05+0100..2024-05-06+0100 | 2024-05-05+0100..2024-05-07+0100 |
+      | value-type  | args                                         | reset-args                                   |
+      | integer     | 1..5                                         | 7..9                                         |
+      | double      | 1.1..1.5                                     | -8.0..88.3                                   |
+      | decimal     | -8.0dec..88.3dec                             | 1.1dec..1.5dec                               |
+      | string      | "S".."s"                                     | "not s".."xxxxxxxxx"                         |
+      | date        | 2024-05-05..2024-05-06                       | 2024-06-05..2024-06-06                       |
+      | datetime    | 2024-05-05..2024-05-06                       | 2024-06-05..2024-06-06                       |
+      | datetime-tz | 2024-05-05T00:00+0100..2024-05-06T00:00+0100 | 2024-05-05T00:00+0100..2024-05-07T00:00+0100 |
 
   Scenario Outline: Owns cannot have @range annotation for <value-type> value type with duplicated arguments
     When create attribute type: custom-attribute
@@ -2831,15 +2828,15 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(person) get owns(custom-attribute) get constraint categories do not contain: @range
     Examples:
-      | value-type  | arg0                     | args                     |
-      | integer     | 1                        | 1                        |
-      | double      | 1.0                      | 1.0                      |
-      | decimal     | 1.0                      | 1.0                      |
-      | string      | "123"                    | "123"                    |
-      | boolean     | false                    | false                    |
-      | date        | 2030-06-04               | 2030-06-04               |
-      | datetime    | 2030-06-04               | 2030-06-04               |
-      | datetime-tz | 2030-06-04 Europe/London | 2030-06-04 Europe/London |
+      | value-type  | arg0                           | args                           |
+      | integer     | 1                              | 1                              |
+      | double      | 1.0                            | 1.0                            |
+      | decimal     | 1.0dec                         | 1.0dec                         |
+      | string      | "123"                          | "123"                          |
+      | boolean     | false                          | false                          |
+      | date        | 2030-06-04                     | 2030-06-04                     |
+      | datetime    | 2030-06-04                     | 2030-06-04                     |
+      | datetime-tz | 2030-06-04T00:00 Europe/London | 2030-06-04T00:00 Europe/London |
 
   Scenario Outline: Owns-related @range annotation for <value-type> value type can be inherited and specialised by a subset of arguments
     When create attribute type: custom-attribute
@@ -2954,14 +2951,14 @@ Feature: Concept Owns Annotations
     Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-specialise                           |
-      | integer     | 1..10                            | 1..5                                      |
-      | double      | 1.0..10.0                        | 2.0..10.0                                 |
-      | decimal     | 0.0..1.0                         | 0.0..0.999999                             |
-      | string      | "A".."Z"                         | "J".."Z"                                  |
-      | date        | 2024-06-04..2024-06-06           | 2024-06-04..2024-06-05                    |
-      | datetime    | 2024-06-04..2024-06-05           | 2024-06-04..2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-04T12:00:00+0010 |
+      | value-type  | args                                         | args-specialise                                 |
+      | integer     | 1..10                                        | 1..5                                            |
+      | double      | 1.0..10.0                                    | 2.0..10.0                                       |
+      | decimal     | 0.0dec..1.0dec                               | 0.0dec..0.999999dec                             |
+      | string      | "A".."Z"                                     | "J".."Z"                                        |
+      | date        | 2024-06-04..2024-06-06                       | 2024-06-04..2024-06-05                          |
+      | datetime    | 2024-06-04..2024-06-05                       | 2024-06-04..2024-06-04T12:00:00                 |
+      | datetime-tz | 2024-06-04T00:00+0010..2024-06-05T00:00+0010 | 2024-06-04T00:00+0010..2024-06-04T12:00:00+0010 |
 
   Scenario Outline: Inherited @range annotation on owns for <value-type> value type can be reset or specialised by the @range of not a subset of arguments
     When create attribute type: custom-attribute
@@ -3042,14 +3039,14 @@ Feature: Concept Owns Annotations
     Then entity(player) get constraints for owned attribute(second-custom-attribute) contain: @range(<args>)
     Then entity(player) get owns(second-custom-attribute) get constraints contain: @range(<args>)
     Examples:
-      | value-type  | args                             | args-specialise                           |
-      | integer     | 1..10                            | -1..5                                     |
-      | double      | 1.0..10.0                        | 0.0..150.0                                |
-      | decimal     | 0.0..1.0                         | -0.0001..0.999999                         |
-      | string      | "A".."Z"                         | "A".."z"                                  |
-      | date        | 2024-06-04..2024-06-06           | 2023-06-04..2024-06-05                    |
-      | datetime    | 2024-06-04..2024-06-05           | 2023-06-04..2024-06-04T12:00:00           |
-      | datetime-tz | 2024-06-04+0010..2024-06-05+0010 | 2024-06-04+0010..2024-06-05T01:00:00+0010 |
+      | value-type  | args                                         | args-specialise                                 |
+      | integer     | 1..10                                        | -1..5                                           |
+      | double      | 1.0..10.0                                    | 0.0..150.0                                      |
+      | decimal     | 0.0dec..1.0dec                               | -0.0001dec..0.999999dec                         |
+      | string      | "A".."Z"                                     | "A".."z"                                        |
+      | date        | 2024-06-04..2024-06-06                       | 2023-06-04..2024-06-05                          |
+      | datetime    | 2024-06-04..2024-06-05                       | 2023-06-04..2024-06-04T12:00:00                 |
+      | datetime-tz | 2024-06-04T00:00+0010..2024-06-05T00:00+0010 | 2024-06-04T00:00+0010..2024-06-05T01:00:00+0010 |
 
   Scenario Outline: Range can be narrowed for the same attribute for <root-type>'s owns
     When create attribute type: name
@@ -4877,16 +4874,16 @@ Feature: Concept Owns Annotations
     When connection open read transaction for database: typedb
     Then entity(person) get owns is empty
     Examples:
-      | value-type | arg                 |
-      | string     | "value"             |
-      | string     | "123.456"           |
-      | string     | "\S+"               |
-      | string     | "\S+@\S+\.\S+"      |
-      | string     | "^starts"           |
-      | string     | "ends$"             |
-      | string     | "^starts and ends$" |
-      | string     | "^(not)$"           |
-      | string     | "2024-06-04+0100"   |
+      | value-type | arg                     |
+      | string     | "value"                 |
+      | string     | "123.456"               |
+      | string     | "\S+"                   |
+      | string     | "\S+@\S+\.\S+"          |
+      | string     | "^starts"               |
+      | string     | "ends$"                 |
+      | string     | "^starts and ends$"     |
+      | string     | "^(not)$"               |
+      | string     | "2024-06-04T00:00+0100" |
 
   Scenario: Owns cannot have @regex annotation for none value type
     When create attribute type: custom-attribute
@@ -5150,11 +5147,11 @@ Feature: Concept Owns Annotations
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-2>
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
-      | key                           | values(1, 2)    | key                   | values                | decimal     |
-      | key                           | range(1.0..2.0) | key                   | range                 | decimal     |
-      | key                           | regex("s")      | key                   | regex                 | string      |
-      | key                           | regex("s")      | key                   | regex                 | string      |
+      | annotation-1                  | annotation-2          | annotation-category-1 | annotation-category-2 | value-type  |
+      | key                           | values(1, 2)          | key                   | values                | decimal     |
+      | key                           | range(1..2)           | key                   | range                 | decimal     |
+      | key                           | regex("s")            | key                   | regex                 | string      |
+      | key                           | regex("s")            | key                   | regex                 | string      |
       # TODO: subkey is not implemented
 #      | key                               | subkey(L)          | key                   | subkey                | integer        |
 #      | subkey(L)                         | unique             | subkey                | unique                | duration    |
@@ -5162,16 +5159,16 @@ Feature: Concept Owns Annotations
 #      | subkey(L)                         | range(false..true) | subkey                | range                 | boolean     |
 #      | subkey(L)                         | card(0..1)         | subkey                | card                  | integer        |
 #      | subkey(L)                         | regex("s")         | subkey                | regex                 | string      |
-      | unique                        | values(1, 2)    | unique                | values                | integer     |
-      | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
-      | unique                        | card(0..1)      | unique                | card                  | decimal     |
-      | unique                        | regex("s")      | unique                | regex                 | string      |
-      | values(2024-05-06+0100)       | card(0..1)      | values                | card                  | datetime-tz |
-      | range(2020-05-05..2025-05-05) | card(0..1)      | range                 | card                  | datetime    |
-      | card(0..1)                    | regex("s")      | card                  | regex                 | string      |
-      | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
-      | values("str")                 | regex("s")      | values                | regex                 | string      |
-      | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
+      | unique                        | values(1, 2)          | unique                | values                | integer     |
+      | unique                        | range(1.0dec..2.0dec) | unique                | range                 | decimal     |
+      | unique                        | card(0..1)            | unique                | card                  | decimal     |
+      | unique                        | regex("s")            | unique                | regex                 | string      |
+      | values(2024-05-06T00:00+0100) | card(0..1)            | values                | card                  | datetime-tz |
+      | range(2020-05-05..2025-05-05) | card(0..1)            | range                 | card                  | datetime    |
+      | card(0..1)                    | regex("s")            | card                  | regex                 | string      |
+      | values(1.0dec, 2.0dec)        | range(1.0dec..2.0dec) | values                | range                 | decimal     |
+      | values("str")                 | regex("s")            | values                | regex                 | string      |
+      | range("1".."2")               | regex("s")            | range                 | regex                 | string      |
 
   Scenario Outline: Ordered ownership can set @<annotation-1> and @<annotation-2> together and unset it for <value-type> value type
     When create attribute type: custom-attribute
@@ -5209,22 +5206,22 @@ Feature: Concept Owns Annotations
     Then relation(description) get owns(custom-attribute) get declared annotations do not contain: @<annotation-2>
     Examples:
     # TODO: Move to "cannot" test if something is wrong here.
-      | annotation-1                  | annotation-2    | annotation-category-1 | annotation-category-2 | value-type  |
-      | unique                        | values(1, 2)    | unique                | values                | integer     |
-      | unique                        | range(1.0..2.0) | unique                | range                 | decimal     |
-      | unique                        | card(0..1)      | unique                | card                  | integer     |
-      | unique                        | regex("s")      | unique                | regex                 | string      |
-      | unique                        | distinct        | unique                | distinct              | string      |
-      | values(2024-05-06+0100)       | card(0..1)      | values                | card                  | datetime-tz |
-      | values(1, 2)                  | distinct        | values                | distinct              | integer     |
-      | values(1.0, 2.0)              | range(1.0..2.0) | values                | range                 | decimal     |
-      | values("str")                 | regex("s")      | values                | regex                 | string      |
-      | range(2020-05-05..2025-05-05) | card(0..1)      | range                 | card                  | datetime    |
-      | range(2020-05-05..2025-05-05) | distinct        | range                 | distinct              | date        |
-      | card(0..1)                    | regex("s")      | card                  | regex                 | string      |
-      | card(0..1)                    | distinct        | card                  | distinct              | integer     |
-      | regex("s")                    | distinct        | regex                 | distinct              | string      |
-      | range("1".."2")               | regex("s")      | range                 | regex                 | string      |
+      | annotation-1                  | annotation-2 | annotation-category-1 | annotation-category-2 | value-type  |
+      | unique                        | values(1, 2) | unique                | values                | integer     |
+      | unique                        | range(1..2)  | unique                | range                 | decimal     |
+      | unique                        | card(0..1)   | unique                | card                  | integer     |
+      | unique                        | regex("s")   | unique                | regex                 | string      |
+      | unique                        | distinct     | unique                | distinct              | string      |
+      | values(2024-05-06T00:00+0100) | card(0..1)   | values                | card                  | datetime-tz |
+      | values(1, 2)                  | distinct     | values                | distinct              | integer     |
+      | values(1, 2)                  | range(1..2)  | values                | range                 | decimal     |
+      | values("str")                 | regex("s")   | values                | regex                 | string      |
+      | range(2020-05-05..2025-05-05) | card(0..1)   | range                 | card                  | datetime    |
+      | range(2020-05-05..2025-05-05) | distinct     | range                 | distinct              | date        |
+      | card(0..1)                    | regex("s")   | card                  | regex                 | string      |
+      | card(0..1)                    | distinct     | card                  | distinct              | integer     |
+      | regex("s")                    | distinct     | regex                 | distinct              | string      |
+      | range("1".."2")               | regex("s")   | range                 | regex                 | string      |
 
   Scenario Outline: Owns cannot set @<annotation-1> and @<annotation-2> together for scalar <value-type>
     When create attribute type: custom-attribute
