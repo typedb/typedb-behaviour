@@ -358,8 +358,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
+      | a                    | b                    | c                     | d                   |
+      | value:decimal:9.0dec | value:decimal:3.0dec | value:decimal:18.0dec | value:double:2.0dec |
 
 
   Scenario: Test operator definitions - integer decimal
@@ -376,8 +376,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
+      | a                    | b                    | c                     | d                   |
+      | value:decimal:9.0dec | value:decimal:3.0dec | value:decimal:18.0dec | value:double:2.0dec |
 
 
   Scenario: Test operator definitions - decimal integer
@@ -393,8 +393,8 @@ Feature: TypeQL Query with Expressions
         $a, $b, $c, $d;
       """
     Then uniquely identify answer concepts
-      | a                 | b                 | c                  | d                |
-      | value:decimal:9.0 | value:decimal:3.0 | value:decimal:18.0 | value:double:2.0 |
+      | a                    | b                    | c                     | d                   |
+      | value:decimal:9.0dec | value:decimal:3.0dec | value:decimal:18.0dec | value:double:2.0dec |
 
 
   Scenario: Test operator definitions - double decimal
