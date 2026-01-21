@@ -779,7 +779,7 @@ Feature: TypeQL Query with Expressions
       | attr:name:b25.0 |
 
 
-  Scenario: Division by zero throws a useful error
+  Scenario: Division errors are handled
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
@@ -795,9 +795,22 @@ Feature: TypeQL Query with Expressions
       """
       match
         $p isa person, has age $a;
-        let $div-zero = $a / 0.0;
-      select $p;
+        let $div-zero = $a / 0.0; # inf
       """
+
+    Then get answers of typeql read query
+      """
+      match
+        $p isa person, has age $a;
+        let $zero = 0.0 / $a ;
+      """
+    Then answer size is: 1
+
+    When typeql read query; fails with a message containing: "Division failed"
+      """
+      match let $nan = 0.0 / 0.0; # nan
+      """
+    Then transaction closes
 
 
   Scenario: Test operator precedence
