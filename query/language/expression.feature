@@ -552,8 +552,8 @@ Feature: TypeQL Query with Expressions
       | round    | decimal | 12.5dec         | integer     | 12         |
       | round    | decimal | -11.5dec        | integer     | -12        |
       | round    | decimal | -12.5dec        | integer     | -12        |
-      | length   | string  | ""              | integer     | 0          |
-      | length   | string  | "Hello, world!" | integer     | 13         |
+      | len      | string  | ""              | integer     | 0          |
+      | len      | string  | "Hello, world!" | integer     | 13         |
 
 
   Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
@@ -568,9 +568,9 @@ Feature: TypeQL Query with Expressions
       | ceil     | integer | 0        |
       | floor    | integer | 0        |
       | round    | integer | 0        |
-      | length   | integer | 0        |
-      | length   | double  | 0.0      |
-      | length   | decimal | 0.0dec   |
+      | len      | integer | 0        |
+      | len      | double  | 0.0      |
+      | len      | decimal | 0.0dec   |
 
 
   Scenario: Test operators on variables
