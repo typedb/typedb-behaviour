@@ -554,6 +554,9 @@ Feature: TypeQL Query with Expressions
       | round    | decimal | -12.5dec        | integer     | -12        |
       | len      | string  | ""              | integer     | 0          |
       | len      | string  | "Hello, world!" | integer     | 13         |
+      | len      | string  | "こんにちは"    | integer     | 5          |
+      | len      | string  | "❤️‍🔥"               | integer     | 4          |
+      | len      | string  | "⭐"            | integer     | 1          |
 
 
   Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
@@ -915,3 +918,25 @@ Feature: TypeQL Query with Expressions
     """
     match $x iid <answer.x.iid>; iid($x) == "<answer.x.iid>";
     """
+
+  Scenario: Test role label includes relation namespace
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      relation rel, relates rolename;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        $_ relates $r;
+        let $label = label($r);
+      select
+        $label;
+      """
+    Then uniquely identify answer concepts
+      | label                     |
+      | value:string:rel:rolename |
