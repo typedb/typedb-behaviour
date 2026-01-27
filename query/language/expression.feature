@@ -250,7 +250,6 @@ Feature: TypeQL Query with Expressions
       { let $v = $a / 2.0; };
       """
 
-
   Scenario: Test unary minus sign
     Given connection open write transaction for database: typedb
     Given typeql write query
@@ -502,6 +501,20 @@ Feature: TypeQL Query with Expressions
       | a                                               | b                                           |
       | value:datetime-tz:2027-03-30T16:05:06.789+01:00 | value:datetime-tz:2026-01-27T12:00:00+00:00 |
                 
+
+  Scenario: Test operator definitions - string string
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = "Hello, " + "world!";
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                          |
+      | value:string:Hello, world! |
+
 
   Scenario: Adding one day ignores DST
     Given connection open read transaction for database: typedb
