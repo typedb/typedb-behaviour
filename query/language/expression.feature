@@ -431,6 +431,156 @@ Feature: TypeQL Query with Expressions
       | value:double:9.0 | value:double:3.0 | value:double:18.0 | value:double:2.0 |
 
 
+  Scenario: Test operator definitions - date date
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2027-03-30 - 2026-01-27;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                      |
+      | value:duration:P1Y2M3D |
+
+
+  Scenario: Test operator definitions - datetime datetime
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2027-03-30T16:05:06.789 - 2026-01-27T12:00:00;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                                 |
+      | value:duration:P1Y2M3DT4H5M6.789S |
+
+
+  Scenario: Test operator definitions - datetime duration
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2026-01-27T12:00:00 + P1Y2M3DT4H5M6.789S;
+        let $b = 2027-03-30T16:05:06.789 - P1Y2M3DT4H5M6.789S;
+      select
+        $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                                      | b                                  |
+      | value:datetime:2027-03-30T16:05:06.789 | value:datetime:2026-01-27T12:00:00 |
+
+
+  Scenario: Test operator definitions - datetime-tz datetime-tz
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2027-03-30T16:05:06.789 Europe/London - 2026-01-27T12:00:00+01:00;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                                 |
+      | value:duration:P1Y2M3DT4H5M6.789S |
+
+
+  Scenario: Test operator definitions - datetime-tz duration
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2026-01-27T12:00:00+01:00 + P1Y2M3DT4H5M6.789S;
+        let $b = 2027-03-30T16:05:06.789 Europe/London - P1Y2M3DT4H5M6.789S;
+      select
+        $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                                               | b                                           |
+      | value:datetime-tz:2027-03-30T16:05:06.789+01:00 | value:datetime-tz:2026-01-27T12:00:00+00:00 |
+                
+
+  Scenario: Adding one day ignores DST
+    Given connection open read transaction for database: typedb
+    # London DST change occurred on 2024-03-31 01:00:00 GMT
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2024-03-30T12:00:00 Europe/London + P1D;
+      """
+    Then uniquely identify answer concepts
+      | a                                                   |
+      | value:datetime-tz:2024-03-31T12:00:00 Europe/London |
+
+
+  Scenario: Adding 24 hours respects DST
+    Given connection open read transaction for database: typedb
+    # London DST change occurred on 2024-03-31 01:00:00 GMT
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2024-03-30T12:00:00 Europe/London + PT24H;
+      """
+    Then uniquely identify answer concepts
+      | a                                                   |
+      | value:datetime-tz:2024-03-31T13:00:00 Europe/London |
+
+
+  Scenario: When addition results in an ambiguous datetime, the earliest possible is used
+    Given connection open read transaction for database: typedb
+    # London DST change occurred on 2024-10-27 02:00:00 BST
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2024-10-26T01:30:00 Europe/London + P1D;
+      """
+    Then uniquely identify answer concepts
+      | a                                           |
+      | value:datetime-tz:2024-10-27T01:30:00+01:00 |
+
+
+  Scenario: When addition results in a datetime that falls in a gap, the datetime is advanced by the length of the gap
+    Given connection open read transaction for database: typedb
+    # London DST change occurred on 2024-03-31 01:00:00 GMT
+    # 2024-03-31 01:00:00 to 02:00:00 do not exist in Europe/London
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2024-03-30T01:30:00 Europe/London + P1D;
+      """
+    Then uniquely identify answer concepts
+      | a                                                   |
+      | value:datetime-tz:2024-03-31T02:30:00 Europe/London |
+
+    # Samoa switched from -10 to +14 after 29th of December, 2011, skipping 30th of December.
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2011-12-29T12:00:00 Pacific/Apia + P1D;
+      """
+    Then uniquely identify answer concepts
+      | a                                                  |
+      | value:datetime-tz:2011-12-31T12:00:00 Pacific/Apia |
+
+
+  Scenario: Test operator definitions - duration duration
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = P9Y8M7DT6H5M3.210S + P1Y2M3DT4H5M6.789S;
+        let $b = P9Y8M7DT6H5M3.210S - P1Y2M3DT4H5M6.789S;
+      select
+        $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                                      | b                                   |
+      | value:duration:P10Y10M10DT10H10M9.999S | value:duration:P8Y6M4DT1H59M56.421S |
+
+
   Scenario: Test builtin math functions
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
