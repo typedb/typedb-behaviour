@@ -516,6 +516,24 @@ Feature: TypeQL Query with Expressions
       | value:string:Hello, world! |
 
 
+  Scenario: Invalid date times in a time zone fail to parse
+    Given connection open read transaction for database: typedb
+    # London DST change occurred on 2024-03-31 01:00:00 GMT
+    # 2024-03-31 01:00:00 to 02:00:00 do not exist in Europe/London
+    Then typeql read query; fails with a message containing: "Local time 2024-03-31 01:30:00 does not exist in timezone Europe/London"
+    """
+      match
+        let $a = 2024-03-31T01:30:00 Europe/London;
+      """
+    # London DST change occurred on 2024-10-27 02:00:00 BST
+    # 2024-10-21 01:00:00 to 02:00:00 occur twice in Europe/London, first in BST, then GMT
+    Then typeql read query; fails with a message containing: "Local time 2024-10-27 01:30:00 is ambiguous in timezone Europe/London"
+    """
+      match
+        let $a = 2024-10-27T01:30:00 Europe/London;
+      """
+
+
   Scenario: Adding one day ignores DST
     Given connection open read transaction for database: typedb
     # London DST change occurred on 2024-03-31 01:00:00 GMT
