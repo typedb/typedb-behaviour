@@ -444,6 +444,20 @@ Feature: TypeQL Query with Expressions
       | value:duration:P1Y2M3D |
 
 
+  Scenario: Test operator definitions - datetime date
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = 2027-03-30T16:05:06.789 - 2026-01-27;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                                 |
+      | value:duration:P1Y2M3DT16H5M6.789S |
+
+
   Scenario: Test operator definitions - datetime datetime
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
