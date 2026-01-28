@@ -444,6 +444,20 @@ Feature: TypeQL Query with Expressions
       | value:duration:P1Y2M3D |
 
 
+  Scenario: Test extreme dates in operator expressions
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = +262142-12-31 - -262143-01-01;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                             |
+      | value:duration:P524285Y11M30D |
+
+
   Scenario: Test operator definitions - datetime date
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -472,6 +486,20 @@ Feature: TypeQL Query with Expressions
       | value:duration:P1Y2M3DT4H5M6.789S |
 
 
+  Scenario: Test extreme values in datetime datetime operator expressions
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = +262142-12-31T23:59:59.999999999 - -262143-01-01T00:00:00;
+      select
+        $a;
+      """
+    Then uniquely identify answer concepts
+      | a                                                 |
+      | value:duration:P524285Y11M30DT23H59M59.999999999S |
+
+
   Scenario: Test operator definitions - datetime duration
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -485,6 +513,42 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | a                                      | b                                  |
       | value:datetime:2027-03-30T16:05:06.789 | value:datetime:2026-01-27T12:00:00 |
+
+
+  Scenario: Test extreme values in datetime duration operator expressions
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match
+        let $a = +262142-12-31T23:59:59.999999999 - P524285Y11M30DT23H59M59.999999999S;
+        let $b = -262143-01-01T00:00:00 + P524285Y11M30DT23H59M59.999999999S;
+      select
+        $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                                     | b                                               |
+      | value:datetime:-262143-01-01T00:00:00 | value:datetime:+262142-12-31T23:59:59.999999999 |
+
+
+  Scenario: Test out of range results in datetime duration operator expressions
+      
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = +262142-12-31T23:59:59.999999999 + PT1S;
+    """
+    Then typeql read query; fails
+    """
+      match let $a = -262143-01-01T00:00:00 - PT1S;
+    """
+    Then typeql read query; fails
+    """
+      match let $a = +262142-12-31T23:59:59.999999999 - P524285Y11M30DT24H;
+    """
+    Then typeql read query; fails
+    """
+      match let $b = -262143-01-01T00:00:00 + P524285Y11M30DT24H;
+    """
 
 
   Scenario: Test operator definitions - datetime-tz datetime-tz
@@ -530,6 +594,66 @@ Feature: TypeQL Query with Expressions
       | value:string:Hello, world! |
 
 
+  Scenario: Out of range integers fail to parse
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = 9223372036854775808;
+    """
+    Then typeql read query; fails
+    """
+      match let $b = -9223372036854775809;
+    """
+
+
+  Scenario: Out of range doubles fail to parse
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = 1.8e308;
+    """
+    Then typeql read query; fails
+    """
+      match let $b = -1.8e308;
+    """
+
+
+  Scenario: Out of range date times fail to parse
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Invalid date"
+    """
+      match let $a = +262143-01-01T00:00:00;
+    """
+    Then typeql read query; fails with a message containing: "Invalid date"
+    """
+      match let $b = -262144-12-31T23:59:59.999999999;
+    """
+
+
+  Scenario: Out of range date times in a time zone fail to parse
+    Given connection open read transaction for database: typedb
+    # This is out of local range of NaiveDateTime, but the offset brings it within the UTC NaiveDateTime range
+    Then typeql read query; fails with a message containing: "Invalid date"
+    """
+      match let $a = +262143-01-01T00:00+02:00;
+    """
+    # This is out of local range of NaiveDateTime, but the offset brings it within the UTC NaiveDateTime range
+    Then typeql read query; fails with a message containing: "Invalid date"
+    """
+      match let $a = -262144-12-31T23:00-02:00;
+    """
+    # This is within range of local NaiveDateTime, but the offset takes it outside the UTC NaiveDateTime range
+    Then typeql read query; fails with a message containing: "Local time +262142-12-31 23:00:00 does not exist in timezone -02:00"
+    """
+      match let $a = +262142-12-31T23:00-02:00;
+    """
+    # This is within range of local NaiveDateTime, but the offset takes it outside the UTC NaiveDateTime range
+    Then typeql read query; fails with a message containing: "Local time -262143-01-01 00:00:00 does not exist in timezone +02:00"
+    """
+      match let $a = -262143-01-01T00:00+02:00;
+    """
+
+
   Scenario: Invalid date times in a time zone fail to parse
     Given connection open read transaction for database: typedb
     # London DST change occurred on 2024-03-31 01:00:00 GMT
@@ -555,10 +679,11 @@ Feature: TypeQL Query with Expressions
     """
       match
         let $a = 2024-03-30T12:00:00 Europe/London + P1D;
+        let $b = 2024-03-30T12:00:00 Europe/London + PT24H;
       """
     Then uniquely identify answer concepts
-      | a                                                   |
-      | value:datetime-tz:2024-03-31T12:00:00 Europe/London |
+      | a                                                   | b                                                   |
+      | value:datetime-tz:2024-03-31T12:00:00 Europe/London | value:datetime-tz:2024-03-31T13:00:00 Europe/London |
 
 
   Scenario: Adding 24 hours respects DST
@@ -624,6 +749,34 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | a                                      | b                                   |
       | value:duration:P10Y10M10DT10H10M9.999S | value:duration:P8Y6M4DT1H59M56.421S |
+
+
+  Scenario: Out of range durations fail to parse
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = P524287Y;
+    """
+    Then typeql read query; fails
+    """
+      match let $a = P6291433M;
+    """
+
+
+  Scenario: Test out of range results in duration duration operator expressions
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = P6291432M + P1M;
+    """
+    Then typeql read query; fails
+    """
+      match let $a = P524288Y + P1M;
+    """
+    Then typeql read query; fails
+    """
+      match let $a = PT0S - PT1S;
+    """
 
 
   Scenario: Test builtin math functions
