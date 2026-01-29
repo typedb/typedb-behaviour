@@ -618,6 +618,18 @@ Feature: TypeQL Query with Expressions
     """
 
 
+  Scenario: Out of range decimals fail to parse
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+    """
+      match let $a = 9223372036854775808.0dec;
+    """
+    Then typeql read query; fails
+    """
+      match let $b = -9223372036854775809.0dec;
+    """
+
+
   Scenario: Out of range date times fail to parse
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "Invalid date"
