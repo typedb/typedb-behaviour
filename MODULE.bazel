@@ -1,0 +1,38 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+module(
+    name = "typedb_behaviour",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+# Core BCR dependencies
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_python", version = "1.0.0")
+bazel_dep(name = "rules_kotlin", version = "2.0.0")
+
+# typedb_dependencies via local path override (until published to BCR)
+bazel_dep(name = "typedb_dependencies", version = "0.0.0")
+local_path_override(
+    module_name = "typedb_dependencies",
+    path = "../dependencies",
+)
+
+# typedb_bazel_distribution is a transitive dependency via typedb_dependencies
+bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
+local_path_override(
+    module_name = "typedb_bazel_distribution",
+    path = "../bazel-distribution",
+)
+
+# Python toolchain (required for checkstyle)
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.11",
+)
+
+# Register Kotlin toolchain (required for checkstyle)
+register_toolchains("@rules_kotlin//kotlin/internal:default_toolchain")

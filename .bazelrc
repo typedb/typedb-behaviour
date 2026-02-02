@@ -2,6 +2,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+# Bzlmod is now the default (Bazel 7+)
+# WORKSPACE is kept for backward compatibility but is deprecated
+# To use WORKSPACE mode, uncomment the following line:
+# common --enable_workspace=true
+
 build --incompatible_strict_action_env
 run --incompatible_strict_action_env
 test --incompatible_strict_action_env
