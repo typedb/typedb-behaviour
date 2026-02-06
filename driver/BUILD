@@ -7,6 +7,7 @@ package(default_visibility = ["//visibility:public"])
 load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
+    "cluster.feature",
     "concept.feature",
     "connection.feature",
     "migration.feature",
