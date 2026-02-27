@@ -52,11 +52,12 @@ Feature: Driver Cluster
 
 
   @ignore-typedb-http-driver
-  Scenario Outline: Driver discovers all replicas in any server routing mode
-    When set operation server routing to: address
+  Scenario Outline: Driver discovers all replicas with <routing> server routing mode
+    When set operation server routing to: <routing>
     Then connection has 3 replicas
     Then connection primary replica exists
     Examples:
+      | routing   |
       | auto      |
       | server(1) |
       | server(2) |
