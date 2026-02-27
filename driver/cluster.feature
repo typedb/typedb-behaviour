@@ -57,11 +57,11 @@ Feature: Driver Cluster
     Then connection has 3 replicas
     Then connection primary replica exists
     Examples:
-      | routing   |
-      | auto      |
-      | server(1) |
-      | server(2) |
-      | server(3) |
+      | routing                 |
+      | auto                    |
+      | server(127.0.0.1:11729) |
+      | server(127.0.0.1:21729) |
+      | server(127.0.0.1:31729) |
 
   ##################
   # DRIVER OPTIONS #
