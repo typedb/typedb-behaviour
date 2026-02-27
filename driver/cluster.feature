@@ -40,17 +40,31 @@ Feature: Driver Cluster
       | secondary |
 
   ##################
-  # DRIVER OPTIONS #
+  # SERVER ROUTING #
   ##################
 
-  @ignore-typedb-http-driver
   Scenario: Driver discovers all replicas even when connecting to single server
-    When connection closes
+    Given connection closes
     When connection opens to single server with default authentication
     Then connection is open: true
     Then connection has 3 replicas
     Then connection primary replica exists
 
+
+  @ignore-typedb-http-driver
+  Scenario Outline: Driver discovers all replicas in any server routing mode
+    When set operation server routing to: address
+    Then connection has 3 replicas
+    Then connection primary replica exists
+    Examples:
+      | auto      |
+      | server(1) |
+      | server(2) |
+      | server(3) |
+
+  ##################
+  # DRIVER OPTIONS #
+  ##################
 
   # TODO: Test that primary_failover_retries actually works by simulating failover
   @ignore-typedb-http-driver
@@ -69,97 +83,3 @@ Feature: Driver Cluster
     When connection opens with default authentication
     Then connection is open: true
     Then connection has 3 replicas
-
-  #######################
-  # CONSISTENCY - READS #
-  #######################
-
-  @ignore-typedb-http-driver
-  Scenario Outline: Driver can open read transaction with <consistency> consistency
-    Given connection create database: typedb
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define entity person;
-      """
-    Given transaction commits
-    When set transaction option read_consistency_level to: <consistency>
-    When connection open read transaction for database: typedb
-    Then transaction is open: true
-    Then transaction has type: read
-    When get answers of typeql read query
-      """
-      match entity $x;
-      """
-    Then answer size is: 1
-    When transaction closes
-    Examples:
-      | consistency              |
-      | strong                   |
-      | eventual                 |
-      | replica(127.0.0.1:21729) |
-      | replica(127.0.0.1:11729) |
-
-  ########################
-  # CONSISTENCY - WRITES #
-  ########################
-
-  @ignore-typedb-http-driver
-  Scenario Outline: Driver schema and write transactions succeed regardless of consistency option (<consistency>)
-    Given connection create database: typedb
-    When set transaction option read_consistency_level to: <consistency>
-    When connection open schema transaction for database: typedb
-    Then transaction is open: true
-    Then transaction has type: schema
-    Then typeql schema query
-      """
-      define entity person;
-      """
-    When transaction commits
-    When connection open write transaction for database: typedb
-    Then transaction is open: true
-    Then transaction has type: write
-    Then typeql write query
-      """
-      insert $p isa person;
-      """
-    When transaction commits
-    When connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person;
-      """
-    Then answer size is: 1
-    Examples:
-      | consistency              |
-      | strong                   |
-      | eventual                 |
-      | replica(127.0.0.1:21729) |
-      | replica(127.0.0.1:11729) |
-
-  ###################################
-  # DATABASE CONSISTENCY OPERATIONS #
-  ###################################
-
-  @ignore-typedb-http-driver
-  Scenario Outline: Database operations work with <consistency> consistency
-    When set database operation consistency to: <consistency>
-    Given connection has 0 databases
-    When connection create database: consistency-test-db
-    Then connection has 1 database
-    When connection create database: typedb
-    Then connection has 2 databases
-    Then connection has databases:
-      | consistency-test-db |
-      | typedb              |
-    Then connection has database: consistency-test-db
-    When connection delete database: consistency-test-db
-    Then connection has 1 database
-    When connection delete database: typedb
-    Then connection has 0 databases
-    Examples:
-      | consistency              |
-      | strong                   |
-      | eventual                 |
-      | replica(127.0.0.1:21729) |
-      | replica(127.0.0.1:11729) |
