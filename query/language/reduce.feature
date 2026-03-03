@@ -45,7 +45,7 @@ Feature: TypeQL Reduce Queries
   #  reduce   #
   #############
 
-  Scenario: 'count' returns the total number of answers
+  Scenario: 'count' returns the total number of answers while count(var) returns unique number of values of var
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
@@ -72,7 +72,7 @@ Feature: TypeQL Reduce Queries
         $x isa person;
         $y isa name;
         $f isa friendship;
-      reduce $count = count($x);
+      reduce $count = count;
       """
     Then result is a single row with variable 'count': value:integer:9
     When get answers of typeql read query
@@ -89,7 +89,7 @@ Feature: TypeQL Reduce Queries
         $x isa person;
         $y isa name;
         $f isa friendship, links (friend: $x);
-      reduce $count = count($x);
+      reduce $count = count;
       """
     Then result is a single row with variable 'count': value:integer:6
     When get answers of typeql read query
@@ -98,9 +98,9 @@ Feature: TypeQL Reduce Queries
         $x isa person;
         $y isa name;
         $f isa friendship, links (friend: $x);
-      reduce $count = count;
+      reduce $count = count($x);
       """
-    Then result is a single row with variable 'count': value:integer:6
+    Then result is a single row with variable 'count': value:integer:2
 
 
   Scenario: the 'count' of an empty answer set is zero
@@ -600,8 +600,8 @@ Feature: TypeQL Reduce Queries
       """
     Then uniquely identify answer concepts
       | x        | cy           | cz           |
-      | key:ref:0 | value:integer:4 | value:integer:4 |
-      | key:ref:1 | value:integer:2 | value:integer:2 |
+      | key:ref:0 | value:integer:2 | value:integer:3 |
+      | key:ref:1 | value:integer:1 | value:integer:2 |
 
 
   Scenario: the maximum value for a particular variable grouped by each answer group can be retrieved using a group 'max'
