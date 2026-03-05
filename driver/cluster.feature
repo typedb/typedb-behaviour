@@ -59,9 +59,9 @@ Feature: Driver Cluster
     Examples:
       | routing                 |
       | auto                    |
-      | server(127.0.0.1:11729) |
-      | server(127.0.0.1:21729) |
-      | server(127.0.0.1:31729) |
+      | direct(127.0.0.1:11729) |
+      | direct(127.0.0.1:21729) |
+      | direct(127.0.0.1:31729) |
 
   ##################
   # DRIVER OPTIONS #
