@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 # These tests are dedicated to test the required cluster functionality of TypeDB drivers.
-# NOTE: This file should be run only against cluster deployments with 3 replicas.
+# NOTE: This file should be run only against cluster deployments with 3 servers.
 
 #noinspection CucumberUndefinedStep
 Feature: Driver Cluster
@@ -14,27 +14,27 @@ Feature: Driver Cluster
     Given connection is open: true
 
   ###########
-  # REPLICA #
+  # SERVER #
   ###########
 
-  Scenario: Driver can discover replicas in a cluster
-    Then connection has 3 replicas
-    Then connection primary replica exists
-    Then connection get replica(127.0.0.1:11729) exists
-    Then connection get replica(127.0.0.1:21729) exists
-    Then connection get replica(127.0.0.1:31729) exists
+  Scenario: Driver can discover servers in a cluster
+    Then connection has 3 servers
+    Then connection primary server exists
+    Then connection get server(127.0.0.1:11729) exists
+    Then connection get server(127.0.0.1:21729) exists
+    Then connection get server(127.0.0.1:31729) exists
 
 
-  Scenario: Driver can query replica terms
-    Then connection has 3 replicas
-    Then connection get replica(127.0.0.1:11729) has term
-    Then connection get replica(127.0.0.1:21729) has term
-    Then connection get replica(127.0.0.1:31729) has term
+  Scenario: Driver can query server terms
+    Then connection has 3 servers
+    Then connection get server(127.0.0.1:11729) has term
+    Then connection get server(127.0.0.1:21729) has term
+    Then connection get server(127.0.0.1:31729) has term
 
 
-  Scenario: Driver can inspect replica roles
-    Then connection has 3 replicas
-    Then connection replicas have roles:
+  Scenario: Driver can inspect server roles
+    Then connection has 3 servers
+    Then connection servers have roles:
       | primary   |
       | secondary |
       | secondary |
@@ -43,19 +43,19 @@ Feature: Driver Cluster
   # SERVER ROUTING #
   ##################
 
-  Scenario: Driver discovers all replicas even when connecting to single server
+  Scenario: Driver discovers all servers even when connecting to single server
     Given connection closes
     When connection opens to single server with default authentication
     Then connection is open: true
-    Then connection has 3 replicas
-    Then connection primary replica exists
+    Then connection has 3 servers
+    Then connection primary server exists
 
 
   @ignore-typedb-http-driver
-  Scenario Outline: Driver discovers all replicas with <routing> server routing mode
+  Scenario Outline: Driver discovers all servers with <routing> server routing mode
     When set operation server routing to: <routing>
-    Then connection has 3 replicas
-    Then connection primary replica exists
+    Then connection has 3 servers
+    Then connection primary server exists
     Examples:
       | routing                 |
       | auto                    |
@@ -76,11 +76,11 @@ Feature: Driver Cluster
     Then connection is open: true
 
 
-  # TODO: Test that replica_discovery_attempts actually works by limiting discovery
+  # TODO: Test that server_discovery_attempts actually works by limiting discovery
   @ignore-typedb-http-driver
-  Scenario: Driver can configure replica discovery attempts
+  Scenario: Driver can configure server discovery attempts
     When connection closes
-    When set driver option replica_discovery_attempts to: 10
+    When set driver option server_discovery_attempts to: 10
     When connection opens with default authentication
     Then connection is open: true
-    Then connection has 3 replicas
+    Then connection has 3 servers
