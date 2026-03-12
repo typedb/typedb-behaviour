@@ -74,13 +74,3 @@ Feature: Driver Cluster
     When set driver option primary_failover_retries to: 5
     When connection opens with default authentication
     Then connection is open: true
-
-
-  # TODO: Test that server_discovery_attempts actually works by limiting discovery
-  @ignore-typedb-http-driver
-  Scenario: Driver can configure server discovery attempts
-    When connection closes
-    When set driver option server_discovery_attempts to: 10
-    When connection opens with default authentication
-    Then connection is open: true
-    Then connection has 3 servers
