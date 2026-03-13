@@ -42,7 +42,7 @@ local_path_override(
 # git_override(
 #     module_name = "typedb_dependencies",
 #     remote = "https://github.com/typedb/dependencies",
-#     commit = "7b9fc66a5d8fb0765f455b0e03240a73060faada",
+#     commit = "d936741322792d391e8d373ac5ce7d00493cbd4a",
 # )
 
 bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
@@ -53,5 +53,5 @@ local_path_override(
 # git_override(
 #     module_name = "typedb_bazel_distribution",
 #     remote = "https://github.com/typedb/bazel-distribution",
-#     commit = "cea906afdc16d34a9a55d3c0b2f5a89a88706c9c",
+#     commit = "b8491976da84ff4c250afa06ba1b9d990cf0d642",
 # )
