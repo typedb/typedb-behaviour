@@ -35,15 +35,23 @@ register_toolchains("@rules_kotlin//kotlin/internal:default_toolchain")
 # ===========================================================
 
 bazel_dep(name = "typedb_dependencies", version = "0.0.0")
-git_override(
+local_path_override(
     module_name = "typedb_dependencies",
-    remote = "https://github.com/typedb/dependencies",
-    commit = "1fbd83797f42d12b3a83cee80f3a0b9b70e73359",
+    path = "../dependencies",
 )
+# git_override(
+#     module_name = "typedb_dependencies",
+#     remote = "https://github.com/typedb/dependencies",
+#     commit = "7b9fc66a5d8fb0765f455b0e03240a73060faada",
+# )
 
 bazel_dep(name = "typedb_bazel_distribution", version = "0.0.0")
-git_override(
+local_path_override(
     module_name = "typedb_bazel_distribution",
-    remote = "https://github.com/typedb/bazel-distribution",
-    commit = "cea906afdc16d34a9a55d3c0b2f5a89a88706c9c",
+    path = "../bazel-distribution",
 )
+# git_override(
+#     module_name = "typedb_bazel_distribution",
+#     remote = "https://github.com/typedb/bazel-distribution",
+#     commit = "cea906afdc16d34a9a55d3c0b2f5a89a88706c9c",
+# )
