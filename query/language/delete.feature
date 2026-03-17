@@ -2990,6 +2990,14 @@ Feature: TypeQL Delete Query
     delete
       has $name of $john;
     """
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block."
+    """
+    match
+      $john isa person; try { $john has name $name; };
+    delete
+      $name;
+    """
 
 
   Scenario: nested try blocks in delete are disallowed
