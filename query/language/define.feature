@@ -40,6 +40,50 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
+  Scenario: type labels can start with an underscore
+    When typeql schema query
+      """
+      define
+      entity _hidden-entity;
+      relation _internal-relation relates _role;
+      attribute _private-name value string;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match entity $x;
+      """
+    Then uniquely identify answer concepts
+      | x                     |
+      | label:person          |
+      | label:_hidden-entity  |
+
+    When get answers of typeql read query
+      """
+      match relation $x;
+      """
+    Then uniquely identify answer concepts
+      | x                          |
+      | label:employment           |
+      | label:income               |
+      | label:_internal-relation   |
+
+    When get answers of typeql read query
+      """
+      match attribute $x;
+      """
+    Then uniquely identify answer concepts
+      | x                                |
+      | label:name                       |
+      | label:email                      |
+      | label:start-date                 |
+      | label:employment-reference-code  |
+      | label:phone-nr                   |
+      | label:_private-name              |
+
+
   ################
   # ENTITY TYPES #
   ################
