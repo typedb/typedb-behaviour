@@ -720,6 +720,18 @@ Feature: TypeQL Put Query
     Then answer size is: 2
 
 
+  Scenario: In a put stage, using an optional variable outside a try block errors.
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    """
+    match
+      $p isa person;
+      try { $p has age $age; };
+    put
+      $q isa person, has name "Jane", has $age;
+    """
+
+
   Scenario: nested try blocks in put are disallowed
     Given connection open write transaction for database: typedb
     Given typeql write query; fails
