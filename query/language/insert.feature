@@ -2852,6 +2852,23 @@ Parker";
     """
     Then answer size is: 3
 
+
+  Scenario: Optional variables in an insert must be within a try block
+    Given typeql write query
+    """
+    insert
+      $john isa person, has ref 0, has name "John";
+    """
+    When typeql write query; fails with a message containing: "The optional variable 'age' was used outside a 'try' block."
+    """
+    match
+      $p isa person;
+      try { $p has age $age; };
+    insert
+      $q isa person, has ref 1, has name "Jane", has $age;
+    """
+
+
   Scenario: nested try blocks in delete are disallowed
     Given typeql write query; fails
     """
