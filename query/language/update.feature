@@ -3028,6 +3028,17 @@ Feature: TypeQL Update Query
       | key:ref:0 | attr:name:Jane |
 
 
+  Scenario: In an update stage, using an optional variable outside a try block errors.
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    """
+    match
+      $john isa person, has name "John";
+      $other isa person; try { $other has age $age; };
+    update
+      $john has $age;
+    """
+
+
   Scenario: nested try blocks in insert are disallowed
     Given typeql write query; fails
     """

@@ -2853,13 +2853,13 @@ Parker";
     Then answer size is: 3
 
 
-  Scenario: Optional variables in an insert must be within a try block
+  Scenario: In an insert stage, using an optional variable outside a try block errors.
     Given typeql write query
     """
     insert
       $john isa person, has ref 0, has name "John";
     """
-    When typeql write query; fails with a message containing: "The optional variable 'age' was used outside a 'try' block."
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
     """
     match
       $p isa person;
