@@ -5422,16 +5422,16 @@ Feature: TypeQL Match Clause
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Given typeql schema query; parsing fails
+    Given typeql schema query
       """
       define
-      entity _leading_connector_disallowed;
+      entity _leading_underscore_allowed;
       """
 
     Given typeql read query; parsing fails
       """
       match
-      entity $_leading_connector_disallowed;
+      entity $_leading_underscore_in_var_disallowed;
       """
 
     Given typeql schema query
