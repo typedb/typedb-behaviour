@@ -690,3 +690,12 @@ Feature: TypeQL Reduce Queries
       | x         | std   |
       | key:ref:0 | none  |
 
+
+  Scenario: The variable resulting from a reduction cannot be grouped on
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The variable 'c' was not available for use in the reduce."
+      """
+      match $p isa person;
+      reduce $c = count($p) groupby $c;
+      """
+
