@@ -5453,8 +5453,7 @@ Feature: TypeQL Match Clause
     Given get answers of typeql read query
       """
       match
-      $r isa _underscore-relation;
-      $r links (_underscore-relation:_underscore-role: $p);
+      $r isa _underscore-relation (_underscore-role: $p), links (_underscore-role: $q);
       """
 
     Given get answers of typeql read query
