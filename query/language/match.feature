@@ -5422,21 +5422,23 @@ Feature: TypeQL Match Clause
     Given transaction closes
 
     Given connection open schema transaction for database: typedb
-    Given typeql schema query; parsing fails
+    Given typeql schema query
       """
       define
-      entity _leading_connector_disallowed;
+      entity _leading_underscore_allowed;
       """
 
     Given typeql read query; parsing fails
       """
       match
-      entity $_leading_connector_disallowed;
+      entity $_leading_underscore_in_var_disallowed;
       """
 
     Given typeql schema query
       """
       define
+      relation _underscore-relation relates _underscore-role;
+      entity _leading_underscore_allowed plays _underscore-relation:_underscore-role;
       entity following_connectors-and-digits-1-2-3-allowed;
       """
     Given transaction commits
@@ -5446,4 +5448,21 @@ Feature: TypeQL Match Clause
       """
       match
       entity $following_connectors-and-digits-1-2-3-allowed;
+      """
+
+    Given get answers of typeql read query
+      """
+      match
+      $r isa _underscore-relation (_underscore-role: $p), links (_underscore-role: $q);
+      """
+
+    Given get answers of typeql read query
+      """
+      with
+      fun _underscore-func($p: _leading_underscore_allowed) -> _leading_underscore_allowed:
+      match $p isa _leading_underscore_allowed;
+      return first $p;
+      match
+      $p isa _leading_underscore_allowed;
+      let $q = _underscore-func($p);
       """
