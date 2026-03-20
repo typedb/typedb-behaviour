@@ -247,13 +247,13 @@ Feature: Validate Function Signatures Against Definition & Calls
     When typeql schema query
     """
     define
-    fun i_return_a_stream_with_an_optional() -> { person, person }:
+    fun i_return_a_stream_with_an_optional() -> { person, person? }:
     match
       $x isa person;
       try { $y isa person; };
     return { $x, $y };
 
-    fun i_return_a_single_with_an_optional() -> person, person:
+    fun i_return_a_single_with_an_optional() -> person, person?:
     match
       $x isa person;
       try { $y isa person; };
