@@ -319,3 +319,84 @@ Feature: TypeQL Optional
 
   # TODO: Test out assigning to optionals  let $x? = f($y);
   # TODO: Test out functions returning optionals: fun f(x) -> { person?, name };
+
+  # TODO: Should it? Or do we use ? to unwrap?
+  Scenario: An optional return assigned by a function return must be explicitly marked as optional or explicitly unwrapped
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has name "Alice", has ref 40;
+      $p2 isa person, has name "Charlie", has ref 41;
+      $p3 isa person, has ref 42;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "TODO"
+      """
+      with fun persons_with_optional_name() -> { person, name? }:
+      match $p isa person; try { $p has name $n; };
+      return { $p, $n };
+
+      match
+        $p isa person;
+        let $p, $n in persons_with_optional_name();
+      """
+
+    When get answers of typeql read query
+      """
+      with fun persons_with_optional_name() -> { person, name? }:
+      match $p isa person; try { $p has name $n; };
+      return { $p, $n };
+
+      match
+        let $p, $n? in persons_with_optional_name();
+      """
+    Then answer size is: 3
+
+    When get answers of typeql read query
+      """
+      with fun persons_with_optional_name() -> { person, name? }:
+      match $p isa person; try { $p has name $n; };
+      return { $p, $n };
+
+      match
+        let $p, $n! in persons_with_optional_name();
+      """
+    Then answer size is: 2
+
+
+
+  Scenario: An optional return assigned by a function return may not be used in the same block, unless unwrapped
+    Given typeql write query
+      """
+      insert
+      $p1 isa person, has name "Alice", has ref 40;
+      $p2 isa person, has name "Charlie", has ref 41;
+      $p3 isa person, has ref 42;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "TODO"
+      """
+      with fun persons_with_optional_name() -> { person, name? }:
+      match $p isa person; try { $p has name $n; };
+      return { $p, $n };
+
+      match
+        $n > "Bob";
+        let $p, $n? in persons_with_optional_name();
+      """
+
+    When get answers of typeql read query
+      """
+      with fun persons_with_optional_name() -> { person, name? }:
+      match $p isa person; try { $p has name $n; };
+      return { $p, $n };
+
+      match
+        $n > "Bob";
+        let $p, $n! in persons_with_optional_name();
+      """
+    Then answer size is: 1
