@@ -140,3 +140,85 @@ Feature: TypeQL Define Query
       | y                |
       | value:integer:3  |
       | value:integer:13 |
+
+
+  Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a parent conjunction
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match
+      let $x = 1; let $a = 10;
+      { $x < 5; $a > 5; } or { $a < 15; };
+      { $a < 20; } or { $x > 0; $a > 0; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:3 |
+
+    # TODO: Might be better with disjoint variable error "Locally-scoped variable 'x' cannot be re-used elsewhere as a locally-scoped variable"
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    match
+      let $a = 10;
+      { let $x = 1; $x < 5; $a > 5; } or { $a < 15; };
+      { $a < 20; } or { let $x = 1; $x > 0; $a > 0; };
+    """
+
+
+  Scenario: Variables which occur in a negation and are NOT PRESENT in a parent conjunction are local and unavailable in subsequent stages.
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match
+      let $a = 10;
+      not { let $x = 1; $x > 10; };
+    match
+      let $b = $a + 2;
+    """
+    Then uniquely identify answer concepts
+      | b                |
+      | value:integer:12 |
+
+    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable x"
+    """
+    match
+      let $a = 10;
+      not { let $x = 1; $x > 10; };
+    match
+      let $y = $x + 2;
+    """
+
+
+  Scenario: Variables which occur in a negation and ARE PRESENT in a parent conjunction MUST BE BOUND by the parent conjunction
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match
+      let $x = 1;
+      not { $x > 10; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    match
+      not { let $x = 1; $x > 10; };
+      let $y = $x + 2;
+    """
+
+
+  Scenario: It is illegal to have variables are in a negation, NOT PRESENT in a parent conjunction, and present only in some branches of a sibling disjunction.
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    match
+      let $a = 10;
+      { let $x = 1; $a > 5; } or { $a < 15; };
+      not { $x > 10; };
+    """
+
