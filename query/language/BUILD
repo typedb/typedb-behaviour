@@ -21,6 +21,7 @@ files = [
     "reduce.feature",
     "undefine.feature",
     "update.feature",
+    "variables.feature",
 ]
 
 filegroup(

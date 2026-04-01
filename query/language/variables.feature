@@ -1,0 +1,142 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+#noinspection CucumberUndefinedStep
+Feature: TypeQL Define Query
+  # Note: Most rules across stages are repeated in pipeline.feature
+  Background: Open connection and create a simple extensible schema
+    Given typedb starts
+    Given connection opens with default authentication
+    Given connection is open: true
+    Given connection reset database: typedb
+    Given connection open schema transaction for database: typedb
+
+    Given typeql schema query
+      """
+      define
+      entity person, owns ref @key, owns name @card(0..);
+      attribute name, value string;
+      attribute ref, value integer;
+      attribute number @independent, value integer;
+      """
+    Given transaction commits
+
+#
+#    Given connection open write transaction for database: typedb
+#    When typeql write query
+#    """
+#    insert
+#      $_ isa number 1;
+#      $_ isa number 11;
+#    """
+#    Then transaction commits
+
+  Scenario: Variables are available in the next stage
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match let $x = 1;
+    match let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:3 |
+
+
+  Scenario: Variables are not available in subsequent stages if they are not selected by a select stage
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable x"
+    """
+    match
+      let $x = 1;
+      let $a = 2;
+    select $a;
+    match
+      let $y = $x + 2;
+    """
+
+
+  Scenario: Variables are not available in subsequent stages if they are aggregated over by a reduce stage
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable x"
+    """
+    match
+      let $x = 1;
+    reduce $c = sum($x);
+    match
+      let $y = $x + 2;
+    """
+
+
+  Scenario: Variables which occur in all branches of a disjunction are available in the root & subsequent stages
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      { let $x = 1; } or { let $x = 11; };
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+      | value:integer:13 |
+
+    When get answers of typeql read query
+    """
+    match
+      { let $x = 1; } or { let $x = 11; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+      | value:integer:13 |
+
+
+  Scenario: Variables which occur in only some branches of a disjunction and are NOT BOUND in a parent conjunction are not available in the root & subsequent stages
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    match
+      { let $x = 1; let $a = 100; } or { let $z = 11; let $a = 100; };
+      let $y = $x + 2;
+    """
+
+    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable x"
+    """
+    match
+      { let $x = 1; let $a = 100; } or { let $z = 11; let $a = 100; };
+    match
+      let $y = $x + 2;
+    """
+
+
+  Scenario: Variables which occur in only some branches of a disjunction and ARE BOUND in a parent conjunction are available in subsequent stages
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match
+      let $x = 1; let $a = 10;
+      { $x < 5; $a > 5; } or { $a < 15; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:3 |
+
+    Then get answers of typeql read query
+    """
+    match
+      let $a = 10;
+      { let $x = 1;  } or { let $x = 11;  };
+      { $x < 5; $a > 5; } or { $a < 15; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+      | value:integer:13 |
