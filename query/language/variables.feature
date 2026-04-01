@@ -94,6 +94,25 @@ Feature: TypeQL Define Query
       | value:integer:3  |
       | value:integer:13 |
 
+    When get answers of typeql read query
+    """
+    # Skip a level
+    match
+      {
+        { let $x = 1;  } or { let $x = 11;  };
+      } or {
+        { let $x = 6;  } or { let $x = 16;  };
+      };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+      | value:integer:13 |
+      | value:integer:8  |
+      | value:integer:18 |
+
 
   Scenario: Variables which occur in only some branches of a disjunction and are NOT BOUND in a parent conjunction are not available in the root & subsequent stages
     Given connection open read transaction for database: typedb
@@ -115,7 +134,7 @@ Feature: TypeQL Define Query
 
   Scenario: Variables which occur in only some branches of a disjunction and ARE BOUND in a parent conjunction are available in subsequent stages
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match
       let $x = 1; let $a = 10;
@@ -127,7 +146,7 @@ Feature: TypeQL Define Query
       | y               |
       | value:integer:3 |
 
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match
       let $a = 10;
@@ -142,9 +161,10 @@ Feature: TypeQL Define Query
       | value:integer:13 |
 
 
-  Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a parent conjunction
+
+  Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a common ancestor conjunction
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match
       let $x = 1; let $a = 10;
@@ -169,7 +189,7 @@ Feature: TypeQL Define Query
 
   Scenario: Variables which occur in a negation and are NOT PRESENT in a parent conjunction are local and unavailable in subsequent stages.
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match
       let $a = 10;
@@ -191,9 +211,9 @@ Feature: TypeQL Define Query
     """
 
 
-  Scenario: Variables which occur in a negation and ARE PRESENT in a parent conjunction MUST BE BOUND by the parent conjunction
+  Scenario: Variables which occur in a negation and ARE PRESENT elsewhere MUST BE BOUND in the parent conjunction
     Given connection open read transaction for database: typedb
-    Then get answers of typeql read query
+    When get answers of typeql read query
     """
     match
       let $x = 1;
@@ -205,6 +225,20 @@ Feature: TypeQL Define Query
       | y                |
       | value:integer:3  |
 
+    When get answers of typeql read query
+    """
+    # Skip a level
+    match
+      let $x = 1;
+      { not { $x > 10; }; } or { not { $x < 0; }; };
+    match
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:integer:3  |
+
+
     Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
@@ -214,6 +248,7 @@ Feature: TypeQL Define Query
 
 
   Scenario: It is illegal to have variables are in a negation, NOT PRESENT in a parent conjunction, and present only in some branches of a sibling disjunction.
+    Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
@@ -222,3 +257,34 @@ Feature: TypeQL Define Query
       not { $x > 10; };
     """
 
+
+  Scenario: It is illegal to have variables in two separate negations which are NOT BOUND in an ancestor conjunction.
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      let $x = 1;
+      not { $x > 10; };
+      not { $x < 0; };
+      let $y = $x + 2;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:3 |
+
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    match
+      not { let $x = 1; $x > 10; };
+      not { let $x = 2; $x < 0; };
+    """
+
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    # Skip a level
+    match
+      { not { let $x = 1; $x > 10; }; } or
+      { not { let $x = 2; $x < 0;  }; };
+    match
+      let $y = $x + 2;
+    """
