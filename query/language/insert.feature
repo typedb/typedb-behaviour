@@ -2875,3 +2875,22 @@ Parker";
     match $p isa person; try { $p has name $name, has age $age; };
     insert $q isa person; try { $q has $name; try { $q has $age; }; };
     """
+
+
+  Scenario: Values of attributes inserted in parent blocks are available in try blocks
+    When get answers of typeql write query
+    """
+    insert
+     $thirty-two isa ref 32; # Wrong type just to complicate things.
+     $john isa person, has name "John", has ref 0;
+     try { $john has age == $thirty-two; };
+    """
+    Then transaction commits
+    Then connection open write transaction for database: typedb
+    Then get answers of typeql read query
+    """
+    match $p isa person, has age $age;
+    """
+    Then uniquely identify answer concepts
+      | p             | age         |
+      | key:name:John | attr:age:32 |
