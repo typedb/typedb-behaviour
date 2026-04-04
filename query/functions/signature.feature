@@ -27,7 +27,7 @@ Feature: Validate Function Signatures Against Definition & Calls
 
   Scenario: Functions whose return do not match the signature error
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature - mismatch at index '1'"
     """
     define
     fun i_return_a_stream_of_two() -> { person, person }:
@@ -37,7 +37,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature - mismatch at index '1'"
     """
     define
     fun i_return_a_stream_of_one() -> { person }:
@@ -47,7 +47,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a single row but the implementation returns a stream"
     """
     define
     fun i_return_a_single_person() -> person:
@@ -57,7 +57,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a stream but the implementation returns a single row"
     """
     define
     fun i_return_a_stream_of_persons() -> { person }:
@@ -67,7 +67,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a single row but the implementation returns a stream"
     """
     define
     fun i_return_a_string() -> string:
@@ -218,4 +218,75 @@ Feature: Validate Function Signatures Against Definition & Calls
       let $name in name_attribute_of_cat($cat);
       $name isa breed;
     """
+
+
+  Scenario: Function signatures must reflect optionality of returned concepts
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature - mismatch at index '1'"
+    """
+    define
+    fun i_return_a_stream_with_an_optional() -> { person, person }:
+    match
+      $x isa person;
+      try { $y isa person; };
+    return { $x, $y };
+    """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature - mismatch at index '1'"
+    """
+    define
+    fun i_return_a_single_with_an_optional() -> person, person:
+    match
+      $x isa person;
+      try { $y isa person; };
+    return first $x, $y;
+    """
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun i_return_a_stream_with_an_optional() -> { person, person? }:
+    match
+      $x isa person;
+      try { $y isa person; };
+    return { $x, $y };
+
+    fun i_return_a_single_with_an_optional() -> person, person?:
+    match
+      $x isa person;
+      try { $y isa person; };
+    return first $x, $y;
+    """
+    Then transaction commits
+
+
+  Scenario Outline:: Function which return reduction '<reducer>' must have signatures which reflect optionality of reduce operations
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature - mismatch at index '0'"
+    """
+    define
+      fun i_return_<reducer>() -> double:
+      match
+        let $x = 5.0;
+      return <reducer>($x);
+    """
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+      fun i_return_<reducer>() -> double?:
+      match
+        let $x = 5.0;
+      return <reducer>($x);
+    """
+    Then transaction commits
+    Examples:
+      | reducer |
+      | max     |
+      | min     |
+      | mean    |
+      | median  |
+      | std     |
 
