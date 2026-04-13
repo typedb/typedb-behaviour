@@ -288,3 +288,19 @@ Feature: TypeQL Define Query
     match
       let $y = $x + 2;
     """
+
+
+  Scenario: Reassigning an argument to a return does not make it binding
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    """
+    with fun ident($x: integer) -> integer:
+    match let $y = $x;
+    return first $y;
+
+    match
+      let $x = ident($x);
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:3 |
