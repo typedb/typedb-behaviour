@@ -59,6 +59,20 @@ Feature: Driver Connection
     Then connection is open: true
     Then connection has database: typedb
 
+
+  Scenario: Driver can configure request timeout
+    When connection closes
+    When set driver option request_timeout_millis to: 7200000
+    When connection opens with default authentication
+    Then connection is open: true
+    Then connection has database: typedb
+
+
+  Scenario: Driver fails to connect with impossibly short request timeout
+    When connection closes
+    When set driver option request_timeout_millis to: 1
+    Then connection opens with default authentication; fails with a message containing: "timed out"
+
   #############
   # DATABASES #
   #############
