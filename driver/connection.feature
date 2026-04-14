@@ -60,6 +60,7 @@ Feature: Driver Connection
     Then connection has database: typedb
 
 
+  @ignore-typedb-http
   Scenario: Driver can configure request timeout
     When connection closes
     When set driver option request_timeout_millis to: 7200000
@@ -68,6 +69,7 @@ Feature: Driver Connection
     Then connection has database: typedb
 
 
+  @ignore-typedb-http
   Scenario: Driver fails to connect with impossibly short request timeout
     When connection closes
     When set driver option request_timeout_millis to: 1
