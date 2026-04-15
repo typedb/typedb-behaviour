@@ -1391,6 +1391,7 @@ Feature: Driver Query
       """
       define entity entity;
       """
+    Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "Failed to execute define query"
       """
       define attribute name owns name;
