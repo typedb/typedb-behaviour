@@ -1387,7 +1387,7 @@ Feature: Driver Query
       """
       match $r label non-existing;
       """
-    Then typeql schema query; fails with a message containing: "Query parsing failed"
+    Then typeql schema query; fails with a message containing: "The reserved keyword \"entity\" cannot be used as an identifier"
       """
       define entity entity;
       """
