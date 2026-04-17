@@ -301,6 +301,3 @@ Feature: TypeQL Define Query
     match
       let $x = ident($x);
     """
-    Then uniquely identify answer concepts
-      | y               |
-      | value:integer:3 |
