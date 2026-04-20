@@ -16,11 +16,12 @@ Feature: Validate Function Signatures Against Definition & Calls
     Given typeql schema query
     """
     define
-    entity person, owns name, owns nationality;
-    entity cat, owns name, owns breed;
+    entity person, owns name, owns weight, owns nationality;
+    entity cat, owns name, owns weight, owns breed;
     attribute name, value string;
-    attribute nationality, value integer;
+    attribute nationality, value string;
     attribute breed, value string;
+    attribute weight, value double;
     """
     Given transaction commits
 
@@ -75,6 +76,46 @@ Feature: Validate Function Signatures Against Definition & Calls
       $x isa person;
     return { $x };
     """
+
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '1' did not match that declared in the signature"
+    """
+    define
+    fun the_first_returned_value_is_optional() -> { person, person }:
+    match
+      $x isa person;
+      try { $y isa person; };
+    return { $x, $y };
+    """
+
+
+  Scenario Outline: A function returning the <op> of a stream must declare the corresponding return as optional
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '0' did not match that declared in the signature"
+    """
+    define
+    fun my_reduce_returns_optional() -> double:
+    match
+      $x isa person, has weight $weight;
+    return <op>($weight);
+    """
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun my_reduce_returns_optional() -> double?:
+    match
+      $x isa person, has weight $weight;
+    return <op>($weight);
+    """
+    Then transaction commits
+    Examples:
+      | op     |
+      | min    |
+      | max    |
+      | median |
+      | std    |
 
 
   Scenario: Functions which do not return the specified type fail type-inference
