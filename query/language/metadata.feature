@@ -81,9 +81,9 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $struct_doc = get_doc("location");
-        let $field_doc = get_doc("location:latitude");
-        let $field_doc_2 = get_doc("location:longitude");
+        let $struct_doc = get_struct_doc("location");
+        let $field_doc = get_struct_field_doc("location", "latitude");
+        let $field_doc_2 = get_struct_field_doc("location", "longitude");
       """
     Then uniquely identify answer concepts
       | struct_doc                          | field_doc                | field_doc_2            |
@@ -165,7 +165,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $doc = get_constraint_doc("person", "<constraint>", "<rhs>");
+      match let $doc = get_<constraint>_doc("person", "<rhs>");
       """
     Then uniquely identify answer concepts
       | doc                      |
@@ -275,9 +275,9 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $struct_meta = get_meta("key", "location");
-        let $field_meta = get_meta("key", "location:latitude");
-        let $field_meta_2 = get_meta("key", "location:longitude");
+        let $struct_meta = get_struct_meta("key", "location");
+        let $field_meta = get_struct_field_meta("key", "location", "latitude");
+        let $field_meta_2 = get_struct_field_meta("key", "location", "longitude");
       """
     Then uniquely identify answer concepts
       | struct_meta                         | field_meta               | field_meta_2           |
@@ -299,7 +299,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $metadata = function_get_meta("get_random_number");
+        let $metadata = get_function_meta("get_random_number");
       """
     Then uniquely identify answer concepts
       | metadata                                |
@@ -318,7 +318,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_constraint_meta("key", "person", "<constraint>", "<rhs>");
+      match let $metadata = get_<constraint>_meta("key", "person", "<rhs>");
       """
     Then uniquely identify answer concepts
       | metadata                 |
