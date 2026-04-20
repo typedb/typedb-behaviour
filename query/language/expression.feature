@@ -40,7 +40,7 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable v"
+    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
