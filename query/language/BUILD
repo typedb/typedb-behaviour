@@ -7,13 +7,13 @@ package(default_visibility = ["//visibility:public"])
 load("@typedb_dependencies//tool/checkstyle:rules.bzl", "checkstyle_test")
 
 files = [
-    "annotations.feature",
     "define.feature",
     "delete.feature",
     "expression.feature",
     "fetch.feature",
     "insert.feature",
     "match.feature",
+    "metadata.feature",
     "modifiers.feature",
     "negation.feature",
     "pipelines.feature",
