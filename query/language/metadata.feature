@@ -21,7 +21,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $doc = get_doc("person");
+      match let $doc = get_doc(person);
       """
     Then uniquely identify answer concepts
       | doc                                   |
@@ -39,7 +39,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $doc = get_doc("name");
+      match let $doc = get_doc(name);
       """
     Then uniquely identify answer concepts
       | doc                                 |
@@ -58,8 +58,8 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $relation_doc = get_doc("marriage");
-        let $role_doc = get_doc("marriage:spouse");
+        let $relation_doc = get_doc(marriage);
+        let $role_doc = get_doc(marriage:spouse);
       """
     Then uniquely identify answer concepts
       | relation_doc                            | role_doc                                     |
@@ -125,7 +125,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $doc = get_doc("person");
+      match let $doc = get_doc(person);
       """
     Then uniquely identify answer concepts
       | doc                                   |
@@ -194,7 +194,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $doc = get_doc("person");
+        let $doc = get_doc(person);
         let $func_doc = get_function_doc("get_random_number");
       """
     Then uniquely identify answer concepts
@@ -215,7 +215,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_metadata("key", "person");
+      match let $metadata = get_meta("key", person);
       """
     Then uniquely identify answer concepts
       | metadata                              |
@@ -233,7 +233,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_metadata("key", "name");
+      match let $metadata = get_meta("key", name);
       """
     Then uniquely identify answer concepts
       | metadata                            |
@@ -252,11 +252,11 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $relation_doc = get_metadata("key", "marriage");
-        let $role_doc = get_metadata("key", "marriage:spouse");
+        let $relation_meta = get_meta("key", marriage);
+        let $role_meta = get_meta("key", marriage:spouse);
       """
     Then uniquely identify answer concepts
-      | relation_doc                            | role_doc                                     |
+      | relation_meta                           | role_meta                                    |
       | value:string:This represents a marriage | value:string:This role is played by a spouse |
 
 
@@ -275,12 +275,12 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $struct_doc = get_metadata("key", "location");
-        let $field_doc = get_metadata("key", "location:latitude");
-        let $field_doc_2 = get_metadata("key", "location:longitude");
+        let $struct_meta = get_meta("key", "location");
+        let $field_meta = get_meta("key", "location:latitude");
+        let $field_meta_2 = get_meta("key", "location:longitude");
       """
     Then uniquely identify answer concepts
-      | struct_doc                          | field_doc                | field_doc_2            |
+      | struct_meta                         | field_meta               | field_meta_2           |
       | value:string:geographic coordinates | value:string:north-south | value:string:east-west |
 
 
@@ -299,7 +299,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $metadata = function_get_doc("get_random_number");
+        let $metadata = function_get_meta("get_random_number");
       """
     Then uniquely identify answer concepts
       | metadata                                |
@@ -318,7 +318,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_constraint_metadata("key", "person", "<constraint>", "<rhs>");
+      match let $metadata = get_constraint_meta("key", "person", "<constraint>", "<rhs>");
       """
     Then uniquely identify answer concepts
       | metadata                 |
@@ -345,8 +345,8 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $repr = get_metadata("repr", "person");
-        let $table = get_metadata("table", "person");
+        let $repr = get_meta("repr", person);
+        let $table = get_meta("table", person);
       """
     Then uniquely identify answer concepts
       | repr                | table               |
@@ -362,7 +362,7 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_metadata("key", "person");
+      match let $metadata = get_meta("key", person);
       """
     Then uniquely identify answer concepts
       | metadata      |
@@ -377,8 +377,8 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $metadata = get_metadata("key", "person");
-        let $metadata_other = get_metadata("other", "person");
+        let $metadata = get_meta("key", person);
+        let $metadata_other = get_meta("other", person);
       """
     Then uniquely identify answer concepts
       | metadata                              | metadata_other |
