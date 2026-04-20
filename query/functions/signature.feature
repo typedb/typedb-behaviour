@@ -260,3 +260,60 @@ Feature: Validate Function Signatures Against Definition & Calls
       $name isa breed;
     """
 
+
+  Scenario: A function call assigning an optional returned value must mark the return as optional
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun cats_and_their_names() -> { cat, name? }:
+    match
+      $cat isa cat;
+      try { $cat has name $name; };
+    return { $cat, $name };
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'name' is assigned an optional value but not marked with a '?'"
+    """
+    match
+      let $cat, $name in cats_and_their_names();
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      let $cat, $name? in cats_and_their_names();
+    """
+    Then answer size is: 0
+
+
+  Scenario: A variable assigned an optional value by a function call may not be referenced in the same stage
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    fun cats_and_their_names() -> { cat, name? }:
+    match
+      $cat isa cat;
+      try { $cat has name $name; };
+    return { $cat, $name };
+    """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'name' is optionally assigned by a function return, and may not be referenced elsewhere in the same stage"
+    """
+    match
+      let $cat, $name? in cats_and_their_names();
+      $p isa person, has name $name;
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      let $cat, $name? in cats_and_their_names();
+    match
+      try { $p isa person, has name $name; };
+    """
+    Then answer size is: 0
+
