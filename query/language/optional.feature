@@ -154,7 +154,9 @@ Feature: TypeQL Optional
 
 
   Scenario: an optional cannot be used within a disjunction
-    When  typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
+    # TODO: Better error messages from core again
+    # Then  typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
+    Then typeql read query; fails with a message containing: "is required to be bound to a value before it's used"
       """
       match $x isa person, has name "Frank";
       {
@@ -194,7 +196,10 @@ Feature: TypeQL Optional
     Then uniquely identify answer concepts
       | x         | r1        | r2        |
       | key:ref:1 | key:ref:3 | key:ref:3 |
-    Then typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
+    # TODO: Better error messages from core again
+    # Then typeql read query; fails with a message containing: "cannot be re-used elsewhere as a locally-scoped variable"
+    Then typeql read query; fails with a message containing: "The variable 'y' is required to be bound to a value before it's used"
+
     """
       match
       $x isa person, has name "Eve";
