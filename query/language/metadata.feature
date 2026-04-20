@@ -105,7 +105,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $doc = get_function_doc("get_random_number");
+        let $doc = get_fun_doc("get_random_number");
       """
     Then uniquely identify answer concepts
       | doc                                     |
@@ -145,7 +145,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $doc = get_function_doc("get_random_number");
+        let $doc = get_fun_doc("get_random_number");
       """
     Then uniquely identify answer concepts
       | doc                                     |
@@ -195,7 +195,7 @@ Feature: TypeQL schema metadata
       """
       match
         let $doc = get_doc(person);
-        let $func_doc = get_function_doc("get_random_number");
+        let $func_doc = get_fun_doc("get_random_number");
       """
     Then uniquely identify answer concepts
       | doc           | func_doc      |
@@ -299,7 +299,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $metadata = get_function_meta("get_random_number");
+        let $metadata = get_fun_meta("get_random_number");
       """
     Then uniquely identify answer concepts
       | metadata                                |
