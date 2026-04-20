@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Define Query
+Feature: TypeQL Variable binding tests
   # Note: Most rules across stages are repeated in pipeline.feature
   Background: Open connection and create a simple extensible schema
     Given typedb starts
@@ -37,7 +37,7 @@ Feature: TypeQL Define Query
 
   Scenario: Variables are not available in subsequent stages if they are not selected by a select stage
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable 'x'"
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
       let $x = 1;
@@ -50,7 +50,7 @@ Feature: TypeQL Define Query
 
   Scenario: Variables are not available in subsequent stages if they are aggregated over by a reduce stage
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable 'x'"
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
       let $x = 1;
@@ -114,7 +114,7 @@ Feature: TypeQL Define Query
       let $y = $x + 2;
     """
 
-    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable 'x'"
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
       { let $x = 1; let $a = 100; } or { let $z = 11; let $a = 100; };
@@ -192,7 +192,7 @@ Feature: TypeQL Define Query
       | b                |
       | value:integer:12 |
 
-    Then typeql read query; fails with a message containing: "Invalid query containing unbound concept variable 'x'"
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
     """
     match
       let $a = 10;
