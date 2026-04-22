@@ -5205,6 +5205,70 @@ Feature: TypeQL Match Clause
        """
     Then answer size is: 1
 
+
+  ####################
+  # REUSED VARIABLES #
+  ####################
+
+  Scenario: A relation query where the same variable plays both roles only matches relations where the players are the same
+    Given typeql schema query
+       """
+       define
+         person plays employment:employer;
+       """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+       """
+       insert
+         $p1 isa person, has ref 1;
+         $p2 isa person, has ref 2;
+         $p3 isa person, has ref 3;
+         $_ isa employment, links (employer: $p1, employee: $p2), has ref 4;
+         $_ isa employment, links (employer: $p3, employee: $p3), has ref 5;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $_ isa employment, links (employer: $p, employee: $p);
+      """
+    Then uniquely identify answer concepts
+      | p         |
+      | key:ref:3 |
+
+
+  Scenario: A relation query where the same variable plays relation and player only matches relations where the relation plays the role in itself.
+    Given typeql schema query
+       """
+       define
+         relation loop, relates member, owns ref @key;
+         loop plays loop:member;
+       """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+       """
+       insert
+         $l1 isa loop, has ref 1;
+         $l2 isa loop, has ref 2;
+         $l1 links (member: $l2);
+         $l2 links (member: $l2);
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $l isa loop, links (member: $l);
+      """
+    Then uniquely identify answer concepts
+      | l         |
+      | key:ref:2 |
+
   #######################
   # NEGATION VALIDATION #
   #######################

@@ -121,14 +121,26 @@ Feature: Function Usage
     match
       let $five = 5;
     return first $five;
+
+    fun five_five() -> integer, integer:
+    match
+      let $five = 5;
+      let $five_again = 5;
+    return first $five, $five_again;
+
     """
     Given transaction commits
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails
+    Then typeql read query; fails with a message containing: "Variable 'five' cannot be assigned to multiple times in the same branch"
     """
     match
       let $five = five();
       let $five = five();
+    """
+    Then typeql read query; fails with a message containing: "Variable 'five' cannot be assigned to multiple times in the same branch"
+    """
+    match
+      let $five, $five = five_five();
     """
 
 
