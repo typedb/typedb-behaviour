@@ -128,6 +128,18 @@ Feature: Function Usage
       let $five_again = 5;
     return first $five, $five_again;
 
+    fun five_stream() -> { integer }:
+    match
+      let $five = 5;
+    return { $five };
+
+    fun five_five_stream() -> { integer, integer }:
+    match
+      let $five = 5;
+      let $five_again = 5;
+    return { $five, $five_again };
+
+
     """
     Given transaction commits
     Given connection open read transaction for database: typedb
@@ -141,6 +153,18 @@ Feature: Function Usage
     """
     match
       let $five, $five = five_five();
+    """
+    Then typeql read query; fails with a message containing: "Variable 'five' cannot be assigned to multiple times in the same branch"
+    """
+    match
+      let $five in five_stream();
+      let $five in five_stream();
+    """
+
+    Then typeql read query; fails with a message containing: "Variable 'five' cannot be assigned to multiple times in the same branch"
+    """
+    match
+      let $five, $five in five_five_stream();
     """
 
 
