@@ -27,7 +27,7 @@ Feature: Validate Function Signatures Against Definition & Calls
 
   Scenario: Functions whose return do not match the signature error
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The size of the tuple returned by the body of the function did not match that declared in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns 2 item(s), but the definition returns 1"
     """
     define
     fun i_return_a_stream_of_two() -> { person, person }:
@@ -37,7 +37,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The size of the tuple returned by the body of the function did not match that declared in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns 1 item(s), but the definition returns 2"
     """
     define
     fun i_return_a_stream_of_one() -> { person }:
