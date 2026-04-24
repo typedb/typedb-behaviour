@@ -1541,8 +1541,10 @@ Feature: TypeQL Undefine Query
       @<category> from player;
       """
     Examples:
-      | annotation | category |
-      | abstract   | abstract |
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for relation types
@@ -1609,9 +1611,11 @@ Feature: TypeQL Undefine Query
       @<category> from parentship;
       """
     Examples:
-      | annotation | category |
-      | abstract   | abstract |
-#      | cascade    | cascade  | # TODO: Cascade is temporarily turned off
+      | annotation       | category    |
+      | abstract         | abstract    |
+#      | cascade          | cascade     | # TODO: Cascade is temporarily turned off
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for attribute types
@@ -1678,9 +1682,11 @@ Feature: TypeQL Undefine Query
       @<category> from description;
       """
     Examples:
-      | annotation  | category    |
-      | abstract    | abstract    |
-      | independent | independent |
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | independent      | independent |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for relates/role types
@@ -1747,9 +1753,11 @@ Feature: TypeQL Undefine Query
       @<category> from parentship relates parent;
       """
     Examples:
-      | annotation | category |
-      | abstract   | abstract |
-      | card(1..1) | card     |
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | card(1..1)       | card        |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> to relates/role types lists
@@ -1815,10 +1823,12 @@ Feature: TypeQL Undefine Query
       @<category> from parentship relates parent[];
       """
     Examples:
-      | annotation | category |
-      | abstract   | abstract |
-      | card(1..1) | card     |
-      | distinct   | distinct |
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | card(1..1)       | card        |
+      | distinct         | distinct    |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for relates/role types using wrong scalar/list notation
@@ -1983,14 +1993,16 @@ Feature: TypeQL Undefine Query
       @<category> from player owns name[];
       """
     Examples:
-      | annotation       | category |
-      | unique           | unique   |
-      | key              | key      |
-      | card(1..1)       | card     |
-      | regex("val")     | regex    |
-      | range("1".."2")  | range    |
-      | values("1", "2") | values   |
-      | distinct         | distinct |
+      | annotation       | category    |
+      | unique           | unique      |
+      | key              | key         |
+      | card(1..1)       | card        |
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+      | distinct         | distinct    |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for owns using wrong scalar/list notation
@@ -2092,8 +2104,10 @@ Feature: TypeQL Undefine Query
       @<category> from player plays employment:employee;
       """
     Examples:
-      | annotation | category |
-      | card(1..1) | card     |
+      | annotation       | category    |
+      | card(1..1)       | card        |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for value types
@@ -2159,10 +2173,12 @@ Feature: TypeQL Undefine Query
       @<category> from description value string;
       """
     Examples:
-      | annotation       | category |
-      | regex("val")     | regex    |
-      | range("1".."2")  | range    |
-      | values("1", "2") | values   |
+      | annotation       | category    |
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+      | doc("docs here") | doc         |
+      | meta("key", "v") | meta("key") |
 
   ###################
   # COMPLEX QUERIES #
