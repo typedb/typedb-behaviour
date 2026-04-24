@@ -16,12 +16,11 @@ Feature: Validate Function Signatures Against Definition & Calls
     Given typeql schema query
     """
     define
-    entity person, owns name, owns weight, owns nationality;
-    entity cat, owns name, owns weight, owns breed;
+    entity person, owns name, owns nationality;
+    entity cat, owns name, owns breed;
     attribute name, value string;
-    attribute nationality, value string;
+    attribute nationality, value integer;
     attribute breed, value string;
-    attribute weight, value double;
     """
     Given transaction commits
 
