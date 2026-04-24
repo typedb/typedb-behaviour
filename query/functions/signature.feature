@@ -16,18 +16,19 @@ Feature: Validate Function Signatures Against Definition & Calls
     Given typeql schema query
     """
     define
-    entity person, owns name, owns nationality;
-    entity cat, owns name, owns breed;
+    entity person, owns name, owns weight, owns nationality;
+    entity cat, owns name, owns weight, owns breed;
     attribute name, value string;
-    attribute nationality, value integer;
+    attribute nationality, value string;
     attribute breed, value string;
+    attribute weight, value double;
     """
     Given transaction commits
 
 
   Scenario: Functions whose return do not match the signature error
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The size of the tuple returned by the body of the function did not match that declared in the signature"
     """
     define
     fun i_return_a_stream_of_two() -> { person, person }:
@@ -37,7 +38,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The size of the tuple returned by the body of the function did not match that declared in the signature"
     """
     define
     fun i_return_a_stream_of_one() -> { person }:
@@ -47,7 +48,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a single row but the implementation returns a stream"
     """
     define
     fun i_return_a_single_person() -> person:
@@ -57,7 +58,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a stream but the implementation returns a single row"
     """
     define
     fun i_return_a_stream_of_persons() -> { person }:
@@ -67,7 +68,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The return statement in the body of the function did not match that in the signature"
+    Then typeql schema query; fails with a message containing: "The function declares it returns a single row but the implementation returns a stream"
     """
     define
     fun i_return_a_string() -> string:
