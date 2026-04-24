@@ -1288,8 +1288,10 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation |
-      | abstract   |
+      | annotation       |
+      | abstract         |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to entity types
@@ -1338,9 +1340,11 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation |
-      | abstract   |
+      | annotation       |
+      | abstract         |
 #      | cascade          | # TODO: Cascade is temporarily turned off
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to relation types
@@ -1389,9 +1393,11 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation  |
-      | abstract    |
-      | independent |
+      | annotation       |
+      | abstract         |
+      | independent      |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to attribute types
@@ -1440,9 +1446,11 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation |
-      | abstract   |
-      | card(1..1) |
+      | annotation       |
+      | abstract         |
+      | card(1..1)       |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to relates/role types
@@ -1490,10 +1498,12 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation |
-      | abstract   |
-      | card(1..1) |
-      | distinct   |
+      | annotation       |
+      | abstract         |
+      | card(1..1)       |
+      | distinct         |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to relates/role types lists
@@ -1536,6 +1546,8 @@ Feature: TypeQL Define Query
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns
@@ -1696,6 +1708,8 @@ Feature: TypeQL Define Query
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to owns lists
@@ -1727,8 +1741,10 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
     Examples:
-      | annotation |
-      | card(1..1) |
+      | annotation       |
+      | card(1..1)       |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to plays
@@ -1781,6 +1797,8 @@ Feature: TypeQL Define Query
       | regex("val")     |
       | range("1".."2")  |
       | values("1", "2") |
+      | doc("docs here") |
+      | meta("key", "v") |
 
 
   Scenario Outline: cannot set annotation @<annotation> to wrong value type <value-type>
