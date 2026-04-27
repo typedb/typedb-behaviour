@@ -5244,8 +5244,12 @@ Feature: TypeQL Match Clause
     Given typeql schema query
        """
        define
-         relation loop, relates member, owns ref @key;
-         loop plays loop:member;
+         relation loop,
+            relates member,
+            relates member2,
+            owns ref @key,
+            plays loop:member,
+            plays loop:member2;
        """
     Given transaction commits
 
@@ -5255,8 +5259,10 @@ Feature: TypeQL Match Clause
        insert
          $l1 isa loop, has ref 1;
          $l2 isa loop, has ref 2;
+         $l3 isa loop, has ref 3;
          $l1 links (member: $l2);
          $l2 links (member: $l2);
+         $l3 links (member: $l3, member2: $l3);
        """
     Given transaction commits
 
@@ -5268,6 +5274,14 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | l         |
       | key:ref:2 |
+      | key:ref:3 |
+    Given get answers of typeql read query
+      """
+      match $l isa loop, links (member: $l, member2: $l);
+      """
+    Then uniquely identify answer concepts
+      | l         |
+      | key:ref:3 |
 
   #######################
   # NEGATION VALIDATION #
