@@ -5210,6 +5210,45 @@ Feature: TypeQL Match Clause
   # REUSED VARIABLES #
   ####################
 
+  Scenario: A 'sub' query where the subtype and supertype are the same returns individual types.
+    Given typeql schema query
+       """
+       define
+          entity e0;
+          entity e1, sub e0;
+          entity e2, sub e1;
+          entity e3, sub e0;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $s sub $t; $t sub e0;
+      """
+    Then uniquely identify answer concepts
+      | s        | t        |
+      | label:e0 | label:e0 |
+      | label:e1 | label:e1 |
+      | label:e2 | label:e2 |
+      | label:e3 | label:e3 |
+      | label:e1 | label:e0 |
+      | label:e2 | label:e0 |
+      | label:e2 | label:e1 |
+      | label:e3 | label:e0 |
+
+    Given get answers of typeql read query
+      """
+      match $s sub $s; $s sub e0;
+      """
+    Then uniquely identify answer concepts
+      | s        |
+      | label:e0 |
+      | label:e1 |
+      | label:e2 |
+      | label:e3 |
+
+
   Scenario: A relation query where the same variable plays both roles only matches relations where the players are the same
     Given typeql schema query
        """
@@ -5244,12 +5283,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
        """
        define
-         relation loop,
-            relates member,
-            relates member2,
-            owns ref @key,
-            plays loop:member,
-            plays loop:member2;
+         relation loop, owns ref @key, relates member, plays loop:member;
        """
     Given transaction commits
 
@@ -5259,10 +5293,8 @@ Feature: TypeQL Match Clause
        insert
          $l1 isa loop, has ref 1;
          $l2 isa loop, has ref 2;
-         $l3 isa loop, has ref 3;
          $l1 links (member: $l2);
          $l2 links (member: $l2);
-         $l3 links (member: $l3, member2: $l3);
        """
     Given transaction commits
 
@@ -5274,7 +5306,51 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | l         |
       | key:ref:2 |
-      | key:ref:3 |
+
+
+  Scenario: Miscellaneous cases where producible variables are repeated
+    Given typeql schema query
+       """
+       define
+         relation loop,
+            relates member,
+            relates member2 @card(0..),
+            owns ref @key,
+            plays loop:member,
+            plays loop:member2;
+       """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+       """
+       insert
+         $l1 isa loop, has ref 1, links (member: $l2, member2: $l3);  # All different
+         $l2 isa loop, has ref 2, links (member: $l1, member2: $l1);  # Same players, different relation
+         $l3 isa loop, has ref 3, links (member: $l3, member2: $l3);  # All 3 same
+         $l4 isa loop, has ref 4, links (member: $l4, member2: $l3);  # One player same as relation, one different
+         $l5 isa loop, has ref 5, links (member2: $l1, member2: $l2); # Same role; Relations, players different
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $l isa loop, links (member: $x, member2: $x);
+      """
+    Then uniquely identify answer concepts
+      | l         | x         |
+      | key:ref:2 | key:ref:1 |
+      | key:ref:3 | key:ref:3 |
+
+    Given get answers of typeql read query
+      """
+      match $l isa loop, links (member: $l, member2: $x);
+      """
+    Then uniquely identify answer concepts
+      | l         | x         |
+      | key:ref:3 | key:ref:3 |
+      | key:ref:4 | key:ref:3 |
+
     Given get answers of typeql read query
       """
       match $l isa loop, links (member: $l, member2: $l);
@@ -5282,6 +5358,16 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | l         |
       | key:ref:3 |
+
+    Given get answers of typeql read query
+      """
+      match $l isa loop, links ($role: $x, $role: $y);
+      """
+    Then uniquely identify answer concepts
+      | l         | role                | x         | y         |
+      | key:ref:5 | label:loop:member2  | key:ref:1 | key:ref:2 |
+      | key:ref:5 | label:loop:member2  | key:ref:2 | key:ref:1 |
+
 
   #######################
   # NEGATION VALIDATION #
