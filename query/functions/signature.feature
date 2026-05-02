@@ -78,7 +78,7 @@ Feature: Validate Function Signatures Against Definition & Calls
     """
 
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '1' did not match that declared in the signature"
+    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '1' does not match that declared in the signature"
     """
     define
     fun the_first_returned_value_is_optional() -> { person, person }:
@@ -91,7 +91,7 @@ Feature: Validate Function Signatures Against Definition & Calls
 
   Scenario Outline: A function returning the <op> of a stream must declare the corresponding return as optional
     Given connection open schema transaction for database: typedb
-    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '0' did not match that declared in the signature"
+    Then typeql schema query; fails with a message containing: "The optionality of the value returned by the function at index '0' does not match that declared in the signature"
     """
     define
     fun my_reduce_returns_optional() -> double:
@@ -129,7 +129,7 @@ Feature: Validate Function Signatures Against Definition & Calls
       $cat isa person, has $name;
     return { $cat };
     """
-    Then transaction commits; fails with a message containing: "The types inferred for the return statement of function 'cats_of_name' did not match those declared in the signature. Mismatching index: 0"
+    Then transaction commits; fails with a message containing: "The types inferred for the return statement of function 'cats_of_name' does not match those declared in the signature. Mismatching index: 0"
 
     Given connection open schema transaction for database: typedb
     When typeql schema query
@@ -141,7 +141,7 @@ Feature: Validate Function Signatures Against Definition & Calls
       $cat has $name;
     return { $name };
     """
-    Then transaction commits; fails with a message containing: "The types inferred for the return statement of function 'name_of_cat' did not match those declared in the signature. Mismatching index: 0"
+    Then transaction commits; fails with a message containing: "The types inferred for the return statement of function 'name_of_cat' does not match those declared in the signature. Mismatching index: 0"
 
 
   Scenario: Functions arguments which are inconsistent with the body fail type-inference
