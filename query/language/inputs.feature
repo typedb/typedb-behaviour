@@ -13,10 +13,16 @@ Feature: TypeQL Inputs Clause
     Given connection create database: typedb
 
     Given connection open schema transaction for database: typedb
+    # Do first to guarantee numbering
     Given typeql schema query
     """
     define
-      entity person
+      entity person;
+    """
+    Given typeql schema query
+    """
+    define
+      person
         plays employment:employee,
         owns name @card(0..),
         owns age @card(0..),
@@ -30,8 +36,15 @@ Feature: TypeQL Inputs Clause
         relates employer @card(0..),
         owns ref @key;
       attribute name value string;
-      attribute age, value integer;
       attribute ref value integer;
+    """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    # Use separate stages to guarantee numbering.
+    insert $p isa person, has name "John", has age 25, has ref 0;
+    insert $p isa person, has name "Jane", has age 30, has ref 1;
     """
     Given transaction commits
 
@@ -39,29 +52,32 @@ Feature: TypeQL Inputs Clause
     Scenario: raw values can be used as inputs
       Given connection open read transaction for database: typedb
       Given query inputs
-      """
-      INPUTS
-      """
+        | n: string |
+        | Jane      |
+
       When get answers of typeql read query with inputs
       """
-      READ QUERY
+      inputs $n: string;
+      match $p isa person, has name == $n;
       """
       Then uniquely identify answers
-
+        | p         |
+        | key:ref:1 |
 
 
     Scenario: concepts can be used as inputs
       Given connection open read transaction for database: typedb
       Given query inputs
-      """
-      INPUTS
-      """
+        | p: person      |
+        | iid:entity:0:1 |
       When get answers of typeql read query with inputs
       """
-      READ QUERY
+      inputs $p: person;
+      match $p has name $n;
       """
       Then uniquely identify answers
-
+        | p              |
+        | attr:name:Jane |
 
 
   Scenario: input variables cannot be reassigned to
