@@ -1884,7 +1884,7 @@ Feature: TypeQL Undefine Query
     Then typeql schema query; fails
       """
       undefine
-      @<category> from player sub person name;
+      @<category> from player sub person;
       """
     Examples:
       | annotation       | category    |
