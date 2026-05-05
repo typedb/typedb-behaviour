@@ -1865,6 +1865,77 @@ Feature: TypeQL Undefine Query
       | card(1..1) | card     |
 
 
+  Scenario Outline: cannot undefine annotation @<annotation> for sub
+    Given typeql schema query
+      """
+      define
+      entity player sub person;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      define
+      entity player sub person @<annotation>;
+      """
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails
+      """
+      undefine
+      @<category> from player sub person name;
+      """
+    Examples:
+      | annotation       | category    |
+      | abstract         | abstract    |
+      | independent      | independent |
+      | distinct         | distinct    |
+#      | cascade          | cascade     | # TODO: Cascade is temporarily turned off
+      | unique           | unique      |
+      | key              | key         |
+      | card(1..1)       | card        |
+      | regex("val")     | regex       |
+      | range("1".."2")  | range       |
+      | values("1", "2") | values      |
+
+
+  Scenario Outline: can undefine annotation @<annotation> for sub, cannot undefine not defined
+    Given typeql schema query
+      """
+      define
+      entity player sub person;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      entity player sub person @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      undefine
+      @<category> from player sub person;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "no defined"
+      """
+      undefine
+      @<category> from player owns name;
+      """
+    Examples:
+      | annotation           | category    |
+      | doc("docs here")     | doc         |
+      | meta("key", "value") | meta("key") |
+
+
   Scenario Outline: cannot undefine annotation @<annotation> for owns
     Given typeql schema query
       """
@@ -1925,13 +1996,16 @@ Feature: TypeQL Undefine Query
       @<category> from player owns name;
       """
     Examples:
-      | annotation       | category |
-      | unique           | unique   |
-      | key              | key      |
-      | card(1..1)       | card     |
-      | regex("val")     | regex    |
-      | range("1".."2")  | range    |
-      | values("1", "2") | values   |
+      | annotation           | category    |
+      | unique               | unique      |
+      | key                  | key         |
+      | card(1..1)           | card        |
+      | regex("val")         | regex       |
+      | range("1".."2")      | range       |
+      | values("1", "2")     | values      |
+      | doc("docs here")     | doc         |
+      | meta("key", "value") | meta("key") |
+
 
 
   Scenario Outline: cannot undefine annotation @<annotation> for owns lists
