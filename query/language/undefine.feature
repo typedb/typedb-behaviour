@@ -2206,14 +2206,16 @@ Feature: TypeQL Undefine Query
       @<category> from description value string;
       """
     Examples:
-      | annotation  | category    |
-      | unique      | unique      |
-      | key         | key         |
-      | abstract    | abstract    |
-      | independent | independent |
-      | distinct    | distinct    |
-#      | cascade     |category     | # TODO: Cascade is temporarily turned off
-      | card(1..1)  | card        |
+      | annotation           | category    |
+      | unique               | unique      |
+      | key                  | key         |
+      | abstract             | abstract    |
+      | independent          | independent |
+      | distinct             | distinct    |
+#      | cascade              |category     | # TODO: Cascade is temporarily turned off
+      | card(1..1)           | card        |
+      | doc("docs here")     | doc         |
+      | meta("key", "value") | meta("key") |
 
 
   Scenario Outline: can undefine annotation @<annotation> for value types, cannot undefine not defined
@@ -2247,12 +2249,10 @@ Feature: TypeQL Undefine Query
       @<category> from description value string;
       """
     Examples:
-      | annotation           | category    |
-      | regex("val")         | regex       |
-      | range("1".."2")      | range       |
-      | values("1", "2")     | values      |
-      | doc("docs here")     | doc         |
-      | meta("key", "value") | meta("key") |
+      | annotation       | category |
+      | regex("val")     | regex    |
+      | range("1".."2")  | range    |
+      | values("1", "2") | values   |
 
   ###################
   # COMPLEX QUERIES #
