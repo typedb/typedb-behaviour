@@ -187,3 +187,4 @@ Feature: TypeQL Inputs Clause
 
 
   # TODO: Test accepting subtypes as input
+  # TODO: Optional inputs
