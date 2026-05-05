@@ -1523,6 +1523,47 @@ Feature: TypeQL Define Query
       | values("1", "2") |
 
 
+  Scenario Outline: can set annotation @<annotation> to sub
+    Then typeql schema query
+      """
+      define
+      entity player sub person @<annotation>;
+      """
+    Then transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      player sub person @<annotation> @<annotation> @<annotation>;
+      """
+    Then transaction commits
+    Examples:
+      | annotation           |
+      | doc("docs here")     |
+      | meta("key", "value") |
+
+
+  Scenario Outline: cannot set annotation @<annotation> to sub
+    Then typeql schema query; fails
+      """
+      define
+      entity player sub person @<annotation>;
+      """
+    Examples:
+      | annotation       |
+      | abstract         |
+      | distinct         |
+      | independent      |
+      | card(1..1)       |
+      | unique           |
+      | key              |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
+#      | cascade          | # TODO: Cascade is temporarily turned off
+
+
   Scenario Outline: can set annotation @<annotation> to owns
     Then typeql schema query
       """
