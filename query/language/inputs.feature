@@ -120,7 +120,7 @@ Feature: TypeQL Inputs Clause
       | x                |
       | value:integer:3  |
       | value:string:abc |
-    Then typeql read query with inputs; fails with a message containing: "The given value at row '1' and column '0' did not not satisfy the declared type"
+    Then typeql read query with inputs; fails with a message containing: "The given value at row '1' and column '0' does not not satisfy the declared type"
       """
       inputs $x: integer;
       match let $y = 2 * $x;
@@ -130,7 +130,7 @@ Feature: TypeQL Inputs Clause
     Given query inputs
       | comp           |
       | iid:entity:0:0 |
-    Then typeql read query with inputs; fails with a message containing: "The given value at row '0' and column '0' did not not satisfy the declared type"
+    Then typeql read query with inputs; fails with a message containing: "The given value at row '0' and column '0' does not not satisfy the declared type"
       """
       inputs $comp: company;
       match $comp has name $name;
@@ -155,7 +155,7 @@ Feature: TypeQL Inputs Clause
     Given query inputs
       | person           |
       | iid:entity:0:123 |
-    Then typeql read query with inputs; fails with a message containing: "The given instance at row '0' and column '0' was not found in the database"
+    Then typeql read query with inputs; fails with a message containing: "The given instance at row '0' and column '0' does not exist in the database"
       """
       inputs $person: person;
       select $person;
@@ -186,5 +186,100 @@ Feature: TypeQL Inputs Clause
         | key:ref:110 | attr:name:James |
 
 
-  # TODO: Test accepting subtypes as input
-  # TODO: Optional inputs
+  Scenario: concepts used as inputs can be subtypes of the declared types
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+      attribute weight, value integer;
+      entity animal, owns weight;
+      person sub animal;
+    """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | p: animal      |
+      | iid:entity:0:1 |
+    When get answers of typeql write query with inputs
+        """
+        inputs $p: animal;
+        insert $p has weight 65;
+        """
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $name, has weight $weight;
+      """
+    Then uniquely identify answer concepts
+      | p           | name           | weight        |
+      | key:ref:101 |attr:name:Jane | attr:weight:65 |
+    Given transaction commits
+
+    # Bonus, ensure the bounds are tight.
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | p: animal      |
+      | iid:entity:0:1 |
+    # Fail, Animal does not own age.
+    When typeql write query with inputs; fails with a message containing: "Left type 'animal' across constraint 'has' is not compatible with right type 'age'"
+        """
+        inputs $p: animal;
+        insert $p has age 12;
+        """
+
+
+  Scenario: Inputs can be optional
+    # Undeclared None fail at runtime
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | ref               | name               |
+      | value:integer:110 | value:string:James |
+      | value:integer:111 | none               |
+    Then typeql write query with inputs; fails with a message containing: "The given value at row '1' and column '1' was None, but the variable was not declared optional"
+        """
+        inputs $ref: integer, $name: string;
+        insert $p isa person, has ref == $ref, has name == $name;
+        """
+
+    # Declared None, used outside try
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | ref               | name               |
+      | value:integer:110 | value:string:James |
+      | value:integer:111 | none               |
+    Then typeql write query with inputs; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
+        """
+        inputs $ref: integer, $name: string?;
+        insert $p isa person, has ref == $ref, has name == $name;
+        """
+
+    # normal
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | ref               | name               |
+      | value:integer:110 | value:string:James |
+      | value:integer:111 | none               |
+    When get answers of typeql write query with inputs
+        """
+        inputs $ref: integer, $name: string?;
+        insert
+          $p isa person, has ref == $ref;
+          try { $p has name == $name; };
+        """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+        """
+        match $p isa person, has name "James";
+        """
+    Then uniquely identify answer concepts
+      | p           |
+      | key:ref:110 |
+    When get answers of typeql read query
+        """
+        match $p isa person; not { $p has name $name; };
+        """
+    Then uniquely identify answer concepts
+      | p           |
+      | key:ref:111 |
