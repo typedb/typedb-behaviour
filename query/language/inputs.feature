@@ -120,7 +120,7 @@ Feature: TypeQL Inputs Clause
       | x                |
       | value:integer:3  |
       | value:string:abc |
-    Then typeql read query with inputs; fails with a message containing: "The input value for variable 'x' at row index '1' did not satisfy the declared type 'integer'"
+    Then typeql read query with inputs; fails with a message containing: "The given value at row '1' and column '0' did not not satisfy the declared type"
       """
       inputs $x: integer;
       match let $y = 2 * $x;
@@ -130,7 +130,7 @@ Feature: TypeQL Inputs Clause
     Given query inputs
       | comp           |
       | iid:entity:0:0 |
-    Then typeql read query with inputs; fails with a message containing: "The input value for variable 'comp' at row index '0' did not satisfy the declared type 'company'"
+    Then typeql read query with inputs; fails with a message containing: "The given value at row '0' and column '0' did not not satisfy the declared type"
       """
       inputs $comp: company;
       match $comp has name $name;
@@ -155,7 +155,7 @@ Feature: TypeQL Inputs Clause
     Given query inputs
       | person           |
       | iid:entity:0:123 |
-    Then typeql read query with inputs; fails with a message containing: "The input instance for variable 'person' at row '0' was not found in the database"
+    Then typeql read query with inputs; fails with a message containing: "The given instance at row '0' and column '0' was not found in the database"
       """
       inputs $person: person;
       select $person;
