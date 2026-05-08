@@ -1015,6 +1015,69 @@ Feature: Driver Query
     """
 
 
+  Scenario: Driver processes query inputs correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given query inputs
+      | p: person                    | age_value: integer? |
+      | iid:0x1e00000000000000000001 | value:integer:23    |
+      | iid:0x1e00000000000000000000 | none                |
+
+    When get answers of typeql write query
+    """
+    inputs $p: person, $age_value: integer;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get type get value: "Jane"
+
+    Then answer get row(1) get entity(p) get type get label: person
+    Then answer get row(1) get attribute(name) get type get label: name
+    Then answer get row(1) get attribute(name) get type get value: "John"
+
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $p isa person, has name $name, has age $age;
+    """
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(1) get entity(p) get type get label: person
+    Then answer get row(1) get attribute(name) get type get label: name
+    Then answer get row(1) get attribute(name) get type get value: "John"
+    Then answer get row(1) get attribute(age) get type get label: age
+    Then answer get row(1) get attribute(age) get type get value: "23"
+
+    Then transaction commits
+
+  ###########
+  # ANALYZE #
+  ###########
+
   Scenario: Driver processes query structure correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1374,6 +1437,9 @@ Feature: Driver Query
     Given transaction closes
 
 
+  ###########
+  # MISC    #
+  ###########
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1396,6 +1462,7 @@ Feature: Driver Query
       """
       define attribute name owns name;
       """
+
 
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
