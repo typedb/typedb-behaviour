@@ -1035,14 +1035,15 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
     Given query is given rows
       | p: person                    | age_value: integer? |
       | iid:0x1e00000000000000000001 | value:integer:23    |
       | iid:0x1e00000000000000000000 | none                |
 
-    When get answers of typeql write query
+    When get answers of typeql write query with given rows
     """
-    given $p: person, $age_value: integer;
+    given $p: person, $age_value: integer?;
     match $p isa person, has name $name;
     insert try { $p has age == $age_value; };
     """
@@ -1051,26 +1052,28 @@ Feature: Driver Query
 
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get attribute(name) get type get label: name
-    Then answer get row(0) get attribute(name) get type get value: "Jane"
+    Then answer get row(0) get attribute(name) get value is: "Jane"
 
     Then answer get row(1) get entity(p) get type get label: person
     Then answer get row(1) get attribute(name) get type get label: name
-    Then answer get row(1) get attribute(name) get type get value: "John"
+    Then answer get row(1) get attribute(name) get value is: "John"
 
     Then transaction commits
 
     Given connection open read transaction for database: typedb
+    Given set query option include_instance_types to: true
     When get answers of typeql read query
     """
     match $p isa person, has name $name, has age $age;
     """
     Then answer get row(0) get concepts size is: 3
 
-    Then answer get row(1) get entity(p) get type get label: person
-    Then answer get row(1) get attribute(name) get type get label: name
-    Then answer get row(1) get attribute(name) get type get value: "John"
-    Then answer get row(1) get attribute(age) get type get label: age
-    Then answer get row(1) get attribute(age) get type get value: "23"
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(age) get type get label: age
+    Then answer get row(0) get attribute(age) get value is: 23
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
 
     Then transaction commits
 
