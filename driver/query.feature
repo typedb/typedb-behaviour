@@ -1027,7 +1027,7 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given typeql write query
+    Given get answers of typeql write query
       """
       insert $_ isa person, has name "John";
       insert $_ isa person, has name "Jane";
@@ -1036,11 +1036,18 @@ Feature: Driver Query
 
     Given connection open write transaction for database: typedb
     Given set query option include_instance_types to: true
-    Given query is given rows
-      | p: person                    | age_value: integer? |
-      | iid:0x1e00000000000000000001 | value:integer:23    |
-      | iid:0x1e00000000000000000000 | none                |
-
+    Given set answers of typeql read query as given rows with order: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      {
+        $name == "Jane"; try { let $age_value = 38; };
+      } or {
+        $name == "John"; try { let $age_value = 0; $age_value == 1; };
+      };
+    sort $name;
+    select $p, $age_value;
+    """
     When get answers of typeql write query with given rows
     """
     given $p: person, $age_value: integer?;
@@ -1070,12 +1077,10 @@ Feature: Driver Query
 
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get attribute(age) get type get label: age
-    Then answer get row(0) get attribute(age) get value is: 23
+    Then answer get row(0) get attribute(age) get value is: 38
     Then answer get row(0) get attribute(name) get type get label: name
     Then answer get row(0) get attribute(name) get value is: "Jane"
 
-
-    Then transaction commits
 
   ###########
   # ANALYZE #
