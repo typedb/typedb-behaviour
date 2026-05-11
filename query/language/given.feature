@@ -3,7 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-Feature: TypeQL Inputs Clause
+Feature: TypeQL Given Clause
 
   Background: Open connection and create a simple extensible schema
     Given typedb starts
@@ -51,15 +51,15 @@ Feature: TypeQL Inputs Clause
     Given transaction commits
 
 
-    Scenario: raw values can be used as inputs
+    Scenario: raw values can be used in given rows
       Given connection open read transaction for database: typedb
-      Given query inputs
+      Given query is given rows
         | n: string         |
         | value:string:Jane |
 
-      When get answers of typeql read query with inputs
+      When get answers of typeql read query with given rows
         """
-        inputs $n: string;
+        given $n: string;
         match $p isa person, has name == $n;
         """
       Then uniquely identify answer concepts
@@ -67,14 +67,14 @@ Feature: TypeQL Inputs Clause
         | key:ref:101 |
 
 
-    Scenario: concepts can be used as inputs
+    Scenario: concepts can be used in given rows
       Given connection open read transaction for database: typedb
-      Given query inputs
+      Given query is given rows
         | p: person      |
         | iid:entity:0:1 |
-      When get answers of typeql read query with inputs
+      When get answers of typeql read query with given rows
         """
-        inputs $p: person;
+        given $p: person;
         match $p has name $n;
         """
       Then uniquely identify answer concepts
@@ -82,28 +82,28 @@ Feature: TypeQL Inputs Clause
         | attr:name:Jane |
 
 
-  Scenario: input variables cannot be reassigned to
+  Scenario: Variables in given rows cannot be reassigned to
     Given connection open read transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | x               |
       | value:integer:5 |
-    Then typeql read query with inputs; fails with a message containing: "The variable 'x' may not be assigned to, as it was already bound in a previous stage"
+    Then typeql read query with given rows; fails with a message containing: "The variable 'x' may not be assigned to, as it was already bound in a previous stage"
       """
-      inputs $x: integer;
+      given $x: integer;
       match let $x = 6;
       """
 
 
-  Scenario: Inputs may contain multiple rows
+  Scenario: Given rows may contain multiple rows
     Given connection open read transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | x               |
       | value:integer:3 |
       | value:integer:5 |
       | value:integer:7 |
-    When get answers of typeql read query with inputs
+    When get answers of typeql read query with given rows
       """
-      inputs $x: integer;
+      given $x: integer;
       match let $y = 2 * $x;
       """
     Then uniquely identify answer concepts
@@ -113,63 +113,63 @@ Feature: TypeQL Inputs Clause
       | value:integer: 14 |
 
 
-  Scenario: Input rows are checked against declared types
+  Scenario: Given rows are checked against declared types
     Given connection open read transaction for database: typedb
     # Values: Pass a string instead
-    Given query inputs
+    Given query is given rows
       | x                |
       | value:integer:3  |
       | value:string:abc |
-    Then typeql read query with inputs; fails with a message containing: "The given value at row '1' and column '0' does not not satisfy the declared type"
+    Then typeql read query with given rows; fails with a message containing: "The given value at row '1' and column '0' does not not satisfy the declared type"
       """
-      inputs $x: integer;
+      given $x: integer;
       match let $y = 2 * $x;
       """
 
     # Concepts: Pass a person (John) instead
-    Given query inputs
+    Given query is given rows
       | comp           |
       | iid:entity:0:0 |
-    Then typeql read query with inputs; fails with a message containing: "The given value at row '0' and column '0' does not not satisfy the declared type"
+    Then typeql read query with given rows; fails with a message containing: "The given value at row '0' and column '0' does not not satisfy the declared type"
       """
-      inputs $comp: company;
+      given $comp: company;
       match $comp has name $name;
       """
 
 
-  Scenario: Concepts in input rows are validated to exist
+  Scenario: Concepts in given rows are validated to exist
     Given connection open read transaction for database: typedb
 
-    Given query inputs
+    Given query is given rows
       | person         |
       | iid:entity:0:0 |
-    When get answers of typeql read query with inputs
+    When get answers of typeql read query with given rows
       """
-      inputs $person: person;
+      given $person: person;
       select $person;
       """
     Then uniquely identify answer concepts
       | person      |
       | key:ref:100 |
 
-    Given query inputs
+    Given query is given rows
       | person           |
       | iid:entity:0:123 |
-    Then typeql read query with inputs; fails with a message containing: "The given instance at row '0' and column '0' does not exist in the database"
+    Then typeql read query with given rows; fails with a message containing: "The given instance at row '0' and column '0' does not exist in the database"
       """
-      inputs $person: person;
+      given $person: person;
       select $person;
       """
 
 
-    Scenario: Inputs can be used in write stages
+    Scenario: Given entries can be used in write stages
       Given connection open write transaction for database: typedb
-      Given query inputs
+      Given query is given rows
         | name               |
         | value:string:James |
-      When get answers of typeql write query with inputs
+      When get answers of typeql write query with given rows
         """
-        inputs $name: string;
+        given $name: string;
         insert $_ isa person, has name == $name, has ref 110;
         """
       Then transaction commits
@@ -186,7 +186,7 @@ Feature: TypeQL Inputs Clause
         | key:ref:110 | attr:name:James |
 
 
-  Scenario: concepts used as inputs can be subtypes of the declared types
+  Scenario: concepts given can be subtypes of the declared types
     Given connection open schema transaction for database: typedb
     Given typeql schema query
     """
@@ -198,12 +198,12 @@ Feature: TypeQL Inputs Clause
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | p: animal      |
       | iid:entity:0:1 |
-    When get answers of typeql write query with inputs
+    When get answers of typeql write query with given rows
         """
-        inputs $p: animal;
+        given $p: animal;
         insert $p has weight 65;
         """
     When get answers of typeql read query
@@ -217,51 +217,51 @@ Feature: TypeQL Inputs Clause
 
     # Bonus, ensure the bounds are tight.
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | p: animal      |
       | iid:entity:0:1 |
     # Fail, Animal does not own age.
-    When typeql write query with inputs; fails with a message containing: "Left type 'animal' across constraint 'has' is not compatible with right type 'age'"
+    When typeql write query with given rows; fails with a message containing: "Left type 'animal' across constraint 'has' is not compatible with right type 'age'"
         """
-        inputs $p: animal;
+        given $p: animal;
         insert $p has age 12;
         """
 
 
-  Scenario: Inputs can be optional
+  Scenario: Given row entries can be optional
     # Undeclared None fail at runtime
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    Then typeql write query with inputs; fails with a message containing: "The given value at row '1' and column '1' was None, but the variable was not declared optional"
+    Then typeql write query with given rows; fails with a message containing: "The given value at row '1' and column '1' was None, but the variable was not declared optional"
         """
-        inputs $ref: integer, $name: string;
+        given $ref: integer, $name: string;
         insert $p isa person, has ref == $ref, has name == $name;
         """
 
     # Declared None, used outside try
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    Then typeql write query with inputs; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
+    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
         """
-        inputs $ref: integer, $name: string?;
+        given $ref: integer, $name: string?;
         insert $p isa person, has ref == $ref, has name == $name;
         """
 
     # normal
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    When get answers of typeql write query with inputs
+    When get answers of typeql write query with given rows
         """
-        inputs $ref: integer, $name: string?;
+        given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
           try { $p has name == $name; };

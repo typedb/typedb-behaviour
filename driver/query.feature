@@ -1015,7 +1015,7 @@ Feature: Driver Query
     """
 
 
-  Scenario: Driver processes query inputs correctly
+  Scenario: Driver processes query given rows correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -1035,14 +1035,14 @@ Feature: Driver Query
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given query inputs
+    Given query is given rows
       | p: person                    | age_value: integer? |
       | iid:0x1e00000000000000000001 | value:integer:23    |
       | iid:0x1e00000000000000000000 | none                |
 
     When get answers of typeql write query
     """
-    inputs $p: person, $age_value: integer;
+    given $p: person, $age_value: integer;
     match $p isa person, has name $name;
     insert try { $p has age == $age_value; };
     """

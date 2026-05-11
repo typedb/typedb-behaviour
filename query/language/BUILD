@@ -11,7 +11,7 @@ files = [
     "delete.feature",
     "expression.feature",
     "fetch.feature",
-    "inputs.feature",
+    "given.feature",
     "insert.feature",
     "match.feature",
     "modifiers.feature",
