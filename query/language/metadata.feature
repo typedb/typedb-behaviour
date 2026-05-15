@@ -157,7 +157,8 @@ Feature: TypeQL schema metadata
     When typeql schema query
       """
       define
-        relation person, <constraint> <rhs> @doc("lorem ipsum");
+        relation person, <constraint> <arg> @doc("lorem ipsum");
+        person relates dummy; # a relation must relate at least one role
         relation base, relates arole;
         attribute id value string;
       """
@@ -165,17 +166,17 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $doc = get_<constraint>_doc("person", "<rhs>");
+      match let $doc = get_<constraint>_doc(person, <rhs>);
       """
     Then uniquely identify answer concepts
       | doc                      |
       | value:string:lorem ipsum |
   Examples:
-    | constraint | rhs         |
-    | owns       | id          |
-    | plays      | base:arole  |
-    | relates    | newrole     |
-    | sub        | base        |
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
 
 
   Scenario: retrieving a missing doc annotation returns an empty string
@@ -299,7 +300,7 @@ Feature: TypeQL schema metadata
     When get answers of typeql read query
       """
       match
-        let $metadata = get_fun_meta("get_random_number");
+        let $metadata = get_fun_meta("key", "get_random_number");
       """
     Then uniquely identify answer concepts
       | metadata                                |
@@ -310,7 +311,8 @@ Feature: TypeQL schema metadata
     When typeql schema query
       """
       define
-        relation person, <constraint> <rhs> @meta("key", "lorem ipsum");
+        relation person, <constraint> <arg> @meta("key", "lorem ipsum");
+        person relates dummy; # a relation must relate at least one role
         relation base, relates arole;
         attribute id value string;
       """
@@ -318,18 +320,17 @@ Feature: TypeQL schema metadata
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $metadata = get_<constraint>_meta("key", "person", "<rhs>");
+      match let $metadata = get_<constraint>_meta("key", person, <rhs>);
       """
     Then uniquely identify answer concepts
       | metadata                 |
       | value:string:lorem ipsum |
   Examples:
-    | constraint | rhs         |
-    | owns       | id          |
-    | plays      | base:arole  |
-    | relates    | newrole     |
-    | sub        | base        |
-
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
 
 
   Scenario: types can have multiple metadata annotations
@@ -359,6 +360,7 @@ Feature: TypeQL schema metadata
       define entity person;
       """
     Then transaction commits
+
     Then connection open read transaction for database: typedb
     When get answers of typeql read query
       """
@@ -367,7 +369,9 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata      |
       | value:string: |
+    Then transaction closes
 
+    Then connection open schema transaction for database: typedb
     When typeql schema query
       """
       define entity person @meta("key", "This represents a person");
