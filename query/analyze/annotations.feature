@@ -242,9 +242,9 @@ Feature: Analyzed query annotations
         )
       ),
       Select(),
-      Delete(And({ $n: instance([name]), $x: instance([person]) }, [])),
+      Delete(And({ $n: instance([name]) }, [])),
       Insert(And({ $_: instance([name]), $x: instance([person]) }, [])),
-      Match(And({ $n1:instance([name]), $x: instance([person]) }, [])),
+      Match(And({ $n1:instance([name]) }, [])),
       Put(And({ $n1:instance([name]), $x: instance([person]) }, []))
     ])
     """
@@ -450,6 +450,24 @@ Feature: Analyzed query annotations
         friends: List({
           name: [string]
         }),
+        ref: [integer]
+      }
+    """
+
+    # Skip a level
+    When get answers of typeql analyze
+    """
+      match
+        $p isa person, has ref $r;
+      match
+        let $x = 1.0;
+      fetch {
+        "ref": $r
+      };
+    """
+    Then analyzed fetch annotations are:
+    """
+      {
         ref: [integer]
       }
     """
