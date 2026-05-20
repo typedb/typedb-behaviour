@@ -1258,6 +1258,25 @@ Feature: Driver Query
       Limit(1)
     ])
     """
+    When get answers of typeql analyze
+    """
+      given $x: person, $y: string;
+      insert
+        $z isa name == $y;
+        $x has $z;
+    """
+    Then analyzed query given structure is:
+    """
+    Given([$x, $y])
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Insert(
+        [Isa($z, name), Comparison($z, $y, ==), Has($x, $z)]
+      )
+    ])
+    """
     Given transaction closes
 
 
@@ -1367,6 +1386,21 @@ Feature: Driver Query
         names: List([string]),
         ref: [integer]
       }
+    """
+    When get answers of typeql analyze
+    """
+      given $p: person, $m: string;
+      insert $p has name == $m;
+    """
+    Then analyzed query given annotations are:
+    """
+      Given({ $m: value([string]), $p: instance([person]) })
+    """
+    Then analyzed query pipeline annotations are:
+    """
+      Pipeline([
+        Insert(And({ $_: instance([name]), $m: value([string]), $p: instance([person]) }, []))
+      ])
     """
 
 
