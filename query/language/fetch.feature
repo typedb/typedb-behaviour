@@ -416,6 +416,24 @@ Feature: TypeQL Fetch Query
       """
 
 
+  Scenario: Fetching an object's attribute also matches the attribute's subtypes
+    When get answers of typeql read query
+      """
+      match
+      $c isa company;
+      fetch {
+        "company": [ $c.name ]
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "company": [ "TypeDB" ]
+      }
+      """
+
+
   Scenario: fetch uses results of match stream operators
     When get answers of typeql read query
       """
