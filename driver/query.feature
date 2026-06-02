@@ -1234,13 +1234,13 @@ Feature: Driver Query
       ),
       Select(),
       Delete(
-        And({ $n: instance([name]), $x: instance([person]) }, [])
+        And({ $n: instance([name]) }, [])
       ),
       Insert(
         And({ $_: instance([name]), $x: instance([person]) }, [])
       ),
       Match(
-        And({ $n1:instance([name]), $x: instance([person]) }, [])
+        And({ $n1:instance([name]) }, [])
       ),
       Put(
         And({ $n1:instance([name]), $x: instance([person]) }, [])
