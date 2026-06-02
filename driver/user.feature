@@ -174,6 +174,13 @@ Feature: Driver User
     Then delete user: user2; fails with a message containing: "User not found"
     Then delete user: surely-non-existing-user; fails with a message containing: "User not found"
 
+
+  Scenario: Updating the password of a non-existent user fails
+    Given typedb starts
+    Given connection opens with username 'admin', password 'password'
+    Then get user(surely-non-existing-user) update password to 'anything'; fails with a message containing: "User not found"
+
+
     # TODO: Not sure if it's correct, may be implemented differently
   Scenario: User's name is retrievable only by admin
     Given typedb starts
