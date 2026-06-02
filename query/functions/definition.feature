@@ -179,7 +179,7 @@ Feature: Function Definition
       let $five = 5;
     return first $five;
     """
-    Then transaction commits
+    Then transaction is open: false
     Examples:
       | annotation       |
       | abstract         |
@@ -222,6 +222,8 @@ Feature: Function Definition
       let $five = 5;
     return first $five;
     """
+    Then transaction is open: false
+    Then connection open schema transaction for database: typedb
     When typeql schema query; fails
     """
     define
@@ -232,7 +234,7 @@ Feature: Function Definition
       let $five = 5;
     return first $five;
     """
-    Then transaction commits
+    Then transaction is open: false
 
 
   Scenario: Functions are stratified wrt negation
