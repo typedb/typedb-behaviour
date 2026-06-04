@@ -1928,7 +1928,7 @@ Feature: TypeQL Undefine Query
     Then typeql schema query; fails with a message containing: "no defined"
       """
       undefine
-      @<category> from player owns name;
+      @<category> from player sub person;
       """
     Examples:
       | annotation           | category    |
