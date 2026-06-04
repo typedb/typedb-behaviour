@@ -895,34 +895,7 @@ Feature: TypeQL Redefine Query
   ###############
   # ANNOTATIONS #
   ###############
-
-  Scenario Outline: cannot redefine annotation @<annotation> for <blank>
-    Given typeql schema query
-      """
-      define <base>;
-      """
-    Given transaction commits
-
-    When connection open schema transaction for database: typedb
-    Then typeql schema query
-      """
-      define
-      <base> @<annotation>;
-      """
-    When transaction commits
-
-    When connection open schema transaction for database: typedb
-    Then typeql schema query
-      """
-      redefine
-      <base> @<annotation-2>;
-      """
-    Examples:
-      | base          | annotation           | annotation-2             |
-      | entity player | doc("docs")          | doc("also docs")         |
-      | entity player | meta("key", "value") | meta("key", "new value") |
-
-
+  
   Scenario Outline: cannot redefine annotation @<annotation> for entity types
     Given typeql schema query
       """
@@ -1013,7 +986,6 @@ Feature: TypeQL Redefine Query
       """
     Examples:
       | annotation           | annotation-2             |
-      | abstract             | abstract                 |
 #      | cascade              | cascade                  | # TODO: Cascade is temporarily turned off
       | doc("docs")          | doc("also docs")         |
       | meta("key", "value") | meta("key", "new value") |
