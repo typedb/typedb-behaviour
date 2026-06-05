@@ -51,35 +51,35 @@ Feature: TypeQL Given Clause
     Given transaction commits
 
 
-    Scenario: raw values can be used in given rows
-      Given connection open read transaction for database: typedb
-      Given query is given rows
-        | n: string         |
-        | value:string:Jane |
+  Scenario: raw values can be used in given rows
+    Given connection open read transaction for database: typedb
+    Given query is given rows
+      | n: string         |
+      | value:string:Jane |
 
-      When get answers of typeql read query with given rows
-        """
-        given $n: string;
-        match $p isa person, has name == $n;
-        """
-      Then uniquely identify answer concepts
-        | p           |
-        | key:ref:101 |
+    When get answers of typeql read query with given rows
+      """
+      given $n: string;
+      match $p isa person, has name == $n;
+      """
+    Then uniquely identify answer concepts
+      | p           |
+      | key:ref:101 |
 
 
-    Scenario: concepts can be used in given rows
-      Given connection open read transaction for database: typedb
-      Given query is given rows
-        | p: person      |
-        | iid:entity:0:1 |
-      When get answers of typeql read query with given rows
-        """
-        given $p: person;
-        match $p has name $n;
-        """
-      Then uniquely identify answer concepts
-        | n              |
-        | attr:name:Jane |
+  Scenario: concepts can be used in given rows
+    Given connection open read transaction for database: typedb
+    Given query is given rows
+      | p: person      |
+      | iid:entity:0:1 |
+    When get answers of typeql read query with given rows
+      """
+      given $p: person;
+      match $p has name $n;
+      """
+    Then uniquely identify answer concepts
+      | n              |
+      | attr:name:Jane |
 
 
   Scenario: Variables in given rows cannot be reassigned to
@@ -137,6 +137,17 @@ Feature: TypeQL Given Clause
       """
 
 
+  Scenario: Variables which are provided in the given row but not declared are flagged.
+    Given connection open read transaction for database: typedb
+    Given query is given rows
+      | x               | z               |
+      | value:integer:5 | value:integer:6 |
+    Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
+      """
+      given $x: integer, $y: integer;
+      match let $p = $x + $y;
+      """
+
   Scenario: Concepts in given rows are validated to exist
     Given connection open read transaction for database: typedb
 
@@ -162,28 +173,28 @@ Feature: TypeQL Given Clause
       """
 
 
-    Scenario: Given entries can be used in write stages
-      Given connection open write transaction for database: typedb
-      Given query is given rows
-        | name               |
-        | value:string:James |
-      When get answers of typeql write query with given rows
-        """
-        given $name: string;
-        insert $_ isa person, has name == $name, has ref 110;
-        """
-      Then transaction commits
+  Scenario: Given entries can be used in write stages
+    Given connection open write transaction for database: typedb
+    Given query is given rows
+      | name               |
+      | value:string:James |
+    When get answers of typeql write query with given rows
+      """
+      given $name: string;
+      insert $_ isa person, has name == $name, has ref 110;
+      """
+    Then transaction commits
 
-      Given connection open read transaction for database: typedb
-      When get answers of typeql read query
-        """
-        match $p isa person, has name $name;
-        """
-      Then uniquely identify answer concepts
-        | p           | name            |
-        | key:ref:100 | attr:name:John  |
-        | key:ref:101 | attr:name:Jane  |
-        | key:ref:110 | attr:name:James |
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $p isa person, has name $name;
+      """
+    Then uniquely identify answer concepts
+      | p           | name            |
+      | key:ref:100 | attr:name:John  |
+      | key:ref:101 | attr:name:Jane  |
+      | key:ref:110 | attr:name:James |
 
 
   Scenario: concepts given can be subtypes of the declared types
@@ -266,6 +277,47 @@ Feature: TypeQL Given Clause
           $p isa person, has ref == $ref;
           try { $p has name == $name; };
         """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+        """
+        match $p isa person, has name "James";
+        """
+    Then uniquely identify answer concepts
+      | p           |
+      | key:ref:110 |
+    When get answers of typeql read query
+        """
+        match $p isa person; not { $p has name $name; };
+        """
+    Then uniquely identify answer concepts
+      | p           |
+      | key:ref:111 |
+
+  Scenario: The order of variables in the given rows does not matter, omitted ones are treated as optional, undeclared ones are flagged.
+    Given connection open write transaction for database: typedb
+    Given query is given rows
+      | name               | ref               |
+      | value:string:James | value:integer:110 |
+    When get answers of typeql write query with given rows
+        """
+        given $ref: integer, $name: string?;
+        insert
+          $p isa person, has ref == $ref;
+          try { $p has name == $name; };
+        """
+    Given query is given rows
+      | ref               |
+      | value:integer:111 |
+    When get answers of typeql write query with given rows
+        """
+        given $ref: integer, $name: string?;
+        insert
+          $p isa person, has ref == $ref;
+          try { $p has name == $name; };
+        """
+
     Then transaction commits
 
     Given connection open read transaction for database: typedb
