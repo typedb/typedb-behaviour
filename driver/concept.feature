@@ -20,22 +20,21 @@ Feature: Driver Concept
     Given connection has database: typedb
 
 
-# TODO: Uncomment when optional results are introduced
-#  Scenario: Driver processes empty concepts correctly
-#    Given connection open schema transaction for database: typedb
-#    Given typeql schema query
-#      """
-#      define entity person;
-#      """
-#    When get answers of typeql write query
-#      """
-#      match { $empty isa person; } or { $_ label person; };
-#      """
-#    Then answer type is: concept rows
-#    Then answer size is: 1
-#
-#    Then answer get row(0) get variable(empty) is empty
-#    Then answer get row(0) get variable by index(0) is empty
+  Scenario: Driver processes empty concepts correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity person;
+      """
+    When get answers of typeql write query
+      """
+      match try { $empty isa person; };
+      """
+    Then answer type is: concept rows
+    Then answer size is: 1
+
+    Then answer get row(0) get variable(empty) is empty
+    Then answer get row(0) get variable by index(0) is empty
 
 
   Scenario: Driver processes entity types correctly

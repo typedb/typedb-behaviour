@@ -137,15 +137,42 @@ Feature: TypeQL Given Clause
       """
 
 
-  Scenario: Variables which are provided in the given row but not declared are flagged.
+  Scenario: Optional variables may be omitted, required ones may not, undeclared variables are flagged.
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    When query is given rows
+      | x               |
+      | value:integer:5 |
+    When get answers of typeql read query with given rows
+      """
+      given $x: integer, $y: integer?;
+      match
+       let $p = $x * 2;
+       try { let $q = $x + $y; };
+      """
+    Then uniquely identify answer concepts
+      | x               | p                |
+      | value:integer:5 | value:integer:10 |
+
+    When query is given rows
+      | x               |
+      | value:integer:5 |
+    Then typeql read query with given rows; fails with a message containing: "The given rows are missing the required variable 'y'"
+      """
+      given $x: integer, $y: integer;
+      match
+       let $p = $x * 2;
+       let $q = $x + $y;
+      """
+
+    When query is given rows
       | x               | z               |
       | value:integer:5 | value:integer:6 |
     Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
       """
       given $x: integer, $y: integer?;
-      match try { let $p = $x + $y; };
+      match
+        let $p = $x;
+       try { let $q = $x + $y; };
       """
 
 

@@ -1147,28 +1147,48 @@ Feature: Driver Query
     Then transaction commits
 
 
-  Scenario: Illegal query given rows are flagged with errors
-    Given connection open schema transaction for database: typedb
-    Given typeql schema query
-      """
-      define
-        entity person owns name @card(0..), owns age @card(0..);
-        attribute name, value string;
-        attribute age, value integer;
-      """
-    Given transaction commits
-
+  Scenario: In given rows, optional variables may be omitted, required ones may not, undeclared variables are flagged.
     Given connection open read transaction for database: typedb
-    Given set answers of typeql read query as given rows with order: $x, $z
+    When set answers of typeql read query as given rows with order: $x
     """
-    match
-      let $x = 5;
-      let $z = 6;
+    match let $x = 5;
     """
-    Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
+    When get answers of typeql read query with given rows
+      """
+      given $x: integer, $y: integer?;
+      match
+       let $p = $x * 2;
+       try { let $q = $x + $y; };
+      """
+    Then answer get row(0) get concepts size is: 4
+
+    Then answer get row(0) get value(x) get is: 5
+    Then answer get row(0) get value(p) get is: 10
+    Then answer get row(0) get variable(y) is empty
+    Then answer get row(0) get variable(q) is empty
+
+    When set answers of typeql read query as given rows with order: $x
+      """
+      match let $x = 5;
+      """
+    Then typeql read query with given rows; fails with a message containing: "The given rows are missing the required variable 'y'"
       """
       given $x: integer, $y: integer;
-      match let $p = $x + $y;
+      match
+       let $p = $x * 2;
+       let $q = $x + $y;
+      """
+
+    When set answers of typeql read query as given rows with order: $x, $z
+      """
+      match let $x = 5; let $z =6;
+      """
+    Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
+      """
+      given $x: integer, $y: integer?;
+      match
+        let $p = $x;
+       try { let $q = $x + $y; };
       """
 
   ###########
