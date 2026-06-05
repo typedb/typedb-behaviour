@@ -13,6 +13,7 @@ files = [
     "fetch.feature",
     "insert.feature",
     "match.feature",
+    "metadata.feature",
     "modifiers.feature",
     "negation.feature",
     "pipelines.feature",

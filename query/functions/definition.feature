@@ -152,6 +152,91 @@ Feature: Function Definition
     Then transaction is open: false
 
 
+  Scenario Outline: Functions can be defined with annotation @<annotation>
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun five() -> integer @<annotation>:
+    match
+      let $five = 5;
+    return first $five;
+    """
+    Then transaction commits
+    Examples:
+      | annotation           |
+      | doc("docs here")     |
+      | meta("key", "value") |
+
+
+  Scenario Outline: Functions cannot be defined with annotation @<annotation>
+    Given connection open schema transaction for database: typedb
+    When typeql schema query; fails
+    """
+    define
+    fun five() -> integer @<annotation>:
+    match
+      let $five = 5;
+    return first $five;
+    """
+    Then transaction is open: false
+    Examples:
+      | annotation       |
+      | abstract         |
+      | distinct         |
+      | independent      |
+      | unique           |
+      | key              |
+      | card(1..1)       |
+      | regex("val")     |
+#      | cascade          | # TODO: Cascade is temporarily turned off
+      | range("1".."2")  |
+      | values("1", "2") |
+
+
+  Scenario: Functions can be defined with multiple annotations
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun five() -> integer
+      @doc("docs here")
+      @meta("key", "value")
+      @meta("other key", "other value"):
+    match
+      let $five = 5;
+    return first $five;
+    """
+    Then transaction commits
+
+
+  Scenario: Functions cannot be defined with duplicate annotations
+    Given connection open schema transaction for database: typedb
+    When typeql schema query; fails
+    """
+    define
+    fun five() -> integer
+      @doc("docs here")
+      @doc("also docs"):
+    match
+      let $five = 5;
+    return first $five;
+    """
+    Then transaction is open: false
+    Then connection open schema transaction for database: typedb
+    When typeql schema query; fails
+    """
+    define
+    fun five() -> integer
+      @meta("key", "value")
+      @meta("key", "other value"):
+    match
+      let $five = 5;
+    return first $five;
+    """
+    Then transaction is open: false
+
+
   Scenario: Functions are stratified wrt negation
     Given connection open schema transaction for database: typedb
     Given typeql schema query

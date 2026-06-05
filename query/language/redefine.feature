@@ -895,7 +895,7 @@ Feature: TypeQL Redefine Query
   ###############
   # ANNOTATIONS #
   ###############
-
+  
   Scenario Outline: cannot redefine annotation @<annotation> for entity types
     Given typeql schema query
       """
@@ -918,10 +918,14 @@ Feature: TypeQL Redefine Query
       entity player @<annotation-2>;
       """
     Examples:
-      | annotation | annotation-2 |
-      | abstract   | abstract     |
+      | annotation           | annotation-2               |
+      | abstract             | abstract                   |
+      | doc("docs")          | doc("docs")                |
+      | meta("key", "value") | meta("key", "value")       |
+      | meta("key", "value") | meta("other key", "value") |
 
-  Scenario Outline: cannot redefine annotation @<annotation> for entity types
+
+  Scenario Outline: cannot define or redefine annotation @<annotation> for entity types
     Given typeql schema query
       """
       define entity player;
@@ -958,6 +962,35 @@ Feature: TypeQL Redefine Query
       | values("1", "2") | values("0", "2") |
 
 
+  Scenario Outline: can redefine annotation @<annotation> for relation types
+    Given typeql schema query
+      """
+      define
+      relation parentship relates parent;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      relation parentship @<annotation>;
+      """
+    When transaction commits
+
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      redefine
+      relation parentship @<annotation-2>;
+      """
+    Examples:
+      | annotation           | annotation-2             |
+#      | cascade              | cascade                  | # TODO: Cascade is temporarily turned off
+      | doc("docs")          | doc("also docs")         |
+      | meta("key", "value") | meta("key", "new value") |
+
+
   Scenario Outline: cannot redefine annotation @<annotation> for relation types
     Given typeql schema query
       """
@@ -975,15 +1008,18 @@ Feature: TypeQL Redefine Query
     When transaction commits
 
     When connection open schema transaction for database: typedb
-    Then typeql schema query<redefine-fail>
+    Then typeql schema query; fails
       """
       redefine
       relation parentship @<annotation-2>;
       """
     Examples:
-      | annotation | annotation-2 | redefine-fail |
-      | abstract   | abstract     | ; fails       |
-#      | cascade    | cascade        | ; fails       | # TODO: Cascade is temporarily turned off
+      | annotation           | annotation-2               |
+      | abstract             | abstract                   |
+#      | cascade              | cascade                    | # TODO: Cascade is temporarily turned off
+      | doc("docs")          | doc("docs")                |
+      | meta("key", "value") | meta("key", "value")       |
+      | meta("key", "value") | meta("other key", "value") |
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for relation types
@@ -1460,6 +1496,33 @@ Feature: TypeQL Redefine Query
     Given transaction commits
 
     When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define
+      entity player plays employment:employee @<annotation>;
+      """
+
+    Then typeql schema query; fails
+      """
+      redefine
+      entity player plays employment:employee @<annotation-2>;
+      """
+    Examples:
+      | annotation           | annotation-2               |
+      | doc("docs")          | doc("docs")                |
+      | meta("key", "value") | meta("key", "value")       |
+      | meta("key", "value") | meta("other key", "value") |
+
+
+  Scenario Outline: cannot redefine annotation @<annotation> for plays
+    Given typeql schema query
+      """
+      define
+      entity player plays employment:employee;
+      """
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
     Then typeql schema query; fails
       """
       define
@@ -1504,8 +1567,10 @@ Feature: TypeQL Redefine Query
       """
     Then transaction commits
     Examples:
-      | annotation | annotation-2 |
-      | card(1..1) | card(0..1)   |
+      | annotation           | annotation-2             |
+      | card(1..1)           | card(0..1)               |
+      | doc("docs")          | doc("also docs")         |
+      | meta("key", "value") | meta("key", "new value") |
 
 
   Scenario Outline: cannot redefine annotation @<annotation> for value types
@@ -1528,16 +1593,16 @@ Feature: TypeQL Redefine Query
     Then typeql schema query; fails with a message containing: "already defined"
       """
       redefine
-      attribute description value string @<annotation-2>;
+      attribute description value string @<annotation>;
       """
     Examples:
-      | annotation       | annotation-2     |
-      | regex("val")     | regex("val")     |
-      | range("1".."2")  | range("1".."2")  |
-      | values("1", "2") | values("1", "2") |
+      | annotation       |
+      | regex("val")     |
+      | range("1".."2")  |
+      | values("1", "2") |
 
 
-  Scenario Outline: cannot redefine annotation @<annotation> for value types
+  Scenario Outline: cannot define or redefine annotation @<annotation> for value types
     Given typeql schema query
       """
       define
@@ -1567,7 +1632,6 @@ Feature: TypeQL Redefine Query
       | distinct    | distinct     |
 #      | cascade     | cascade      | # TODO: Cascade is temporarily turned off
       | card(1..1)  | card(1..1)   |
-      | card(1..1)  | card(0..1)   |
 
 
   Scenario Outline: can redefine annotation @<annotation> for value types
