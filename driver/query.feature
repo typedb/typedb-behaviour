@@ -1082,6 +1082,95 @@ Feature: Driver Query
     Then answer get row(0) get attribute(name) get value is: "Jane"
 
 
+  Scenario: The order of variables in given rows don't matter
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
+    Given set answers of typeql read query as given rows with order: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      $name == "Jane"; try { let $age_value = 38; };
+    sort $name;
+    select $p, $age_value;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+    Given set answers of typeql read query as given rows with order: $p
+    """
+    match
+      $p isa person, has name $name;
+      $name == "John";
+    sort $name;
+    select $p;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "John"
+
+    Then transaction commits
+
+
+  Scenario: Illegal query given rows are flagged with errors
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given set answers of typeql read query as given rows with order: $x, $z
+    """
+    match
+      let $x = 5;
+      let $z = 6;
+    """
+    Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
+      """
+      given $x: integer, $y: integer;
+      match let $p = $x + $y;
+      """
+
   ###########
   # ANALYZE #
   ###########

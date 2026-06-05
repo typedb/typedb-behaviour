@@ -144,9 +144,10 @@ Feature: TypeQL Given Clause
       | value:integer:5 | value:integer:6 |
     Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
       """
-      given $x: integer, $y: integer;
-      match let $p = $x + $y;
+      given $x: integer, $y: integer?;
+      match try { let $p = $x + $y; };
       """
+
 
   Scenario: Concepts in given rows are validated to exist
     Given connection open read transaction for database: typedb
