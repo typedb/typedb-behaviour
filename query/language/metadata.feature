@@ -352,6 +352,15 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | repr                | table               |
       | value:string:person | value:string:PERSON |
+    When get answers of typeql read query
+      """
+      match
+        let $key, $value in get_all_meta(person);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:repr  | value:string:person |
+      | value:string:table | value:string:PERSON |
 
 
   Scenario: retrieving a missing metadata annotation returns an empty string
@@ -388,3 +397,218 @@ Feature: TypeQL schema metadata
       | metadata                              | metadata_other |
       | value:string:This represents a person | value:string:  |
 
+
+  Scenario: get_all_meta returns all metadata for an entity type
+    When typeql schema query
+      """
+      define entity person @meta("key1", "val1") @meta("key2", "val2");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(person);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario: get_all_meta returns all metadata for an attribute type
+    When typeql schema query
+      """
+      define attribute name @meta("key1", "val1") @meta("key2", "val2"), value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(name);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario: get_all_meta returns all metadata for a relation type
+    When typeql schema query
+      """
+      define relation marriage @meta("key1", "val1") @meta("key2", "val2"), relates spouse;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(marriage);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario: get_all_meta returns all metadata for a role type
+    When typeql schema query
+      """
+      define relation marriage, relates spouse @meta("key1", "val1") @meta("key2", "val2");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(marriage:spouse);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario: get_all_meta returns all metadata for a function
+    When typeql schema query
+      """
+      define
+        fun get_random_number() -> integer
+          @meta("key1", "val1")
+          @meta("key2", "val2"):
+        match
+          let $rand = 4;
+        return first $rand;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_fun_all_meta("get_random_number");
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario Outline: get_<constraint>_all_meta returns all metadata for a <constraint>
+    When typeql schema query
+      """
+      define
+        relation person, <constraint> <arg> @meta("key1", "val1") @meta("key2", "val2");
+        person relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_<constraint>_all_meta(person, <rhs>);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+  Examples:
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
+
+
+  Scenario: get_all_meta results in zero rows if no @meta are defined for an entity type
+    When typeql schema query
+      """
+      define entity person;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(person);
+      """
+    Then answer size is: 0
+
+
+  Scenario: get_all_meta results in zero rows if no @meta are defined for an attribute type
+    When typeql schema query
+      """
+      define attribute name value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(name);
+      """
+    Then answer size is: 0
+
+
+  Scenario: get_all_meta results in zero rows if no @meta are defined for a relation type
+    When typeql schema query
+      """
+      define relation marriage, relates spouse;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(marriage);
+      """
+    Then answer size is: 0
+
+
+  Scenario: get_all_meta results in zero rows if no @meta are defined for a role type
+    When typeql schema query
+      """
+      define relation marriage, relates spouse;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_all_meta(marriage:spouse);
+      """
+    Then answer size is: 0
+
+
+  Scenario: get_fun_all_meta results in zero rows if no @meta are defined for a function
+    When typeql schema query
+      """
+      define
+        fun get_random_number() -> integer:
+        match
+          let $rand = 4;
+        return first $rand;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_fun_all_meta("get_random_number");
+      """
+    Then answer size is: 0
+
+
+  Scenario Outline: get_<constraint>_all_meta results in zero rows if no @meta are defined for the <constraint>
+    When typeql schema query
+      """
+      define
+        relation person, <constraint> <arg>;
+        person relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_<constraint>_all_meta(person, <rhs>);
+      """
+    Then answer size is: 0
+  Examples:
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
