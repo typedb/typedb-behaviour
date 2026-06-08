@@ -262,7 +262,7 @@ Feature: TypeQL schema metadata
 
 
   @ignore
-  # TODO: structs; TBD: are struct value types first class?
+  # TODO: structs
   Scenario: structs can have metadata annotations
     When typeql schema query
       """
@@ -612,3 +612,167 @@ Feature: TypeQL schema metadata
     | plays      | base:arole | base:arole     |
     | relates    | newrole    | person:newrole |
     | sub        | base       | base           |
+
+
+  ##############
+  # FAIL CASES #
+  ##############
+
+  Scenario: get_fun_doc fails if the function does not exist
+    Then typeql read query; fails
+      """
+      match let $doc = get_fun_doc("non_existing_function");
+      """
+
+
+  Scenario: get_fun_meta fails if the function does not exist
+    Then typeql read query; fails
+      """
+      match let $meta = get_fun_meta("non_existing_function");
+      """
+
+
+  Scenario: get_fun_all_meta fails if the function does not exist
+    Then typeql read query; fails
+      """
+      match let $key, $value in get_fun_all_meta("non_existing_function");
+      """
+
+
+  Scenario Outline: get_<constraint>_doc fails if the <constraint> is not defined
+    When typeql schema query
+      """
+      define
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match let $doc = get_<constraint>_doc(person, <rhs>);
+      """
+  Examples:
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
+
+
+  Scenario Outline: get_<constraint>_meta fails if the <constraint> is not defined
+    When typeql schema query
+      """
+      define
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match let $meta = get_<constraint>_meta(person, <rhs>);
+      """
+  Examples:
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
+
+
+  Scenario Outline: get_<constraint>_all_meta fails if the <constraint> is not defined
+    When typeql schema query
+      """
+      define
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match let $key, $value in get_<constraint>_all_meta(person, <rhs>);
+      """
+  Examples:
+    | constraint | arg        | rhs            |
+    | owns       | id         | id             |
+    | plays      | base:arole | base:arole     |
+    | relates    | newrole    | person:newrole |
+    | sub        | base       | base           |
+
+  @ignore
+  # TODO: structs
+  Scenario: get_struct_all_meta returns all metadata for a struct type
+    When typeql schema query
+      """
+      define struct location @meta("key1", "val1") @meta("key2", "val2"):
+        latitude value double;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_struct_all_meta("location");
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  @ignore
+  # TODO: structs
+  Scenario: get_struct_field_all_meta returns all metadata for a struct field
+    When typeql schema query
+      """
+      define struct location:
+        latitude value double @meta("key1", "val1") @meta("key2", "val2");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_struct_field_all_meta("location", "latitude");
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  @ignore
+  # TODO: structs
+  Scenario: get_struct_all_meta results in zero rows if no @meta are defined for a struct type
+    When typeql schema query
+      """
+      define struct location:
+        latitude value double;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_struct_all_meta("location");
+      """
+    Then answer size is: 0
+
+
+  @ignore
+  # TODO: structs
+  Scenario: get_struct_field_all_meta results in zero rows if no @meta are defined for a struct field
+    When typeql schema query
+      """
+      define struct location:
+        latitude value double;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_struct_field_all_meta("location", "latitude");
+      """
+    Then answer size is: 0
