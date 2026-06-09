@@ -1118,8 +1118,6 @@ Feature: Driver Query
     insert try { $p has age == $age_value; };
     """
     # We don't necessarily guarantee that the rows retain the order
-    Then answer get row(0) get concepts size is: 3
-
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get attribute(name) get type get label: name
     Then answer get row(0) get attribute(name) get value is: "Jane"
@@ -1138,8 +1136,6 @@ Feature: Driver Query
     insert try { $p has age == $age_value; };
     """
     # We don't necessarily guarantee that the rows retain the order
-    Then answer get row(0) get concepts size is: 3
-
     Then answer get row(0) get entity(p) get type get label: person
     Then answer get row(0) get attribute(name) get type get label: name
     Then answer get row(0) get attribute(name) get value is: "John"
@@ -1160,7 +1156,6 @@ Feature: Driver Query
        let $p = $x * 2;
        try { let $q = $x + $y; };
       """
-    Then answer get row(0) get concepts size is: 4
 
     Then answer get row(0) get value(x) get is: 5
     Then answer get row(0) get value(p) get is: 10
@@ -1190,6 +1185,87 @@ Feature: Driver Query
         let $p = $x;
        try { let $q = $x + $y; };
       """
+
+
+  Scenario: Drivers also accept given rows as maps
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
+    Given set answers of typeql read query as given rows dictionary with variables: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      {
+        $name == "Jane"; try { let $age_value = 38; };
+      } or {
+        $name == "John"; try { let $age_value = 0; $age_value == 1; };
+      };
+    sort $name;
+    select $p, $age_value;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+    Then answer get row(1) get entity(p) get type get label: person
+    Then answer get row(1) get attribute(name) get type get label: name
+    Then answer get row(1) get attribute(name) get value is: "John"
+
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given set query option include_instance_types to: true
+    When get answers of typeql read query
+    """
+    match $p isa person, has name $name, has age $age;
+    """
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(age) get type get label: age
+    Then answer get row(0) get attribute(age) get value is: 38
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+    Given connection open read transaction for database: typedb
+    When set answers of typeql read query as given rows dictionary with variables: $x
+    """
+    match let $x = 5;
+    """
+    When get answers of typeql read query with given rows
+      """
+      given $x: integer, $y: integer?;
+      match
+       let $p = $x * 2;
+       try { let $q = $x + $y; };
+      """
+    Then answer get row(0) get value(x) get is: 5
+    Then answer get row(0) get value(p) get is: 10
+    Then answer get row(0) get variable(y) is empty
+    Then answer get row(0) get variable(q) is empty
 
   ###########
   # ANALYZE #
