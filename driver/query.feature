@@ -1250,7 +1250,6 @@ Feature: Driver Query
     Then answer get row(0) get attribute(name) get type get label: name
     Then answer get row(0) get attribute(name) get value is: "Jane"
 
-    Given connection open read transaction for database: typedb
     When set answers of typeql read query as given rows dictionary with variables: $x
     """
     match let $x = 5;
