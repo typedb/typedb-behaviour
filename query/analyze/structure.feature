@@ -190,6 +190,10 @@ Feature: Analyzed query structure
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze
     """
+    given $x: person, $y: string;
+    insert
+      $z isa name == $y;
+      $x has $z;
     match
      $p isa person;
      $q isa person;
@@ -213,9 +217,16 @@ Feature: Analyzed query structure
     offset 1;
     limit 1;
     """
+    Then analyzed query given structure is:
+    """
+    Given([$x, $y])
+    """
     Then analyzed query pipeline structure is:
     """
     Pipeline([
+      Insert(
+        [Isa($z, name), Comparison($z, $y, ==), Has($x, $z)]
+      ),
       Match(
         [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
       ),

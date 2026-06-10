@@ -1015,6 +1015,261 @@ Feature: Driver Query
     """
 
 
+  Scenario: Driver processes query given rows correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
+    Given set answers of typeql read query as given rows with order: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      {
+        $name == "Jane"; try { let $age_value = 38; };
+      } or {
+        $name == "John"; try { let $age_value = 0; $age_value == 1; };
+      };
+    sort $name;
+    select $p, $age_value;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+    Then answer get row(1) get entity(p) get type get label: person
+    Then answer get row(1) get attribute(name) get type get label: name
+    Then answer get row(1) get attribute(name) get value is: "John"
+
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given set query option include_instance_types to: true
+    When get answers of typeql read query
+    """
+    match $p isa person, has name $name, has age $age;
+    """
+    Then answer get row(0) get concepts size is: 3
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(age) get type get label: age
+    Then answer get row(0) get attribute(age) get value is: 38
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+
+  Scenario: The order of variables in given rows don't matter
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
+    Given set answers of typeql read query as given rows with order: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      $name == "Jane"; try { let $age_value = 38; };
+    sort $name;
+    select $p, $age_value;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+    Given set answers of typeql read query as given rows with order: $p
+    """
+    match
+      $p isa person, has name $name;
+      $name == "John";
+    sort $name;
+    select $p;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "John"
+
+    Then transaction commits
+
+
+  Scenario: In given rows, optional variables may be omitted, required ones may not, undeclared variables are flagged.
+    Given connection open read transaction for database: typedb
+    When set answers of typeql read query as given rows with order: $x
+    """
+    match let $x = 5;
+    """
+    When get answers of typeql read query with given rows
+      """
+      given $x: integer, $y: integer?;
+      match
+       let $p = $x * 2;
+       try { let $q = $x + $y; };
+      """
+
+    Then answer get row(0) get value(x) get is: 5
+    Then answer get row(0) get value(p) get is: 10
+    Then answer get row(0) get variable(y) is empty
+    Then answer get row(0) get variable(q) is empty
+
+    When set answers of typeql read query as given rows with order: $x
+      """
+      match let $x = 5;
+      """
+    Then typeql read query with given rows; fails with a message containing: "The given rows are missing the required variable 'y'"
+      """
+      given $x: integer, $y: integer;
+      match
+       let $p = $x * 2;
+       let $q = $x + $y;
+      """
+
+    When set answers of typeql read query as given rows with order: $x, $z
+      """
+      match let $x = 5; let $z =6;
+      """
+    Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
+      """
+      given $x: integer, $y: integer?;
+      match
+        let $p = $x;
+       try { let $q = $x + $y; };
+      """
+
+
+  Scenario: Drivers also accept given rows as maps
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person owns name @card(0..), owns age @card(0..);
+        attribute name, value string;
+        attribute age, value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given get answers of typeql write query
+      """
+      insert $_ isa person, has name "John";
+      insert $_ isa person, has name "Jane";
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query option include_instance_types to: true
+    Given set answers of typeql read query as given rows dictionary with variables: $p, $age_value
+    """
+    match
+      $p isa person, has name $name;
+      {
+        $name == "Jane"; try { let $age_value = 38; };
+      } or {
+        $name == "John"; try { let $age_value = 0; $age_value == 1; };
+      };
+    sort $name;
+    select $p, $age_value;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $p: person, $age_value: integer?;
+    match $p isa person, has name $name;
+    insert try { $p has age == $age_value; };
+    """
+    # We don't necessarily guarantee that the rows retain the order
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+    Then answer get row(1) get entity(p) get type get label: person
+    Then answer get row(1) get attribute(name) get type get label: name
+    Then answer get row(1) get attribute(name) get value is: "John"
+
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given set query option include_instance_types to: true
+    When get answers of typeql read query
+    """
+    match $p isa person, has name $name, has age $age;
+    """
+
+    Then answer get row(0) get entity(p) get type get label: person
+    Then answer get row(0) get attribute(age) get type get label: age
+    Then answer get row(0) get attribute(age) get value is: 38
+    Then answer get row(0) get attribute(name) get type get label: name
+    Then answer get row(0) get attribute(name) get value is: "Jane"
+
+    When set answers of typeql read query as given rows dictionary with variables: $x
+    """
+    match let $x = 5;
+    """
+    When get answers of typeql read query with given rows
+      """
+      given $x: integer, $y: integer?;
+      match
+       let $p = $x * 2;
+       try { let $q = $x + $y; };
+      """
+    Then answer get row(0) get value(x) get is: 5
+    Then answer get row(0) get value(p) get is: 10
+    Then answer get row(0) get variable(y) is empty
+    Then answer get row(0) get variable(q) is empty
+
+  ###########
+  # ANALYZE #
+  ###########
+
   Scenario: Driver processes query structure correctly
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1187,6 +1442,25 @@ Feature: Driver Query
       Limit(1)
     ])
     """
+    When get answers of typeql analyze
+    """
+      given $x: person, $y: string;
+      insert
+        $z isa name == $y;
+        $x has $z;
+    """
+    Then analyzed query given structure is:
+    """
+    Given([$x, $y])
+    """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Insert(
+        [Isa($z, name), Comparison($z, $y, ==), Has($x, $z)]
+      )
+    ])
+    """
     Given transaction closes
 
 
@@ -1297,6 +1571,21 @@ Feature: Driver Query
         ref: [integer]
       }
     """
+    When get answers of typeql analyze
+    """
+      given $p: person, $m: string;
+      insert $p has name == $m;
+    """
+    Then analyzed query given annotations are:
+    """
+      Given({ $m: value([string]), $p: instance([person]) })
+    """
+    Then analyzed query pipeline annotations are:
+    """
+      Pipeline([
+        Insert(And({ $_: instance([name]), $m: value([string]), $p: instance([person]) }, []))
+      ])
+    """
 
 
   Scenario: Analyze handles unsatisfiable schema queries and errors properly
@@ -1374,6 +1663,9 @@ Feature: Driver Query
     Given transaction closes
 
 
+  ###########
+  # MISC    #
+  ###########
   Scenario: Driver processes query errors correctly
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails
@@ -1396,6 +1688,7 @@ Feature: Driver Query
       """
       define attribute name owns name;
       """
+
 
   Scenario: Driver can concurrently process read queries without interruptions
     Given connection open schema transaction for database: typedb
