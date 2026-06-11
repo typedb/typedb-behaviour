@@ -708,6 +708,126 @@ Feature: TypeQL schema metadata
     | sub        | base       |
 
 
+  Scenario Outline: get_<constraint>_doc returns no answers if the argument kinds don't match the constraint
+    When typeql schema query
+      """
+      define
+        entity company;
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $doc = get_<constraint>_doc(<lhs>, <rhs>);
+      """
+    Then answer size is: 0
+  Examples:
+    | constraint | lhs        | rhs        |
+    | owns       | base:arole | id         |
+    | owns       | id         | id         |
+    | owns       | id         | person     |
+    | owns       | person     | base:arole |
+    | owns       | person     | company    |
+    | owns       | person     | person     |
+    | plays      | base:arole | base:arole |
+    | plays      | id         | base:arole |
+    | plays      | person     | company    |
+    | plays      | person     | id         |
+    | plays      | person     | person     |
+    | relates    | base:arole | base:arole |
+    | relates    | company    | base:arole |
+    | relates    | id         | base:arole |
+    | relates    | person     | company    |
+    | relates    | person     | id         |
+    | relates    | person     | person     |
+    | sub        | company    | person     |
+    | sub        | person     | id         |
+    | sub        | person     | base:arole |
+
+
+  Scenario Outline: get_<constraint>_meta returns no answers if the argument kinds don't match the constraint
+    When typeql schema query
+      """
+      define
+        entity company;
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $meta = get_<constraint>_meta("key", <lhs>, <rhs>);
+      """
+    Then answer size is: 0
+  Examples:
+    | constraint | lhs        | rhs        |
+    | owns       | base:arole | id         |
+    | owns       | id         | id         |
+    | owns       | id         | person     |
+    | owns       | person     | base:arole |
+    | owns       | person     | company    |
+    | owns       | person     | person     |
+    | plays      | base:arole | base:arole |
+    | plays      | id         | base:arole |
+    | plays      | person     | company    |
+    | plays      | person     | id         |
+    | plays      | person     | person     |
+    | relates    | base:arole | base:arole |
+    | relates    | company    | base:arole |
+    | relates    | id         | base:arole |
+    | relates    | person     | company    |
+    | relates    | person     | id         |
+    | relates    | person     | person     |
+    | sub        | company    | person     |
+    | sub        | person     | id         |
+    | sub        | person     | base:arole |
+
+
+  Scenario Outline: get_<constraint>_all_meta returns no answers if the argument kinds don't match the constraint
+    When typeql schema query
+      """
+      define
+        entity company;
+        relation person, relates dummy; # a relation must relate at least one role
+        relation base, relates arole;
+        attribute id value string;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $key, $value in get_<constraint>_all_meta(<lhs>, <rhs>);
+      """
+    Then answer size is: 0
+  Examples:
+    | constraint | lhs        | rhs        |
+    | owns       | base:arole | id         |
+    | owns       | id         | id         |
+    | owns       | id         | person     |
+    | owns       | person     | base:arole |
+    | owns       | person     | company    |
+    | owns       | person     | person     |
+    | plays      | base:arole | base:arole |
+    | plays      | id         | base:arole |
+    | plays      | person     | company    |
+    | plays      | person     | id         |
+    | plays      | person     | person     |
+    | relates    | base:arole | base:arole |
+    | relates    | company    | base:arole |
+    | relates    | id         | base:arole |
+    | relates    | person     | company    |
+    | relates    | person     | id         |
+    | relates    | person     | person     |
+    | sub        | company    | person     |
+    | sub        | person     | id         |
+    | sub        | person     | base:arole |
+
+
   @ignore
   # TODO: structs
   Scenario: get_struct_all_meta returns all metadata for a struct type
