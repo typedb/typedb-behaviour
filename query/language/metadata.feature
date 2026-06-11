@@ -662,7 +662,7 @@ Feature: TypeQL schema metadata
     | sub        | base       |
 
 
-  Scenario Outline: get_<constraint>_meta fails if the <constraint> is not defined
+  Scenario Outline: get_<constraint>_meta returns no answers if the <constraint> is not defined
     When typeql schema query
       """
       define
@@ -685,7 +685,7 @@ Feature: TypeQL schema metadata
     | sub        | base       |
 
 
-  Scenario Outline: get_<constraint>_all_meta fails if the <constraint> is not defined
+  Scenario Outline: get_<constraint>_all_meta returns no answers if the <constraint> is not defined
     When typeql schema query
       """
       define
@@ -780,3 +780,83 @@ Feature: TypeQL schema metadata
       match let $key, $value in get_struct_field_all_meta("location", "latitude");
       """
     Then answer size is: 0
+
+
+  #############
+  # VARIABLES #
+  #############
+
+  Scenario: get_doc works with a type variable
+    When typeql schema query
+      """
+      define entity person @doc("This represents a person");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $ty label person;
+        let $doc = get_doc($ty);
+      """
+    Then uniquely identify answer concepts
+      | doc                                   |
+      | value:string:This represents a person |
+
+
+  Scenario: get_meta works with a type variable
+    When typeql schema query
+      """
+      define entity person @meta("key", "This represents a person");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $ty label person;
+        let $metadata = get_meta("key", $ty);
+      """
+    Then uniquely identify answer concepts
+      | metadata                              |
+      | value:string:This represents a person |
+
+
+  Scenario: get_all_meta works with a type variable
+    When typeql schema query
+      """
+      define entity person @meta("key1", "val1") @meta("key2", "val2");
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $ty label person;
+        let $key, $value in get_all_meta($ty);
+      """
+    Then uniquely identify answer concepts
+      | key                | value               |
+      | value:string:key1  | value:string:val1   |
+      | value:string:key2  | value:string:val2   |
+
+
+  Scenario: get_fun_doc works with the function name in a variable
+    When typeql schema query
+      """
+      define
+        fun get_random_number() -> integer
+          @doc("chosen by a fair dice roll"):
+        match
+          let $rand = 4;
+        return first $rand;
+      """
+    Then transaction commits
+    Then connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match let $fun = "get_random_number"; let $doc = get_fun_doc($fun);
+      """
+    Then uniquely identify answer concepts
+      | doc                                     |
+      | value:string:chosen by a fair dice roll |
