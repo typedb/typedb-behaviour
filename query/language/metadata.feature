@@ -639,7 +639,7 @@ Feature: TypeQL schema metadata
       """
 
 
-  Scenario Outline: get_<constraint>_doc fails if the <constraint> is not defined
+  Scenario Outline: get_<constraint>_doc returns no answers if the <constraint> is not defined
     When typeql schema query
       """
       define
@@ -649,16 +649,17 @@ Feature: TypeQL schema metadata
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
-    Then typeql read query; fails
+    When get answers of typeql read query
       """
       match let $doc = get_<constraint>_doc(person, <rhs>);
       """
+    Then answer size is: 0
   Examples:
-    | constraint | arg        | rhs            |
-    | owns       | id         | id             |
-    | plays      | base:arole | base:arole     |
-    | relates    | newrole    | person:newrole |
-    | sub        | base       | base           |
+    | constraint | rhs        |
+    | owns       | id         |
+    | plays      | base:arole |
+    | relates    | base:arole |
+    | sub        | base       |
 
 
   Scenario Outline: get_<constraint>_meta fails if the <constraint> is not defined
@@ -671,16 +672,17 @@ Feature: TypeQL schema metadata
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
-    Then typeql read query; fails
+    When get answers of typeql read query
       """
-      match let $meta = get_<constraint>_meta(person, <rhs>);
+      match let $meta = get_<constraint>_meta("key", person, <rhs>);
       """
+    Then answer size is: 0
   Examples:
-    | constraint | arg        | rhs            |
-    | owns       | id         | id             |
-    | plays      | base:arole | base:arole     |
-    | relates    | newrole    | person:newrole |
-    | sub        | base       | base           |
+    | constraint | rhs        |
+    | owns       | id         |
+    | plays      | base:arole |
+    | relates    | base:arole |
+    | sub        | base       |
 
 
   Scenario Outline: get_<constraint>_all_meta fails if the <constraint> is not defined
@@ -693,16 +695,18 @@ Feature: TypeQL schema metadata
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
-    Then typeql read query; fails
+    When get answers of typeql read query
       """
       match let $key, $value in get_<constraint>_all_meta(person, <rhs>);
       """
+    Then answer size is: 0
   Examples:
-    | constraint | arg        | rhs            |
-    | owns       | id         | id             |
-    | plays      | base:arole | base:arole     |
-    | relates    | newrole    | person:newrole |
-    | sub        | base       | base           |
+    | constraint | rhs        |
+    | owns       | id         |
+    | plays      | base:arole |
+    | relates    | base:arole |
+    | sub        | base       |
+
 
   @ignore
   # TODO: structs
