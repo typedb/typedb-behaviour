@@ -1513,7 +1513,7 @@ Feature: Driver Query
       match $s isa a-string;
       """
     Then answer size is: 1
-    Then answer get row(0) get variable(s) try get value is: "<string>"
+    Then answer get row(0) get attribute by index of variable(s) get value is: "<string>"
 
     Examples:
       | string  |
