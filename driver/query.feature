@@ -1493,6 +1493,36 @@ Feature: Driver Query
 #    Then concurrently process 1 rows from answers; fails
 
 
+  Scenario Outline: Driver correctly handles non-ascii strings (<string>)
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute a-string @independent, value string;
+      """
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    Then typeql write query
+      """
+      insert $_ isa a-string == "<string>";
+      """
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $s isa a-string;
+      """
+    Then answer size is: 1
+    Then answer get row(0) get variable(s) try get value is: "<string>"
+
+    Examples:
+      | string  |
+      | hello   | 
+      | äìèòðèé | 
+      | കുര്യാക്കോസ്     | 
+      | 📎      | 
+
+
 #  TODO: Repeat two tests above for:
 #  read results + write query (not) interrupting them
 #  write results + schema query (not) interrupting them
