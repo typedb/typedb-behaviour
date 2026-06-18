@@ -1516,11 +1516,11 @@ Feature: Driver Query
     Then answer get row(0) get attribute by index of variable(s) get value is: "<string>"
 
     Examples:
-      | string  |
-      | hello   | 
-      | äìèòðèé | 
-      | കുര്യാക്കോസ്     | 
-      | 📎      | 
+      | string     |
+      | hello      |
+      | äìèòðèé    |
+      | കുര്യാക്കോസ് |
+      | 📎         |
 
 
 #  TODO: Repeat two tests above for:
