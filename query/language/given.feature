@@ -120,7 +120,7 @@ Feature: TypeQL Given Clause
       | x                |
       | value:integer:3  |
       | value:string:abc |
-    Then typeql read query with given rows; fails with a message containing: "The given value at row '1' and column '0' does not not satisfy the declared type"
+    Then typeql read query with given rows; fails with a message containing: "The provided value '"abc"' has type 'string' and could not be decoded as the value type 'integer'"
       """
       given $x: integer;
       match let $y = 2 * $x;
@@ -135,6 +135,22 @@ Feature: TypeQL Given Clause
       given $comp: company;
       match $comp has name $name;
       """
+
+    # Values: Passing an integer or decimal for a float is accepted
+    Given query is given rows
+      | x                    |
+      | value:integer:3      |
+      | value:decimal:1.2dec |
+    Then get answers of typeql read query with given rows
+      """
+      given $x: double;
+      match let $y = 2 * $x;
+      """
+    Then uniquely identify answer concepts
+      | y                |
+      | value:double:6.0 |
+      | value:double:2.4 |
+
 
 
   Scenario: Optional variables may be omitted, required ones may not, undeclared variables are flagged.
