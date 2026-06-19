@@ -82,6 +82,32 @@ Feature: TypeQL Given Clause
       | attr:name:Jane |
 
 
+  Scenario: If a query has a given stage, given rows must be passed
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The query contains a given stage, but no given rows were provided"
+      """
+      given $n: name;
+      match $p has name $n;
+      """
+
+    When query is given rows
+      | n: name           |
+      | value:string:Jane |
+    Then typeql read query with given rows; fails with a message containing: "The query contains no given stage, but given rows were provided"
+      """
+      match $p has name $n;
+      """
+
+    When query is given rows
+      | n: name         |
+    Then get answers of typeql read query with given rows
+      """
+      given $n: name;
+      match $p has name $n;
+      """
+    Then answer size is: 0
+
+
   Scenario: Variables in given rows cannot be reassigned to
     Given connection open read transaction for database: typedb
     Given query is given rows
@@ -150,7 +176,6 @@ Feature: TypeQL Given Clause
       | y                |
       | value:double:6.0 |
       | value:double:2.4 |
-
 
 
   Scenario: Optional variables may be omitted, required ones may not, undeclared variables are flagged.
@@ -338,6 +363,7 @@ Feature: TypeQL Given Clause
     Then uniquely identify answer concepts
       | p           |
       | key:ref:111 |
+
 
   Scenario: The order of variables in the given rows does not matter, omitted ones are treated as optional, undeclared ones are flagged.
     Given connection open write transaction for database: typedb
