@@ -65,13 +65,12 @@ Feature: Driver User
     Then connection opens with username '<wrong-name>', password 'password'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username '<name>', password 'password'
     Examples:
-      | name | wrong-name |
-      | bob  | BoB        |
-      | BoB  | Bob        |
-      | Bob  | bob        |
-      # TODO: Errors with "Credential not supplied"
-#      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c          |
-#      | 資料庫                                                                 | 資料        |
+      | name                                                                  | wrong-name |
+      | bob                                                                   | BoB        |
+      | BoB                                                                   | Bob        |
+      | Bob                                                                   | bob        |
+      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c          |
+      | 資料庫                                                                | 資料       |
 
 
   Scenario Outline: Cannot create user with an emoji in its name (<name>)
@@ -83,21 +82,9 @@ Feature: Driver User
     Then connection opens with username '<name>', password 'password'; fails with a message containing: "Invalid credential supplied"
     Examples:
       | name           |
-      | ??(!@(**('"'£" |
+      # TODO: TS can't parse quotes in string
+      # | ??(!@(**('"'£" |
       | ·‿·            |
-
-
-  # TODO: Merge with the general "cannot contain invalid indentifiers" after fixing https://github.com/typedb/typedb-driver/issues/699
-  @ignore-typedb-driver-java
-  Scenario Outline: Cannot create user with an emoji in its name (<name>)
-    Given typedb starts
-    Given connection opens with username 'admin', password 'password'
-    When create user with username '<name>', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Then get all users does not contain: <name>
-    When connection closes
-    Then connection opens with username '<name>', password 'password'; fails with a message containing: "Invalid credential supplied"
-    Examples:
-      | name     |
       | 😎       |
       | my😎user |
 
@@ -111,16 +98,16 @@ Feature: Driver User
     Then connection opens with username 'user', password '<wrong-pass>'; fails with a message containing: "Invalid credential supplied"
     Then connection opens with username 'user', password '<pass>'
     Examples:
-      | pass | wrong-pass |
-      | bob  | BoB        |
-      | BoB  | Bob        |
-      | Bob  | bob        |
-      # TODO: Errors with "Credential not supplied"
-#      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c             |
-#      | ?(!@(**('"'£"                                                         | ?(!@(**('"'£" |
-#      | 資料庫                                                                   | 資料            |
-#      | ·‿·                                                                   | =)            |
-#      | 😎                                                                    | B)            |
+      | pass                                                                  | wrong-pass      |
+      | bob                                                                   | BoB             |
+      | BoB                                                                   | Bob             |
+      | Bob                                                                   | bob             |
+      | cAn-be_Like-that_WITH-a_pretty-looooooooooooong_name-and·even‿a·smile | c               |
+      # TODO: TS can't parse quotes in string
+      # | ?(!@(**('"'£"                                                         | ?(!@(**('\"'£\" |
+      | 資料庫                                                                | 資料            |
+      | ·‿·                                                                   | =)              |
+      | 😎                                                                    | B)              |
 
 
   Scenario: User cannot be created multiple times
