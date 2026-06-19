@@ -218,6 +218,8 @@ Feature: Analyzed query annotations
     Given connection open read transaction for database: typedb
     When get answers of typeql analyze
       """
+      given $p: person, $m: string;
+      insert $p has name == $m;
       match
         $x isa person, has name $n, has ref $r;
         { $r == 2; } or { $r == 3; };
@@ -227,9 +229,14 @@ Feature: Analyzed query annotations
       match $n1 isa name == "J";
       put $x has name $n1;
       """
+    Then analyzed query given annotations are:
+    """
+    Given({ $m: value([string]), $p: instance([person]) })
+    """
     Then analyzed query pipeline annotations are:
     """
     Pipeline([
+      Insert(And({ $_: instance([name]), $m: value([string]), $p: instance([person]) }, [])),
       Match(
         And(
           { $n: instance([name]), $r: instance([ref]), $x: instance([person]) },

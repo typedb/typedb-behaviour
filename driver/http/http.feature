@@ -234,6 +234,7 @@ Feature: TypeDB HTTP Endpoint
         },
         "attribute": {
             "kind": "attribute",
+            "iid": "0x200000084a6f686e00000000000000000000000004",
             "value": "John",
             "valueType": "string",
             "type": {
@@ -318,6 +319,7 @@ Feature: TypeDB HTTP Endpoint
         },
         "attribute": {
             "kind": "attribute",
+            "iid": "0x200000084a6f686e00000000000000000000000004",
             "value": "John",
             "valueType": "string",
             "type": {
