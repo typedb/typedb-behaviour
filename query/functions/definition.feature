@@ -256,7 +256,6 @@ Feature: Function Definition
     Given typeql schema query
     """
     define
-    entity animal @abstract;
     fun get_animals_via_get_animals() -> { animal }:
     match
       let $a in get_animals();
@@ -831,7 +830,7 @@ Feature: Function Definition
 #      rel01 sub relation, relates role01;
 #      rel1 sub rel00;
 #
-#      ent00 sub entitybstract, plays rel00:role00, plays rel01:role01;
+#      ent00 sub entity, @abstract, plays rel00:role00, plays rel01:role01;
 #      ent01 sub entity, abstract;
 #      ent1 sub ent00;
 #
