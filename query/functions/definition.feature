@@ -237,6 +237,137 @@ Feature: Function Definition
     Then transaction is open: false
 
 
+  # Abstract schema functions
+  Scenario: Schema functions can be committed even if all types inferred are abstract.
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    entity animal @abstract;
+    fun get_animals() -> { animal }:
+    match
+      $a isa animal;
+    return { $a };
+    """
+    Then transaction commits
+
+    # Other schema functions are allowed to reference this.
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+    """
+    define
+    fun get_animals_via_get_animals() -> { animal }:
+    match
+      let $a in get_animals();
+    return { $a };
+    """
+    Then transaction commits
+
+
+  Scenario: Using a schema function where all types are abstract in a query or preamble function errors.
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    entity animal @abstract;
+    fun get_animals() -> { animal }:
+    match
+      $a isa animal;
+    return { $a };
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+    """
+    match let $a in get_animals();
+    """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'a' & 'animal' across a 'isa' constraint"
+    """
+    with
+    fun get_animals_preamble() -> { animal }:
+    match
+      $a isa animal;
+    return { $a };
+
+    match let $a in get_animals_preamble();
+    """
+    Given transaction closes
+
+
+  Scenario: Preamble functions that infer no concrete types are not allowed
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    entity animal @abstract;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Type-inference was unable to find compatible types for the pair of variables 'a' & 'animal' across a 'isa' constraint"
+    """
+    with
+    fun get_animals() -> { animal }:
+    match
+      $a isa animal;
+    return { $a };
+
+    match let $a in get_animals();
+    """
+    Given transaction closes
+
+
+  Scenario: A function returning only abstract types produces results after concrete subtypes are added
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    entity animal @abstract;
+    fun get_animals() -> { animal }:
+    match
+      $a isa animal;
+    return { $a };
+    """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    define
+    entity cat sub animal;
+    """
+    Given transaction commits
+
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match let $a in get_animals();
+    """
+    Then answer size is: 0
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+    insert $c isa cat;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match let $a in get_animals();
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+
+  # Stratification
   Scenario: Functions are stratified wrt negation
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -699,7 +830,7 @@ Feature: Function Definition
 #      rel01 sub relation, relates role01;
 #      rel1 sub rel00;
 #
-#      ent00 sub entity, abstract, plays rel00:role00, plays rel01:role01;
+#      ent00 sub entity, @abstract, plays rel00:role00, plays rel01:role01;
 #      ent01 sub entity, abstract;
 #      ent1 sub ent00;
 #
