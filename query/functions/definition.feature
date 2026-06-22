@@ -240,7 +240,7 @@ Feature: Function Definition
   # Abstract schema functions
   Scenario: Schema functions can be committed even if all types inferred are abstract.
     Given connection open schema transaction for database: typedb
-    Given typeql schema query
+    When typeql schema query
     """
     define
     entity animal @abstract;
@@ -249,11 +249,11 @@ Feature: Function Definition
       $a isa animal;
     return { $a };
     """
-    Given transaction commits
+    Then transaction commits
 
     # Other schema functions are allowed to reference this.
     Given connection open schema transaction for database: typedb
-    Given typeql schema query
+    When typeql schema query
     """
     define
     fun get_animals_via_get_animals() -> { animal }:
@@ -261,7 +261,7 @@ Feature: Function Definition
       let $a in get_animals();
     return { $a };
     """
-    Given transaction commits
+    Then transaction commits
 
 
   Scenario: Using a schema function where all types are abstract in a query or preamble function errors.
