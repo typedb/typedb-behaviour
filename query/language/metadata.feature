@@ -26,6 +26,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | doc                                   |
       | value:string:This represents a person |
+    When get answers of typeql read query
+      """
+      match $t label person;
+      fetch { "doc": get_doc($t) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "doc": "This represents a person"
+      }
+      """
 
 
   Scenario: attribute types can have doc annotations
@@ -44,6 +56,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | doc                                 |
       | value:string:This represents a name |
+    When get answers of typeql read query
+      """
+      match $t label name;
+      fetch { "doc": get_doc($t) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "doc": "This represents a name"
+      }
+      """
 
 
   Scenario: relation and role types can have doc annotations
@@ -64,6 +88,24 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | relation_doc                            | role_doc                                     |
       | value:string:This represents a marriage | value:string:This role is played by a spouse |
+    When get answers of typeql read query
+      """
+      match
+        $t label marriage;
+        $r label marriage:spouse;
+      fetch {
+        "relation_doc": get_doc($t),
+        "role_doc": get_doc($r)
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "relation_doc": "This represents a marriage",
+        "role_doc": "This role is played by a spouse"
+      }
+      """
 
 
   @ignore
@@ -88,6 +130,24 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | struct_doc                          | field_doc                | field_doc_2            |
       | value:string:geographic coordinates | value:string:north-south | value:string:east-west |
+    When get answers of typeql read query
+      """
+      match let $struct_name = "location";
+      fetch {
+        "struct_doc": get_struct_doc($struct_name),
+        "field_doc": get_struct_field_doc($struct_name, "latitude"),
+        "field_doc_2": get_struct_field_doc($struct_name, "longitude")
+      }
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "struct_doc": "geographic coordinates",
+        "field_doc": "north-south",
+        "field_doc_2": "east-west"
+      }
+      """
 
 
   Scenario: functions can have doc annotations
@@ -110,6 +170,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | doc                                     |
       | value:string:chosen by a fair dice roll |
+    When get answers of typeql read query
+      """
+      match let $f = "get_random_number";
+      fetch { "doc": get_fun_doc($f) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "doc": "chosen by a fair dice roll"
+      }
+      """
 
 
   @ignore
@@ -171,6 +243,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | doc                      |
       | value:string:lorem ipsum |
+    When get answers of typeql read query
+      """
+      match $rhs label <rhs>;
+      fetch { "doc": get_<constraint>_doc(person, $rhs) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "doc": "lorem ipsum"
+      }
+      """
   Examples:
     | constraint | arg        | rhs            |
     | owns       | id         | id             |
@@ -201,6 +285,24 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | doc           | func_doc      |
       | value:string: | value:string: |
+    When get answers of typeql read query
+      """
+      match
+        $t label person;
+        let $f = "get_random_number";
+      fetch {
+        "doc": get_doc($t),
+        "func_doc": get_fun_doc($f)
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "doc": "",
+        "func_doc": ""
+      }
+      """
 
 
   ############
@@ -221,6 +323,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata                              |
       | value:string:This represents a person |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch { "metadata": get_meta($key, person) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "metadata": "This represents a person"
+      }
+      """
 
 
   Scenario: attribute types can have metadata annotations
@@ -239,6 +353,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata                            |
       | value:string:This represents a name |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch { "metadata": get_meta($key, name) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "metadata": "This represents a name"
+      }
+      """
 
 
   Scenario: relation and role types can have metadata annotations
@@ -259,6 +385,22 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | relation_meta                           | role_meta                                    |
       | value:string:This represents a marriage | value:string:This role is played by a spouse |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch {
+        "relation_meta": get_meta($key, marriage),
+        "role_meta": get_meta($key, marriage:spouse)
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "relation_meta": "This represents a marriage",
+        "role_meta": "This role is played by a spouse"
+      }
+      """
 
 
   @ignore
@@ -283,6 +425,24 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | struct_meta                         | field_meta               | field_meta_2           |
       | value:string:geographic coordinates | value:string:north-south | value:string:east-west |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch {
+        "struct_meta": get_struct_meta($key, "location"),
+        "field_meta": get_struct_field_meta($key, "location", "latitude"),
+        "field_meta_2": get_struct_field_meta($key, "location", "longitude")
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "struct_meta": "geographic coordinates",
+        "field_meta": "north-south",
+        "field_meta_2": "east-west"
+      }
+      """
 
 
   Scenario: functions can have metadata annotations
@@ -305,6 +465,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata                                |
       | value:string:chosen by a fair dice roll |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch { "metadata": get_fun_meta($key, "get_random_number") };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "metadata": "chosen by a fair dice roll"
+      }
+      """
 
 
   Scenario Outline: <constraint> can have metadata annotations
@@ -325,6 +497,18 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata                 |
       | value:string:lorem ipsum |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch { "metadata": get_<constraint>_meta($key, person, <rhs>) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "metadata": "lorem ipsum"
+      }
+      """
   Examples:
     | constraint | arg        | rhs            |
     | owns       | id         | id             |
@@ -378,6 +562,16 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata      |
       | value:string: |
+    When get answers of typeql read query
+      """
+      match let $key = "key";
+      fetch { "metadata": get_meta($key, person) };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      { "metadata": "" }
+      """
     Then transaction closes
 
     Then connection open schema transaction for database: typedb
@@ -396,6 +590,24 @@ Feature: TypeQL schema metadata
     Then uniquely identify answer concepts
       | metadata                              | metadata_other |
       | value:string:This represents a person | value:string:  |
+    When get answers of typeql read query
+      """
+      match
+        let $key = "key";
+        let $other = "other";
+      fetch {
+        "metadata": get_meta($key, person),
+        "metadata_other": get_meta($other, person)
+      };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {
+        "metadata": "This represents a person",
+        "metadata_other": ""
+      }
+      """
 
 
   Scenario: get_all_meta returns all metadata for an entity type
