@@ -145,6 +145,28 @@ Feature: Connection Database
       """
       define entity person;
       """
+    Then connection delete database: typedb; fails
+    Then transaction rollbacks
+    Then transaction is open: true
+    Then connection delete database: typedb; fails
+    Then typeql schema query
+      """
+      define entity person;
+      """
     Then transaction commits
     Then connection delete database: typedb
     Then connection does not have database: typedb
+
+  Scenario Outline: database can be deleted and recreated immediately after closing <type> transactions
+    When connection create database: typedb
+    When connection open <type> transaction for database: typedb
+    Then transaction closes
+    Then connection delete database: typedb
+    Then connection does not have database: typedb
+    When connection create database: typedb
+    Then connection has database: typedb
+    Examples:
+      | type   |
+      | schema |
+      | write  |
+      | read   |
