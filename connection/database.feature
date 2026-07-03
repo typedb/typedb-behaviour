@@ -146,6 +146,13 @@ Feature: Connection Database
       define entity person;
       """
     Then connection delete database: typedb; fails
+    Then transaction rollbacks
+    Then transaction is open: true
+    Then connection delete database: typedb; fails
+    Then typeql schema query
+      """
+      define entity person;
+      """
     Then transaction commits
     Then connection delete database: typedb
     Then connection does not have database: typedb
