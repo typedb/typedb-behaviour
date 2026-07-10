@@ -5630,3 +5630,39 @@ Feature: TypeQL Match Clause
       $p isa _leading_underscore_allowed;
       let $q = _underscore-func($p);
       """
+
+
+  Scenario: documents can be ranked and filtered by cosine similarity to a query embedding
+    Given typeql schema query
+      """
+      define
+      attribute embedding value double[3];
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $near isa document, has name "near", has embedding [1.0, 0.0, 0.0];
+      $far isa document, has name "far", has embedding [0.0, 1.0, 0.0];
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $doc isa document, has name $name, has embedding $e;
+        let $score = cosine_similarity($e, [1.0, 0.0, 0.0]);
+        $score >= 0.8;
+      select
+        $name, $score;
+      sort $score desc;
+      limit 10;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name                | score            |
+      | value:string:"near" | value:double:1.0 |
