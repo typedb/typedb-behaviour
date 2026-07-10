@@ -113,6 +113,41 @@ Feature: TypeQL Query with Expressions
       | attr:my-struct-attr:my-struct { my-field: "hello" } | value:struct:my-struct { my-field: "world" } | value:string:hello | value:string:world |
 
 
+  Scenario: A field of an inner struct can be accessed directly
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+      struct test-struct:
+        inner value inner-struct;
+      struct inner-struct:
+        field value integer;
+      """
+    Then transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      let $s = test-struct { inner: inner-struct { field: 314 } };
+      let $f = $s.inner.field;
+      """
+    Then uniquely identify answer concepts
+      | s                                                               | f                 |
+      | value:struct:test-struct { inner: inner-struct { field: 314 } } | value:integer:314 |
+
+
+  Scenario: A field of a struct literal can be accessed directly
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+      let $f = my-struct { my-field: "hello" }.my-field;
+      """
+    Then uniquely identify answer concepts
+      | f                  |
+      | value:string:hello |
+
+
   Scenario: A struct value's and a struct attribute field can be deconstructed
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
