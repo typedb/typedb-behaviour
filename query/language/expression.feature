@@ -1316,11 +1316,16 @@ Feature: TypeQL Query with Expressions
       | value:string:rel:rolename |
 
 
-  Scenario: String attributes are retrieved correctly when compared across lengths
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-    """
-      with fun names_helper($len: integer) -> { string }:
+  ######################
+  # STRING COMPARISONS #
+  ######################
+
+  Scenario: String attributes are retrieved correctly when compared with raw values across lengths
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun names_helper($len: integer) -> { string }:
         match
           {
             $len > 1;
@@ -1330,9 +1335,264 @@ Feature: TypeQL Query with Expressions
             let $a = "a";
           };
         return { $a };
-      with fun names() -> { string }:
+      fun names() -> { string }:
         match let $a in names_helper(20);
         return { $a };
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+      match let $a in names();
+      insert $_ isa name == $a;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match $n isa name;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                |
+    | attr:name:"a"                    |
+    | attr:name:"aa"                   |
+    | attr:name:"aaa"                  |
+    | attr:name:"aaaa"                 |
+    | attr:name:"aaaaa"                |
+    | attr:name:"aaaaaa"               |
+    | attr:name:"aaaaaaa"              |
+    | attr:name:"aaaaaaaa"             |
+    | attr:name:"aaaaaaaaa"            |
+    | attr:name:"aaaaaaaaaa"           |
+    | attr:name:"aaaaaaaaaaa"          |
+    | attr:name:"aaaaaaaaaaaa"         |
+    | attr:name:"aaaaaaaaaaaaa"        |
+    | attr:name:"aaaaaaaaaaaaaa"       |
+    | attr:name:"aaaaaaaaaaaaaaa"      |
+    | attr:name:"aaaaaaaaaaaaaaaa"     |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 > $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 19
+    Then uniquely identify answer concepts
+    | n                               | c                |
+    | attr:name:"a"                   | value:integer:19 |
+    | attr:name:"aa"                  | value:integer:18 |
+    | attr:name:"aaa"                 | value:integer:17 |
+    | attr:name:"aaaa"                | value:integer:16 |
+    | attr:name:"aaaaa"               | value:integer:15 |
+    | attr:name:"aaaaaa"              | value:integer:14 |
+    | attr:name:"aaaaaaa"             | value:integer:13 |
+    | attr:name:"aaaaaaaa"            | value:integer:12 |
+    | attr:name:"aaaaaaaaa"           | value:integer:11 |
+    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 >= $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:20 |
+    | attr:name:"aa"                   | value:integer:19 |
+    | attr:name:"aaa"                  | value:integer:18 |
+    | attr:name:"aaaa"                 | value:integer:17 |
+    | attr:name:"aaaaa"                | value:integer:16 |
+    | attr:name:"aaaaaa"               | value:integer:15 |
+    | attr:name:"aaaaaaa"              | value:integer:14 |
+    | attr:name:"aaaaaaaa"             | value:integer:13 |
+    | attr:name:"aaaaaaaaa"            | value:integer:12 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 < $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 19
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"aa"                   | value:integer:1  |
+    | attr:name:"aaa"                  | value:integer:2  |
+    | attr:name:"aaaa"                 | value:integer:3  |
+    | attr:name:"aaaaa"                | value:integer:4  |
+    | attr:name:"aaaaaa"               | value:integer:5  |
+    | attr:name:"aaaaaaa"              | value:integer:6  |
+    | attr:name:"aaaaaaaa"             | value:integer:7  |
+    | attr:name:"aaaaaaaaa"            | value:integer:8  |
+    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 <= $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:1  |
+    | attr:name:"aa"                   | value:integer:2  |
+    | attr:name:"aaa"                  | value:integer:3  |
+    | attr:name:"aaaa"                 | value:integer:4  |
+    | attr:name:"aaaaa"                | value:integer:5  |
+    | attr:name:"aaaaaa"               | value:integer:6  |
+    | attr:name:"aaaaaaa"              | value:integer:7  |
+    | attr:name:"aaaaaaaa"             | value:integer:8  |
+    | attr:name:"aaaaaaaaa"            | value:integer:9  |
+    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 != $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:19 |
+    | attr:name:"aa"                   | value:integer:19 |
+    | attr:name:"aaa"                  | value:integer:19 |
+    | attr:name:"aaaa"                 | value:integer:19 |
+    | attr:name:"aaaaa"                | value:integer:19 |
+    | attr:name:"aaaaaa"               | value:integer:19 |
+    | attr:name:"aaaaaaa"              | value:integer:19 |
+    | attr:name:"aaaaaaaa"             | value:integer:19 |
+    | attr:name:"aaaaaaaaa"            | value:integer:19 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+
+    When get answers of typeql read query
+    """
+      match
+        $n isa name;
+        let $n2 in names();
+        $n2 == $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c               |
+    | attr:name:"a"                    | value:integer:1 |
+    | attr:name:"aa"                   | value:integer:1 |
+    | attr:name:"aaa"                  | value:integer:1 |
+    | attr:name:"aaaa"                 | value:integer:1 |
+    | attr:name:"aaaaa"                | value:integer:1 |
+    | attr:name:"aaaaaa"               | value:integer:1 |
+    | attr:name:"aaaaaaa"              | value:integer:1 |
+    | attr:name:"aaaaaaaa"             | value:integer:1 |
+    | attr:name:"aaaaaaaaa"            | value:integer:1 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+
+
+  Scenario: String attributes are retrieved correctly when compared with other attributes across lengths
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun names_helper($len: integer) -> { string }:
+        match
+          {
+            $len > 1;
+            let $a_ in names_helper($len - 1);
+            let $a = "a" + $a_;
+          } or {
+            let $a = "a";
+          };
+        return { $a };
+      fun names() -> { string }:
+        match let $a in names_helper(20);
+        return { $a };
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
       match let $a in names();
       insert $_ isa name == $a;
     """
@@ -1558,11 +1818,12 @@ Feature: TypeQL Query with Expressions
     | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
 
 
-  Scenario: Owned string attributes are retrieved correctly when compared across lengths
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-    """
-      with fun names_helper($len: integer) -> { string }:
+  Scenario: Owned string attributes are retrieved correctly when compared with raw values across lengths
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun names_helper($len: integer) -> { string }:
         match
           {
             $len > 1;
@@ -1572,9 +1833,264 @@ Feature: TypeQL Query with Expressions
             let $a = "a";
           };
         return { $a };
-      with fun names() -> { string }:
+      fun names() -> { string }:
         match let $a in names_helper(20);
         return { $a };
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
+      match let $a in names();
+      insert $_ isa person, has name == $a;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match $_ has name $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                |
+    | attr:name:"a"                    |
+    | attr:name:"aa"                   |
+    | attr:name:"aaa"                  |
+    | attr:name:"aaaa"                 |
+    | attr:name:"aaaaa"                |
+    | attr:name:"aaaaaa"               |
+    | attr:name:"aaaaaaa"              |
+    | attr:name:"aaaaaaaa"             |
+    | attr:name:"aaaaaaaaa"            |
+    | attr:name:"aaaaaaaaaa"           |
+    | attr:name:"aaaaaaaaaaa"          |
+    | attr:name:"aaaaaaaaaaaa"         |
+    | attr:name:"aaaaaaaaaaaaa"        |
+    | attr:name:"aaaaaaaaaaaaaa"       |
+    | attr:name:"aaaaaaaaaaaaaaa"      |
+    | attr:name:"aaaaaaaaaaaaaaaa"     |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 > $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 19
+    Then uniquely identify answer concepts
+    | n                               | c                |
+    | attr:name:"a"                   | value:integer:19 |
+    | attr:name:"aa"                  | value:integer:18 |
+    | attr:name:"aaa"                 | value:integer:17 |
+    | attr:name:"aaaa"                | value:integer:16 |
+    | attr:name:"aaaaa"               | value:integer:15 |
+    | attr:name:"aaaaaa"              | value:integer:14 |
+    | attr:name:"aaaaaaa"             | value:integer:13 |
+    | attr:name:"aaaaaaaa"            | value:integer:12 |
+    | attr:name:"aaaaaaaaa"           | value:integer:11 |
+    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 >= $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:20 |
+    | attr:name:"aa"                   | value:integer:19 |
+    | attr:name:"aaa"                  | value:integer:18 |
+    | attr:name:"aaaa"                 | value:integer:17 |
+    | attr:name:"aaaaa"                | value:integer:16 |
+    | attr:name:"aaaaaa"               | value:integer:15 |
+    | attr:name:"aaaaaaa"              | value:integer:14 |
+    | attr:name:"aaaaaaaa"             | value:integer:13 |
+    | attr:name:"aaaaaaaaa"            | value:integer:12 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 < $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 19
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"aa"                   | value:integer:1  |
+    | attr:name:"aaa"                  | value:integer:2  |
+    | attr:name:"aaaa"                 | value:integer:3  |
+    | attr:name:"aaaaa"                | value:integer:4  |
+    | attr:name:"aaaaaa"               | value:integer:5  |
+    | attr:name:"aaaaaaa"              | value:integer:6  |
+    | attr:name:"aaaaaaaa"             | value:integer:7  |
+    | attr:name:"aaaaaaaaa"            | value:integer:8  |
+    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 <= $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:1  |
+    | attr:name:"aa"                   | value:integer:2  |
+    | attr:name:"aaa"                  | value:integer:3  |
+    | attr:name:"aaaa"                 | value:integer:4  |
+    | attr:name:"aaaaa"                | value:integer:5  |
+    | attr:name:"aaaaaa"               | value:integer:6  |
+    | attr:name:"aaaaaaa"              | value:integer:7  |
+    | attr:name:"aaaaaaaa"             | value:integer:8  |
+    | attr:name:"aaaaaaaaa"            | value:integer:9  |
+    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 != $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c                |
+    | attr:name:"a"                    | value:integer:19 |
+    | attr:name:"aa"                   | value:integer:19 |
+    | attr:name:"aaa"                  | value:integer:19 |
+    | attr:name:"aaaa"                 | value:integer:19 |
+    | attr:name:"aaaaa"                | value:integer:19 |
+    | attr:name:"aaaaaa"               | value:integer:19 |
+    | attr:name:"aaaaaaa"              | value:integer:19 |
+    | attr:name:"aaaaaaaa"             | value:integer:19 |
+    | attr:name:"aaaaaaaaa"            | value:integer:19 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+
+    When get answers of typeql read query
+    """
+      match
+        $_ has name $n;
+        let $n2 in names();
+        $n2 == $n;
+      reduce $c = count($n2) groupby $n;
+    """
+    Then answer size is: 20
+    Then uniquely identify answer concepts
+    | n                                | c               |
+    | attr:name:"a"                    | value:integer:1 |
+    | attr:name:"aa"                   | value:integer:1 |
+    | attr:name:"aaa"                  | value:integer:1 |
+    | attr:name:"aaaa"                 | value:integer:1 |
+    | attr:name:"aaaaa"                | value:integer:1 |
+    | attr:name:"aaaaaa"               | value:integer:1 |
+    | attr:name:"aaaaaaa"              | value:integer:1 |
+    | attr:name:"aaaaaaaa"             | value:integer:1 |
+    | attr:name:"aaaaaaaaa"            | value:integer:1 |
+    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+
+
+  Scenario: Owned string attributes are retrieved correctly when compared with other attributes across lengths
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      fun names_helper($len: integer) -> { string }:
+        match
+          {
+            $len > 1;
+            let $a_ in names_helper($len - 1);
+            let $a = "a" + $a_;
+          } or {
+            let $a = "a";
+          };
+        return { $a };
+      fun names() -> { string }:
+        match let $a in names_helper(20);
+        return { $a };
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+    """
       match let $a in names();
       insert $_ isa person, has name == $a;
     """
