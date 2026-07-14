@@ -2901,7 +2901,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute embedding value double[3];
+      attribute embedding value vector(3, f8);
       entity document owns embedding;
       """
     Given transaction commits
@@ -2929,7 +2929,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute embedding value double[3];
+      attribute embedding value vector(3, f8);
       entity document owns embedding;
       """
     Given transaction commits
