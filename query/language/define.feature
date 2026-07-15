@@ -1083,7 +1083,7 @@ Feature: TypeQL Define Query
   Scenario: an attribute type can be defined with a fixed-size vector value type
     When typeql schema query
       """
-      define attribute embedding value vector(3, f8);
+      define attribute embedding value vector(3, "float32");
       """
     Then transaction commits
 
@@ -1092,7 +1092,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      attribute embedding value vector(3, f8);
+      attribute embedding value vector(3, "float32");
       entity document owns embedding;
       """
     Then transaction commits
@@ -1110,7 +1110,7 @@ Feature: TypeQL Define Query
   Scenario: defining an embedding value type with a non-integer length errors
     Then typeql schema query; fails
       """
-      define attribute embedding value vector(abc, f8);
+      define attribute embedding value vector(abc, "float32");
       """
 
 

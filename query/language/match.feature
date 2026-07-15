@@ -5636,7 +5636,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, f8);
+      attribute embedding value vector(3, "float32");
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5645,8 +5645,8 @@ Feature: TypeQL Match Clause
     When typeql write query
       """
       insert
-      $near isa document, has name "near", has embedding [1.0, 0.0, 0.0];
-      $far isa document, has name "far", has embedding [0.0, 1.0, 0.0];
+      $near isa document, has name "near", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $far isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
       """
     Then transaction commits
 

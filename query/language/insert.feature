@@ -2901,7 +2901,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, f8);
+      attribute embedding value vector(3, "float32");
       entity document owns embedding;
       """
     Given transaction commits
@@ -2911,7 +2911,7 @@ Parker";
       """
       insert
       $x isa document,
-        has embedding [0.1, 0.2, 0.3];
+        has embedding vector([0.1, 0.2, 0.3], "float32");
       """
     Then transaction commits
 
@@ -2929,7 +2929,7 @@ Parker";
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, f8);
+      attribute embedding value vector(3, "float32");
       entity document owns embedding;
       """
     Given transaction commits
@@ -2939,5 +2939,5 @@ Parker";
       """
       insert
       $x isa document,
-        has embedding [0.1, 0.2];
+        has embedding vector([0.1, 0.2], "float32");
       """
