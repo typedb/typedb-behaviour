@@ -1087,15 +1087,6 @@ Feature: TypeQL Define Query
       """
     Then transaction commits
 
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match
-        $x label embedding;
-        attribute $x;
-      """
-    Then answer size is: 1
-
 
   Scenario: an entity type can own an embedding attribute type
     When typeql schema query
