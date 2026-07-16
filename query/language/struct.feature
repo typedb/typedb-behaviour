@@ -16,10 +16,11 @@ Feature: TypeQL Query with Expressions
     Given typeql schema query
       """
       define
-      struct my-struct:
-        my-field value string;
-      attribute my-struct-attr @independent,
-        value my-struct;
+      struct my_struct {
+        my_field: string,
+      };
+      attribute my_struct_attr @independent,
+        value my_struct;
       """
     Given transaction commits
 
@@ -28,11 +29,11 @@ Feature: TypeQL Query with Expressions
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match let $s = my-struct { my-field: "hello" };
+      match let $s = my_struct { my_field: "hello" };
       """
     Then uniquely identify answer concepts
       | sf                 | s                                            |
-      | value:string:world | value:struct:my-struct { my-field: "hello" } |
+      | value:string:world | value:struct:my_struct { my_field: "hello" } |
 
 
   Scenario: A struct value can be created using a variable
@@ -41,76 +42,76 @@ Feature: TypeQL Query with Expressions
       """
       match
         let $f = "hello";
-        let $s = my-struct { my-field: $f };
+        let $s = my_struct { my_field: $f };
       """
     Then uniquely identify answer concepts
       | s                                            |
-      | value:struct:my-struct { my-field: "hello" } |
+      | value:struct:my_struct { my_field: "hello" } |
 
 
   Scenario: An attribute with a struct value can be created from a literal
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $a isa my-struct-attr my-struct { my-field: "hello" };
+      insert $a isa my_struct_attr my_struct { my_field: "hello" };
       """
     Then uniquely identify answer concepts
       | a                                                   |
-      | attr:my-struct-attr:my-struct { my-field: "hello" } |
+      | attr:my_struct_attr:my_struct { my_field: "hello" } |
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a isa my-struct-attr;
+      match $a isa my_struct_attr;
       """
     Then uniquely identify answer concepts
       | a                                                   |
-      | attr:my-struct-attr:my-struct { my-field: "hello" } |
+      | attr:my_struct_attr:my_struct { my_field: "hello" } |
 
 
   Scenario: An attribute with a struct value can be created from a value variable
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      match let $s = my-struct { my-field: "hello" };
-      insert $a isa my-struct-attr == $s;
+      match let $s = my_struct { my_field: "hello" };
+      insert $a isa my_struct_attr == $s;
       """
     Then uniquely identify answer concepts
       | s                                            | a                                                   |
-      | value:struct:my-struct { my-field: "hello" } | attr:my-struct-attr:my-struct { my-field: "hello" } |
+      | value:struct:my_struct { my_field: "hello" } | attr:my_struct_attr:my_struct { my_field: "hello" } |
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
-      match $a isa my-struct-attr;
+      match $a isa my_struct_attr;
       """
     Then uniquely identify answer concepts
       | a                                                   |
-      | attr:my-struct-attr:my-struct { my-field: "hello" } |
+      | attr:my_struct_attr:my_struct { my_field: "hello" } |
 
 
   Scenario: A struct value's and a struct attribute's field can be accessed directly
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $a isa my-struct-attr my-struct { my-field: "world" };
+      insert $a isa my_struct_attr my_struct { my_field: "world" };
       """
     Then uniquely identify answer concepts
       | a                                                   |
-      | attr:my-struct-attr:my-struct { my-field: "world" } |
+      | attr:my_struct_attr:my_struct { my_field: "world" } |
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-        let $s = my-struct { my-field: "world" };
-        $a isa my-struct-attr;
-        let $sf = $s.my-field;
-        let $af = $a.my-field;
+        let $s = my_struct { my_field: "world" };
+        $a isa my_struct_attr;
+        let $sf = $s.my_field;
+        let $af = $a.my_field;
       """
     Then uniquely identify answer concepts
       | a                                                   | s                                            | af                 | sf                 |
-      | attr:my-struct-attr:my-struct { my-field: "hello" } | value:struct:my-struct { my-field: "world" } | value:string:hello | value:string:world |
+      | attr:my_struct_attr:my_struct { my_field: "hello" } | value:struct:my_struct { my_field: "world" } | value:string:hello | value:string:world |
 
 
   Scenario: A field of an inner struct can be accessed directly
@@ -118,22 +119,24 @@ Feature: TypeQL Query with Expressions
     When typeql schema query
       """
       define
-      struct test-struct:
-        inner value inner-struct;
-      struct inner-struct:
-        field value integer;
+      struct test_struct {
+        inner: inner_struct,
+      };
+      struct inner_struct {
+        field: integer,
+      };
       """
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-      let $s = test-struct { inner: inner-struct { field: 314 } };
+      let $s = test_struct { inner: inner_struct { field: 314 } };
       let $f = $s.inner.field;
       """
     Then uniquely identify answer concepts
       | s                                                               | f                 |
-      | value:struct:test-struct { inner: inner-struct { field: 314 } } | value:integer:314 |
+      | value:struct:test_struct { inner: inner_struct { field: 314 } } | value:integer:314 |
 
 
   Scenario: A field of a struct literal can be accessed directly
@@ -141,7 +144,7 @@ Feature: TypeQL Query with Expressions
     When get answers of typeql read query
       """
       match
-      let $f = my-struct { my-field: "hello" }.my-field;
+      let $f = my_struct { my_field: "hello" }.my_field;
       """
     Then uniquely identify answer concepts
       | f                  |
@@ -152,47 +155,48 @@ Feature: TypeQL Query with Expressions
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
       """
-      insert $a isa my-struct-attr my-struct { my-field: "world" };
+      insert $a isa my_struct_attr my_struct { my_field: "world" };
       """
     Then uniquely identify answer concepts
       | a                                                   |
-      | attr:my-struct-attr:my-struct { my-field: "world" } |
+      | attr:my_struct_attr:my_struct { my_field: "world" } |
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-        let $s = my-struct { my-field: "world" };
-        $a isa my-struct-attr;
-        let my-struct { my-field: $sf } = $s;
-        let my-struct { my-field: $af } = $a;
+        let $s = my_struct { my_field: "world" };
+        $a isa my_struct_attr;
+        let my_struct { my_field: $sf } = $s;
+        let my_struct { my_field: $af } = $a;
       """
     Then uniquely identify answer concepts
       | a                                                   | s                                            | af                 | sf                 |
-      | attr:my-struct-attr:my-struct { my-field: "hello" } | value:struct:my-struct { my-field: "world" } | value:string:hello | value:string:world |
+      | attr:my_struct_attr:my_struct { my_field: "hello" } | value:struct:my_struct { my_field: "world" } | value:string:hello | value:string:world |
 
 
-  Scenario Outline: A struct can have a <value-type> valued field
+  Scenario Outline: A struct can have a <value_type> valued field
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       define
-      struct test-struct:
-        field value <value-type>;
+      struct test_struct {
+        field: <value_type>,
+      };
       """
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-        let $s = test-struct { field: <value> };
+        let $s = test_struct { field: <value> };
       """
     Then uniquely identify answer concepts
       | s                                           |
-      | value:struct:test-struct { field: <value> } |
+      | value:struct:test_struct { field: <value> } |
 
     Examples:
-      | value-type  | value                              |
+      | value_type  | value                              |
       | boolean     | true                               |
       | integer     | 21                                 |
       | double      | 123.456                            |
@@ -202,32 +206,33 @@ Feature: TypeQL Query with Expressions
       | datetime    | 1990-01-01T11:22:33.123456789      |
       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | duration    | P1Y2M3DT4H5M6.789S                 |
-      | my-struct   | my-struct { my-field: "hello" }    |
+      | my_struct   | my_struct { my_field: "hello" }    |
 
 
-  Scenario Outline: A struct can have an optional <value-type> valued field
+  Scenario Outline: A struct can have an optional <value_type> valued field
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
       define
-      struct test-struct:
-        field value <value-type>?;
+      struct test_struct {
+        field: <value_type>?,
+      };
       """
     Then transaction commits
     When connection open read transaction for database: typedb
     When get answers of typeql read query
       """
       match
-        let $s = test-struct { field: <value> };
-        let $p = test-struct { field: None };
-        let $q = test-struct {};
+        let $s = test_struct { field: <value> };
+        let $p = test_struct { field: None };
+        let $q = test_struct {};
       """
     Then uniquely identify answer concepts
       | s                                           | p                           | q                           |
-      | value:struct:test-struct { field: <value> } | value:struct:test-struct {} | value:struct:test-struct {} |
+      | value:struct:test_struct { field: <value> } | value:struct:test_struct {} | value:struct:test_struct {} |
 
     Examples:
-      | value-type  | value                              |
+      | value_type  | value                              |
       | boolean     | true                               |
       | integer     | 21                                 |
       | double      | 123.456                            |
@@ -237,4 +242,4 @@ Feature: TypeQL Query with Expressions
       | datetime    | 1990-01-01T11:22:33.123456789      |
       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | duration    | P1Y2M3DT4H5M6.789S                 |
-      | my-struct   | my-struct { my-field: "hello" }    |
+      | my_struct   | my_struct { my_field: "hello" }    |

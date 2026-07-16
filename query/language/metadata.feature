@@ -114,9 +114,10 @@ Feature: TypeQL schema metadata
     When typeql schema query
       """
       define
-        struct location @doc("geographic coordinates"):
-          latitude value double @doc("north-south"),
-          longitude value double @doc("east-west");
+        struct location @doc("geographic coordinates") {
+          latitude: double @doc("north-south"),
+          longitude: double @doc("east-west"),
+        };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
@@ -409,9 +410,10 @@ Feature: TypeQL schema metadata
     When typeql schema query
       """
       define
-        struct location @meta("key", "geographic coordinates"):
-          latitude value double @meta("key", "north-south"),
-          longitude value double @meta("key", "east-west");
+        struct location @meta("key", "geographic coordinates") {
+          latitude: double @meta("key", "north-south"),
+          longitude: double @meta("key", "east-west"),
+        };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
@@ -1045,8 +1047,9 @@ Feature: TypeQL schema metadata
   Scenario: get_struct_all_meta returns all metadata for a struct type
     When typeql schema query
       """
-      define struct location @meta("key1", "val1") @meta("key2", "val2"):
-        latitude value double;
+      define struct location @meta("key1", "val1") @meta("key2", "val2") {
+        latitude: double,
+      };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
@@ -1065,8 +1068,9 @@ Feature: TypeQL schema metadata
   Scenario: get_struct_field_all_meta returns all metadata for a struct field
     When typeql schema query
       """
-      define struct location:
-        latitude value double @meta("key1", "val1") @meta("key2", "val2");
+      define struct location {
+        latitude value double @meta("key1", "val1") @meta("key2", "val2"),
+      };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
@@ -1085,8 +1089,9 @@ Feature: TypeQL schema metadata
   Scenario: get_struct_all_meta results in zero rows if no @meta are defined for a struct type
     When typeql schema query
       """
-      define struct location:
-        latitude value double;
+      define struct location {
+        latitude: double,
+      };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
@@ -1102,8 +1107,9 @@ Feature: TypeQL schema metadata
   Scenario: get_struct_field_all_meta results in zero rows if no @meta are defined for a struct field
     When typeql schema query
       """
-      define struct location:
-        latitude value double;
+      define struct location {
+        latitude: double,
+      };
       """
     Then transaction commits
     Then connection open read transaction for database: typedb
