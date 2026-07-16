@@ -21,6 +21,7 @@ files = [
     "put.feature",
     "redefine.feature",
     "reduce.feature",
+    "struct.feature",
     "undefine.feature",
     "update.feature",
     "variables.feature",
