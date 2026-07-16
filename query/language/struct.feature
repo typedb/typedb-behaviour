@@ -202,7 +202,7 @@ Feature: TypeQL Query with Expressions
       | datetime    | 1990-01-01T11:22:33.123456789      |
       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | duration    | P1Y2M3DT4H5M6.789S                 |
-      | struct      | my-struct { my-field: "hello" }    |
+      | my-struct   | my-struct { my-field: "hello" }    |
 
 
   Scenario Outline: A struct can have an optional <value-type> valued field
@@ -237,4 +237,4 @@ Feature: TypeQL Query with Expressions
       | datetime    | 1990-01-01T11:22:33.123456789      |
       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu |
       | duration    | P1Y2M3DT4H5M6.789S                 |
-      | struct      | my-struct { my-field: "hello" }    |
+      | my-struct   | my-struct { my-field: "hello" }    |
