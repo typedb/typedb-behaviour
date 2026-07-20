@@ -5632,7 +5632,7 @@ Feature: TypeQL Match Clause
       """
 
 
-  Scenario: documents can be ranked and filtered by cosine similarity to a query embedding
+  Scenario: documents can be retrieved by indexed cosine similarity search on an embedding attribute
     Given typeql schema query
       """
       define
@@ -5654,15 +5654,13 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
-        let $score = cosine_similarity($e, [1.0, 0.0, 0.0]);
-        $score >= 0.8;
       select
-        $name, $score;
-      sort $score desc;
+        $name;
       limit 10;
       """
     Then answer size is: 1
     Then uniquely identify answer concepts
-      | name                | score            |
-      | value:string:"near" | value:double:1.0 |
+      | name           |
+      | attr:name:near |
