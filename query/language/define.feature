@@ -1121,6 +1121,13 @@ Feature: TypeQL Define Query
       """
 
 
+  Scenario: defining an embedding value type with a negative length errors
+    Then typeql schema query; fails
+      """
+      define attribute embedding value vector(-3, "float32");
+      """
+
+
   Scenario: new attribute type declaration should contain kind
     Then typeql schema query; fails
       """
