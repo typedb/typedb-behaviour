@@ -5630,3 +5630,37 @@ Feature: TypeQL Match Clause
       $p isa _leading_underscore_allowed;
       let $q = _underscore-func($p);
       """
+
+
+  Scenario: documents can be retrieved by indexed cosine similarity search on an embedding attribute
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $near isa document, has name "near", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $far isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      limit 10;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name           |
+      | attr:name:near |

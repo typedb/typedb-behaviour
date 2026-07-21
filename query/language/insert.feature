@@ -2894,3 +2894,50 @@ Parker";
     Then uniquely identify answer concepts
       | p             | age         |
       | key:name:John | attr:age:32 |
+
+
+  Scenario: an embedding value can be inserted
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x isa document, has embedding $e;
+      """
+    Then answer size is: 1
+
+
+  Scenario: inserting an embedding whose length differs from the declared array size errors
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2], "float32");
+      """
