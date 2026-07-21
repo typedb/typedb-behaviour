@@ -1114,6 +1114,13 @@ Feature: TypeQL Define Query
       """
 
 
+  Scenario: defining an embedding value type with an invalid encoding errors
+    Then typeql schema query; fails
+      """
+      define attribute embedding value vector(3, "an-invalid-encoding");
+      """
+
+
   Scenario: new attribute type declaration should contain kind
     Then typeql schema query; fails
       """
