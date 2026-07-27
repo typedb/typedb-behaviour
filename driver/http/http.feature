@@ -1084,3 +1084,57 @@ Feature: TypeDB HTTP Endpoint
       }
     }
     """
+
+  ##############
+  # GIVEN ROWS #
+  ##############
+
+  Scenario Outline: Given rows handle <encoding> <value-type> values
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity owner, owns attr; attribute attr, value <value-type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When set query given rows
+      | attr                            |
+      | <encoding>:<value-type>:<value> |
+    When get answers of typeql write query with given rows
+      """
+      given $attr: <value-type>;
+      insert $x isa owner, has attr == $attr;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa owner, has attr $attr;
+      """
+    Then answer size is: 1
+    Then answer get row(0) get attribute(attr) get value is: <value>
+
+    Examples:
+      | encoding | value-type  | value                              |
+      | raw      | boolean     | true                               |
+      | raw      | integer     | 12345090                           |
+      | raw      | double      | 2.01234567                         |
+      | raw      | decimal     | 1234567890.0001234567890dec        |
+      | raw      | date        | 2024-09-20                         |
+      | raw      | datetime    | 1999-02-26T12:15:05                |
+      | raw      | datetime-tz | 2024-09-20T16:40:05.000000001+0100 |
+      | raw      | duration    | P1Y10M7DT15H44M5.00394892S         |
+      | raw      | string      | hello                              |
+      | raw      | string      | bob"bobby                          |
+      | value    | boolean     | true                               |
+      | value    | integer     | 12345090                           |
+      | value    | double      | 2.01234567                         |
+      | value    | decimal     | 1234567890.0001234567890dec        |
+      | value    | date        | 2024-09-20                         |
+      | value    | datetime    | 1999-02-26T12:15:05                |
+      | value    | datetime-tz | 2024-09-20T16:40:05.000000001+0100 |
+      | value    | duration    | P1Y10M7DT15H44M5.00394892S         |
+      | value    | string      | hello                              |
+      | value    | string      | bob"bobby                          |

@@ -53,7 +53,7 @@ Feature: TypeQL Given Clause
 
   Scenario: raw values can be used in given rows
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | n: string         |
       | value:string:Jane |
 
@@ -67,9 +67,51 @@ Feature: TypeQL Given Clause
       | key:ref:101 |
 
 
+  Scenario Outline: Given rows handle <value-type> values
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define entity owner, owns attr; attribute attr value <value-type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set query given rows
+      | attr                       |
+      | value:<value-type>:<value> |
+    When get answers of typeql write query with given rows
+      """
+      given $attr: <value-type>;
+      insert $x isa owner, has attr == $attr;
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa owner, has attr $attr;
+      """
+    Then uniquely identify answer concepts
+      | attr              |
+      | attr:attr:<value> |
+
+    Examples:
+      | value-type  | value                              |
+      | boolean     | true                               |
+      | integer     | 12345090                           |
+      | double      | 2.01234567                         |
+      | decimal     | 1234567890.0001234567890dec        |
+      | date        | 2024-09-20                         |
+      | datetime    | 1999-02-26T12:15:05                |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100 |
+      | duration    | P1Y10M7DT15H44M5.00394892S         |
+      | string      | hello                              |
+      | string      | bob"bobby                          |
+
+
   Scenario: concepts can be used in given rows
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | p: person      |
       | iid:entity:0:1 |
     When get answers of typeql read query with given rows
@@ -90,7 +132,7 @@ Feature: TypeQL Given Clause
       match $p has name $n;
       """
 
-    When query is given rows
+    When set query given rows
       | n: name           |
       | value:string:Jane |
     Then typeql read query with given rows; fails with a message containing: "The query contains no given stage, but given rows were provided"
@@ -98,7 +140,7 @@ Feature: TypeQL Given Clause
       match $p has name $n;
       """
 
-    When query is given rows
+    When set query given rows
       | n: name         |
     Then get answers of typeql read query with given rows
       """
@@ -110,7 +152,7 @@ Feature: TypeQL Given Clause
 
   Scenario: Variables in given rows cannot be reassigned to
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | x               |
       | value:integer:5 |
     Then typeql read query with given rows; fails with a message containing: "The variable 'x' may not be assigned to, as it was already bound in a previous stage"
@@ -122,7 +164,7 @@ Feature: TypeQL Given Clause
 
   Scenario: Given rows may contain multiple rows
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | x               |
       | value:integer:3 |
       | value:integer:5 |
@@ -142,7 +184,7 @@ Feature: TypeQL Given Clause
   Scenario: Given rows are checked against declared types
     Given connection open read transaction for database: typedb
     # Values: Pass a string instead
-    Given query is given rows
+    Given set query given rows
       | x                |
       | value:integer:3  |
       | value:string:abc |
@@ -153,7 +195,7 @@ Feature: TypeQL Given Clause
       """
 
     # Concepts: Pass a person (John) instead
-    Given query is given rows
+    Given set query given rows
       | comp           |
       | iid:entity:0:0 |
     Then typeql read query with given rows; fails with a message containing: "The given value at row '0' and column '0' does not not satisfy the declared type"
@@ -163,7 +205,7 @@ Feature: TypeQL Given Clause
       """
 
     # Values: Passing an integer or decimal for a float is accepted
-    Given query is given rows
+    Given set query given rows
       | x                    |
       | value:integer:3      |
       | value:decimal:1.2dec |
@@ -180,7 +222,7 @@ Feature: TypeQL Given Clause
 
   Scenario: Optional variables may be omitted, required ones may not, undeclared variables are flagged.
     Given connection open read transaction for database: typedb
-    When query is given rows
+    When set query given rows
       | x               |
       | value:integer:5 |
     When get answers of typeql read query with given rows
@@ -194,7 +236,7 @@ Feature: TypeQL Given Clause
       | x               | p                |
       | value:integer:5 | value:integer:10 |
 
-    When query is given rows
+    When set query given rows
       | x               |
       | value:integer:5 |
     Then typeql read query with given rows; fails with a message containing: "The given rows are missing the required variable 'y'"
@@ -205,7 +247,7 @@ Feature: TypeQL Given Clause
        let $q = $x + $y;
       """
 
-    When query is given rows
+    When set query given rows
       | x               | z               |
       | value:integer:5 | value:integer:6 |
     Then typeql read query with given rows; fails with a message containing: "The variable 'z' was not declared in the query"
@@ -220,7 +262,7 @@ Feature: TypeQL Given Clause
   Scenario: Concepts in given rows are validated to exist
     Given connection open read transaction for database: typedb
 
-    Given query is given rows
+    Given set query given rows
       | person         |
       | iid:entity:0:0 |
     When get answers of typeql read query with given rows
@@ -232,7 +274,7 @@ Feature: TypeQL Given Clause
       | person      |
       | key:ref:100 |
 
-    Given query is given rows
+    Given set query given rows
       | person           |
       | iid:entity:0:123 |
     Then typeql read query with given rows; fails with a message containing: "The given instance at row '0' and column '0' does not exist in the database"
@@ -244,7 +286,7 @@ Feature: TypeQL Given Clause
 
   Scenario: Given entries can be used in write stages
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | name               |
       | value:string:James |
     When get answers of typeql write query with given rows
@@ -278,7 +320,7 @@ Feature: TypeQL Given Clause
     Given transaction commits
 
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | p: animal      |
       | iid:entity:0:1 |
     When get answers of typeql write query with given rows
@@ -297,7 +339,7 @@ Feature: TypeQL Given Clause
 
     # Bonus, ensure the bounds are tight.
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | p: animal      |
       | iid:entity:0:1 |
     # Fail, Animal does not own age.
@@ -311,7 +353,7 @@ Feature: TypeQL Given Clause
   Scenario: Given row entries can be optional
     # Undeclared None fail at runtime
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
@@ -323,7 +365,7 @@ Feature: TypeQL Given Clause
 
     # Declared None, used outside try
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
@@ -335,7 +377,7 @@ Feature: TypeQL Given Clause
 
     # normal
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
@@ -367,7 +409,7 @@ Feature: TypeQL Given Clause
 
   Scenario: The order of variables in the given rows does not matter, omitted ones are treated as optional, undeclared ones are flagged.
     Given connection open write transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | name               | ref               |
       | value:string:James | value:integer:110 |
     When get answers of typeql write query with given rows
@@ -377,7 +419,7 @@ Feature: TypeQL Given Clause
           $p isa person, has ref == $ref;
           try { $p has name == $name; };
         """
-    Given query is given rows
+    Given set query given rows
       | ref               |
       | value:integer:111 |
     When get answers of typeql write query with given rows

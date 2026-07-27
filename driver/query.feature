@@ -1266,6 +1266,49 @@ Feature: Driver Query
     Then answer get row(0) get variable(y) is empty
     Then answer get row(0) get variable(q) is empty
 
+
+  Scenario Outline: Given rows handle <value-type> values
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute attr, value <value-type>; entity owner, owns attr;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given set answers of typeql read query as given rows with order: $attr
+    """
+    match let $attr = <value>;
+    """
+    When get answers of typeql write query with given rows
+    """
+    given $attr: <value-type>;
+    insert $x isa owner, has attr == $attr;
+    """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $x isa owner, has attr $attr;
+    """
+    Then answer size is: 1
+    Then answer get row(0) get attribute(attr) get value is: <value>
+
+    Examples:
+      | value-type  | value                              |
+      | boolean     | true                               |
+      | integer     | 12345090                           |
+      | double      | 2.01234567                         |
+      | decimal     | 1234567890.0001234567890dec        |
+      | date        | 2024-09-20                         |
+      | datetime    | 1999-02-26T12:15:05                |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100 |
+      | duration    | P1Y10M7DT15H44M5.00394892S         |
+      | string      | "hello"                            |
+      | string      | "bob\"bobby"                       |
+
+
   ###########
   # ANALYZE #
   ###########
