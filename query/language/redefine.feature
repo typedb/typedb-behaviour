@@ -422,7 +422,7 @@ Feature: TypeQL Redefine Query
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "Label 'cannot-rename-to' should be unique, but is already used by 'entity'"
       """
-      redefine entity before-rename label cannot-rename-to;
+      redefine relation before-rename label cannot-rename-to;
       """
     # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
@@ -862,7 +862,7 @@ Feature: TypeQL Redefine Query
     Given connection open schema transaction for database: typedb
     Then typeql schema query; fails with a message containing: "Label 'cannot-rename-to' should be unique, but is already used by 'entity'"
       """
-      redefine entity before-rename label cannot-rename-to;
+      redefine attribute before-rename label cannot-rename-to;
       """
     # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
