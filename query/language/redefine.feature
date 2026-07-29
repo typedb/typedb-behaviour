@@ -107,11 +107,19 @@ Feature: TypeQL Redefine Query
     Given typeql schema query
     """
     define
+     entity cannot-rename-to;
+
      entity parent-of-rename;
      entity before-rename, sub parent-of-rename;
      entity before-child sub before-rename;
     """
     Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Label 'cannot-rename-to' should be unique, but is already used by 'entity'"
+      """
+      redefine entity before-rename label cannot-rename-to;
+      """
+    # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
@@ -405,11 +413,18 @@ Feature: TypeQL Redefine Query
     Given typeql schema query
     """
     define
+     entity cannot-rename-to;
      relation parent-of-rename @abstract;
      relation before-rename, relates dummy, sub parent-of-rename;
      entity before-player plays before-rename:dummy;
     """
     Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Label 'cannot-rename-to' should be unique, but is already used by 'entity'"
+      """
+      redefine entity before-rename label cannot-rename-to;
+      """
+    # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
@@ -561,10 +576,24 @@ Feature: TypeQL Redefine Query
     Given typeql schema query
     """
     define
-      relation relation-of-rename, relates before-rename;
+      relation relation-of-rename, relates before-rename, relates sibling-role;
       entity before-player plays relation-of-rename:before-rename;
+
+      relation child-of-rename sub relation-of-rename, relates child-role;
     """
     Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Role name of 'relation-of-rename:sibling-role' should be unique in relation type hierarchy of 'relation-of-rename'"
+      """
+      redefine relation-of-rename:before-rename label sibling-role;
+      """
+    # Given transaction closes: # The transaction is killed by the error
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Role name of 'child-of-rename:child-role' should be unique in relation type hierarchy of 'child-of-rename'"
+      """
+      redefine relation-of-rename:before-rename label child-role;
+      """
+    # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
@@ -579,6 +608,7 @@ Feature: TypeQL Redefine Query
     Then uniquely identify answer concepts
       | x                                     |
       | label:relation-of-rename:after-rename |
+      | label:relation-of-rename:sibling-role |
     Given transaction closes
     # Verify we can do defines with the new label
     Given connection open schema transaction for database: typedb
@@ -822,11 +852,19 @@ Feature: TypeQL Redefine Query
     Given typeql schema query
     """
     define
+     entity cannot-rename-to;
+
      attribute parent-of-rename, value integer;
      attribute before-rename, sub parent-of-rename;
      entity before-owner owns before-rename;
     """
     Given transaction commits
+    Given connection open schema transaction for database: typedb
+    Then typeql schema query; fails with a message containing: "Label 'cannot-rename-to' should be unique, but is already used by 'entity'"
+      """
+      redefine entity before-rename label cannot-rename-to;
+      """
+    # Given transaction closes: # The transaction is killed by the error
     Given connection open schema transaction for database: typedb
     When typeql schema query
       """
