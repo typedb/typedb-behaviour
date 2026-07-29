@@ -760,6 +760,7 @@ Feature: Function Definition
     nickname;
     """
     Then transaction commits; fails
+    # TODO: Add messsage when it's an explicit check at query time
 
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -767,7 +768,19 @@ Feature: Function Definition
     redefine attribute nickname label friendly-alias;
     """
     Then transaction commits; fails
-    # TODO: Add messsage when it's an explicit check at query time
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    redefine attribute nickname label friendly-alias;
+    """
+    Then typeql read query; fails with a message containing: "An error occurred when trying to resolve the type at return index: 0"
+    """
+    match
+     $p isa person;
+     let $e in nickname_of($p);
+    """
+
 
 
   # TODO: The following tests are old tests for rules from the concept/migration directory.
