@@ -760,6 +760,13 @@ Feature: Function Definition
     nickname;
     """
     Then transaction commits; fails
+
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    redefine attribute nickname label friendly-alias;
+    """
+    Then transaction commits; fails
     # TODO: Add messsage when it's an explicit check at query time
 
 

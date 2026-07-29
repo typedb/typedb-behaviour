@@ -103,6 +103,39 @@ Feature: TypeQL Redefine Query
       """
 
 
+  Scenario: entity types can be renamed
+    Given typeql schema query
+    """
+    define
+     entity parent-of-rename;
+     entity before-rename, sub parent-of-rename;
+     entity before-child sub before-rename;
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      redefine entity before-rename label after-rename;
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub! parent-of-rename;
+      """
+    Then uniquely identify answer concepts
+      | x                  |
+      | label:after-rename |
+    Given transaction closes
+    # Verify we can do defines with the new label
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        entity after-child sub after-rename;
+      """
+    Then transaction commits
+
   Scenario: can redefine entity type's sub, cannot redefine unchanged
     When typeql schema query
       """
@@ -368,6 +401,39 @@ Feature: TypeQL Redefine Query
       """
 
 
+  Scenario: relation types can be renamed
+    Given typeql schema query
+    """
+    define
+     relation parent-of-rename @abstract;
+     relation before-rename, relates dummy, sub parent-of-rename;
+     entity before-player plays before-rename:dummy;
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      redefine relation before-rename label after-rename;
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub! parent-of-rename;
+      """
+    Then uniquely identify answer concepts
+      | x                  |
+      | label:after-rename |
+    Given transaction closes
+    # Verify we can do defines with the new label
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        entity after-player plays after-rename:dummy;
+      """
+    Then transaction commits
+
   Scenario: can redefine relation type's sub
     When typeql schema query
       """
@@ -489,6 +555,39 @@ Feature: TypeQL Redefine Query
       """
       redefine employment relates mentor[];
       """
+
+
+  Scenario: A role-type related by a relation type can be renamed
+    Given typeql schema query
+    """
+    define
+      relation relation-of-rename, relates before-rename;
+      entity before-player plays relation-of-rename:before-rename;
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      redefine relation-of-rename:before-rename label after-rename;
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match relation-of-rename relates $x;
+      """
+    Then uniquely identify answer concepts
+      | x                                     |
+      | label:relation-of-rename:after-rename |
+    Given transaction closes
+    # Verify we can do defines with the new label
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        entity after-player plays relation-of-rename:after-rename;
+      """
+    Then transaction commits
 
 
   Scenario: cannot redefine relation type's relates both ordering and annotation
@@ -717,6 +816,40 @@ Feature: TypeQL Redefine Query
       redefine
       attribute email value string @regex("^.*@.*$") @range("A".."zzzzzzzzzzzzzzzzzzzzzzzzzz");
       """
+
+
+  Scenario: attribute types can be renamed
+    Given typeql schema query
+    """
+    define
+     attribute parent-of-rename, value integer;
+     attribute before-rename, sub parent-of-rename;
+     entity before-owner owns before-rename;
+    """
+    Given transaction commits
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      redefine attribute before-rename label after-rename;
+      """
+    Then transaction commits
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x sub! parent-of-rename;
+      """
+    Then uniquely identify answer concepts
+      | x                  |
+      | label:after-rename |
+    Given transaction closes
+    # Verify we can do defines with the new label
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      define
+        entity after-owner owns after-rename;
+      """
+    Then transaction commits
 
   Scenario: an existing attribute type can be switched to a new supertype with a matching value type
     Given typeql schema query
