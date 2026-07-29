@@ -1062,6 +1062,7 @@ Feature: TypeQL Redefine Query
   ###########
 
     # TODO 3.x: Add tests for structs
+    # Scenario: structs can be renamed
 
   ###############
   # ANNOTATIONS #
