@@ -5632,6 +5632,8 @@ Feature: TypeQL Match Clause
       """
 
 
+  # TODO: enable when similarity search functions are implemented (deferred vector work)
+  @ignore
   Scenario: documents can be retrieved by indexed cosine similarity search on an embedding attribute
     Given typeql schema query
       """

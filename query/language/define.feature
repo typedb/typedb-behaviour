@@ -1108,21 +1108,21 @@ Feature: TypeQL Define Query
 
 
   Scenario: defining an embedding value type with a non-integer length errors
-    Then typeql schema query; fails
+    Then typeql schema query; parsing fails
       """
       define attribute embedding value vector(3.0, "float32");
       """
 
 
   Scenario: defining an embedding value type with an invalid encoding errors
-    Then typeql schema query; fails
+    Then typeql schema query; parsing fails
       """
       define attribute embedding value vector(3, "an-invalid-encoding");
       """
 
 
   Scenario: defining an embedding value type with a negative length errors
-    Then typeql schema query; fails
+    Then typeql schema query; parsing fails
       """
       define attribute embedding value vector(-3, "float32");
       """

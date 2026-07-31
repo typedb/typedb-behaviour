@@ -2998,3 +2998,91 @@ Feature: TypeQL Delete Query
     match $p isa person; try { $p has email $email, has age $age; };
     delete try { has $email of $p; try { has $age of $p; }; };
     """
+
+
+  Scenario: an embedding attribute can be deleted, which also deletes its ownerships
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $e isa embedding;
+      delete
+        $e;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $e isa embedding;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $x isa document, has embedding $e;
+      """
+    Then answer size is: 0
+
+
+  Scenario: deleting one ownership of a shared embedding leaves the other ownership intact
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns embedding, owns name;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa document, has name "first",
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      $y isa document, has name "second",
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $x isa document, has name "first", has embedding $e;
+      delete
+        has $e of $x;
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa document, has embedding $e;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $e isa embedding;
+      """
+    Then answer size is: 1
