@@ -5666,9 +5666,6 @@ Feature: TypeQL Match Clause
       | attr:name:near |
 
 
-  # TODO: enable when the answer stream is ordered by descending similarity (threshold filtering
-  # already works; ordering requires the pipeline-level sort increment)
-  @ignore
   Scenario: cosine similarity search returns answers ordered by descending similarity
     Given typeql schema query
       """
