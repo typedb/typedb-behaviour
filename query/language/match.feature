@@ -5632,8 +5632,6 @@ Feature: TypeQL Match Clause
       """
 
 
-  # TODO: enable when similarity search functions are implemented (deferred vector work)
-  @ignore
   Scenario: documents can be retrieved by indexed cosine similarity search on an embedding attribute
     Given typeql schema query
       """
@@ -5666,3 +5664,59 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | name           |
       | attr:name:near |
+
+
+  # TODO: enable when the answer stream is ordered by descending similarity (threshold filtering
+  # already works; ordering requires the pipeline-level sort increment)
+  @ignore
+  Scenario: cosine similarity search returns answers ordered by descending similarity
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $exact isa document, has name "exact", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $close isa document, has name "close", has embedding vector([0.9, 0.1, 0.0], "float32");
+      $mid isa document, has name "mid", has embedding vector([0.7, 0.3, 0.0], "float32");
+      $far isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    # cosine similarity vs query: exact = 1.0, close ~= 0.994, mid ~= 0.919, far = 0.0 (excluded by threshold)
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 3
+    Then order of answer concepts is
+      | name            |
+      | attr:name:exact |
+      | attr:name:close |
+      | attr:name:mid   |
+    # limit takes a prefix of the similarity-ordered stream: top-2, not any-2
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      limit 2;
+      """
+    Then answer size is: 2
+    Then uniquely identify answer concepts
+      | name            |
+      | attr:name:exact |
+      | attr:name:close |
