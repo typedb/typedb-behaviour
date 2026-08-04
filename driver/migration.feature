@@ -1616,3 +1616,89 @@ Feature: Driver Migration
         $p isa person, has name "P4", has email $n;
       """
     Then answer size is: 0
+
+
+  @ignore-typedb-driver-java @ignore-typedb-driver-python @ignore-typedb-driver-csharp
+  Scenario: a database can be neither imported nor created while another import of it is open
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name, value string;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has name "alice";
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+
+    When connection opens import of database(typedb-imported) with schema file(schema.tql)
+    Then wait 2 seconds
+    Then connection import database(typedb-imported) from schema file(schema.tql), data file(data.typedb); fails with a message containing: "is being imported"
+    Then connection create database: typedb-imported; fails with a message containing: "is being imported"
+    Then connection does not have database: typedb-imported
+
+    When connection aborts the open import of database(typedb-imported)
+    Then wait 2 seconds
+    Then connection does not have database: typedb-imported
+    When connection import database(typedb-imported) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-imported
+
+
+  @ignore-typedb-driver-java @ignore-typedb-driver-python @ignore-typedb-driver-csharp
+  Scenario: an interrupted import leaves no visible database and the name stays importable
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name, value string;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has name "alice";
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+
+    When connection opens import of database(typedb-imported) with schema file(schema.tql)
+    Then wait 2 seconds
+    When connection aborts the open import of database(typedb-imported)
+    Then wait 2 seconds
+    Then connection does not have database: typedb-imported
+    Then connection has 1 databases
+
+    When connection import database(typedb-imported) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-imported
+
+
+  @ignore-typedb-driver-java @ignore-typedb-driver-python @ignore-typedb-driver-csharp
+  Scenario: an import completed without data is rejected, leaves no visible database, and can be retried
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name;
+        attribute name, value string;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $p isa person, has name "alice";
+      """
+    Given transaction commits
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+
+    When connection opens import of database(typedb-imported) with schema file(schema.tql)
+    Then connection completes the open import of database(typedb-imported); fails with a message containing: "checksums"
+    Then connection does not have database: typedb-imported
+
+    When connection import database(typedb-imported) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-imported
