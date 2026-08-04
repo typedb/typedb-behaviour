@@ -5717,3 +5717,31 @@ Feature: TypeQL Match Clause
       | name            |
       | attr:name:exact |
       | attr:name:close |
+
+
+  Scenario: cosine similarity search with a query vector of mismatched dimension fails
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $doc isa document, has name "doc", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0], "float32"), 0.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
