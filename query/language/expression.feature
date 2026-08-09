@@ -216,9 +216,11 @@ Feature: TypeQL Query with Expressions
       """
     Given transaction closes
 
-    # Non-cyclic query, just inverted dependencies in two branches
+    # Non-cyclic query, just inverted dependencies in two branches.
+    # TODO: This is legal, but currently fails because our validation is too coarse.
+    # The validation introduced in #7900 is finer and permits this.
     Given connection open read transaction for database: typedb
-    Then typeql read query
+    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
     """
       match
         { let $x = 5; let $y = $x; } or
