@@ -245,3 +245,31 @@ Feature: Function Usage
       match
         let $name = name_of($p);
       """
+
+  Scenario: When no evaluation order can bind the arguments of a function, an error is returned.
+    Given connection open read transaction for database: typedb
+    # "The conjunction cannot have a valid plan" is also fine here, but we have easier pre-checks at the moment.
+    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used."
+    """
+      with fun plus($x: integer, $inc: integer) -> integer:
+      match let $y = $x + $inc;
+      return first $x;
+
+      match
+        let $x = plus($x, 0);
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    """
+      with fun plus($x: integer, $inc: integer) -> integer:
+      match let $y = $x + $inc;
+      return first $x;
+
+      match
+        let $y = plus($x, 1);
+        let $x = plus($y, -1);
+      """
+    Given transaction closes
+

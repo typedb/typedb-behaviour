@@ -5073,6 +5073,22 @@ Feature: TypeQL Match Clause
         { $x isa company; } or { $n isa name; };
       """
 
+
+    # This is more of an implementation choice than a semantic requirement because we could have had optional outputs of disjunctions
+    Scenario: Variables occurring in only one branch of a disjunction are considered input
+      Given transaction commits
+
+      Given connection open read transaction for database: typedb
+      Then typeql read query; fails with a message containing: "is required to be bound to a value before it's used."
+      """
+      match
+        $x isa person;
+        { $b isa age; } or { $a isa name; };
+        { $x has $a; } or { $x has $b; };
+      """
+      Given transaction closes
+
+
   ##################
   # VARIABLE TYPES #
   ##################

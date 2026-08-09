@@ -134,11 +134,9 @@ Feature: TypeQL Query with Expressions
       """
 
 
-  @ignore
-  # TODO: 3.x: The beam search unwraps a None because there are no valid plans.
   Scenario: When no evaluation order can bind the variables in an expression, an error is returned.
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "TODO"
+    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -147,11 +145,24 @@ Feature: TypeQL Query with Expressions
       select
         $x, $v;
       """
+    Given transaction closes
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used."
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        $v > $h;
+        try { let $v = $a / 2; };
+      select
+        $x, $v;
+      """
+    Given transaction closes
+    Given connection open read transaction for database: typedb
 
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -162,7 +173,7 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -171,7 +182,20 @@ Feature: TypeQL Query with Expressions
       select
         $x, $u, $v;
       """
+    Given transaction closes
 
+    # Non-cyclic query, just inverted dependencies in two branches
+    Given connection open read transaction for database: typedb
+    Then typeql read query
+    """
+      match
+        { let $x = 5; let $y = $x; } or
+        { let $y = 6; let $x = $y; };
+      select
+        $x, $y;
+      """
+    Then verify answer size is: 2
+    Given transaction closes
 
   Scenario: Value variables can cross over into negations
     Given connection open write transaction for database: typedb
