@@ -157,7 +157,39 @@ Feature: TypeQL Query with Expressions
         $x, $v;
       """
     Given transaction closes
+
+    # verify we recurse properly
     Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    """
+      match
+        try { let $x = $y + 0;  let $y = $x + 0; };
+      select
+        $x, $y;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    """
+      match
+        let $z = 0;
+        not { let $x = $y + $z;  let $y = $x + $z; };
+      select
+        $z;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    """
+      match
+        { let $x = 0;  let $y = 0; } or
+        { let $x = $y + 0;  let $y = $x + 0; };
+      select
+        $x, $y;
+      """
+    Given transaction closes
 
 
   Scenario: Value variable assignments may not form cycles
@@ -196,6 +228,7 @@ Feature: TypeQL Query with Expressions
       """
     Then verify answer size is: 2
     Given transaction closes
+
 
   Scenario: Value variables can cross over into negations
     Given connection open write transaction for database: typedb
