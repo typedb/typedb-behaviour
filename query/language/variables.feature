@@ -37,7 +37,7 @@ Feature: TypeQL Variable binding tests
 
   Scenario: Variables are not available in subsequent stages if they are not selected by a select stage
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       let $x = 1;
@@ -50,7 +50,7 @@ Feature: TypeQL Variable binding tests
 
   Scenario: Variables are not available in subsequent stages if they are aggregated over by a reduce stage
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       let $x = 1;
@@ -107,14 +107,14 @@ Feature: TypeQL Variable binding tests
 
   Scenario: Variables which occur in only some branches of a disjunction and are NOT BOUND in a parent conjunction are not available in the root & subsequent stages
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       { let $x = 1; let $a = 100; } or { let $z = 11; let $a = 100; };
       let $y = $x + 2;
     """
 
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       { let $x = 1; let $a = 100; } or { let $z = 11; let $a = 100; };
@@ -169,7 +169,7 @@ Feature: TypeQL Variable binding tests
       | value:integer:3 |
 
     # TODO: Might be better with disjoint variable error "Locally-scoped variable 'x' cannot be re-used elsewhere as a locally-scoped variable"
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       let $a = 10;
@@ -192,7 +192,7 @@ Feature: TypeQL Variable binding tests
       | b                |
       | value:integer:12 |
 
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       let $a = 10;
@@ -230,7 +230,7 @@ Feature: TypeQL Variable binding tests
       | value:integer:3  |
 
 
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       not { let $x = 1; $x > 10; };
@@ -240,7 +240,7 @@ Feature: TypeQL Variable binding tests
 
   Scenario: It is illegal to have variables are in a negation, NOT PRESENT in a parent conjunction, and present only in some branches of a sibling disjunction.
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       let $a = 10;
@@ -263,14 +263,14 @@ Feature: TypeQL Variable binding tests
       | y               |
       | value:integer:3 |
 
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     match
       not { let $x = 1; $x > 10; };
       not { let $x = 2; $x < 0; };
     """
 
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     # Skip a level
     match
@@ -283,7 +283,7 @@ Feature: TypeQL Variable binding tests
 
   Scenario: Reassigning an argument to a return does not make it binding
     Given connection open read transaction for database: typedb
-    When typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used"
+    When typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
     """
     with fun ident($x: integer) -> integer:
     match let $y = $x;

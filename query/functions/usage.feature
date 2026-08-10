@@ -245,3 +245,31 @@ Feature: Function Usage
       match
         let $name = name_of($p);
       """
+
+  Scenario: When no evaluation order can bind the arguments of a function, an error is returned.
+    Given connection open read transaction for database: typedb
+    # "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)" is also fine here, but we have easier pre-checks at the moment.
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used."
+    """
+      with fun plus($x: integer, $inc: integer) -> integer:
+      match let $y = $x + $inc;
+      return first $x;
+
+      match
+        let $x = plus($x, 0);
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
+    """
+      with fun plus($x: integer, $inc: integer) -> integer:
+      match let $y = $x + $inc;
+      return first $x;
+
+      match
+        let $y = plus($x, 1);
+        let $x = plus($y, -1);
+      """
+    Given transaction closes
+

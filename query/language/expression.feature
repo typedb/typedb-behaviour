@@ -40,7 +40,7 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -134,11 +134,9 @@ Feature: TypeQL Query with Expressions
       """
 
 
-  @ignore
-  # TODO: 3.x: The beam search unwraps a None because there are no valid plans.
   Scenario: When no evaluation order can bind the variables in an expression, an error is returned.
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "TODO"
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -147,11 +145,56 @@ Feature: TypeQL Query with Expressions
       select
         $x, $v;
       """
+    Given transaction closes
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used."
+    """
+      match
+        $x isa person, has age $a, has height $h;
+        $v > $h;
+        try { let $v = $a / 2; };
+      select
+        $x, $v;
+      """
+    Given transaction closes
+
+    # verify we recurse properly
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
+    """
+      match
+        try { let $x = $y + 0;  let $y = $x + 0; };
+      select
+        $x, $y;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
+    """
+      match
+        let $z = 0;
+        not { let $x = $y + $z;  let $y = $x + $z; };
+      select
+        $z;
+      """
+    Given transaction closes
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
+    """
+      match
+        { let $x = 0;  let $y = 0; } or
+        { let $x = $y + 0;  let $y = $x + 0; };
+      select
+        $x, $y;
+      """
+    Given transaction closes
 
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -162,7 +205,7 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -171,6 +214,22 @@ Feature: TypeQL Query with Expressions
       select
         $x, $u, $v;
       """
+    Given transaction closes
+
+    # Non-cyclic query, just inverted dependencies in two branches.
+    # TODO: This is legal, but currently fails because our validation is too coarse.
+    # The validation introduced in #7900 is finer and permits this.
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    """
+      match
+        { let $x = 5; let $y = $x; } or
+        { let $y = 6; let $x = $y; };
+      select
+        $x, $y;
+      """
+    #Then verify answer size is: 2
+    Given transaction closes
 
 
   Scenario: Value variables can cross over into negations
