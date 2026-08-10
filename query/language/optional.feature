@@ -154,7 +154,7 @@ Feature: TypeQL Optional
 
 
   Scenario: an optional cannot be used within a disjunction
-    Then typeql read query; fails with a message containing: "is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "must be bound to a value before it's used"
       """
       match $x isa person, has name "Frank";
       {
@@ -194,7 +194,7 @@ Feature: TypeQL Optional
     Then uniquely identify answer concepts
       | x         | r1        | r2        |
       | key:ref:1 | key:ref:3 | key:ref:3 |
-    Then typeql read query; fails with a message containing: "The variable 'y' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'y' must be bound to a value before it's used"
 
     """
       match

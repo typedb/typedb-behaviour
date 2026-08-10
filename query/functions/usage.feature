@@ -248,8 +248,8 @@ Feature: Function Usage
 
   Scenario: When no evaluation order can bind the arguments of a function, an error is returned.
     Given connection open read transaction for database: typedb
-    # "The conjunction cannot have a valid plan" is also fine here, but we have easier pre-checks at the moment.
-    Then typeql read query; fails with a message containing: "The variable 'x' is required to be bound to a value before it's used."
+    # "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)" is also fine here, but we have easier pre-checks at the moment.
+    Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used."
     """
       with fun plus($x: integer, $inc: integer) -> integer:
       match let $y = $x + $inc;
@@ -261,7 +261,7 @@ Feature: Function Usage
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       with fun plus($x: integer, $inc: integer) -> integer:
       match let $y = $x + $inc;

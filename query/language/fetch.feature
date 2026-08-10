@@ -3131,7 +3131,7 @@ Feature: TypeQL Fetch Query
       match { $p isa person; } or { $k isa person; }; fetch {"p": $p.name};
       """
 
-    Then typeql read query; fails with a message containing: "The variable 'p' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'p' must be bound to a value before it's used"
     """
     with fun name($p: person) -> name:
     match $p has name $n;

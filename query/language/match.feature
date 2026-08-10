@@ -5079,7 +5079,7 @@ Feature: TypeQL Match Clause
       Given transaction commits
 
       Given connection open read transaction for database: typedb
-      Then typeql read query; fails with a message containing: "is required to be bound to a value before it's used."
+      Then typeql read query; fails with a message containing: "must be bound to a value before it's used."
       """
       match
         $x isa person;

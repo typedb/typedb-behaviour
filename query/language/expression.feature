@@ -40,7 +40,7 @@ Feature: TypeQL Query with Expressions
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -136,7 +136,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: When no evaluation order can bind the variables in an expression, an error is returned.
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used"
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -147,7 +147,7 @@ Feature: TypeQL Query with Expressions
       """
     Given transaction closes
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The variable 'v' is required to be bound to a value before it's used."
+    Then typeql read query; fails with a message containing: "The variable 'v' must be bound to a value before it's used."
     """
       match
         $x isa person, has age $a, has height $h;
@@ -160,7 +160,7 @@ Feature: TypeQL Query with Expressions
 
     # verify we recurse properly
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         try { let $x = $y + 0;  let $y = $x + 0; };
@@ -170,7 +170,7 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         let $z = 0;
@@ -181,7 +181,7 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         { let $x = 0;  let $y = 0; } or
@@ -194,7 +194,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: Value variable assignments may not form cycles
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         $x isa person, has age $a, has height $h;
@@ -205,7 +205,7 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The conjunction cannot have a valid plan"
+    Then typeql read query; fails with a message containing: "The required input variables for the following constraints could not be satisfied (there may be a circular dependency)"
     """
       match
         $x isa person, has age $a, has height $h;
