@@ -1150,6 +1150,233 @@ Feature: Driver Migration
     Then answer size is: 3
 
 
+  Scenario: Export and import of a database with attribute hierarchies declared in either order succeeds
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        attribute technical-fit sub assessment-score, value integer;
+        attribute assessment-score @abstract;
+        attribute leaf-score @independent, sub rating, value integer;
+        attribute rating @abstract;
+        attribute measure @abstract;
+        attribute cpu-load sub measure, value integer;
+        attribute quality @abstract;
+        attribute grade @independent, sub quality, value integer;
+        entity application, owns technical-fit, owns leaf-score, owns cpu-load, owns grade;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $a isa application, has technical-fit 4, has leaf-score 5, has cpu-load 7, has grade 2;
+        $s isa leaf-score 3;
+        $g isa grade 1;
+      """
+    Given transaction commits
+
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+
+    When connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-clone
+    Then connection get database(typedb-clone) has schema:
+      """
+      define
+        attribute technical-fit sub assessment-score, value integer;
+        attribute assessment-score @abstract;
+        attribute leaf-score @independent, sub rating, value integer;
+        attribute rating @abstract;
+        attribute measure @abstract;
+        attribute cpu-load sub measure, value integer;
+        attribute quality @abstract;
+        attribute grade @independent, sub quality, value integer;
+        entity application, owns technical-fit, owns leaf-score, owns cpu-load, owns grade;
+      """
+
+    When connection open read transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match $a isa application, has technical-fit 4, has leaf-score 5, has cpu-load 7, has grade 2;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $s isa leaf-score;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $g isa grade;
+      """
+    Then answer size is: 2
+
+    # Deleting the only owner must clean up the non-independent attributes and keep the
+    # independent ones: the restored schema carries the exact original independence semantics.
+    When connection open write transaction for database: typedb-clone
+    When typeql write query
+      """
+      match $a isa application; delete $a;
+      """
+    When transaction commits
+    When connection open read transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match $t isa technical-fit;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $c isa cpu-load;
+      """
+    Then answer size is: 0
+    When get answers of typeql read query
+      """
+      match $s isa leaf-score;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $g isa grade;
+      """
+    Then answer size is: 2
+
+
+  Scenario: Export and import of a database with specializing owns keys and annotations succeeds
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity page @abstract, owns ref, owns id @unique, owns tag, owns kind @values(1, 2, 3), owns score @range(0..100), owns handle, plays team:member @doc("who can join");
+        entity profile sub page, owns ref @key, owns id @card(0..1) @unique, owns tag @card(0..2) @values("alpha", "beta"), owns kind @card(0..1) @values(1, 2), owns score @card(0..1) @range(10..50), owns handle @card(0..1) @regex("[a-z]+"), plays team:member @card(0..1) @doc("who can join");
+        entity acc @abstract, owns code;
+        entity acc-mid @abstract, sub acc, owns code @card(0..3);
+        entity acc-leaf sub acc-mid, owns code @key;
+        relation team, relates member @card(0..10);
+        attribute ref, value string;
+        attribute id, value string;
+        attribute tag, value string;
+        attribute kind, value integer;
+        attribute score, value integer;
+        attribute handle, value string;
+        attribute code, value string;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p isa profile, has ref "r1", has id "i1", has tag "alpha", has kind 1, has score 42, has handle "hey";
+        $q isa profile, has ref "r2";
+        $x isa acc-leaf, has code "k1";
+        $t isa team, links (member: $p, member: $q);
+      """
+    Given transaction commits
+
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+    Then file(schema.tql) exists
+    Then file(data.typedb) exists
+
+    When connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-clone
+    Then connection get database(typedb-clone) has schema:
+      """
+      define
+        entity page @abstract, owns ref, owns id @unique, owns tag, owns kind @values(1, 2, 3), owns score @range(0..100), owns handle, plays team:member @doc("who can join");
+        entity profile sub page, owns ref @key, owns id @card(0..1) @unique, owns tag @card(0..2) @values("alpha", "beta"), owns kind @card(0..1) @values(1, 2), owns score @card(0..1) @range(10..50), owns handle @card(0..1) @regex("[a-z]+"), plays team:member @card(0..1) @doc("who can join");
+        entity acc @abstract, owns code;
+        entity acc-mid @abstract, sub acc, owns code @card(0..3);
+        entity acc-leaf sub acc-mid, owns code @key;
+        relation team, relates member @card(0..10);
+        attribute ref, value string;
+        attribute id, value string;
+        attribute tag, value string;
+        attribute kind, value integer;
+        attribute score, value integer;
+        attribute handle, value string;
+        attribute code, value string;
+      """
+
+    When connection open read transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match $p isa profile, has ref $r;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $p isa profile, has id "i1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $x isa acc-leaf, has code "k1";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $p isa profile, has tag "alpha", has kind 1, has score 42, has handle "hey";
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $t isa team, links (member: $m);
+      """
+    Then answer size is: 2
+
+    When connection open write transaction for database: typedb-clone
+    Then typeql write query; fails with a message containing: "key"
+      """
+      insert $x isa profile, has ref "r1";
+      """
+    When connection open write transaction for database: typedb-clone
+    Then typeql write query; fails with a message containing: "@unique"
+      """
+      insert $x isa profile, has ref "r9", has id "i1";
+      """
+    When connection open write transaction for database: typedb-clone
+    Then typeql write query; fails with a message containing: "@values(1, 2)"
+      """
+      insert $x isa profile, has ref "r10", has kind 3;
+      """
+    When connection open write transaction for database: typedb-clone
+    Then typeql write query; fails with a message containing: "@range(10..50)"
+      """
+      insert $x isa profile, has ref "r11", has score 90;
+      """
+    When connection open write transaction for database: typedb-clone
+    Then typeql write query; fails with a message containing: "@regex"
+      """
+      insert $x isa profile, has ref "r12", has handle "UPPER";
+      """
+    When connection open write transaction for database: typedb-clone
+    When typeql write query
+      """
+      match $p isa profile, has ref "r1";
+      insert $t isa team, links (member: $p);
+      """
+    Then transaction commits; fails with a message containing: "@card(0..1)"
+
+    When connection open write transaction for database: typedb-clone
+    When typeql write query
+      """
+      insert $t isa team;
+      """
+    When transaction commits
+    When connection open read transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match $t isa team;
+      """
+    Then answer size is: 1
+
+
   Scenario: Export and import of a database with mismatched schema and data fails
     Given connection create database: untypedb
     Given connection create database: notypedb
