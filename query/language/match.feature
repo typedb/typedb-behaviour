@@ -5632,8 +5632,6 @@ Feature: TypeQL Match Clause
       """
 
 
-  # TODO: enable when similarity search functions are implemented (deferred vector work)
-  @ignore
   Scenario: documents can be retrieved by indexed cosine similarity search on an embedding attribute
     Given typeql schema query
       """
@@ -5666,3 +5664,245 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | name           |
       | attr:name:near |
+
+
+  Scenario: cosine similarity search returns answers ordered by descending similarity
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $exact isa document, has name "exact", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $close isa document, has name "close", has embedding vector([0.9, 0.1, 0.0], "float32");
+      $mid isa document, has name "mid", has embedding vector([0.7, 0.3, 0.0], "float32");
+      $far isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    # cosine similarity vs query: exact = 1.0, close ~= 0.994, mid ~= 0.919, far = 0.0 (excluded by threshold)
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 3
+    Then order of answer concepts is
+      | name            |
+      | attr:name:exact |
+      | attr:name:close |
+      | attr:name:mid   |
+    # limit takes a prefix of the similarity-ordered stream: top-2, not any-2
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      limit 2;
+      """
+    Then answer size is: 2
+    Then uniquely identify answer concepts
+      | name            |
+      | attr:name:exact |
+      | attr:name:close |
+
+
+  Scenario: cosine similarity search with a query vector of mismatched dimension fails
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $doc isa document, has name "doc", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0], "float32"), 0.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+
+
+  Scenario: cosine similarity search threshold is an inclusive lower bound over the full similarity range
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    # cosine similarity vs query [1,0,0]: same = 1.0, orthogonal = 0.0, opposite = -1.0
+    When typeql write query
+      """
+      insert
+      $same isa document, has name "same", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $orthogonal isa document, has name "orthogonal", has embedding vector([0.0, 1.0, 0.0], "float32");
+      $opposite isa document, has name "opposite", has embedding vector([-1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    # threshold 0.0 keeps the exact boundary value (orthogonal) and drops negative similarity
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 2
+    Then uniquely identify answer concepts
+      | name                 |
+      | attr:name:same       |
+      | attr:name:orthogonal |
+    # threshold -1.0 admits everything, including the exactly-opposite vector, ordered descending
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), -1.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 3
+    Then order of answer concepts is
+      | name                 |
+      | attr:name:same       |
+      | attr:name:orthogonal |
+      | attr:name:opposite   |
+    # a high threshold keeps only an exact-direction match. Note: exactly 1.0 is NOT a reliable
+    # threshold — floating-point similarity of identical vectors may fall marginally below 1.0
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.999);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name           |
+      | attr:name:same |
+
+
+  Scenario: cosine similarity search treats zero vectors as similarity 0 to any vector and 1 to another zero vector
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $zero isa document, has name "zero", has embedding vector([0.0, 0.0, 0.0], "float32");
+      $unit isa document, has name "unit", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    # vs a non-zero query the zero vector scores similarity 0: admitted at threshold 0, ranked last
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 2
+    Then order of answer concepts is
+      | name           |
+      | attr:name:unit |
+      | attr:name:zero |
+    # ...and excluded by any positive threshold
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name           |
+      | attr:name:unit |
+    # a zero query vector scores 1 against the zero vector and 0 against everything else
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([0.0, 0.0, 0.0], "float32"), 0.5);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name           |
+      | attr:name:zero |
+
+
+  Scenario: cosine similarity search returns every owner of a shared matching embedding
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $a isa document, has name "a", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $b isa document, has name "b", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name;
+      """
+    Then answer size is: 2
+    Then uniquely identify answer concepts
+      | name        |
+      | attr:name:a |
+      | attr:name:b |
