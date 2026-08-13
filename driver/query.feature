@@ -1464,6 +1464,38 @@ Feature: Driver Query
     Given transaction closes
 
 
+  Scenario: Driver processes vector search query structure correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze
+      """
+      match
+        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
+        $d isa document, has embedding $e;
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        VectorSearch($e, embedding, [1.0, 0.0, 0.0], 0.5, $_),
+        Isa($d, document),
+        Has($d, $e),
+        Isa($e, embedding)
+      ]),
+      Sort([desc($_)])
+    ])
+    """
+    Given transaction closes
+
+
   Scenario: Analyze returns the annotations of variables in the query
     Given connection open schema transaction for database: typedb
     Given typeql schema query
