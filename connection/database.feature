@@ -157,6 +157,21 @@ Feature: Connection Database
     Then connection delete database: typedb
     Then connection does not have database: typedb
 
+  Scenario: database can be deleted and recreated immediately after committing transactions
+    When connection create database: typedb
+    When connection open schema transaction for database: typedb
+    Then typeql schema query
+      """
+      define entity person;
+      """
+    Then transaction commits
+    When connection open write transaction for database: typedb
+    Then transaction commits
+    Then connection delete database: typedb
+    Then connection does not have database: typedb
+    When connection create database: typedb
+    Then connection has database: typedb
+
   Scenario Outline: database can be deleted and recreated immediately after closing <type> transactions
     When connection create database: typedb
     When connection open <type> transaction for database: typedb
