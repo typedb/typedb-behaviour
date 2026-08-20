@@ -1552,6 +1552,9 @@ Parker";
       | double   | length     | 52               | 52.00            |
       | double   | length     | 52.0             | 52               |
       | double   | length     | 52.0             | 52.00            |
+      | double   | length     | 0.01             | 1e-2             |
+      | double   | length     | 0.01             | 1.0e-2           |
+      | double   | length     | 1e-2             | 0.01             |
       | datetime | start-date | 2019-12-26       | 2019-12-26       |
       | datetime | start-date | 2019-12-26       | 2019-12-26T00:00 |
       | datetime | start-date | 2019-12-26T00:00 | 2019-12-26       |
