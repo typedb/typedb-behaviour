@@ -405,3 +405,38 @@ Feature: TypeQL Given Clause
     Then uniquely identify answer concepts
       | p           |
       | key:ref:111 |
+
+
+  Scenario: vector values can be used in given rows
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        attribute embedding, value vector(3, "float32");
+        entity document, owns name @card(0..), owns embedding @card(0..);
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $d1 isa document, has name "near", has embedding vector([1.0, 0.0, 0.0], "float32");
+        $d2 isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Given query is given rows
+      | v: vector                    |
+      | value:vector:[1.0, 0.0, 0.0] |
+    When get answers of typeql read query with given rows
+      """
+      given $v: vector(3, "float32");
+      match
+        let $e in cosine_similarity_search(embedding, $v, 0.8);
+        $doc isa document, has name $name, has embedding $e;
+      select $name;
+      """
+    Then answer size is: 1
+    Then uniquely identify answer concepts
+      | name           |
+      | attr:name:near |
