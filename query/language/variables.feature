@@ -391,3 +391,50 @@ Feature: TypeQL Variable binding tests
       { isset $x; let $y = $x; } or { let $z = 1; };
     """
     Then answer size is: 1
+
+
+  # Not done, but would be cool:
+  @ignore
+  Scenario: Variables unwrapped in all branches of a disjunction are unwrapped in the parent
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; };
+    match
+      { let $y = $x +1; } or { let $y = $x +2; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      { isset $x; let $y = $x +1; } or { isset $x; let $y = $x +2; };
+      let $z = $x + $y;
+    """
+    Then answer size is: 2
+
+
+  @ignore
+  Scenario: Variables unwrapped in the root of a stage is unwrapped in downstream stages
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; };
+    match
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    Then answer size is: 1
