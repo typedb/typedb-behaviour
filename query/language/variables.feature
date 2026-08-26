@@ -19,6 +19,10 @@ Feature: TypeQL Variable binding tests
       attribute name, value string;
       attribute ref, value integer;
       attribute number @independent, value integer;
+
+      fun none_integer() -> integer?:
+      match try { let $none = 1; $none == 0; };
+      return first $none;
       """
     Given transaction commits
 
@@ -313,6 +317,39 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 0
 
+    # Optional function returns
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # In same stage
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
 
   Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
     Given connection open read transaction for database: typedb
