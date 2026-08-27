@@ -300,7 +300,7 @@ Feature: TypeQL Variable binding tests
   # Unwrapping optionals
   Scenario: Referencing optional variables without an unwrap fails
     Given connection open read transaction for database: typedb
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       try { let $x = 5; $x == 4; };
@@ -318,7 +318,7 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 0
 
     # Optional function returns
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       let $x = none_integer(); # Add ? when enforced
@@ -351,9 +351,10 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 0
 
+
   Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
     Given connection open read transaction for database: typedb
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       try { let $x = 5; $x == 4; };
@@ -379,7 +380,7 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 1
 
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       try { let $x = 5; $x == 4; };
@@ -404,7 +405,7 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 1
 
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       try { let $x = 5; $x == 4; };
