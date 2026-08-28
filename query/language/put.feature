@@ -722,7 +722,7 @@ Feature: TypeQL Put Query
 
   Scenario: In a put stage, using an optional variable outside a try block errors.
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "The input optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       $p isa person;

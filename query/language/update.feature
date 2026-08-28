@@ -3029,7 +3029,7 @@ Feature: TypeQL Update Query
 
 
   Scenario: In an update stage, using an optional variable outside a try block errors.
-    Then typeql write query; fails with a message containing: "The input optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       $john isa person, has name "John";
