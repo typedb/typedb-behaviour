@@ -369,7 +369,7 @@ Feature: TypeQL Given Clause
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    Then typeql write query with given rows; fails with a message containing: "The input optional variable 'name' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql write query with given rows; fails with a message containing: "The optional variable 'name' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
         """
         given $ref: integer, $name: string?;
         insert $p isa person, has ref == $ref, has name == $name;

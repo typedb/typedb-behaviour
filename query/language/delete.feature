@@ -2983,7 +2983,7 @@ Feature: TypeQL Delete Query
 
 
   Scenario: In a delete stage, using an optional variable outside a try block errors.
-    Then typeql write query; fails with a message containing: "The input optional variable 'name' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql write query; fails with a message containing: "The optional variable 'name' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
     """
     match
       $john isa person; try { $john has name $name; };
