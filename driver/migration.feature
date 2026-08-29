@@ -1616,3 +1616,53 @@ Feature: Driver Migration
         $p isa person, has name "P4", has email $n;
       """
     Then answer size is: 0
+
+
+  Scenario: Export and import database with vector attributes preserves vector values
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        attribute name, value string;
+        attribute embedding, value vector(3, "float32");
+        entity document, owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $near isa document, has name "near", has embedding vector([1.0, 0.0, 0.0], "float32");
+        $far isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Given transaction commits
+
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb)
+
+    Given connection does not have database: typedb-exported
+    When connection import database(typedb-exported) from schema file(schema.tql), data file(data.typedb)
+    Then connection has database: typedb-exported
+
+    Given connection open read transaction for database: typedb-exported
+    When get answers of typeql read query
+      """
+      match $e isa embedding;
+      """
+    Then answer size is: 2
+    # match-by-value proves the vector bytes round-tripped exactly, still attached to their owner
+    When get answers of typeql read query
+      """
+      match $doc isa document, has name "near", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $doc isa document, has name "far", has embedding vector([0.0, 1.0, 0.0], "float32");
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $doc isa document, has name "far", has embedding vector([1.0, 0.0, 0.0], "float32");
+      """
+    Then answer size is: 0
