@@ -374,6 +374,7 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 0
 
 
+  # TODO: Do we even want to allow this behaviour?
   Scenario: Referencing optional variables in a write stage without an unwrap fails
     Given connection open write transaction for database: typedb
     When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
@@ -392,7 +393,7 @@ Feature: TypeQL Variable binding tests
       isset $x;
       $x has name "Steve";
     """
-    Then answer size is: 0
+    Then answer size is: 1
     Given transaction closes
 
     Given connection open write transaction for database: typedb
@@ -412,7 +413,7 @@ Feature: TypeQL Variable binding tests
       isset $x;
       $x has name "Steve";
     """
-    Then answer size is: 0
+    Then answer size is: 1
     Given transaction closes
 
     Given connection open write transaction for database: typedb
@@ -420,8 +421,8 @@ Feature: TypeQL Variable binding tests
     """
     match
       try { $x isa person; };
-    insert
-      $x has name "Steve";
+    update
+      $x has ref 54321;
     """
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
@@ -430,9 +431,9 @@ Feature: TypeQL Variable binding tests
       try { $x isa person; };
     update
       isset $x;
-      $x has name "Steve";
+      $x has ref 54321;
     """
-    Then answer size is: 0
+    Then answer size is: 1
     Given transaction closes
 
     Given connection open write transaction for database: typedb
@@ -452,7 +453,7 @@ Feature: TypeQL Variable binding tests
       isset $x;
       $x;
     """
-    Then answer size is: 0
+    Then answer size is: 1
     Given transaction closes
 
 
