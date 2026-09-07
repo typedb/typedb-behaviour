@@ -2862,7 +2862,9 @@ Parker";
     insert
       $john isa person, has ref 0, has name "John";
     """
-    Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    # The message will change when we're done with the transition:
+    #Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block"
     """
     match
       $p isa person;
