@@ -13,6 +13,8 @@ files = [
     "migration.feature",
     "query.feature",
     "user.feature",
+
+    "deprecated_optionals.feature",
 ]
 
 filegroup(
