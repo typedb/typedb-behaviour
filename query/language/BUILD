@@ -24,6 +24,8 @@ files = [
     "undefine.feature",
     "update.feature",
     "variables.feature",
+
+    "deprecated_optionals.feature",
 ]
 
 filegroup(
