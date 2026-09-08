@@ -1409,10 +1409,10 @@ Feature: Driver Migration
     When connection get database(typedb) export to schema file(typedb.tql), data file(typedb.typedb)
     When connection get database(untypedb) export to schema file(untypedb.tql), data file(untypedb.typedb)
     When connection get database(notypedb) export to schema file(notypedb.tql), data file(notypedb.typedb)
-    Then connection import database(newtypedb) from schema file(typedb.tql), data file(untypedb.typedb); fails with a message containing: "entity type 'name' does not exist"
-    Then connection import database(newtypedb) from schema file(untypedb.tql), data file(typedb.typedb); fails with a message containing: "entity type 'person' does not exist"
-    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(typedb.typedb); fails with a message containing: "entity type 'person' does not exist"
-    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(untypedb.typedb); fails with a message containing: "entity type 'name' does not exist"
+    Then connection import database(newtypedb) from schema file(typedb.tql), data file(untypedb.typedb); fails with a message containing: "'person' does not exist"
+    Then connection import database(newtypedb) from schema file(untypedb.tql), data file(typedb.typedb); fails with a message containing: "'name' does not exist"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(typedb.typedb); fails with a message containing: "'name' does not exist"
+    Then connection import database(newtypedb) from schema file(notypedb.tql), data file(untypedb.typedb); fails with a message containing: "'person' does not exist"
     Then connection import database(newtypedb) from schema file(typedb.tql), data file(typedb.typedb)
     Then connection import database(newuntypedb) from schema file(untypedb.tql), data file(untypedb.typedb)
     Then connection import database(newnotypedb) from schema file(notypedb.tql), data file(notypedb.typedb)
