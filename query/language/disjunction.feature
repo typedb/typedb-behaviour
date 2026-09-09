@@ -212,3 +212,27 @@ Feature: TypeQL Disjunction
     # If we don't crash in the previous step, we're good.
     Then transaction closes
 
+
+  Scenario: Variables may be shared across (all) branches of a disjunction even if it's unused outside the disjunction
+    # based on typedb#7949
+    Given typeql write query
+      """
+      insert
+        $_ isa person, has age 10, has ref 0;
+        $_ isa person, has age 21, has ref 1;
+        $_ isa person, has age 34, has ref 2;
+      """
+    Given transaction commits
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        not {
+          { $p has age $a;  $a >= 10; } or
+          { $p has age $a;  $a >= 10; };
+        };
+      """
+    # If we don't crash in the previous step, we're good.
+    Then transaction closes
+
