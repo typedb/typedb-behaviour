@@ -527,7 +527,7 @@ Feature: TypeQL Query with Expressions
         $a;
       """
     Then uniquely identify answer concepts
-      | a                                 |
+      | a                                  |
       | value:duration:P1Y2M3DT16H5M6.789S |
 
 
@@ -590,7 +590,7 @@ Feature: TypeQL Query with Expressions
 
 
   Scenario: Test out of range results in datetime duration operator expressions
-      
+
     Given connection open read transaction for database: typedb
     Then typeql read query; fails
     """
@@ -637,7 +637,7 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | a                                               | b                                           |
       | value:datetime-tz:2027-03-30T16:05:06.789+01:00 | value:datetime-tz:2026-01-27T12:00:00+00:00 |
-                
+
 
   Scenario: Test operator definitions - string string
     Given connection open read transaction for database: typedb
@@ -973,26 +973,26 @@ Feature: TypeQL Query with Expressions
       | round    | decimal | -12.5dec        | integer     | -12        |
       | len      | string  | ""              | integer     | 0          |
       | len      | string  | "Hello, world!" | integer     | 13         |
-      | len      | string  | "こんにちは"    | integer     | 5          |
-      | len      | string  | "❤️‍🔥"               | integer     | 4          |
-      | len      | string  | "⭐"            | integer     | 1          |
+      | len      | string  | "こんにちは"         | integer     | 5          |
+      | len      | string  | "❤️‍🔥"         | integer     | 4          |
+      | len      | string  | "⭐"             | integer     | 1          |
 
 
   Scenario Outline: test intrinsic unary function <function> when applied to <type> produces correct result
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Built-in function '<function>' cannot be applied to arguments of type '<type>'."
+    Then typeql read query; fails with a message containing: "Built-in function '<namespaced>' cannot be applied to arguments of type '<type>'."
     """
       match
         let $a = <function>(<val>);
       """
     Examples:
-      | function | type    | val      |
-      | ceil     | integer | 0        |
-      | floor    | integer | 0        |
-      | round    | integer | 0        |
-      | len      | integer | 0        |
-      | len      | double  | 0.0      |
-      | len      | decimal | 0.0dec   |
+      | function | type    | val    | namespaced       |
+      | ceil     | integer | 0      | std::math::ceil  |
+      | floor    | integer | 0      | std::math::floor |
+      | round    | integer | 0      | std::math::round |
+      | len      | integer | 0      | std::string::len |
+      | len      | double  | 0.0    | std::string::len |
+      | len      | decimal | 0.0dec | std::string::len |
 
 
   Scenario: Test operators on variables
@@ -1415,27 +1415,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                |
-    | attr:name:"a"                    |
-    | attr:name:"aa"                   |
-    | attr:name:"aaa"                  |
-    | attr:name:"aaaa"                 |
-    | attr:name:"aaaaa"                |
-    | attr:name:"aaaaaa"               |
-    | attr:name:"aaaaaaa"              |
-    | attr:name:"aaaaaaaa"             |
-    | attr:name:"aaaaaaaaa"            |
-    | attr:name:"aaaaaaaaaa"           |
-    | attr:name:"aaaaaaaaaaa"          |
-    | attr:name:"aaaaaaaaaaaa"         |
-    | attr:name:"aaaaaaaaaaaaa"        |
-    | attr:name:"aaaaaaaaaaaaaa"       |
-    | attr:name:"aaaaaaaaaaaaaaa"      |
-    | attr:name:"aaaaaaaaaaaaaaaa"     |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+      | n                                |
+      | attr:name:"a"                    |
+      | attr:name:"aa"                   |
+      | attr:name:"aaa"                  |
+      | attr:name:"aaaa"                 |
+      | attr:name:"aaaaa"                |
+      | attr:name:"aaaaaa"               |
+      | attr:name:"aaaaaaa"              |
+      | attr:name:"aaaaaaaa"             |
+      | attr:name:"aaaaaaaaa"            |
+      | attr:name:"aaaaaaaaaa"           |
+      | attr:name:"aaaaaaaaaaa"          |
+      | attr:name:"aaaaaaaaaaaa"         |
+      | attr:name:"aaaaaaaaaaaaa"        |
+      | attr:name:"aaaaaaaaaaaaaa"       |
+      | attr:name:"aaaaaaaaaaaaaaa"      |
+      | attr:name:"aaaaaaaaaaaaaaaa"     |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
 
     When get answers of typeql read query
     """
@@ -1447,26 +1447,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                               | c                |
-    | attr:name:"a"                   | value:integer:19 |
-    | attr:name:"aa"                  | value:integer:18 |
-    | attr:name:"aaa"                 | value:integer:17 |
-    | attr:name:"aaaa"                | value:integer:16 |
-    | attr:name:"aaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                               | c                |
+      | attr:name:"a"                   | value:integer:19 |
+      | attr:name:"aa"                  | value:integer:18 |
+      | attr:name:"aaa"                 | value:integer:17 |
+      | attr:name:"aaaa"                | value:integer:16 |
+      | attr:name:"aaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -1478,27 +1478,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:20 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:18 |
-    | attr:name:"aaaa"                 | value:integer:17 |
-    | attr:name:"aaaaa"                | value:integer:16 |
-    | attr:name:"aaaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:20 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:18 |
+      | attr:name:"aaaa"                 | value:integer:17 |
+      | attr:name:"aaaaa"                | value:integer:16 |
+      | attr:name:"aaaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -1510,26 +1510,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"aa"                   | value:integer:1  |
-    | attr:name:"aaa"                  | value:integer:2  |
-    | attr:name:"aaaa"                 | value:integer:3  |
-    | attr:name:"aaaaa"                | value:integer:4  |
-    | attr:name:"aaaaaa"               | value:integer:5  |
-    | attr:name:"aaaaaaa"              | value:integer:6  |
-    | attr:name:"aaaaaaaa"             | value:integer:7  |
-    | attr:name:"aaaaaaaaa"            | value:integer:8  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"aa"                   | value:integer:1  |
+      | attr:name:"aaa"                  | value:integer:2  |
+      | attr:name:"aaaa"                 | value:integer:3  |
+      | attr:name:"aaaaa"                | value:integer:4  |
+      | attr:name:"aaaaaa"               | value:integer:5  |
+      | attr:name:"aaaaaaa"              | value:integer:6  |
+      | attr:name:"aaaaaaaa"             | value:integer:7  |
+      | attr:name:"aaaaaaaaa"            | value:integer:8  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -1541,27 +1541,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:1  |
-    | attr:name:"aa"                   | value:integer:2  |
-    | attr:name:"aaa"                  | value:integer:3  |
-    | attr:name:"aaaa"                 | value:integer:4  |
-    | attr:name:"aaaaa"                | value:integer:5  |
-    | attr:name:"aaaaaa"               | value:integer:6  |
-    | attr:name:"aaaaaaa"              | value:integer:7  |
-    | attr:name:"aaaaaaaa"             | value:integer:8  |
-    | attr:name:"aaaaaaaaa"            | value:integer:9  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:1  |
+      | attr:name:"aa"                   | value:integer:2  |
+      | attr:name:"aaa"                  | value:integer:3  |
+      | attr:name:"aaaa"                 | value:integer:4  |
+      | attr:name:"aaaaa"                | value:integer:5  |
+      | attr:name:"aaaaaa"               | value:integer:6  |
+      | attr:name:"aaaaaaa"              | value:integer:7  |
+      | attr:name:"aaaaaaaa"             | value:integer:8  |
+      | attr:name:"aaaaaaaaa"            | value:integer:9  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
 
     When get answers of typeql read query
     """
@@ -1573,27 +1573,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:19 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:19 |
-    | attr:name:"aaaa"                 | value:integer:19 |
-    | attr:name:"aaaaa"                | value:integer:19 |
-    | attr:name:"aaaaaa"               | value:integer:19 |
-    | attr:name:"aaaaaaa"              | value:integer:19 |
-    | attr:name:"aaaaaaaa"             | value:integer:19 |
-    | attr:name:"aaaaaaaaa"            | value:integer:19 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:19 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:19 |
+      | attr:name:"aaaa"                 | value:integer:19 |
+      | attr:name:"aaaaa"                | value:integer:19 |
+      | attr:name:"aaaaaa"               | value:integer:19 |
+      | attr:name:"aaaaaaa"              | value:integer:19 |
+      | attr:name:"aaaaaaaa"             | value:integer:19 |
+      | attr:name:"aaaaaaaaa"            | value:integer:19 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -1605,27 +1605,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c               |
-    | attr:name:"a"                    | value:integer:1 |
-    | attr:name:"aa"                   | value:integer:1 |
-    | attr:name:"aaa"                  | value:integer:1 |
-    | attr:name:"aaaa"                 | value:integer:1 |
-    | attr:name:"aaaaa"                | value:integer:1 |
-    | attr:name:"aaaaaa"               | value:integer:1 |
-    | attr:name:"aaaaaaa"              | value:integer:1 |
-    | attr:name:"aaaaaaaa"             | value:integer:1 |
-    | attr:name:"aaaaaaaaa"            | value:integer:1 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+      | n                                | c               |
+      | attr:name:"a"                    | value:integer:1 |
+      | attr:name:"aa"                   | value:integer:1 |
+      | attr:name:"aaa"                  | value:integer:1 |
+      | attr:name:"aaaa"                 | value:integer:1 |
+      | attr:name:"aaaaa"                | value:integer:1 |
+      | attr:name:"aaaaaa"               | value:integer:1 |
+      | attr:name:"aaaaaaa"              | value:integer:1 |
+      | attr:name:"aaaaaaaa"             | value:integer:1 |
+      | attr:name:"aaaaaaaaa"            | value:integer:1 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
 
 
   Scenario: String attributes are retrieved correctly when compared with other attributes across lengths
@@ -1664,27 +1664,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                |
-    | attr:name:"a"                    |
-    | attr:name:"aa"                   |
-    | attr:name:"aaa"                  |
-    | attr:name:"aaaa"                 |
-    | attr:name:"aaaaa"                |
-    | attr:name:"aaaaaa"               |
-    | attr:name:"aaaaaaa"              |
-    | attr:name:"aaaaaaaa"             |
-    | attr:name:"aaaaaaaaa"            |
-    | attr:name:"aaaaaaaaaa"           |
-    | attr:name:"aaaaaaaaaaa"          |
-    | attr:name:"aaaaaaaaaaaa"         |
-    | attr:name:"aaaaaaaaaaaaa"        |
-    | attr:name:"aaaaaaaaaaaaaa"       |
-    | attr:name:"aaaaaaaaaaaaaaa"      |
-    | attr:name:"aaaaaaaaaaaaaaaa"     |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+      | n                                |
+      | attr:name:"a"                    |
+      | attr:name:"aa"                   |
+      | attr:name:"aaa"                  |
+      | attr:name:"aaaa"                 |
+      | attr:name:"aaaaa"                |
+      | attr:name:"aaaaaa"               |
+      | attr:name:"aaaaaaa"              |
+      | attr:name:"aaaaaaaa"             |
+      | attr:name:"aaaaaaaaa"            |
+      | attr:name:"aaaaaaaaaa"           |
+      | attr:name:"aaaaaaaaaaa"          |
+      | attr:name:"aaaaaaaaaaaa"         |
+      | attr:name:"aaaaaaaaaaaaa"        |
+      | attr:name:"aaaaaaaaaaaaaa"       |
+      | attr:name:"aaaaaaaaaaaaaaa"      |
+      | attr:name:"aaaaaaaaaaaaaaaa"     |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
 
     When get answers of typeql read query
     """
@@ -1696,26 +1696,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                               | c                |
-    | attr:name:"a"                   | value:integer:19 |
-    | attr:name:"aa"                  | value:integer:18 |
-    | attr:name:"aaa"                 | value:integer:17 |
-    | attr:name:"aaaa"                | value:integer:16 |
-    | attr:name:"aaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                               | c                |
+      | attr:name:"a"                   | value:integer:19 |
+      | attr:name:"aa"                  | value:integer:18 |
+      | attr:name:"aaa"                 | value:integer:17 |
+      | attr:name:"aaaa"                | value:integer:16 |
+      | attr:name:"aaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -1727,27 +1727,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:20 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:18 |
-    | attr:name:"aaaa"                 | value:integer:17 |
-    | attr:name:"aaaaa"                | value:integer:16 |
-    | attr:name:"aaaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:20 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:18 |
+      | attr:name:"aaaa"                 | value:integer:17 |
+      | attr:name:"aaaaa"                | value:integer:16 |
+      | attr:name:"aaaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -1759,26 +1759,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"aa"                   | value:integer:1  |
-    | attr:name:"aaa"                  | value:integer:2  |
-    | attr:name:"aaaa"                 | value:integer:3  |
-    | attr:name:"aaaaa"                | value:integer:4  |
-    | attr:name:"aaaaaa"               | value:integer:5  |
-    | attr:name:"aaaaaaa"              | value:integer:6  |
-    | attr:name:"aaaaaaaa"             | value:integer:7  |
-    | attr:name:"aaaaaaaaa"            | value:integer:8  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"aa"                   | value:integer:1  |
+      | attr:name:"aaa"                  | value:integer:2  |
+      | attr:name:"aaaa"                 | value:integer:3  |
+      | attr:name:"aaaaa"                | value:integer:4  |
+      | attr:name:"aaaaaa"               | value:integer:5  |
+      | attr:name:"aaaaaaa"              | value:integer:6  |
+      | attr:name:"aaaaaaaa"             | value:integer:7  |
+      | attr:name:"aaaaaaaaa"            | value:integer:8  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -1790,27 +1790,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:1  |
-    | attr:name:"aa"                   | value:integer:2  |
-    | attr:name:"aaa"                  | value:integer:3  |
-    | attr:name:"aaaa"                 | value:integer:4  |
-    | attr:name:"aaaaa"                | value:integer:5  |
-    | attr:name:"aaaaaa"               | value:integer:6  |
-    | attr:name:"aaaaaaa"              | value:integer:7  |
-    | attr:name:"aaaaaaaa"             | value:integer:8  |
-    | attr:name:"aaaaaaaaa"            | value:integer:9  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:1  |
+      | attr:name:"aa"                   | value:integer:2  |
+      | attr:name:"aaa"                  | value:integer:3  |
+      | attr:name:"aaaa"                 | value:integer:4  |
+      | attr:name:"aaaaa"                | value:integer:5  |
+      | attr:name:"aaaaaa"               | value:integer:6  |
+      | attr:name:"aaaaaaa"              | value:integer:7  |
+      | attr:name:"aaaaaaaa"             | value:integer:8  |
+      | attr:name:"aaaaaaaaa"            | value:integer:9  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
 
     When get answers of typeql read query
     """
@@ -1822,27 +1822,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:19 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:19 |
-    | attr:name:"aaaa"                 | value:integer:19 |
-    | attr:name:"aaaaa"                | value:integer:19 |
-    | attr:name:"aaaaaa"               | value:integer:19 |
-    | attr:name:"aaaaaaa"              | value:integer:19 |
-    | attr:name:"aaaaaaaa"             | value:integer:19 |
-    | attr:name:"aaaaaaaaa"            | value:integer:19 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:19 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:19 |
+      | attr:name:"aaaa"                 | value:integer:19 |
+      | attr:name:"aaaaa"                | value:integer:19 |
+      | attr:name:"aaaaaa"               | value:integer:19 |
+      | attr:name:"aaaaaaa"              | value:integer:19 |
+      | attr:name:"aaaaaaaa"             | value:integer:19 |
+      | attr:name:"aaaaaaaaa"            | value:integer:19 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -1854,27 +1854,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c               |
-    | attr:name:"a"                    | value:integer:1 |
-    | attr:name:"aa"                   | value:integer:1 |
-    | attr:name:"aaa"                  | value:integer:1 |
-    | attr:name:"aaaa"                 | value:integer:1 |
-    | attr:name:"aaaaa"                | value:integer:1 |
-    | attr:name:"aaaaaa"               | value:integer:1 |
-    | attr:name:"aaaaaaa"              | value:integer:1 |
-    | attr:name:"aaaaaaaa"             | value:integer:1 |
-    | attr:name:"aaaaaaaaa"            | value:integer:1 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+      | n                                | c               |
+      | attr:name:"a"                    | value:integer:1 |
+      | attr:name:"aa"                   | value:integer:1 |
+      | attr:name:"aaa"                  | value:integer:1 |
+      | attr:name:"aaaa"                 | value:integer:1 |
+      | attr:name:"aaaaa"                | value:integer:1 |
+      | attr:name:"aaaaaa"               | value:integer:1 |
+      | attr:name:"aaaaaaa"              | value:integer:1 |
+      | attr:name:"aaaaaaaa"             | value:integer:1 |
+      | attr:name:"aaaaaaaaa"            | value:integer:1 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
 
 
   Scenario: Owned string attributes are retrieved correctly when compared with raw values across lengths
@@ -1913,27 +1913,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                |
-    | attr:name:"a"                    |
-    | attr:name:"aa"                   |
-    | attr:name:"aaa"                  |
-    | attr:name:"aaaa"                 |
-    | attr:name:"aaaaa"                |
-    | attr:name:"aaaaaa"               |
-    | attr:name:"aaaaaaa"              |
-    | attr:name:"aaaaaaaa"             |
-    | attr:name:"aaaaaaaaa"            |
-    | attr:name:"aaaaaaaaaa"           |
-    | attr:name:"aaaaaaaaaaa"          |
-    | attr:name:"aaaaaaaaaaaa"         |
-    | attr:name:"aaaaaaaaaaaaa"        |
-    | attr:name:"aaaaaaaaaaaaaa"       |
-    | attr:name:"aaaaaaaaaaaaaaa"      |
-    | attr:name:"aaaaaaaaaaaaaaaa"     |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+      | n                                |
+      | attr:name:"a"                    |
+      | attr:name:"aa"                   |
+      | attr:name:"aaa"                  |
+      | attr:name:"aaaa"                 |
+      | attr:name:"aaaaa"                |
+      | attr:name:"aaaaaa"               |
+      | attr:name:"aaaaaaa"              |
+      | attr:name:"aaaaaaaa"             |
+      | attr:name:"aaaaaaaaa"            |
+      | attr:name:"aaaaaaaaaa"           |
+      | attr:name:"aaaaaaaaaaa"          |
+      | attr:name:"aaaaaaaaaaaa"         |
+      | attr:name:"aaaaaaaaaaaaa"        |
+      | attr:name:"aaaaaaaaaaaaaa"       |
+      | attr:name:"aaaaaaaaaaaaaaa"      |
+      | attr:name:"aaaaaaaaaaaaaaaa"     |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
 
     When get answers of typeql read query
     """
@@ -1945,26 +1945,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                               | c                |
-    | attr:name:"a"                   | value:integer:19 |
-    | attr:name:"aa"                  | value:integer:18 |
-    | attr:name:"aaa"                 | value:integer:17 |
-    | attr:name:"aaaa"                | value:integer:16 |
-    | attr:name:"aaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                               | c                |
+      | attr:name:"a"                   | value:integer:19 |
+      | attr:name:"aa"                  | value:integer:18 |
+      | attr:name:"aaa"                 | value:integer:17 |
+      | attr:name:"aaaa"                | value:integer:16 |
+      | attr:name:"aaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -1976,27 +1976,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:20 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:18 |
-    | attr:name:"aaaa"                 | value:integer:17 |
-    | attr:name:"aaaaa"                | value:integer:16 |
-    | attr:name:"aaaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:20 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:18 |
+      | attr:name:"aaaa"                 | value:integer:17 |
+      | attr:name:"aaaaa"                | value:integer:16 |
+      | attr:name:"aaaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -2008,26 +2008,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"aa"                   | value:integer:1  |
-    | attr:name:"aaa"                  | value:integer:2  |
-    | attr:name:"aaaa"                 | value:integer:3  |
-    | attr:name:"aaaaa"                | value:integer:4  |
-    | attr:name:"aaaaaa"               | value:integer:5  |
-    | attr:name:"aaaaaaa"              | value:integer:6  |
-    | attr:name:"aaaaaaaa"             | value:integer:7  |
-    | attr:name:"aaaaaaaaa"            | value:integer:8  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"aa"                   | value:integer:1  |
+      | attr:name:"aaa"                  | value:integer:2  |
+      | attr:name:"aaaa"                 | value:integer:3  |
+      | attr:name:"aaaaa"                | value:integer:4  |
+      | attr:name:"aaaaaa"               | value:integer:5  |
+      | attr:name:"aaaaaaa"              | value:integer:6  |
+      | attr:name:"aaaaaaaa"             | value:integer:7  |
+      | attr:name:"aaaaaaaaa"            | value:integer:8  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -2039,27 +2039,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:1  |
-    | attr:name:"aa"                   | value:integer:2  |
-    | attr:name:"aaa"                  | value:integer:3  |
-    | attr:name:"aaaa"                 | value:integer:4  |
-    | attr:name:"aaaaa"                | value:integer:5  |
-    | attr:name:"aaaaaa"               | value:integer:6  |
-    | attr:name:"aaaaaaa"              | value:integer:7  |
-    | attr:name:"aaaaaaaa"             | value:integer:8  |
-    | attr:name:"aaaaaaaaa"            | value:integer:9  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:1  |
+      | attr:name:"aa"                   | value:integer:2  |
+      | attr:name:"aaa"                  | value:integer:3  |
+      | attr:name:"aaaa"                 | value:integer:4  |
+      | attr:name:"aaaaa"                | value:integer:5  |
+      | attr:name:"aaaaaa"               | value:integer:6  |
+      | attr:name:"aaaaaaa"              | value:integer:7  |
+      | attr:name:"aaaaaaaa"             | value:integer:8  |
+      | attr:name:"aaaaaaaaa"            | value:integer:9  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
 
     When get answers of typeql read query
     """
@@ -2071,27 +2071,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:19 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:19 |
-    | attr:name:"aaaa"                 | value:integer:19 |
-    | attr:name:"aaaaa"                | value:integer:19 |
-    | attr:name:"aaaaaa"               | value:integer:19 |
-    | attr:name:"aaaaaaa"              | value:integer:19 |
-    | attr:name:"aaaaaaaa"             | value:integer:19 |
-    | attr:name:"aaaaaaaaa"            | value:integer:19 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:19 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:19 |
+      | attr:name:"aaaa"                 | value:integer:19 |
+      | attr:name:"aaaaa"                | value:integer:19 |
+      | attr:name:"aaaaaa"               | value:integer:19 |
+      | attr:name:"aaaaaaa"              | value:integer:19 |
+      | attr:name:"aaaaaaaa"             | value:integer:19 |
+      | attr:name:"aaaaaaaaa"            | value:integer:19 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -2103,27 +2103,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c               |
-    | attr:name:"a"                    | value:integer:1 |
-    | attr:name:"aa"                   | value:integer:1 |
-    | attr:name:"aaa"                  | value:integer:1 |
-    | attr:name:"aaaa"                 | value:integer:1 |
-    | attr:name:"aaaaa"                | value:integer:1 |
-    | attr:name:"aaaaaa"               | value:integer:1 |
-    | attr:name:"aaaaaaa"              | value:integer:1 |
-    | attr:name:"aaaaaaaa"             | value:integer:1 |
-    | attr:name:"aaaaaaaaa"            | value:integer:1 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+      | n                                | c               |
+      | attr:name:"a"                    | value:integer:1 |
+      | attr:name:"aa"                   | value:integer:1 |
+      | attr:name:"aaa"                  | value:integer:1 |
+      | attr:name:"aaaa"                 | value:integer:1 |
+      | attr:name:"aaaaa"                | value:integer:1 |
+      | attr:name:"aaaaaa"               | value:integer:1 |
+      | attr:name:"aaaaaaa"              | value:integer:1 |
+      | attr:name:"aaaaaaaa"             | value:integer:1 |
+      | attr:name:"aaaaaaaaa"            | value:integer:1 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
 
 
   Scenario: Owned string attributes are retrieved correctly when compared with other attributes across lengths
@@ -2162,27 +2162,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                |
-    | attr:name:"a"                    |
-    | attr:name:"aa"                   |
-    | attr:name:"aaa"                  |
-    | attr:name:"aaaa"                 |
-    | attr:name:"aaaaa"                |
-    | attr:name:"aaaaaa"               |
-    | attr:name:"aaaaaaa"              |
-    | attr:name:"aaaaaaaa"             |
-    | attr:name:"aaaaaaaaa"            |
-    | attr:name:"aaaaaaaaaa"           |
-    | attr:name:"aaaaaaaaaaa"          |
-    | attr:name:"aaaaaaaaaaaa"         |
-    | attr:name:"aaaaaaaaaaaaa"        |
-    | attr:name:"aaaaaaaaaaaaaa"       |
-    | attr:name:"aaaaaaaaaaaaaaa"      |
-    | attr:name:"aaaaaaaaaaaaaaaa"     |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
+      | n                                |
+      | attr:name:"a"                    |
+      | attr:name:"aa"                   |
+      | attr:name:"aaa"                  |
+      | attr:name:"aaaa"                 |
+      | attr:name:"aaaaa"                |
+      | attr:name:"aaaaaa"               |
+      | attr:name:"aaaaaaa"              |
+      | attr:name:"aaaaaaaa"             |
+      | attr:name:"aaaaaaaaa"            |
+      | attr:name:"aaaaaaaaaa"           |
+      | attr:name:"aaaaaaaaaaa"          |
+      | attr:name:"aaaaaaaaaaaa"         |
+      | attr:name:"aaaaaaaaaaaaa"        |
+      | attr:name:"aaaaaaaaaaaaaa"       |
+      | attr:name:"aaaaaaaaaaaaaaa"      |
+      | attr:name:"aaaaaaaaaaaaaaaa"     |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" |
 
     When get answers of typeql read query
     """
@@ -2194,26 +2194,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                               | c                |
-    | attr:name:"a"                   | value:integer:19 |
-    | attr:name:"aa"                  | value:integer:18 |
-    | attr:name:"aaa"                 | value:integer:17 |
-    | attr:name:"aaaa"                | value:integer:16 |
-    | attr:name:"aaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                               | c                |
+      | attr:name:"a"                   | value:integer:19 |
+      | attr:name:"aa"                  | value:integer:18 |
+      | attr:name:"aaa"                 | value:integer:17 |
+      | attr:name:"aaaa"                | value:integer:16 |
+      | attr:name:"aaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -2225,27 +2225,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:20 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:18 |
-    | attr:name:"aaaa"                 | value:integer:17 |
-    | attr:name:"aaaaa"                | value:integer:16 |
-    | attr:name:"aaaaaa"               | value:integer:15 |
-    | attr:name:"aaaaaaa"              | value:integer:14 |
-    | attr:name:"aaaaaaaa"             | value:integer:13 |
-    | attr:name:"aaaaaaaaa"            | value:integer:12 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:11 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:20 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:18 |
+      | attr:name:"aaaa"                 | value:integer:17 |
+      | attr:name:"aaaaa"                | value:integer:16 |
+      | attr:name:"aaaaaa"               | value:integer:15 |
+      | attr:name:"aaaaaaa"              | value:integer:14 |
+      | attr:name:"aaaaaaaa"             | value:integer:13 |
+      | attr:name:"aaaaaaaaa"            | value:integer:12 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:11 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:9  |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:8  |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:7  |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:6  |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:5  |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:4  |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:3  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:2  |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1  |
 
     When get answers of typeql read query
     """
@@ -2257,26 +2257,26 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 19
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"aa"                   | value:integer:1  |
-    | attr:name:"aaa"                  | value:integer:2  |
-    | attr:name:"aaaa"                 | value:integer:3  |
-    | attr:name:"aaaaa"                | value:integer:4  |
-    | attr:name:"aaaaaa"               | value:integer:5  |
-    | attr:name:"aaaaaaa"              | value:integer:6  |
-    | attr:name:"aaaaaaaa"             | value:integer:7  |
-    | attr:name:"aaaaaaaaa"            | value:integer:8  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:9  |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"aa"                   | value:integer:1  |
+      | attr:name:"aaa"                  | value:integer:2  |
+      | attr:name:"aaaa"                 | value:integer:3  |
+      | attr:name:"aaaaa"                | value:integer:4  |
+      | attr:name:"aaaaaa"               | value:integer:5  |
+      | attr:name:"aaaaaaa"              | value:integer:6  |
+      | attr:name:"aaaaaaaa"             | value:integer:7  |
+      | attr:name:"aaaaaaaaa"            | value:integer:8  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:9  |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:10 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -2288,27 +2288,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:1  |
-    | attr:name:"aa"                   | value:integer:2  |
-    | attr:name:"aaa"                  | value:integer:3  |
-    | attr:name:"aaaa"                 | value:integer:4  |
-    | attr:name:"aaaaa"                | value:integer:5  |
-    | attr:name:"aaaaaa"               | value:integer:6  |
-    | attr:name:"aaaaaaa"              | value:integer:7  |
-    | attr:name:"aaaaaaaa"             | value:integer:8  |
-    | attr:name:"aaaaaaaaa"            | value:integer:9  |
-    | attr:name:"aaaaaaaaaa"           | value:integer:10 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:1  |
+      | attr:name:"aa"                   | value:integer:2  |
+      | attr:name:"aaa"                  | value:integer:3  |
+      | attr:name:"aaaa"                 | value:integer:4  |
+      | attr:name:"aaaaa"                | value:integer:5  |
+      | attr:name:"aaaaaa"               | value:integer:6  |
+      | attr:name:"aaaaaaa"              | value:integer:7  |
+      | attr:name:"aaaaaaaa"             | value:integer:8  |
+      | attr:name:"aaaaaaaaa"            | value:integer:9  |
+      | attr:name:"aaaaaaaaaa"           | value:integer:10 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:11 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:12 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:13 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:14 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:15 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:16 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:17 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:18 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:20 |
 
     When get answers of typeql read query
     """
@@ -2320,27 +2320,27 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c                |
-    | attr:name:"a"                    | value:integer:19 |
-    | attr:name:"aa"                   | value:integer:19 |
-    | attr:name:"aaa"                  | value:integer:19 |
-    | attr:name:"aaaa"                 | value:integer:19 |
-    | attr:name:"aaaaa"                | value:integer:19 |
-    | attr:name:"aaaaaa"               | value:integer:19 |
-    | attr:name:"aaaaaaa"              | value:integer:19 |
-    | attr:name:"aaaaaaaa"             | value:integer:19 |
-    | attr:name:"aaaaaaaaa"            | value:integer:19 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:19 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
+      | n                                | c                |
+      | attr:name:"a"                    | value:integer:19 |
+      | attr:name:"aa"                   | value:integer:19 |
+      | attr:name:"aaa"                  | value:integer:19 |
+      | attr:name:"aaaa"                 | value:integer:19 |
+      | attr:name:"aaaaa"                | value:integer:19 |
+      | attr:name:"aaaaaa"               | value:integer:19 |
+      | attr:name:"aaaaaaa"              | value:integer:19 |
+      | attr:name:"aaaaaaaa"             | value:integer:19 |
+      | attr:name:"aaaaaaaaa"            | value:integer:19 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:19 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:19 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:19 |
 
     When get answers of typeql read query
     """
@@ -2352,24 +2352,63 @@ Feature: TypeQL Query with Expressions
     """
     Then answer size is: 20
     Then uniquely identify answer concepts
-    | n                                | c               |
-    | attr:name:"a"                    | value:integer:1 |
-    | attr:name:"aa"                   | value:integer:1 |
-    | attr:name:"aaa"                  | value:integer:1 |
-    | attr:name:"aaaa"                 | value:integer:1 |
-    | attr:name:"aaaaa"                | value:integer:1 |
-    | attr:name:"aaaaaa"               | value:integer:1 |
-    | attr:name:"aaaaaaa"              | value:integer:1 |
-    | attr:name:"aaaaaaaa"             | value:integer:1 |
-    | attr:name:"aaaaaaaaa"            | value:integer:1 |
-    | attr:name:"aaaaaaaaaa"           | value:integer:1 |
-    | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
-    | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+      | n                                | c               |
+      | attr:name:"a"                    | value:integer:1 |
+      | attr:name:"aa"                   | value:integer:1 |
+      | attr:name:"aaa"                  | value:integer:1 |
+      | attr:name:"aaaa"                 | value:integer:1 |
+      | attr:name:"aaaaa"                | value:integer:1 |
+      | attr:name:"aaaaaa"               | value:integer:1 |
+      | attr:name:"aaaaaaa"              | value:integer:1 |
+      | attr:name:"aaaaaaaa"             | value:integer:1 |
+      | attr:name:"aaaaaaaaa"            | value:integer:1 |
+      | attr:name:"aaaaaaaaaa"           | value:integer:1 |
+      | attr:name:"aaaaaaaaaaa"          | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaa"         | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaa"        | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaa"       | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaa"      | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaa"     | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaa"    | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaa"   | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaa"  | value:integer:1 |
+      | attr:name:"aaaaaaaaaaaaaaaaaaaa" | value:integer:1 |
+
+
+  ###############
+  # NAMESPACING #
+  ###############
+  Scenario Outline: Test unary functions with namespacing
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match let $result = <function>(<argument>);
+      """
+    Then uniquely identify answer concepts
+      | result                       |
+      | value:<result_type>:<result> |
+
+    Examples:
+      | function         | argument | result_type | result |
+      | std::math::abs   | -1/2     | double      | 0.5    |
+      | std::math::floor | 3/2      | integer     | 1      |
+      | std::math::ceil  | 3/2      | integer     | 2      |
+      | std::math::round | -11.5    | integer     | -12    |
+      | std::math::log10 | 1000     | double      | 3.0    |
+      | std::string::len | "12345"  | integer     | 5      |
+
+
+  Scenario Outline: Test binary functions with namespacing
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+      match let $result = <function>(<a>, <b>);
+      """
+    Then uniquely identify answer concepts
+      | result                       |
+      | value:<result_type>:<result> |
+
+    Examples:
+      | function       | a       | b       | result_type | result  |
+      | std::math::min | 10.2dec | 13.5dec | decimal     | 10.2dec |
+      | std::math::max | 10.2dec | 13.5dec | decimal     | 13.5dec |
