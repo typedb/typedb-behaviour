@@ -19,6 +19,10 @@ Feature: TypeQL Variable binding tests
       attribute name, value string;
       attribute ref, value integer;
       attribute number @independent, value integer;
+
+      fun none_integer() -> integer?:
+      match try { let $none = 1; $none == 0; };
+      return first $none;
       """
     Given transaction commits
 
@@ -292,3 +296,183 @@ Feature: TypeQL Variable binding tests
     match
       let $x = ident($x);
     """
+
+  # Unwrapping optionals
+  Scenario: Referencing optional variables without an unwrap fails
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # Optional function returns
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # In same stage
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+
+  Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      try { let $y = $x; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      try { let $y = $x; };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      try { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      not { let $y = $x; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      not { let $y = $x; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      not { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When typeql read query; fails with a message containing: "The input optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      { let $y = $x; } or { let $z = 1; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      { let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      { isset $x; let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 1
+
+
+  # Not done, but would be cool:
+  @ignore
+  Scenario: Variables unwrapped in all branches of a disjunction are unwrapped in the parent
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; };
+    match
+      { let $y = $x +1; } or { let $y = $x +2; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      { isset $x; let $y = $x +1; } or { isset $x; let $y = $x +2; };
+      let $z = $x + $y;
+    """
+    Then answer size is: 2
+
+
+  @ignore
+  Scenario: Variables unwrapped in the root of a stage is unwrapped in downstream stages
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      try { let $x = 5; };
+    match
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    Then answer size is: 1
