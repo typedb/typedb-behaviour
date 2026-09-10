@@ -231,7 +231,7 @@ Feature: Analyzed query structure
         [Isa($p, person), Isa($q, person), Isa($n, name), Comparison($n, "John", ==)]
       ),
       Insert([Has($p, $n)]),
-      Delete([$q], [Has($p, $n)]),
+      Delete([$q], [Has($p, $n), DeleteConcepts([$q])]),
       Update([Has($p, $n)]),
       Put([Has($p, $n)]),
       Distinct(),
