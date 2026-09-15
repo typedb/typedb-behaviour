@@ -2446,9 +2446,9 @@ Feature: TypeQL Query with Expressions
       let $z? = $y;
     """
     Then uniquely identify answer concepts
-      | x               | y               | `               |
+      | x               | y               | z               |
       | value:integer:5 | value:integer:5 | value:integer:5 |
-      | None            | None            | None            |
+      | none            | none            | none            |
 
 
   Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
@@ -2478,7 +2478,7 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | x               | y               |
       | value:integer:5 | value:integer:6 |
-      | None            | None            |
+      | none            | none            |
 
     # Nested expression
     When get answers of typeql read query
@@ -2491,4 +2491,4 @@ Feature: TypeQL Query with Expressions
     Then uniquely identify answer concepts
       | x               | y                 |
       | value:integer:5 | value:integer:13  |
-      | None            | None              |
+      | none            | none              |
