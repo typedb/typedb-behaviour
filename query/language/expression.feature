@@ -2410,3 +2410,85 @@ Feature: TypeQL Query with Expressions
       | function       | a       | b       | result_type | result  |
       | std::math::min | 10.2dec | 13.5dec | decimal     | 10.2dec |
       | std::math::max | 10.2dec | 13.5dec | decimal     | 13.5dec |
+
+
+  ###############
+  # OPTIONALITY #
+  ###############
+
+  Scenario: Expressions may return optional values. Sub expressions can short-circuited the expression and return None using '?'
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The variable 'y' is assigned an optional value but not marked with a '?'"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x;
+    match
+      let $z = $y;
+    """
+    When typeql read query; fails with a message containing: "The variable 'z' is assigned an optional value but not marked with a '?'"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y? = $x;
+    match
+      let $z = $y;
+    """
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y? = $x;
+    match
+      let $z? = $y;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               | `               |
+      | value:integer:5 | value:integer:5 | value:integer:5 |
+      | None            | None            | None            |
+
+
+  Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The expression 'Variable(x)' returns an optional value which may be empty. Use '?' to short-circuit and assign an empty result"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x + 1;
+    """
+    Then typeql read query; fails with a message containing: "The variable 'y' is assigned an optional value but not marked with a '?'"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x? + 1;
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y? = $x? + 1;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               |
+      | value:integer:5 | value:integer:6 |
+      | None            | None            |
+
+    # Nested expression
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y? = ($x? * 2) + 3;
+    """
+    Then uniquely identify answer concepts
+      | x               | y                 |
+      | value:integer:5 | value:integer:13  |
+      | None            | None              |
