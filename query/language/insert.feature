@@ -2783,7 +2783,7 @@ Parker";
     match
       friendship ($p, $q);
       $p isa person; try { $p has age $age; };
-    insert if { isset $age; } { $q has $age; };
+    insert if { isset $age; } then { $q has $age; };
     """
     Then uniquely identify answer concepts
       | p             | q             |
@@ -2811,7 +2811,7 @@ Parker";
       $p isa person;
       try { $q isa person, has email $_; not { $q is $p; }; };
     insert
-      if { isset $q; } { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
+      if { isset $q; } then { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
     """
     Then uniquely identify answer concepts
       | p         | q         | f         |
@@ -2840,7 +2840,7 @@ Parker";
       $p isa person;
       try { $p has age $age; };
       try { $p has name $name; };
-    insert if { isset $age, $name; } { $q isa person, has ref 0; $q has $age, has $name; };
+    insert if { isset $age, $name; } then { $q isa person, has ref 0; $q has $age, has $name; };
     """
     Then uniquely identify answer concepts
       | p         | q         | age         | name           |
@@ -2912,7 +2912,7 @@ Parker";
     """
     match $p isa person; try { $p has age $age; };
     insert
-      if { isset $age; } {
+      if { isset $age; } then {
         $p has name "Sam";
       };
     """
@@ -2923,10 +2923,10 @@ Parker";
     """
     match $p isa person, has age $age;
     insert
-      if { $age < 35; } {
+      if { $age < 35; } then {
         $p has name "Little Sam";
       };
-      if { $age >= 35; } {
+      if { $age >= 35; } then {
         $p has name "Big Sam";
       };
     """
@@ -2936,10 +2936,10 @@ Parker";
     """
     match $p has ref $_;
     insert
-      if { $p isa person; } {
+      if { $p isa person; } then {
         $p has name "Person Sam";
       };
-      if { $p isa company; } {
+      if { $p isa company; } then {
         $p has name "Company Sam";
       };
     """

@@ -390,7 +390,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     insert
-      if { isset $x; } {
+      if { isset $x; } then {
         $x has name "Steve";
       };
     """
@@ -411,7 +411,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     put
-      if { isset $x; } {
+      if { isset $x; } then {
         $x has name "Steve";
       };
     """
@@ -424,7 +424,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     update
-      if { isset $x; } {
+      if { isset $x; } then {
         $x has ref 54321;
       };
     """
@@ -434,7 +434,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     update
-      if { isset $x; } {
+      if { isset $x; } then {
         $x has ref 54321;
       };
     """
@@ -455,7 +455,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     delete
-      if { isset $x; } {
+      if { isset $x; } then {
         $x;
       };
     """
