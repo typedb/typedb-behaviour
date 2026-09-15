@@ -162,6 +162,8 @@ Feature: Analyzed query structure
       """
       match
         entity $p1;
+        attribute $a1;
+        relation $r1;
         $p1 sub! person, owns $n1;
         $n1 label name;
         $n1 value string;
@@ -174,6 +176,8 @@ Feature: Analyzed query structure
     Pipeline([
       Match([
         Kind(entity, $p1),
+        Kind(attribute, $a1),
+        Kind(relation, $r1),
         SubExact($p1, person), Owns($p1, $n1),
         Label($n1, name),
         Value($n1, string),
