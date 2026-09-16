@@ -2096,6 +2096,64 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
+  Scenario: Players removed from one of their roles within schema transactions are still matched in their other roles
+    Given typeql schema query
+       """
+       define
+       entity crew-person sub person, plays crew:lead, plays crew:member, plays crew:coach;
+       relation crew relates lead, relates member, relates coach;
+       """
+    Given typeql write query
+       """
+       insert
+       $lead isa crew-person, has ref 1;
+       $other isa crew-person, has ref 2;
+       (lead: $lead, member: $other, coach: $other) isa crew;
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, coach: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+       """
+       match
+       $crew isa crew;
+       $other isa crew-person, has ref 2;
+       delete
+       links (member: $other) of $crew;
+       """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 0
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, coach: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $crew links (coach: $x, lead: $y); select $x, $y;
+       """
+    Then answer size is: 1
+
+
   Scenario Outline: Relations with players can be matched with small and big cardinalities before and after commits (<playsparentcard> <playschildcard> <relatesparentcard> <relateschildcard>)
     Given typeql schema query
        """
