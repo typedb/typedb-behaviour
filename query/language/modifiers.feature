@@ -970,3 +970,92 @@ Feature: TypeQL Query Modifiers
       | n               | r          |
       | attr:name:Klaus | attr:ref:0 |
 
+
+  Scenario: select can occur mid-pipeline
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $p isa person, has name "John", has age 10, has ref 0;
+      $q isa person, has name "Alice", has age 20, has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p isa person, has name $n, has age $a;
+      select $p;
+      match
+        $p has age $b;
+      """
+    Then uniquely identify answer concepts
+      | p         | b           |
+      | key:ref:0 | attr:age:10 |
+      | key:ref:1 | attr:age:20 |
+    When get answers of typeql read query
+      """
+      with fun names($p: person) -> { name }:
+        match $p has name $n;
+        match $p has age $a;
+        select $n;
+        match $n isa name;
+        sort $n;
+        return { $n };
+      match
+        $p isa person;
+        let $n in names($p);
+      """
+    Then uniquely identify answer concepts
+      | p         | n               |
+      | key:ref:0 | attr:name:John  |
+      | key:ref:1 | attr:name:Alice |
+    When get answers of typeql read query
+      """
+      with fun ages($x: person) -> { age }:
+        match $x has age $a;
+        return { $a };
+      match
+        $p isa person, has name $n, has age $a;
+      select $p;
+      match
+        $p isa person;
+        let $b in ages($p);
+      """
+    Then uniquely identify answer concepts
+      | p         | b           |
+      | key:ref:0 | attr:age:10 |
+      | key:ref:1 | attr:age:20 |
+    When get answers of typeql read query
+      """
+      with fun ages($x: person) -> { age }:
+        match $x has age $a;
+        return { $a };
+      match
+        $p isa person, has name $n, has age $a;
+      select $p;
+      match
+        let $b in ages($p);
+      """
+    Then uniquely identify answer concepts
+      | p         | b           |
+      | key:ref:0 | attr:age:10 |
+      | key:ref:1 | attr:age:20 |
+    When get answers of typeql read query
+      """
+      with fun names($p: person) -> { name }:
+        match $p has name $n;
+        match $p has age $a;
+        select $n;
+        sort $n;
+        return { $n };
+      match
+        $p isa person;
+        let $n in names($p);
+      """
+    Then uniquely identify answer concepts
+      | p         | n               |
+      | key:ref:0 | attr:name:John  |
+      | key:ref:1 | attr:name:Alice |
+
