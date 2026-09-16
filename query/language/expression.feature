@@ -2453,7 +2453,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "returns an optional value which may be empty. Use '?' to short-circuit and assign an empty result"
+    Then typeql read query; fails with a message containing: "The expression 'Variable(x)' returns an optional value which may be empty. Use '?' to short-circuit and assign an empty result"
     """
     match
       { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
