@@ -1934,6 +1934,226 @@ Feature: TypeQL Match Clause
     Then answer size is: 4
 
 
+  Scenario: Relations deleted within schema transactions with different cardinalities are not matched
+    Given typeql schema query
+       """
+       define
+       entity parent-person sub person, plays parentship:parent, plays parentship:child;
+       relation parentship relates parent, relates child;
+       """
+    Given typeql write query
+       """
+       insert
+       $p1 isa parent-person, has ref 1;
+       $p2 isa parent-person, has ref 2;
+       $p3 isa parent-person, has ref 3;
+       $p4 isa parent-person, has ref 4;
+       (parent: $p1, child: $p2) isa parentship;
+       (parent: $p3, child: $p4) isa parentship;
+       """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+       """
+       match
+       $p1 isa parent-person, has ref 1;
+       $parentship isa parentship, links (parent: $p1);
+       delete
+       $parentship;
+       """
+    When typeql schema query
+       """
+       define
+       parentship relates parent @card(0..10), relates child @card(0..10);
+       """
+    When get answers of typeql read query
+       """
+       match $parentship isa parentship;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $result links (parent: $x, child: $y); select $result;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa parent-person, has ref 1;
+       $result links (parent: $p1, child: $y);
+       select $result;
+       """
+    Then answer size is: 0
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $result links (parent: $x, child: $y); select $result;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa parent-person, has ref 1;
+       $result links (parent: $p1, child: $y);
+       select $result;
+       """
+    Then answer size is: 0
+    Given transaction closes
+
+    # Requalify the type: the index is rebuilt and must not resurrect the deleted relation
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+       """
+       redefine parentship relates parent @card(0..1);
+       """
+    When typeql schema query
+       """
+       redefine parentship relates child @card(0..1);
+       """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $parentship isa parentship;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $result links (parent: $x, child: $y); select $result;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $p1 isa parent-person, has ref 1;
+       $result links (parent: $p1, child: $y);
+       select $result;
+       """
+    Then answer size is: 0
+
+  Scenario: Players removed from relations within schema transactions are not matched
+    Given typeql schema query
+       """
+       define
+       entity team-person sub person, plays team:lead, plays team:member;
+       relation team relates lead, relates member @card(0..3);
+       """
+    Given typeql write query
+       """
+       insert
+       $lead isa team-person, has ref 1;
+       $member1 isa team-person, has ref 2;
+       $member2 isa team-person, has ref 3;
+       team (lead: $lead, member: $member1, member: $member2);
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $team links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 2
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+       """
+       match
+       $team isa team;
+       $member2 isa team-person, has ref 3;
+       delete
+       links (member: $member2) of $team;
+       """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $team links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match
+       $member2 isa team-person, has ref 3;
+       $result links (member: $member2);
+       select $result;
+       """
+    Then answer size is: 0
+    When get answers of typeql read query
+       """
+       match
+       $lead isa team-person, has ref 1;
+       $member2 isa team-person, has ref 3;
+       $result links (lead: $lead, member: $member2);
+       select $result;
+       """
+    Then answer size is: 0
+
+
+  Scenario: Players removed from one of their roles within schema transactions are still matched in their other roles
+    Given typeql schema query
+       """
+       define
+       entity crew-person sub person, plays crew:lead, plays crew:member, plays crew:coach;
+       relation crew relates lead, relates member, relates coach;
+       """
+    Given typeql write query
+       """
+       insert
+       $lead isa crew-person, has ref 1;
+       $other isa crew-person, has ref 2;
+       crew (lead: $lead, member: $other, coach: $other);
+       """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, coach: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+       """
+       match
+       $crew isa crew;
+       $other isa crew-person, has ref 2;
+       delete
+       links (member: $other) of $crew;
+       """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, member: $y); select $x, $y;
+       """
+    Then answer size is: 0
+    When get answers of typeql read query
+       """
+       match $crew links (lead: $x, coach: $y); select $x, $y;
+       """
+    Then answer size is: 1
+    When get answers of typeql read query
+       """
+       match $crew links (coach: $x, lead: $y); select $x, $y;
+       """
+    Then answer size is: 1
+
+
   Scenario Outline: Relations with players can be matched with small and big cardinalities before and after commits (<playsparentcard> <playschildcard> <relatesparentcard> <relateschildcard>)
     Given typeql schema query
        """

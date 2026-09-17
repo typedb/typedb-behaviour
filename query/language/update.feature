@@ -2496,6 +2496,49 @@ Feature: TypeQL Update Query
       | key:ref:0 | key:ref:1 |
 
 
+  Scenario: Update links queries maintain the relation index within schema transactions
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $p0 isa person, has ref 0;
+        $p1 isa person, has ref 1;
+        $p2 isa person, has ref 2;
+        $r isa parentship, has ref 0, links (parent: $p0, child: $p1);
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Given get answers of typeql read query
+      """
+      match $r links (parent: $x, child: $y); select $x, $y;
+      """
+    Given uniquely identify answer concepts
+      | x         | y         |
+      | key:ref:0 | key:ref:1 |
+    Given transaction closes
+
+    When connection open schema transaction for database: typedb
+    Then typeql write query
+      """
+      match
+        $r isa parentship;
+        $p2 isa person, has ref 2;
+      update
+        $r links (child: $p2);
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r links (parent: $x, child: $y); select $x, $y;
+      """
+    Then uniquely identify answer concepts
+      | x         | y         |
+      | key:ref:0 | key:ref:2 |
+
   Scenario: Update links queries on X rows are executed X times
     Given typeql write query
       """
