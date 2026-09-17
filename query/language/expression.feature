@@ -2485,3 +2485,26 @@ Feature: TypeQL Query with Expressions
       | x               | y                 |
       | value:integer:5 | value:integer:13  |
       | none            | none              |
+
+
+  Scenario: Short-circuits cannot be used where optional results are not allowed
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      $x? + 5 > 7;
+    """
+
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    """
+    with fun plus_one($x: integer) -> { integer }:
+    match let $y = $x + 1;
+    return { $y };
+
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y in plus_one($x? + 1);
+    """
