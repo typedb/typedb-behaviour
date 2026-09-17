@@ -2048,7 +2048,7 @@ Feature: TypeQL Match Clause
        $lead isa team-person, has ref 1;
        $member1 isa team-person, has ref 2;
        $member2 isa team-person, has ref 3;
-       (lead: $lead, member: $member1, member: $member2) isa team;
+       team (lead: $lead, member: $member1, member: $member2);
        """
     Given transaction commits
 
@@ -2108,7 +2108,7 @@ Feature: TypeQL Match Clause
        insert
        $lead isa crew-person, has ref 1;
        $other isa crew-person, has ref 2;
-       (lead: $lead, member: $other, coach: $other) isa crew;
+       crew (lead: $lead, member: $other, coach: $other);
        """
     Given transaction commits
 
