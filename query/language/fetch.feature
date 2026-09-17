@@ -986,7 +986,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch can handle optional objects
-    Then typeql read query; fails with a message containing: "The expression 'Variable(k)' returns an optional value which may be empty. Use '?' to short-circuit and assign an empty result"
+    Then typeql read query; fails with a message containing: "The optional variable 'k' was used in a context where it may fail the branch if unset. Please acknowledge the optionality."
       """
         match
           $p isa person;
