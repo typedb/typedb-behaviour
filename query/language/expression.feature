@@ -2418,7 +2418,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: Expressions may return optional values.
     Given connection open read transaction for database: typedb
-    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
     """
     match
       { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
@@ -2427,7 +2427,7 @@ Feature: TypeQL Query with Expressions
     match
       let $z = $y;
     """
-    When typeql read query; fails with a message containing: "The optional variable 'y' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    When typeql read query; fails with a message containing: "The optional variable 'y' was used in a context where optionals are not permitted"
     """
     match
       { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
@@ -2453,7 +2453,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
     """
     match
       { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
@@ -2489,7 +2489,7 @@ Feature: TypeQL Query with Expressions
 
   Scenario: Short-circuits cannot be used where optional results are not allowed
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where optionals are not permitted"
     """
     match
       { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
@@ -2497,7 +2497,7 @@ Feature: TypeQL Query with Expressions
       $x? + 5 > 7;
     """
 
-    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where it may fail the branch if unset. Please acknowledge the optionality"
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where optionals are not permitted"
     """
     with fun plus_one($x: integer) -> { integer }:
     match let $y = $x + 1;

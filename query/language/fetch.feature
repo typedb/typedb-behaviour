@@ -880,7 +880,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch can handle optional objects
-    Then typeql read query; fails with a message containing: "The optional variable 'e' was used unsafely in a fetch statement"
+    Then typeql read query; fails with a message containing: "Optional variable 'e' cannot be used in a fetch entry without '?'. Use '?' to propagate the empty optional into the fetch entry."
       """
         match
           $p isa person;
@@ -930,7 +930,7 @@ Feature: TypeQL Fetch Query
       }
       """
 
-    Then typeql read query; fails with a message containing: "The optional variable 'e' was used in a context where it may fail the branch if unset"
+    Then typeql read query; fails with a message containing: "The optional variable 'e' was used in a context where optionals are not permitted"
       """
         match
           $p isa person;
@@ -986,7 +986,7 @@ Feature: TypeQL Fetch Query
 
 
   Scenario: fetch can handle optional objects
-    Then typeql read query; fails with a message containing: "The optional variable 'k' was used in a context where it may fail the branch if unset. Please acknowledge the optionality."
+    Then typeql read query; fails with a message containing: "The optional variable 'k' was used in a context where optionals are not permitted"
       """
         match
           $p isa person;
