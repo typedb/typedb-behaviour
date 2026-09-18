@@ -430,9 +430,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     update
-      if { isset $x; } then {
         $x has ref 54321;
-      };
     """
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
