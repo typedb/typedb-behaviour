@@ -581,3 +581,26 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 2
 
+  # This would also be cool behaviour.
+  @ignore
+  Scenario: A variable that is optionally assigned in one branch and bound in the other, is optional in the parent
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { let $x? = none_integer(); } or { let $x = 5; };
+    match
+      let $y = $x + 1;
+    """
+
+    When get answers of typeql read query
+    """
+      match
+        { let $x? = none_integer(); } or { let $x = 5; };
+      match
+        isset $x;
+        let $y = $x + 1;
+      """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |
