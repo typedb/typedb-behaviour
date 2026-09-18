@@ -156,7 +156,6 @@ Feature: TypeQL Variable binding tests
       | value:integer:13 |
 
 
-
   Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a common ancestor conjunction
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -217,8 +216,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
     When get answers of typeql read query
     """
@@ -230,8 +229,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
 
     Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
@@ -380,7 +379,75 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 0
 
 
-  # TODO: Do we even want to allow this behaviour?
+  Scenario: Optionally assigned variables are unsafe to reference unless unwrapped
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      let $y = $x + 1;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not { isset $x; $x > -1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not {
+        {
+          not { isset $x; };
+        } or {
+          isset $x;
+          $x > -1;
+        };
+      };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x? = none_integer(); };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      try { let $y = $x + 1; };
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      try { isset $x; let $y = $x + 1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+
   Scenario: Referencing optional variables in a write stage outside an if fails
     Given connection open write transaction for database: typedb
     When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
