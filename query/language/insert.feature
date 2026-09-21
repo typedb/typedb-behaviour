@@ -2826,7 +2826,7 @@ Parker";
     Then answer size is: 1
 
 
-  Scenario: a try insert is only executed if all optional inputs are bound
+  Scenario: an if-insert is only executed if the conditions is satisfied
     Given typeql write query
     """
     insert
@@ -2872,12 +2872,54 @@ Parker";
     """
 
 
+  Scenario: Using an optional variable in the then, which wasn't checked in a parent is an error
+    Given typeql write query
+    """
+    insert
+      $john isa person, has ref 0, has name "John";
+    """
+    Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where optionals are not permitted"
+    """
+    match
+      $p isa person;
+      try { $p has name $name, has age $age; };
+    insert
+      $q isa person, has ref 1;
+      if { isset $name; } then {
+        $q has $name, has $age;
+      };
+    """
+
+
+
   Scenario: nested try blocks in delete are disallowed
     Given typeql write query; fails
     """
     match $p isa person; try { $p has name $name, has age $age; };
     insert $q isa person; try { $q has $name; try { $q has $age; }; };
     """
+
+
+  Scenario: nested if blocks in insert are disallowed
+    Given typeql write query
+    """
+    insert $p isa person, has ref 0, has name "John", has age 30;
+    """
+    When typeql write query
+    """
+    match
+      $p isa person;
+      try { $p has name $name, has age $age; };
+    insert
+      $q isa person, has ref 1;
+      if { isset $name; } then {
+        $q has $name;
+        if { isset $age; } then {
+          $q has $age;
+        };
+      };
+    """
+    Then transaction commits
 
 
   Scenario: Values of attributes inserted in parent blocks are available in try blocks
