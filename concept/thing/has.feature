@@ -783,6 +783,106 @@ Feature: Concept Ownership
     When connection open schema transaction for database: typedb
     Then attribute(attr1) set supertype: attr2; fails
 
+  Scenario Outline: Moving an attribute type validates existing instances against <annotation> owns declared above the new supertype
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: other
+    When attribute(other) set value type: string
+    When attribute(other) set annotation: @independent
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) get owns(attr0) set annotation: @card(0..)
+    When entity(ent) get owns(attr0) set annotation: <annotation>
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: other
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) create new instance with key(ref): ent0
+    When $ent1 = entity(ent) create new instance with key(ref): ent1
+    When $attr1 = attribute(attr1) put instance with value: "b"
+    When $other = attribute(other) put instance with value: <value>
+    When entity $ent0 set has: $attr1
+    When entity $ent1 set has: $other
+    When transaction commits
+    # under attr1, other's value falls under the constraint declared on attr0
+    When connection open schema transaction for database: typedb
+    Then attribute(other) set supertype: attr1; fails with a message containing: <message>
+    Examples:
+      | annotation        | value | message   |
+      | @unique           | "b"   | "@unique" |
+      | @regex("^[a-c]$") | "x"   | "@regex"  |
+      | @range("a".."c")  | "x"   | "@range"  |
+      | @values("a", "b") | "x"   | "@values" |
+
+  Scenario: Moving an attribute type validates existing instances against @card owns declared above the new supertype
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: other
+    When attribute(other) set value type: string
+    When attribute(other) set annotation: @independent
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0
+    When entity(ent) get owns(attr0) set annotation: @card(0..1)
+    When entity(ent) set owns: attr1
+    When entity(ent) set owns: other
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) create new instance with key(ref): ent0
+    When $attr1 = attribute(attr1) put instance with value: "b"
+    When $other = attribute(other) put instance with value: "x"
+    When entity $ent0 set has: $attr1
+    When entity $ent0 set has: $other
+    When transaction commits
+    # under attr1, ent0 owns two instances of attr0's hierarchy; cardinality is checked on commit
+    When connection open schema transaction for database: typedb
+    When attribute(other) set supertype: attr1
+    Then transaction commits; fails
+
+  Scenario: Moving an attribute type validates existing instances against @distinct owns declared above the new supertype
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: other
+    When attribute(other) set value type: string
+    When attribute(other) set annotation: @independent
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set owns: attr0[]
+    When entity(ent) get owns(attr0) set annotation: @distinct
+    When entity(ent) set owns: attr1[]
+    When entity(ent) set owns: other[]
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent) create new instance with key(ref): ent0
+    When $other = attribute(other) put instance with value: "x"
+    When entity $ent0 set has(other[]): [$other, $other]
+    When transaction commits
+    # under attr1, the repeated value falls under attr0's @distinct
+    When connection open schema transaction for database: typedb
+    Then attribute(other) set supertype: attr1; fails with a message containing: "@distinct"
+
   Scenario: @unique annotation is checked only within the inheritance line of the instance's type
     Given transaction closes
     Given connection open schema transaction for database: typedb
