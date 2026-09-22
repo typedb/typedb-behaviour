@@ -1324,6 +1324,17 @@ Feature: Data validation
     Given entity $ent0k set has: $attr0
     Given transaction commits
     Given connection open schema transaction for database: typedb
+    # ent1n's "attr0" would duplicate ent0k's under the @key
+    Then entity(ent1n) set supertype: ent0k; fails with a message containing: "key"
+    When transaction closes
+    When connection open write transaction for database: typedb
+    When $ent1n = entity(ent1n) get instance with key(ref): ent1n
+    When $attr0 = attribute(attr0) get instance with value: "attr0"
+    When $attr2 = attribute(attr0) put instance with value: "attr2"
+    When entity $ent1n unset has: $attr0
+    When entity $ent1n set has: $attr2
+    When transaction commits
+    When connection open schema transaction for database: typedb
     When entity(ent1n) set supertype: ent0k
     Then transaction commits; fails with a message containing: "@card"
 

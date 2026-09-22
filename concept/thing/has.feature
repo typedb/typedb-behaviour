@@ -883,6 +883,69 @@ Feature: Concept Ownership
     When connection open schema transaction for database: typedb
     Then attribute(other) set supertype: attr1; fails with a message containing: "@distinct"
 
+  Scenario: Moving an attribute type under a @unique owns validates existing instances across the owner type hierarchy
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create attribute type: attr1
+    When attribute(attr1) set supertype: attr0
+    When create attribute type: other
+    When attribute(other) set value type: string
+    When attribute(other) set annotation: @independent
+    When create entity type: ent0
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @unique
+    When entity(ent0) set owns: attr1
+    When entity(ent0) set owns: other
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent0 = entity(ent0) create new instance with key(ref): ent0
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $attr1 = attribute(attr1) put instance with value: "b"
+    When $other = attribute(other) put instance with value: "b"
+    When entity $ent0 set has: $attr1
+    When entity $ent1 set has: $other
+    When transaction commits
+    # under attr1, ent1's value duplicates ent0's within attr0's @unique, across the two owner types
+    When connection open schema transaction for database: typedb
+    Then attribute(other) set supertype: attr1; fails with a message containing: "@unique"
+
+  Scenario: Moving an entity type under an owner with @unique owns validates its instances against the existing hierarchy
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create attribute type: attr0
+    When attribute(attr0) set value type: string
+    When attribute(attr0) set annotation: @independent
+    When create entity type: ent0
+    When entity(ent0) set owns: ref
+    When entity(ent0) set owns: attr0
+    When entity(ent0) get owns(attr0) set annotation: @unique
+    When create entity type: ent1
+    When entity(ent1) set supertype: ent0
+    When create entity type: other
+    When entity(other) set owns: ref
+    When entity(other) set owns: attr0
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent1 = entity(ent1) create new instance with key(ref): ent1
+    When $other = entity(other) create new instance with key(ref): other
+    When $attr0 = attribute(attr0) put instance with value: "b"
+    When entity $ent1 set has: $attr0
+    When entity $other set has: $attr0
+    When transaction commits
+    # under ent0, other's value duplicates ent1's within ent0's @unique
+    When connection open schema transaction for database: typedb
+    Then entity(other) set supertype: ent0; fails with a message containing: "@unique"
+
   Scenario: @unique annotation is checked only within the inheritance line of the instance's type
     Given transaction closes
     Given connection open schema transaction for database: typedb
