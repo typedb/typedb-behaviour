@@ -2900,7 +2900,7 @@ Parker";
     """
 
 
-  Scenario: nested if blocks in insert are disallowed
+  Scenario: nested if blocks in insert are allowed
     Given typeql write query
     """
     insert $p isa person, has ref 0, has name "John", has age 30;
