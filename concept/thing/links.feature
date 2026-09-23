@@ -206,6 +206,37 @@ Feature: Concept Links
     When $rel0 = relation(rel0) create new instance with key(ref): rel0
     Then relation $rel0 set players for role(rol0[]): [$ent1, $ent2]; fails
 
+
+  Scenario: Specialising a role validates existing role players against @distinct relates declared above the new supertype
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    When create attribute type: ref
+    When attribute(ref) set value type: string
+    When create relation type: rel0
+    When relation(rel0) create role: rol0[]
+    When relation(rel0) get role(rol0) set annotation: @distinct
+    When create relation type: rel1
+    When relation(rel1) set supertype: rel0
+    When relation(rel1) create role: rol1[]
+    When relation(rel1) get role(rol1) set specialise: rol0
+    When create relation type: rel2
+    When relation(rel2) set supertype: rel1
+    When relation(rel2) create role: rol2[]
+    When relation(rel2) set owns: ref
+    When create entity type: ent
+    When entity(ent) set owns: ref
+    When entity(ent) set plays: rel2:rol2
+    When transaction commits
+    When connection open write transaction for database: typedb
+    When $ent = entity(ent) create new instance with key(ref): ent
+    When $rel = relation(rel2) create new instance with key(ref): rel
+    When relation $rel set players for role(rol2[]): [$ent, $ent]
+    When transaction commits
+    # under rol1, the repeated player falls under rol0's @distinct
+    When connection open schema transaction for database: typedb
+    Then relation(rel2) get role(rol2) set specialise: rol1; fails
+
+
   Scenario: Links can be unset before and after commits (unordered version)
     When $p = entity(person) create new instance with key(name): "p"
     When $v = relation(vacation) create new instance with key(date): 2025-02-12
