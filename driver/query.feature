@@ -1296,18 +1296,91 @@ Feature: Driver Query
     Then answer get row(0) get attribute(attr) get value is: <value>
 
     Examples:
-      | value-type  | value                              |
-      | boolean     | true                               |
-      | integer     | 12345090                           |
-      | double      | 2.01234567                         |
-      | decimal     | 1234567890.0001234567890dec        |
-      | date        | 2024-09-20                         |
-      | datetime    | 1999-02-26T12:15:05                |
-      | datetime-tz | 2024-09-20T16:40:05.000000001+0100 |
-      | duration    | P1Y10M7DT15H44M5.00394892S         |
-      | string      | "hello"                            |
-      | string      | "bob\"bobby"                       |
+      | value-type  | value                                       |
+      | boolean     | true                                        |
+      | boolean     | false                                       |
+      | integer     | 12345090                                    |
+      | integer     | -12345090                                   |
+      | integer     | 9223372036854775807                         |
+      | integer     | -9223372036854775808                        |
+      | double      | 2.01234567                                  |
+      | double      | -2.5                                        |
+      | decimal     | 1234567890.0001234567890dec                 |
+      | decimal     | -9.59dec                                    |
+      | decimal     | -0.01dec                                    |
+      | decimal     | -0.9999999999999999999dec                   |
+      | date        | 2024-09-20                                  |
+      | datetime    | 1999-02-26T12:15:05                         |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100          |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  |
+      | string      | "hello"                                     |
+      | string      | "bob\"bobby"                                |
+      | string      | ""                                          |
+      | string      | "café 中文 🚀"                                |
 
+
+  Scenario Outline: Documents render <value-type> value <value>
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute attr, value <value-type>; entity owner, owns attr @card(1);
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa owner, has attr <value>;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa owner, has attr $attr;
+      fetch { "attr": $attr };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {"attr": <rendered>}
+      """
+
+    Examples:
+      | value-type  | value                                       | rendered                                      |
+      | boolean     | true                                        | true                                          |
+      | boolean     | false                                       | false                                         |
+      | integer     | 12345090                                    | 12345090                                      |
+      | integer     | -12345090                                   | -12345090                                     |
+      | integer     | 9223372036854775807                         | 9223372036854775807                           |
+      | integer     | -9223372036854775808                        | -9223372036854775808                          |
+      | double      | 2.01234567                                  | 2.01234567                                    |
+      | double      | 1.0e-300                                    | 1e-300                                        |
+      | double      | 1.5e300                                     | 1.5e+300                                      |
+      | decimal     | 1234567890.0001234567890dec                 | "1234567890.000123456789dec"                  |
+      | decimal     | -9.59dec                                    | "-9.59dec"                                    |
+      | decimal     | -0.01dec                                    | "-0.01dec"                                    |
+      | decimal     | -0.5dec                                     | "-0.5dec"                                     |
+      | decimal     | -0.9999999999999999999dec                   | "-0.9999999999999999999dec"                   |
+      | decimal     | -0.0000000000000000001dec                   | "-0.0000000000000000001dec"                   |
+      | decimal     | -1234567890.0001234567890dec                | "-1234567890.000123456789dec"                 |
+      | date        | 2024-09-20                                  | "2024-09-20"                                  |
+      | date        | 2024-02-29                                  | "2024-02-29"                                  |
+      | datetime    | 1999-02-26T12:15:05                         | "1999-02-26T12:15:05.000000000"               |
+      | datetime    | 2024-01-01T00:00:00.5                       | "2024-01-01T00:00:00.500000000"               |
+      | datetime    | 1999-02-26T12:15:05.123456789               | "1999-02-26T12:15:05.123456789"               |
+      | datetime-tz | 2024-09-20T16:40:05.000000001+0100          | "2024-09-20T16:40:05.000000001+01:00"         |
+      | datetime-tz | 2024-09-20T16:40:05-0500                    | "2024-09-20T16:40:05.000000000-05:00"         |
+      | datetime-tz | 2024-09-20T16:40:05.000000001 Europe/London | "2024-09-20T16:40:05.000000001 Europe/London" |
+      | duration    | P1Y10M7DT15H44M5.00394892S                  | "P1Y10M7DT15H44M5.003948920S"                 |
+      | duration    | P13M                                        | "P1Y1M"                                       |
+      | duration    | PT0S                                        | "PT0S"                                        |
+      | duration    | P1M1D                                       | "P1M1D"                                       |
+      | string      | "hello"                                     | "hello"                                       |
+      | string      | "bob\"bobby"                                | "bob\"bobby"                                  |
+      | string      | ""                                          | ""                                            |
+      | string      | "café 中文 🚀"                                | "café 中文 🚀"                                  |
 
   ###########
   # ANALYZE #
