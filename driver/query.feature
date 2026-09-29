@@ -1301,6 +1301,7 @@ Feature: Driver Query
       | boolean     | false                                       |
       | integer     | 12345090                                    |
       | integer     | -12345090                                   |
+      | integer     | 9007199254740993                            |
       | integer     | 9223372036854775807                         |
       | integer     | -9223372036854775808                        |
       | double      | 2.01234567                                  |
@@ -1353,6 +1354,7 @@ Feature: Driver Query
       | boolean     | false                                       | false                                         |
       | integer     | 12345090                                    | 12345090                                      |
       | integer     | -12345090                                   | -12345090                                     |
+      | integer     | 9007199254740993                            | 9007199254740993                              |
       | integer     | 9223372036854775807                         | 9223372036854775807                           |
       | integer     | -9223372036854775808                        | -9223372036854775808                          |
       | double      | 2.01234567                                  | 2.01234567                                    |
