@@ -1306,6 +1306,9 @@ Feature: Driver Query
       | integer     | -9223372036854775808                        |
       | double      | 2.01234567                                  |
       | double      | -2.5                                        |
+      | double      | 2.0                                         |
+      | double      | 1.5e300                                     |
+      | double      | 1.0e-300                                    |
       | decimal     | 1234567890.0001234567890dec                 |
       | decimal     | -9.59dec                                    |
       | decimal     | -0.01dec                                    |
@@ -1358,6 +1361,8 @@ Feature: Driver Query
       | integer     | 9223372036854775807                         | 9223372036854775807                           |
       | integer     | -9223372036854775808                        | -9223372036854775808                          |
       | double      | 2.01234567                                  | 2.01234567                                    |
+      | double      | -2.5                                        | -2.5                                          |
+      | double      | 2.0                                         | 2.0                                           |
       | double      | 1.0e-300                                    | 1e-300                                        |
       | double      | 1.5e300                                     | 1.5e+300                                      |
       | decimal     | 1234567890.0001234567890dec                 | "1234567890.000123456789dec"                  |
