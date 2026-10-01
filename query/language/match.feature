@@ -4165,14 +4165,14 @@ Feature: TypeQL Match Clause
       | attr:name:Mr. Bean                 |
 
 
-  Scenario: 'contains' between attribute variables is only allowed for strings
+  Scenario: 'contains' between string attribute variables matches strings that contain the other
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert
-      $x isa person, has name "Alice Smith", has name "smith", has age 10, has age 1, has ref 0;
+      $x isa person, has name "Alice Smith", has name "smith", has ref 0;
       """
     Given transaction commits
 
@@ -4189,13 +4189,41 @@ Feature: TypeQL Match Clause
       | p         | a                       | b                 |
       | key:ref:0 | attr:name:"Alice Smith" | attr:name:"smith" |
 
-    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+
+  Scenario Outline: 'contains' between two '<type>' attribute variables is only allowed for strings
+    Given typeql schema query
+      """
+      define attribute <attr> @independent, value <type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa <attr> <value>;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query<contains-result>
       """
       match
-        $a isa age;
-        $b isa age;
+        $a isa <attr>;
+        $b isa <attr>;
         $a contains $b;
       """
+
+    Examples:
+      | attr              | type        | value                              | contains-result                                                                            |
+      | nickname          | string      | "alice"                            |                                                                                            |
+      | is-alive          | boolean     | true                               | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | shoe-size         | integer     | 21                                 | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | score             | double      | 123.456                            | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | balance           | decimal     | 123.456dec                         | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | birth-date        | date        | 1990-01-01                         | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | event-datetime    | datetime    | 1990-01-01T11:22:33.123456789      | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | global-date       | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | schedule-interval | duration    | P1Y2M3DT4H5M6.789S                 | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
 
 
   Scenario: 'like' matches strings that match the specified regex
