@@ -4165,6 +4165,39 @@ Feature: TypeQL Match Clause
       | attr:name:Mr. Bean                 |
 
 
+  Scenario: 'contains' between attribute variables is only allowed for strings
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Alice Smith", has name "smith", has age 10, has age 1, has ref 0;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p has name $a;
+        $p has name $b;
+        $a contains $b;
+        not { $a is $b; };
+      """
+    Then uniquely identify answer concepts
+      | p         | a                       | b                 |
+      | key:ref:0 | attr:name:"Alice Smith" | attr:name:"smith" |
+
+    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+      """
+      match
+        $a isa age;
+        $b isa age;
+        $a contains $b;
+      """
+
+
   Scenario: 'like' matches strings that match the specified regex
     Given typeql schema query
     """
@@ -5048,6 +5081,233 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
+  Scenario: long string attributes that share a prefix are matched exactly by equality
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person,
+        has name "https://example.com/item/001",
+        has name "https://example.com/item/extra/1",
+        has name "https://example.com/item/extra/2",
+        has name "https://example.com/item/extra/3",
+        has ref 0;
+      $y isa person, has name "https://example.com/item/002", has ref 1;
+      $z isa person, has name "https://example.com/item/010", has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n == "https://example.com/item/002";
+      """
+    Then uniquely identify answer concepts
+      | n                                        |
+      | attr:name:"https://example.com/item/002" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n == "https://example.com/item/002";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:1 | attr:name:"https://example.com/item/002" |
+
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "https://example.com/item/extra/2";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 0;
+        $x has name $n;
+        $n == "https://example.com/item/001";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:0 | attr:name:"https://example.com/item/001" |
+
+    When get answers of typeql read query
+      """
+      match $x isa person, has ref 0, has name "https://example.com/item/extra/3";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:0 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 1;
+        $x has name "https://example.com/item/001";
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n == "https://example.com/item/003";
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 0;
+        $x has name $n;
+        $n != "https://example.com/item/001";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                            |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/3" |
+
+
+  Scenario: long string attributes that share a prefix are matched correctly by range comparisons
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person,
+        has name "https://example.com/item/001",
+        has name "https://example.com/item/extra/1",
+        has name "https://example.com/item/extra/2",
+        has ref 0;
+      $y isa person, has name "https://example.com/item/002", has ref 1;
+      $z isa person, has name "https://example.com/item/010", has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n < "https://example.com/item/010";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:0 | attr:name:"https://example.com/item/001" |
+      | key:ref:1 | attr:name:"https://example.com/item/002" |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n <= "https://example.com/item/010";
+      """
+    Then uniquely identify answer concepts
+      | n                                        |
+      | attr:name:"https://example.com/item/001" |
+      | attr:name:"https://example.com/item/002" |
+      | attr:name:"https://example.com/item/010" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n > "https://example.com/item/002";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                            |
+      | key:ref:2 | attr:name:"https://example.com/item/010"     |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n > "https://example.com/item/001";
+        $n < "https://example.com/item/extra/1";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:1 | attr:name:"https://example.com/item/002" |
+      | key:ref:2 | attr:name:"https://example.com/item/010" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 0;
+        $x has name $n;
+        $n >= "https://example.com/item/extra/1";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                            |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+
+
+  Scenario: string attributes either side of the inline length limit are matched exactly by equality
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "abcdefghijklmnop", has ref 0;
+      $y isa person, has name "abcdefghijklmnopq", has ref 1;
+      $z isa person, has name "abcdefghijklmnopqr", has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "abcdefghijklmnopq";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:1 |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n == "abcdefghijklmnopq";
+      """
+    Then uniquely identify answer concepts
+      | n                             |
+      | attr:name:"abcdefghijklmnopq" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n == "abcdefghijklmnop";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                            |
+      | key:ref:0 | attr:name:"abcdefghijklmnop" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 2;
+        $x has name "abcdefghijklmnopqr";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:2 |
+
+
   Scenario: value comparisons can be performed between a 'double' and a 'integer'
     Given typeql schema query
       """
@@ -5174,6 +5434,210 @@ Feature: TypeQL Match Clause
       | key:ref:2 | attr:age:18 |
 
 
+  Scenario: multiple value comparisons on an attribute variable are all applied
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $w isa person, has age 5, has ref 0;
+      $x isa person, has age 10, has ref 1;
+      $y isa person, has age 15, has ref 2;
+      $z isa person, has age 20, has ref 3;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a > 5;
+        $a < 20;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:10 |
+      | attr:age:15 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has age $a;
+        $a > 5;
+        $a <= 15;
+        $a >= 10;
+      """
+    Then uniquely identify answer concepts
+      | x         | a           |
+      | key:ref:1 | attr:age:10 |
+      | key:ref:2 | attr:age:15 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has age $a;
+        $a >= 10;
+        $a <= 10;
+      """
+    Then uniquely identify answer concepts
+      | x         | a           |
+      | key:ref:1 | attr:age:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a == 10;
+        $a > 5;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a == 10;
+        $a == 10;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 2;
+        $x has age $a;
+        $a > 5;
+        $a < 20;
+      """
+    Then uniquely identify answer concepts
+      | x         | a           |
+      | key:ref:2 | attr:age:15 |
+
+
+  Scenario: contradictory value comparisons on an attribute variable return no answers
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has age 5, has ref 0;
+      $y isa person, has age 10, has ref 1;
+      $z isa person, has age 15, has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a > 10;
+        $a < 5;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has age $a;
+        $a > 10;
+        $a <= 10;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has age $a;
+        $a > 10;
+        $a < 15;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a == 5;
+        $a == 10;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 1;
+        $x has age $a;
+        $a == 10;
+        $a > 10;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        $a == 10;
+        $a != 10;
+      """
+    Then answer size is: 0
+
+
+  Scenario: a value comparison with the attribute variable on the right-hand side is applied in reverse
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has age 5, has ref 0;
+      $y isa person, has age 10, has ref 1;
+      $z isa person, has age 20, has ref 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa age;
+        10 < $a;
+      """
+    Then uniquely identify answer concepts
+      | a           |
+      | attr:age:20 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has age $a;
+        10 >= $a;
+      """
+    Then uniquely identify answer concepts
+      | x         | a           |
+      | key:ref:0 | attr:age:5  |
+      | key:ref:1 | attr:age:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        let $min = 5;
+        $x isa person, has age $a;
+        $min < $a;
+        $a < 20;
+      """
+    Then uniquely identify answer concepts
+      | x         | a           |
+      | key:ref:1 | attr:age:10 |
+
+
   Scenario: when the answers of a value comparison include both a 'double' and a 'integer', both answers are returned
     Given typeql schema query
       """
@@ -5206,6 +5670,350 @@ Feature: TypeQL Match Clause
       | attr:length:20.9 |
 
 
+  Scenario: value comparisons can be performed between 'integer', 'double' and 'decimal' attributes
+    Given typeql schema query
+      """
+      define
+      attribute quantity @independent, value integer;
+      attribute mass @independent, value double;
+      attribute cost @independent, value decimal;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $a isa quantity 10;
+      $b isa quantity 11;
+      $c isa mass 10.0;
+      $d isa mass 10.5;
+      $e isa cost 10.0dec;
+      $f isa cost 10.5dec;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x == 10.5;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x > 10.5;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | attr:quantity:11 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x >= 10.5;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | attr:quantity:11 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x < 10.5;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | attr:quantity:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x > 10.0;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | attr:quantity:11 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x == 10;
+        $x == 10.0;
+      """
+    Then uniquely identify answer concepts
+      | x                |
+      | attr:quantity:10 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa quantity;
+        $x == 10;
+        $x == 10.5;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa mass;
+        $x > 10;
+      """
+    Then uniquely identify answer concepts
+      | x              |
+      | attr:mass:10.5 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa cost;
+        $x == 10;
+      """
+    Then uniquely identify answer concepts
+      | x                 |
+      | attr:cost:10.0dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa cost;
+        $x > 10;
+      """
+    Then uniquely identify answer concepts
+      | x                 |
+      | attr:cost:10.5dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa cost;
+        $x == 10.5;
+      """
+    Then uniquely identify answer concepts
+      | x                 |
+      | attr:cost:10.5dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa $_;
+        $x == 10;
+      """
+    Then uniquely identify answer concepts
+      | x                 |
+      | attr:quantity:10  |
+      | attr:mass:10.0    |
+      | attr:cost:10.0dec |
+
+
+  Scenario: an owned attribute variable with several possible value types is compared by value
+    Given typeql schema query
+      """
+      define
+      attribute quantity value integer;
+      attribute mass value double;
+      attribute cost value decimal;
+      attribute tag value string;
+      entity item, owns quantity, owns mass, owns cost, owns tag, owns ref @key;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa item, has quantity 10, has mass 10.0, has cost 10.0dec, has tag "10", has ref 0;
+      $y isa item, has quantity 11, has mass 10.5, has cost 10.5dec, has tag "ten", has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $i isa item;
+        $i has $x;
+        $x == 10;
+      """
+    Then uniquely identify answer concepts
+      | i         | x                 |
+      | key:ref:0 | attr:quantity:10  |
+      | key:ref:0 | attr:mass:10.0    |
+      | key:ref:0 | attr:cost:10.0dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $i isa item, has ref 1;
+        $i has $x;
+        $x > 10;
+      """
+    Then uniquely identify answer concepts
+      | i         | x                 |
+      | key:ref:1 | attr:quantity:11  |
+      | key:ref:1 | attr:mass:10.5    |
+      | key:ref:1 | attr:cost:10.5dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $i isa item;
+        $i has $x;
+        $x == 10.5;
+      """
+    Then uniquely identify answer concepts
+      | i         | x                 |
+      | key:ref:1 | attr:mass:10.5    |
+      | key:ref:1 | attr:cost:10.5dec |
+
+    When get answers of typeql read query
+      """
+      match
+        $i isa item;
+        $i has $x;
+        $x == "10";
+      """
+    Then uniquely identify answer concepts
+      | i         | x             |
+      | key:ref:0 | attr:tag:"10" |
+
+    When get answers of typeql read query
+      """
+      match
+        $i isa item;
+        $i has $x;
+        $x > 10;
+        $x < 10;
+      """
+    Then answer size is: 0
+
+
+  Scenario: duration attributes can be compared by equality
+    Given typeql schema query
+      """
+      define
+      attribute expiration @independent, value duration;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $a isa expiration P1D;
+      $b isa expiration PT24H;
+      $c isa expiration P2D;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $d isa expiration;
+        $d == P1D;
+      """
+    Then uniquely identify answer concepts
+      | d                   |
+      | attr:expiration:P1D |
+
+    When get answers of typeql read query
+      """
+      match
+        $d isa expiration;
+        $d == P1D;
+        $d == P1D;
+      """
+    Then uniquely identify answer concepts
+      | d                   |
+      | attr:expiration:P1D |
+
+    When get answers of typeql read query
+      """
+      match
+        $d isa expiration;
+        $d == P1D;
+        $d == P2D;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $d isa expiration;
+        $d != P1D;
+      """
+    Then uniquely identify answer concepts
+      | d                     |
+      | attr:expiration:PT24H |
+      | attr:expiration:P2D   |
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa expiration;
+        $b isa expiration;
+        $a == $b;
+      """
+    Then uniquely identify answer concepts
+      | a                     | b                     |
+      | attr:expiration:P1D   | attr:expiration:P1D   |
+      | attr:expiration:PT24H | attr:expiration:PT24H |
+      | attr:expiration:P2D   | attr:expiration:P2D   |
+
+
+  Scenario: order comparisons between attribute variables only consider value types that have an ordering
+    Given typeql schema query
+      """
+      define
+      attribute expiration @independent, value duration;
+      attribute measure @abstract;
+      attribute size @independent, sub measure, value integer;
+      attribute span @independent, sub measure, value duration;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $a isa expiration P1D;
+      $b isa expiration P2D;
+      $c isa size 3;
+      $d isa span P1D;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+      """
+      match
+        $a isa expiration;
+        $b isa expiration;
+        $a < $b;
+      """
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa measure;
+        $b isa size;
+        $a <= $b;
+      """
+    Then uniquely identify answer concepts
+      | a           | b           |
+      | attr:size:3 | attr:size:3 |
+
+
   Scenario: 'is' can be used to check concept equality.
     Given transaction closes
 
@@ -5230,6 +6038,31 @@ Feature: TypeQL Match Clause
       | x         | y         |
       | key:ref:0 | key:ref:0 |
       | key:ref:1 | key:ref:1 |
+
+
+  Scenario: 'is' can be used to check equality of attributes
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $x isa person, has name "https://example.com/item/001", has ref 0;
+        $y isa person, has name "https://example.com/item/002", has ref 1;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa name "https://example.com/item/002";
+        $x isa person, has name $b;
+        $b is $a;
+      """
+    Then uniquely identify answer concepts
+      | x         | b                                        |
+      | key:ref:1 | attr:name:"https://example.com/item/002" |
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned

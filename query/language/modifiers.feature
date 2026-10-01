@@ -455,6 +455,42 @@ Feature: TypeQL Query Modifiers
       """
 
 
+  Scenario: when sorting by a variable that may contain values without an ordering, an error is thrown
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute expiration @independent, value duration;
+      attribute measure @abstract;
+      attribute size @independent, sub measure, value integer;
+      attribute span @independent, sub measure, value duration;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $a isa expiration P1D;
+      $b isa expiration P2D;
+      $c isa size 1;
+      $d isa span P1D;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "uses values of value-type 'duration', which have no ordering"
+      """
+      match $x isa expiration;
+      sort $x asc;
+      """
+    Then typeql read query; fails with a message containing: "uses values of value-type 'duration', which have no ordering"
+      """
+      match $x isa measure;
+      sort $x desc;
+      """
+
+
   Scenario Outline: sorting and query predicates agree for type '<type>'
     Given connection open schema transaction for database: typedb
     Given typeql schema query
