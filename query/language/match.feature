@@ -6049,12 +6049,15 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-        $x isa person, has ref 0;
-        $y isa person, has ref 1;
+        $x isa person, has name "https://example.com/item/001", has ref 0;
+        $y isa person, has name "https://example.com/item/002", has ref 1;
+        $f links (friend: $x, friend: $y), isa friendship, has ref 2;
+        $g links (friend: $y), isa friendship, has ref 3;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
+    # entities
     When get answers of typeql read query
       """
       match
@@ -6067,20 +6070,44 @@ Feature: TypeQL Match Clause
       | key:ref:0 | key:ref:0 |
       | key:ref:1 | key:ref:1 |
 
-
-  Scenario: 'is' can be used to check equality of attributes
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
+    When get answers of typeql read query
       """
-      insert
-        $x isa person, has name "https://example.com/item/001", has ref 0;
-        $y isa person, has name "https://example.com/item/002", has ref 1;
+      match
+        $x isa person;
+        $y isa person;
+        not { $x is $y; };
       """
-    Given transaction commits
+    Then uniquely identify answer concepts
+      | x         | y         |
+      | key:ref:0 | key:ref:1 |
+      | key:ref:1 | key:ref:0 |
 
-    Given connection open read transaction for database: typedb
+    # relations
+    When get answers of typeql read query
+      """
+      match
+        $r isa friendship;
+        $s isa friendship;
+        $r is $s;
+      """
+    Then uniquely identify answer concepts
+      | r         | s         |
+      | key:ref:2 | key:ref:2 |
+      | key:ref:3 | key:ref:3 |
+
+    When get answers of typeql read query
+      """
+      match
+        $r isa friendship;
+        $s isa friendship;
+        not { $r is $s; };
+      """
+    Then uniquely identify answer concepts
+      | r         | s         |
+      | key:ref:2 | key:ref:3 |
+      | key:ref:3 | key:ref:2 |
+
+    # attributes
     When get answers of typeql read query
       """
       match
@@ -6091,6 +6118,42 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | x         | b                                        |
       | key:ref:1 | attr:name:"https://example.com/item/002" |
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa name "https://example.com/item/002";
+        $x isa person, has name $b;
+        not { $b is $a; };
+      """
+    Then uniquely identify answer concepts
+      | x         | b                                        |
+      | key:ref:0 | attr:name:"https://example.com/item/001" |
+
+    # types
+    When get answers of typeql read query
+      """
+      match
+        $t label person;
+        $u owns ref;
+        $t is $u;
+      """
+    Then uniquely identify answer concepts
+      | t            | u            |
+      | label:person | label:person |
+
+    When get answers of typeql read query
+      """
+      match
+        $t label person;
+        $u owns ref;
+        not { $t is $u; };
+      """
+    Then uniquely identify answer concepts
+      | t            | u                |
+      | label:person | label:company    |
+      | label:person | label:friendship |
+      | label:person | label:employment |
 
 
   Scenario: when one entity exists, and we match two variables with concept inequality, an empty answer is returned
