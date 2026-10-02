@@ -6249,8 +6249,10 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $c isa size 3;
-      $d isa span P1D;
+      $a isa size 3;
+      $b isa size 5;
+      $c isa span P1D;
+      $d isa span P2D;
       """
     Given transaction commits
 
@@ -6259,12 +6261,71 @@ Feature: TypeQL Match Clause
       """
       match
         $a isa measure;
-        $b isa size;
+        $b isa measure;
         $a <= $b;
       """
     Then uniquely identify answer concepts
       | a           | b           |
       | attr:size:3 | attr:size:3 |
+      | attr:size:3 | attr:size:5 |
+      | attr:size:5 | attr:size:5 |
+
+
+  Scenario: comparisons between attribute variables of incompatible value types only match same-typed pairs
+    Given typeql schema query
+      """
+      define
+      entity pet, owns nickname, owns lives;
+      attribute nickname value string;
+      attribute lives value integer;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa pet, has nickname "1", has lives 1;
+      $y isa pet, has nickname "b", has lives 2;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p isa pet, has $a;
+        $q isa pet, has $b;
+        $a < $b;
+      select $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 |
+      | attr:nickname:"1" | attr:nickname:"b" |
+      | attr:lives:1      | attr:lives:2      |
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa pet, has $a;
+        $q isa pet, has $b;
+        $a == $b;
+      select $a, $b;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 |
+      | attr:nickname:"1" | attr:nickname:"1" |
+      | attr:nickname:"b" | attr:nickname:"b" |
+      | attr:lives:1      | attr:lives:1      |
+      | attr:lives:2      | attr:lives:2      |
+
+    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
+      """
+      match
+        $a isa nickname;
+        $b isa lives;
+        $a == $b;
+      """
 
 
   Scenario: 'is' can be used to check concept equality
