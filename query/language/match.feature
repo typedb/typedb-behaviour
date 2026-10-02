@@ -6163,7 +6163,47 @@ Feature: TypeQL Match Clause
       | address           | struct      | location    | $x isa age 1;                                                                                                 | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
 
 
-  Scenario: order comparisons between attribute variables return the ordered pairs
+  Scenario Outline: order comparisons between two '<type>' attribute variables return the ordered pairs
+    Given typeql schema query
+      """
+      define attribute <attr> @independent, value <type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $l isa <attr> <low>;
+      $h isa <attr> <high>;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa <attr>;
+        $b isa <attr>;
+        $a < $b;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                  |
+      | attr:<attr>:<low> | attr:<attr>:<high> |
+
+    Examples:
+      | attr           | type        | low                                | high                               |
+      | nickname       | string      | "alice"                            | "bob"                              |
+      | is-alive       | boolean     | false                              | true                               |
+      | shoe-size      | integer     | 21                                 | 42                                 |
+      | score          | double      | 1.5                                | 123.456                            |
+      | balance        | decimal     | 1.5dec                             | 123.456dec                         |
+      | birth-date     | date        | 1990-01-01                         | 2000-01-01                         |
+      | event-datetime | datetime    | 1990-01-01T11:22:33.123456789      | 2000-01-01T00:00:00                |
+      | global-date    | datetime-tz | 1990-01-01T11:22:33 Asia/Kathmandu | 2000-01-01T11:22:33 Asia/Kathmandu |
+
+
+  Scenario: order comparisons between integer and double attribute variables return the ordered pairs
     Given typeql schema query
       """
       define
@@ -6177,9 +6217,8 @@ Feature: TypeQL Match Clause
       """
       insert
       $a isa shoe-size 21;
-      $b isa shoe-size 42;
-      $c isa score 20.5;
-      $d isa score 21.5;
+      $b isa score 20.5;
+      $c isa score 21.5;
       """
     Given transaction commits
 
@@ -6188,22 +6227,11 @@ Feature: TypeQL Match Clause
       """
       match
         $a isa shoe-size;
-        $b isa shoe-size;
-        $a < $b;
-      """
-    Then uniquely identify answer concepts
-      | a                 | b                 |
-      | attr:shoe-size:21 | attr:shoe-size:42 |
-
-    When get answers of typeql read query
-      """
-      match
-        $a isa shoe-size;
         $b isa score;
         $a < $b;
       """
     Then uniquely identify answer concepts
-      | a                 | b                |
+      | a                 | b               |
       | attr:shoe-size:21 | attr:score:21.5 |
 
 
