@@ -5246,20 +5246,23 @@ Feature: TypeQL Match Clause
       | key:ref:5 |
 
 
-  Scenario: long string attributes that share a prefix are matched correctly by range comparisons
+  Scenario: string attributes are matched correctly by range comparisons, whether stored inline or hashed
     Given transaction commits
 
     Given connection open write transaction for database: typedb
     Given typeql write query
       """
       insert
-      $x isa person,
+      $w isa person,
+        has name "https://a-long-host.org/x",
+        has name "https://e",
         has name "https://example.com/item/001",
         has name "https://example.com/item/extra/1",
         has name "https://example.com/item/extra/2",
         has ref 0;
-      $y isa person, has name "https://example.com/item/002", has ref 1;
-      $z isa person, has name "https://example.com/item/010", has ref 2;
+      $x isa person, has name "https://example", has name "https://example.com/item/002", has ref 1;
+      $y isa person, has name "https://example.", has name "https://example.com/item/010", has name "https://m", has ref 2;
+      $z isa person, has name "https://zzz-long-host.org/y", has ref 3;
       """
     Given transaction commits
 
@@ -5272,6 +5275,10 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | x         | n                                        |
+      | key:ref:0 | attr:name:"https://a-long-host.org/x"    |
+      | key:ref:0 | attr:name:"https://e"                    |
+      | key:ref:1 | attr:name:"https://example"              |
+      | key:ref:2 | attr:name:"https://example."             |
       | key:ref:0 | attr:name:"https://example.com/item/001" |
       | key:ref:1 | attr:name:"https://example.com/item/002" |
 
@@ -5283,6 +5290,10 @@ Feature: TypeQL Match Clause
       """
     Then uniquely identify answer concepts
       | n                                        |
+      | attr:name:"https://a-long-host.org/x"    |
+      | attr:name:"https://e"                    |
+      | attr:name:"https://example"              |
+      | attr:name:"https://example."             |
       | attr:name:"https://example.com/item/001" |
       | attr:name:"https://example.com/item/002" |
       | attr:name:"https://example.com/item/010" |
@@ -5298,6 +5309,8 @@ Feature: TypeQL Match Clause
       | key:ref:2 | attr:name:"https://example.com/item/010"     |
       | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
       | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+      | key:ref:2 | attr:name:"https://m"                        |
+      | key:ref:3 | attr:name:"https://zzz-long-host.org/y"      |
 
     When get answers of typeql read query
       """
@@ -5322,6 +5335,127 @@ Feature: TypeQL Match Clause
       | x         | n                                            |
       | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
       | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n < "https://example.";
+      """
+    Then uniquely identify answer concepts
+      | n                                     |
+      | attr:name:"https://a-long-host.org/x" |
+      | attr:name:"https://e"                 |
+      | attr:name:"https://example"           |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n <= "https://example";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                     |
+      | key:ref:0 | attr:name:"https://a-long-host.org/x" |
+      | key:ref:0 | attr:name:"https://e"                 |
+      | key:ref:1 | attr:name:"https://example"           |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n > "https://example.";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                            |
+      | key:ref:0 | attr:name:"https://example.com/item/001"     |
+      | key:ref:1 | attr:name:"https://example.com/item/002"     |
+      | key:ref:2 | attr:name:"https://example.com/item/010"     |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
+      | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
+      | key:ref:2 | attr:name:"https://m"                        |
+      | key:ref:3 | attr:name:"https://zzz-long-host.org/y"      |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n >= "https://m";
+      """
+    Then uniquely identify answer concepts
+      | n                                       |
+      | attr:name:"https://m"                   |
+      | attr:name:"https://zzz-long-host.org/y" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n > "https://e";
+        $n < "https://example.com/item/002";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:1 | attr:name:"https://example"              |
+      | key:ref:2 | attr:name:"https://example."             |
+      | key:ref:0 | attr:name:"https://example.com/item/001" |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n >= "https://example.com/item/extra/2";
+        $n <= "https://m";
+      """
+    Then uniquely identify answer concepts
+      | n                                            |
+      | attr:name:"https://example.com/item/extra/2" |
+      | attr:name:"https://m"                        |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 2;
+        $x has name $n;
+        $n > "https://example";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                        |
+      | key:ref:2 | attr:name:"https://example."             |
+      | key:ref:2 | attr:name:"https://example.com/item/010" |
+      | key:ref:2 | attr:name:"https://m"                    |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 2;
+        $x has name $n;
+        $n < "https://example.com/item/010";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                            |
+      | key:ref:2 | attr:name:"https://example." |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 0;
+        $x has name $n;
+        $n <= "https://e";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                                     |
+      | key:ref:0 | attr:name:"https://a-long-host.org/x" |
+      | key:ref:0 | attr:name:"https://e"                 |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n > "https://example.com/item/010";
+        $n < "https://example.com/item/extra/1";
+      """
+    Then answer size is: 0
 
 
   Scenario: value comparisons can be performed between a 'double' and a 'integer'
