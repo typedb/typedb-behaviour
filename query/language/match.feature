@@ -5109,7 +5109,7 @@ Feature: TypeQL Match Clause
       | key:ref:1 |
 
 
-  Scenario: long string attributes that share a prefix are matched exactly by equality
+  Scenario: string attributes are matched exactly by equality, whether stored inline or hashed
     Given transaction commits
 
     Given connection open write transaction for database: typedb
@@ -5124,6 +5124,9 @@ Feature: TypeQL Match Clause
         has ref 0;
       $y isa person, has name "https://example.com/item/002", has ref 1;
       $z isa person, has name "https://example.com/item/010", has ref 2;
+      $p isa person, has name "abcdefghijklmnop", has ref 3;
+      $q isa person, has name "abcdefghijklmnopq", has ref 4;
+      $r isa person, has name "abcdefghijklmnopqr", has ref 5;
       """
     Given transaction commits
 
@@ -5204,6 +5207,44 @@ Feature: TypeQL Match Clause
       | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
       | key:ref:0 | attr:name:"https://example.com/item/extra/3" |
 
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "abcdefghijklmnopq";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:4 |
+
+    When get answers of typeql read query
+      """
+      match
+        $n isa name;
+        $n == "abcdefghijklmnopq";
+      """
+    Then uniquely identify answer concepts
+      | n                             |
+      | attr:name:"abcdefghijklmnopq" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has name $n;
+        $n == "abcdefghijklmnop";
+      """
+    Then uniquely identify answer concepts
+      | x         | n                            |
+      | key:ref:3 | attr:name:"abcdefghijklmnop" |
+
+    When get answers of typeql read query
+      """
+      match
+        $x isa person, has ref 5;
+        $x has name "abcdefghijklmnopqr";
+      """
+    Then uniquely identify answer concepts
+      | x         |
+      | key:ref:5 |
+
 
   Scenario: long string attributes that share a prefix are matched correctly by range comparisons
     Given transaction commits
@@ -5281,59 +5322,6 @@ Feature: TypeQL Match Clause
       | x         | n                                            |
       | key:ref:0 | attr:name:"https://example.com/item/extra/1" |
       | key:ref:0 | attr:name:"https://example.com/item/extra/2" |
-
-
-  Scenario: string attributes either side of the inline length limit are matched exactly by equality
-    Given transaction commits
-
-    Given connection open write transaction for database: typedb
-    Given typeql write query
-      """
-      insert
-      $x isa person, has name "abcdefghijklmnop", has ref 0;
-      $y isa person, has name "abcdefghijklmnopq", has ref 1;
-      $z isa person, has name "abcdefghijklmnopqr", has ref 2;
-      """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-      """
-      match $x isa person, has name "abcdefghijklmnopq";
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:1 |
-
-    When get answers of typeql read query
-      """
-      match
-        $n isa name;
-        $n == "abcdefghijklmnopq";
-      """
-    Then uniquely identify answer concepts
-      | n                             |
-      | attr:name:"abcdefghijklmnopq" |
-
-    When get answers of typeql read query
-      """
-      match
-        $x isa person, has name $n;
-        $n == "abcdefghijklmnop";
-      """
-    Then uniquely identify answer concepts
-      | x         | n                            |
-      | key:ref:0 | attr:name:"abcdefghijklmnop" |
-
-    When get answers of typeql read query
-      """
-      match
-        $x isa person, has ref 2;
-        $x has name "abcdefghijklmnopqr";
-      """
-    Then uniquely identify answer concepts
-      | x         |
-      | key:ref:2 |
 
 
   Scenario: value comparisons can be performed between a 'double' and a 'integer'
@@ -5999,11 +5987,96 @@ Feature: TypeQL Match Clause
       | attr:expiration:P2D   | attr:expiration:P2D   |
 
 
-  Scenario: order comparisons between attribute variables only consider value types that have an ordering
+  Scenario Outline: order comparisons between two '<type>' attribute variables are only allowed for value types that have an ordering
     Given typeql schema query
       """
       define
-      attribute expiration @independent, value duration;
+      struct location:
+        latitude value double,
+        longitude value double;
+      attribute <attr> @independent, value <value-type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert <insert>
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query<order-result>
+      """
+      match
+        $a isa <attr>;
+        $b isa <attr>;
+        $a < $b;
+      """
+
+    # struct values cannot yet be written in TypeQL, so no struct instances are inserted
+    Examples:
+      | attr              | type        | value-type  | insert                                                                                                        | order-result                                                                               |
+      | nickname          | string      | string      | $l isa nickname "alice"; $h isa nickname "bob";                                                               |                                                                                            |
+      | is-alive          | boolean     | boolean     | $l isa is-alive false; $h isa is-alive true;                                                                  |                                                                                            |
+      | shoe-size         | integer     | integer     | $l isa shoe-size 21; $h isa shoe-size 42;                                                                     |                                                                                            |
+      | score             | double      | double      | $l isa score 1.5; $h isa score 123.456;                                                                       |                                                                                            |
+      | balance           | decimal     | decimal     | $l isa balance 1.5dec; $h isa balance 123.456dec;                                                             |                                                                                            |
+      | birth-date        | date        | date        | $l isa birth-date 1990-01-01; $h isa birth-date 2000-01-01;                                                   |                                                                                            |
+      | event-datetime    | datetime    | datetime    | $l isa event-datetime 1990-01-01T11:22:33.123456789; $h isa event-datetime 2000-01-01T00:00:00;               |                                                                                            |
+      | global-date       | datetime-tz | datetime-tz | $l isa global-date 1990-01-01T11:22:33 Asia/Kathmandu; $h isa global-date 2000-01-01T11:22:33 Asia/Kathmandu; |                                                                                            |
+      | schedule-interval | duration    | duration    | $l isa schedule-interval P1D; $h isa schedule-interval P1Y2M3DT4H5M6.789S;                                    | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+      | address           | struct      | location    | $x isa age 1;                                                                                                 | ; fails with a message containing: "Type-inference derived an empty-set for some variable" |
+
+
+  Scenario: order comparisons between attribute variables return the ordered pairs
+    Given typeql schema query
+      """
+      define
+      attribute shoe-size @independent, value integer;
+      attribute score @independent, value double;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $a isa shoe-size 21;
+      $b isa shoe-size 42;
+      $c isa score 20.5;
+      $d isa score 21.5;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $a isa shoe-size;
+        $b isa shoe-size;
+        $a < $b;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                 |
+      | attr:shoe-size:21 | attr:shoe-size:42 |
+
+    When get answers of typeql read query
+      """
+      match
+        $a isa shoe-size;
+        $b isa score;
+        $a < $b;
+      """
+    Then uniquely identify answer concepts
+      | a                 | b                |
+      | attr:shoe-size:21 | attr:score:21.5 |
+
+
+  Scenario: order comparisons between attribute variables prune subtypes whose value type has no ordering
+    Given typeql schema query
+      """
+      define
       attribute measure @abstract;
       attribute size @independent, sub measure, value integer;
       attribute span @independent, sub measure, value duration;
@@ -6014,22 +6087,12 @@ Feature: TypeQL Match Clause
     Given typeql write query
       """
       insert
-      $a isa expiration P1D;
-      $b isa expiration P2D;
       $c isa size 3;
       $d isa span P1D;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "Type-inference derived an empty-set for some variable"
-      """
-      match
-        $a isa expiration;
-        $b isa expiration;
-        $a < $b;
-      """
-
     When get answers of typeql read query
       """
       match
