@@ -6042,7 +6042,7 @@ Feature: TypeQL Match Clause
       | attr:size:3 | attr:size:3 |
 
 
-  Scenario: 'is' can be used to check concept equality.
+  Scenario: 'is' can be used to check concept equality
     Given transaction closes
 
     Given connection open write transaction for database: typedb
