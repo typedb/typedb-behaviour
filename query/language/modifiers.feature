@@ -455,15 +455,55 @@ Feature: TypeQL Query Modifiers
       """
 
 
-  Scenario: when sorting by a variable that may contain values without an ordering, an error is thrown
+  Scenario Outline: when sorting by a variable that may contain '<type>' values, which have no ordering, an error is thrown
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      struct location:
+        latitude value double,
+        longitude value double;
+      attribute <attr> @independent, value <value-type>;
+      attribute measure @abstract;
+      attribute size @independent, sub measure, value integer;
+      attribute <sub-attr> @independent, sub measure, value <value-type>;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $s isa size 1;
+      <insert>
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "uses values of value-type '<type>', which have no ordering"
+      """
+      match $x isa <attr>;
+      sort $x asc;
+      """
+    Then typeql read query; fails with a message containing: "uses values of value-type '<type>', which have no ordering"
+      """
+      match $x isa measure;
+      sort $x desc;
+      """
+
+    # struct values cannot yet be written in TypeQL, so no struct instances are inserted
+    Examples:
+      | attr       | type     | value-type | sub-attr       | insert                                                                 |
+      | expiration | duration | duration   | span           | $a isa expiration P1D; $b isa expiration P2D; $c isa span P1D;         |
+      | address    | struct   | location   | location-range | $t isa size 2;                                                         |
+
+
+  Scenario: when sorting by a value variable whose expression produces 'duration' values, an error is thrown
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
       define
       attribute expiration @independent, value duration;
-      attribute measure @abstract;
-      attribute size @independent, sub measure, value integer;
-      attribute span @independent, sub measure, value duration;
       """
     Given transaction commits
 
@@ -473,21 +513,16 @@ Feature: TypeQL Query Modifiers
       insert
       $a isa expiration P1D;
       $b isa expiration P2D;
-      $c isa size 1;
-      $d isa span P1D;
       """
     Given transaction commits
 
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "uses values of value-type 'duration', which have no ordering"
       """
-      match $x isa expiration;
-      sort $x asc;
-      """
-    Then typeql read query; fails with a message containing: "uses values of value-type 'duration', which have no ordering"
-      """
-      match $x isa measure;
-      sort $x desc;
+      match
+        $x isa expiration;
+        let $d = $x + PT1H;
+      sort $d asc;
       """
 
 
