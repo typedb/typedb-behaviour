@@ -5654,7 +5654,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5691,7 +5691,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5706,7 +5706,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5740,7 +5740,7 @@ Feature: TypeQL Match Clause
     Then typeql read query; fails
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0], "float32"), 0.0);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0], "float32"), 0.0);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5772,7 +5772,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5786,7 +5786,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), -1.0);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), -1.0);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5802,7 +5802,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.999);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.999);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5811,6 +5811,44 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | name           |
       | attr:name:same |
+
+
+  Scenario: cosine similarity search returns the similarity score alongside the matched element
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32");
+      entity document owns name @key, owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    # cosine similarity vs query [1,0,0]: same = 1.0, orthogonal = 0.0, opposite = -1.0, all exactly representable
+    When typeql write query
+      """
+      insert
+      $same isa document, has name "same", has embedding vector([1.0, 0.0, 0.0], "float32");
+      $orthogonal isa document, has name "orthogonal", has embedding vector([0.0, 1.0, 0.0], "float32");
+      $opposite isa document, has name "opposite", has embedding vector([-1.0, 0.0, 0.0], "float32");
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    # the second assigned variable binds the similarity score; rows arrive sorted by it, descending
+    When get answers of typeql read query
+      """
+      match
+        let $e, $sim in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), -1.0);
+        $doc isa document, has name $name, has embedding $e;
+      select
+        $name, $sim;
+      """
+    Then answer size is: 3
+    Then order of answer concepts is
+      | name                 | sim                |
+      | attr:name:same       | value:double:1.0   |
+      | attr:name:orthogonal | value:double:0.0   |
+      | attr:name:opposite   | value:double:-1.0  |
 
 
   Scenario: cosine similarity search treats zero vectors as similarity 0 to any vector and 1 to another zero vector
@@ -5836,7 +5874,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.0);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5850,7 +5888,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5863,7 +5901,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([0.0, 0.0, 0.0], "float32"), 0.5);
+        let $e, $_ in cosine_similarity_search(embedding, vector([0.0, 0.0, 0.0], "float32"), 0.5);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;
@@ -5896,7 +5934,7 @@ Feature: TypeQL Match Clause
     When get answers of typeql read query
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
       select
         $name;

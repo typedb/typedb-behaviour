@@ -432,7 +432,7 @@ Feature: TypeQL Given Clause
       """
       given $v: vector(3, "float32");
       match
-        let $e in cosine_similarity_search(embedding, $v, 0.8);
+        let $e, $_ in cosine_similarity_search(embedding, $v, 0.8);
         $doc isa document, has name $name, has embedding $e;
       select $name;
       """

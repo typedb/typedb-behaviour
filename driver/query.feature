@@ -1478,7 +1478,7 @@ Feature: Driver Query
     When get answers of typeql analyze
       """
       match
-        let $e in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
         $d isa document, has embedding $e;
       """
     Then analyzed query pipeline structure is:
