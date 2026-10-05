@@ -1469,7 +1469,7 @@ Feature: Driver Query
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32");
+      attribute embedding value vector(3, "float32") @index(cosine);
       entity document owns embedding;
       """
     Given transaction commits
