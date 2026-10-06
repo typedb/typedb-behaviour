@@ -1351,11 +1351,11 @@ Feature: Driver Query
     Then answer size is: 1
     Then answer contains document:
       """
-      {"attr": <rendered>}
+      {"attr": <expected>}
       """
 
     Examples:
-      | value-type  | value                                       | rendered                                      |
+      | value-type  | value                                       | expected                                      |
       | boolean     | true                                        | true                                          |
       | boolean     | false                                       | false                                         |
       | integer     | 12345090                                    | 12345090                                      |
@@ -1367,10 +1367,8 @@ Feature: Driver Query
       | double      | 2.01234567                                  | 2.01234567                                    |
       | double      | -2.5                                        | -2.5                                          |
       | double      | 2.0                                         | 2.0                                           |
-      | double      | 9007199254740992.56738                      | 9007199254740992.0                            |
-      | double      | 10007199254740992.56738111                  | 1.0007199254740992e+16                        |
-      | double      | 1.0e-300                                    | 1e-300                                        |
-      | double      | 1.5e300                                     | 1.5e+300                                      |
+      | double      | 1.0e-300                                    | 1.0e-300                                      |
+      | double      | 1.5e300                                     | 1.5e300                                       |
       | decimal     | 1234567890.0001234567890dec                 | "1234567890.000123456789dec"                  |
       | decimal     | -9.59dec                                    | "-9.59dec"                                    |
       | decimal     | -0.01dec                                    | "-0.01dec"                                    |
@@ -1394,6 +1392,39 @@ Feature: Driver Query
       | string      | "bob\"bobby"                                | "bob\"bobby"                                  |
       | string      | ""                                          | ""                                            |
       | string      | "café 中文 🚀"                                | "café 中文 🚀"                                  |
+
+
+  Scenario Outline: Documents render double <value> rounded to the nearest double
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define attribute attr, value double; entity owner, owns attr @card(1);
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa owner, has attr <value>;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa owner, has attr $attr;
+      fetch { "attr": $attr };
+      """
+    Then answer size is: 1
+    Then answer contains document:
+      """
+      {"attr": <expected>}
+      """
+
+    Examples:
+      | value                      | expected            |
+      | 9007199254740992.56738     | 9007199254740992.0  |
+      | 10007199254740992.56738111 | 10007199254740992.0 |
 
   ###########
   # ANALYZE #
