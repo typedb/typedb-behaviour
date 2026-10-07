@@ -353,3 +353,70 @@ Feature: TypeQL pipelines
       select $p2, $c;
       """
     Given transaction closes
+
+
+  Scenario: Returned answers are unique over named variables
+    Given typeql write query
+      """
+      insert
+        $p isa person, has ref 0;
+        $c isa company, has ref 1;
+        employment (employee: $p, employer: $c), has ref 2;
+        employment (employee: $p, employer: $c), has ref 3;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        employment (employee: $p, employer: $c);
+      """
+    Then uniquely identify answer concepts
+      | p         | c         |
+      | key:ref:0 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        $e isa employment (employee: $p, employer: $c);
+      """
+    Then uniquely identify answer concepts
+      | p         | c         | e         |
+      | key:ref:0 | key:ref:1 | key:ref:2 |
+      | key:ref:0 | key:ref:1 | key:ref:3 |
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        employment (employee: $p, employer: $c);
+      match
+        employment (employee: $p, employer: $c);
+      """
+    Then uniquely identify answer concepts
+      | p         | c         |
+      | key:ref:0 | key:ref:1 |
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+        employment (employee: $p, employer: $c);
+      reduce $n = count groupby $c;
+      """
+    Then uniquely identify answer concepts
+      | c         | n               |
+      | key:ref:1 | value:integer:1 |
+    When get answers of typeql read query
+      """
+      with fun employers($p: person) -> { company }:
+        match employment (employee: $p, employer: $c);
+        return { $c };
+      match
+        $p isa person;
+        let $c in employers($p);
+      """
+    Then uniquely identify answer concepts
+      | p         | c         |
+      | key:ref:0 | key:ref:1 |
+
