@@ -1394,7 +1394,7 @@ Feature: Driver Query
       | string      | "café 中文 🚀"                                | "café 中文 🚀"                                  |
 
 
-  Scenario Outline: Documents render double <value> rounded to the nearest double
+  Scenario Outline: Documents return the nearest double to literal <value>
     Given connection open schema transaction for database: typedb
     Given typeql schema query
       """
@@ -1422,9 +1422,11 @@ Feature: Driver Query
       """
 
     Examples:
-      | value                      | expected            |
-      | 9007199254740992.56738     | 9007199254740992.0  |
-      | 10007199254740992.56738111 | 10007199254740992.0 |
+      | value                      | expected              |
+      | 9007199254740993.0         | 9007199254740992.0    |
+      | 10007199254740992.56738111 | 10007199254740992.0   |
+      | 18014398509481987.0        | 18014398509481988.0   |
+      | 9223372036854775807.0      | 9223372036854775808.0 |
 
   ###########
   # ANALYZE #
