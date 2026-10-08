@@ -1624,7 +1624,7 @@ Feature: Driver Migration
       """
       define
         attribute name, value string;
-        attribute embedding, value vector(3, "float32") @index(cosine);
+        attribute embedding, value vector(3, "float32") @index(hnsw:cosine);
         entity document, owns name @key, owns embedding;
       """
     Given transaction commits

@@ -5636,7 +5636,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5670,7 +5670,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5723,7 +5723,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5751,7 +5751,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5817,7 +5817,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5855,7 +5855,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits
@@ -5916,7 +5916,7 @@ Feature: TypeQL Match Clause
     Given typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns name @key, owns embedding;
       """
     Given transaction commits

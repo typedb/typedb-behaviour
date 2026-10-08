@@ -1083,7 +1083,7 @@ Feature: TypeQL Define Query
   Scenario: an attribute type can be defined with a fixed-size vector value type
     When typeql schema query
       """
-      define attribute embedding value vector(3, "float32") @index(cosine);
+      define attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       """
     Then transaction commits
 
@@ -1092,7 +1092,7 @@ Feature: TypeQL Define Query
     When typeql schema query
       """
       define
-      attribute embedding value vector(3, "float32") @index(cosine);
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       entity document owns embedding;
       """
     Then transaction commits
@@ -1118,14 +1118,14 @@ Feature: TypeQL Define Query
   Scenario: an index annotation is not allowed on a non-vector value type
     Then typeql schema query; fails with a message containing: "not compatible with index annotation"
       """
-      define attribute name value string @index(cosine);
+      define attribute name value string @index(hnsw:cosine);
       """
 
 
   Scenario: undefining the index annotation of a vector attribute type errors at commit
     Given typeql schema query
       """
-      define attribute embedding value vector(3, "float32") @index(cosine);
+      define attribute embedding value vector(3, "float32") @index(hnsw:cosine);
       """
     Given transaction commits
 
