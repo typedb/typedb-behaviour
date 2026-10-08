@@ -1130,9 +1130,16 @@ Feature: TypeQL Define Query
     Given transaction commits
 
     Given connection open schema transaction for database: typedb
-    When typeql schema query
+    # value-type annotations are addressed through the value constraint, like @regex
+    Then typeql schema query; fails with a message containing: "Illegal annotation"
       """
       undefine @index from embedding;
+      """
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine @index from embedding value vector(3, "float32");
       """
     Then transaction commits; fails with a message containing: "must declare an index annotation"
 
