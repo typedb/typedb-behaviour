@@ -319,8 +319,7 @@ Feature: Analyzed query structure
         Isa($d, document),
         Has($d, $e),
         Isa($e, embedding)
-      ]),
-      Sort([Desc($_)])
+      ])
     ])
     """
     Given transaction closes

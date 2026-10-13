@@ -5666,7 +5666,7 @@ Feature: TypeQL Match Clause
       | attr:name:near |
 
 
-  Scenario: cosine similarity search returns answers ordered by descending similarity
+  Scenario: cosine similarity search answers can be ordered by an explicit sort on the similarity score
     Given typeql schema query
       """
       define
@@ -5687,12 +5687,15 @@ Feature: TypeQL Match Clause
     Then transaction commits
 
     Given connection open read transaction for database: typedb
+    # result order is unspecified without a sort; the similarity variable sorts explicitly.
     # cosine similarity vs query: exact = 1.0, close ~= 0.994, mid ~= 0.919, far = 0.0 (excluded by threshold)
     When get answers of typeql read query
       """
       match
-        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $sim in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
+      sort
+        $sim desc;
       select
         $name;
       """
@@ -5702,12 +5705,14 @@ Feature: TypeQL Match Clause
       | attr:name:exact |
       | attr:name:close |
       | attr:name:mid   |
-    # limit takes a prefix of the similarity-ordered stream: top-2, not any-2
+    # limit after the sort takes a prefix of the similarity-ordered stream: top-2, not any-2
     When get answers of typeql read query
       """
       match
-        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
+        let $e, $sim in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.8);
         $doc isa document, has name $name, has embedding $e;
+      sort
+        $sim desc;
       select
         $name;
       limit 2;
@@ -5782,7 +5787,7 @@ Feature: TypeQL Match Clause
       | name                 |
       | attr:name:same       |
       | attr:name:orthogonal |
-    # threshold -1.0 admits everything, including the exactly-opposite vector, ordered descending
+    # threshold -1.0 admits everything, including the exactly-opposite vector
     When get answers of typeql read query
       """
       match
@@ -5792,7 +5797,7 @@ Feature: TypeQL Match Clause
         $name;
       """
     Then answer size is: 3
-    Then order of answer concepts is
+    Then uniquely identify answer concepts
       | name                 |
       | attr:name:same       |
       | attr:name:orthogonal |
@@ -5834,12 +5839,14 @@ Feature: TypeQL Match Clause
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    # the second assigned variable binds the similarity score; rows arrive sorted by it, descending
+    # the second assigned variable binds the similarity score and can be sorted on explicitly
     When get answers of typeql read query
       """
       match
         let $e, $sim in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), -1.0);
         $doc isa document, has name $name, has embedding $e;
+      sort
+        $sim desc;
       select
         $name, $sim;
       """
@@ -5870,7 +5877,7 @@ Feature: TypeQL Match Clause
     Then transaction commits
 
     Given connection open read transaction for database: typedb
-    # vs a non-zero query the zero vector scores similarity 0: admitted at threshold 0, ranked last
+    # vs a non-zero query the zero vector scores similarity 0: admitted at threshold 0
     When get answers of typeql read query
       """
       match
@@ -5880,7 +5887,7 @@ Feature: TypeQL Match Clause
         $name;
       """
     Then answer size is: 2
-    Then order of answer concepts is
+    Then uniquely identify answer concepts
       | name           |
       | attr:name:unit |
       | attr:name:zero |

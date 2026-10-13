@@ -1489,8 +1489,7 @@ Feature: Driver Query
         Isa($d, document),
         Has($d, $e),
         Isa($e, embedding)
-      ]),
-      Sort([desc($_)])
+      ])
     ])
     """
     Given transaction closes

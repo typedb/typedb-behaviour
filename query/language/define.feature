@@ -1107,12 +1107,13 @@ Feature: TypeQL Define Query
     Then answer size is: 1
 
 
-  Scenario: a vector attribute type must declare an index annotation
+  Scenario: a vector attribute type does not require an index annotation
+    # a cosine HNSW index is implicit for vector value types; @index(hnsw:cosine) is declarative
     When typeql schema query
       """
       define attribute embedding value vector(3, "float32");
       """
-    Then transaction commits; fails with a message containing: "must declare an index annotation"
+    Then transaction commits
 
 
   Scenario: an index annotation is not allowed on a non-vector value type
@@ -1122,7 +1123,7 @@ Feature: TypeQL Define Query
       """
 
 
-  Scenario: undefining the index annotation of a vector attribute type errors at commit
+  Scenario: the index annotation of a vector attribute type can be undefined via the value constraint
     Given typeql schema query
       """
       define attribute embedding value vector(3, "float32") @index(hnsw:cosine);
@@ -1137,11 +1138,12 @@ Feature: TypeQL Define Query
       """
 
     Given connection open schema transaction for database: typedb
+    # the annotation is declarative (the cosine index is implicit), so removing it is legal
     When typeql schema query
       """
       undefine @index from embedding value vector(3, "float32");
       """
-    Then transaction commits; fails with a message containing: "must declare an index annotation"
+    Then transaction commits
 
 
   Scenario: defining an embedding value type with a non-integer length errors
