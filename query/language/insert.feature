@@ -2921,6 +2921,16 @@ Parker";
     """
     Then transaction commits
 
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match $p isa person, has name $n, has age $a;
+    """
+    Then uniquely identify answer concepts
+      | p         | n              | a           |
+      | key:ref:0 | attr:name:John | attr:age:30 |
+      | key:ref:1 | attr:name:John | attr:age:30 |
+
 
   Scenario: Values of attributes inserted in parent blocks are available in try blocks
     When get answers of typeql write query
