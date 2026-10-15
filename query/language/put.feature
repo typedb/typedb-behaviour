@@ -733,10 +733,14 @@ Feature: TypeQL Put Query
 
 
   Scenario: nested try blocks in put are disallowed
-    # Nested if blocks are allowed
+    # Nested try blocks are dis-allowed
     Given connection open write transaction for database: typedb
     Given typeql write query; fails
     """
     match $p isa person; try { $p has name $name, has age $age; };
     put $q isa person; try { isset $name; $q has $name; try { isset $age; $q has $age; }; };
     """
+
+
+  Scenario: nested if blocks in put are allowed
+    TODO

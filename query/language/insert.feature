@@ -2891,8 +2891,7 @@ Parker";
     """
 
 
-
-  Scenario: nested try blocks in delete are disallowed
+  Scenario: nested try blocks in insert are disallowed
     Given typeql write query; fails
     """
     match $p isa person; try { $p has name $name, has age $age; };
@@ -2903,15 +2902,20 @@ Parker";
   Scenario: nested if blocks in insert are allowed
     Given typeql write query
     """
-    insert $p isa person, has ref 0, has name "John", has age 30;
+    insert
+      $p isa person, has ref 0, has name "John", has age 30;
+      $q isa person, has ref 1, has name "James";
+      $r isa person, has ref 2, has age 40;
     """
     When typeql write query
     """
     match
-      $p isa person;
-      try { $p has name $name, has age $age; };
+      $p isa person, has ref $ref;
+      let $new-ref = 10 + $ref;
+      try { $p has name $name; };
+      try { $p has age $age; };
     insert
-      $q isa person, has ref 1;
+      $q isa person, has ref == $new-ref;
       if { isset $name; } then {
         $q has $name;
         if { isset $age; } then {
@@ -2924,12 +2928,19 @@ Parker";
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
     """
-    match $p isa person, has name $n, has age $a;
+    match
+      $p isa person;
+      try { $p has name $n; };
+      try { $p has age $a; };
     """
     Then uniquely identify answer concepts
-      | p         | n              | a           |
-      | key:ref:0 | attr:name:John | attr:age:30 |
-      | key:ref:1 | attr:name:John | attr:age:30 |
+      | p          | n               | a           |
+      | key:ref:0  | attr:name:John  | attr:age:30 |
+      | key:ref:1  | attr:name:James | none        |
+      | key:ref:2  | none            | attr:age:40 |
+      | key:ref:10 | attr:name:John  | attr:age:30 |
+      | key:ref:11 | attr:name:James | none        |
+      | key:ref:12 | none            | none        |
 
 
   Scenario: Values of attributes inserted in parent blocks are available in try blocks
