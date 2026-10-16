@@ -793,6 +793,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
     """
 
 
+  # expression.feature
   Scenario: Expressions may return optional values.
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
