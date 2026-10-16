@@ -29,6 +29,10 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
       attribute email @independent, value string;
       attribute ref @independent, value integer;
       attribute age @independent, value integer;
+
+      fun none_integer() -> integer?:
+      match try { let $none = 1; $none == 0; };
+      return first $none;
       """
     Given transaction commits
 
@@ -201,7 +205,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
 
   Scenario: nested try blocks in delete are disallowed
     Given connection open write transaction for database: typedb
-    Given typeql write query; parsing fails
+    Given typeql write query; fails
     """
     match $p isa person; try { $p has email $email, has age $age; };
     delete try { has $email of $p; try { has $age of $p; }; };
@@ -787,3 +791,579 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
     match $p isa person; try { $p has name $name, has age $age; };
     update try { $p has $name; try { $p has $age; }; };
     """
+
+
+  Scenario: Expressions may return optional values.
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x?;
+    match
+      let $z = $y?;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               | z               |
+      | value:integer:5 | value:integer:5 | value:integer:5 |
+      | none            | none            | none            |
+
+
+  Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
+    Given connection open read transaction for database: typedb
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x? + 1;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               |
+      | value:integer:5 | value:integer:6 |
+      | none            | none            |
+
+    # Further nested expression
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = ($x? * 2) + 3;
+    """
+    Then uniquely identify answer concepts
+      | x               | y                 |
+      | value:integer:5 | value:integer:13  |
+      | none            | none              |
+
+
+  # fetch.feature
+  Scenario: fetch can handle optional objects
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    undefine @key from person owns name;
+    """
+    Given typeql schema query
+    """
+    undefine @card from person owns age;
+    """
+
+    Given typeql schema query
+      """
+      define
+      entity nothing;
+      entity person
+        plays friendship:friend,
+        plays employment:employee,
+        owns name @card(0..),
+        owns person-name @card(0..),
+        owns age @card(0..1),
+        owns karma @card(0..2),
+        owns ref @key;
+      entity company
+        plays employment:employer,
+        owns company-name @card(1..1),
+        owns description @card(1..1000),
+        owns achievement @card(0..1),
+        owns company-achievement @card(0..),
+        owns ref @key;
+      relation friendship
+        relates friend @card(0..),
+        owns ref @key;
+      relation employment
+        relates employee,
+        relates employer,
+        owns ref @key,
+        owns start-date @card(0..),
+        owns end-date @card(0..);
+      attribute name @abstract, value string;
+      attribute person-name sub name;
+      attribute company-name sub name;
+      attribute description, value string;
+      attribute age value integer;
+      attribute karma value double;
+      attribute ref value integer;
+      attribute start-date value datetime;
+      attribute end-date value datetime;
+      attribute achievement @abstract;
+      attribute company-achievement sub achievement, value string;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $n isa nothing;
+      $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
+      $p2 isa person, has person-name "Bob", has ref 1;
+      $c1 isa company, has company-name "TypeDB", has ref 2, has description "Nice and shy guys", has company-achievement "Green BDD tests for fetch";
+      $f1 links (friend: $p1, friend: $p2), isa friendship, has ref 3;
+      $e1 links (employee: $p1, employer: $c1), isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
+      """
+    Given transaction commits
+    Given connection open read transaction for database: typedb
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { $p has karma $k; };
+          fetch {
+            "name": [ $p.person-name ],
+            "adjusted-karma": $k? - 100.0
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "name": [ "Alice", "Allie" ],
+        "adjusted-karma": 23.4567891
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "name": [ "Bob" ],
+        "adjusted-karma": null
+      }
+      """
+
+
+  Scenario: fetch can handle optional objects
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+    """
+    undefine @key from person owns name;
+    """
+    Given typeql schema query
+    """
+    undefine @card from person owns age;
+    """
+    Given typeql schema query
+      """
+      define
+      entity nothing;
+      entity person
+        plays friendship:friend,
+        plays employment:employee,
+        owns name @card(0..),
+        owns person-name @card(0..),
+        owns age @card(0..1),
+        owns karma @card(0..2),
+        owns ref @key;
+      entity company
+        plays employment:employer,
+        owns company-name @card(1..1),
+        owns description @card(1..1000),
+        owns achievement @card(0..1),
+        owns company-achievement @card(0..),
+        owns ref @key;
+      relation friendship
+        relates friend @card(0..),
+        owns ref @key;
+      relation employment
+        relates employee,
+        relates employer,
+        owns ref @key,
+        owns start-date @card(0..),
+        owns end-date @card(0..);
+      attribute name @abstract, value string;
+      attribute person-name sub name;
+      attribute company-name sub name;
+      attribute description, value string;
+      attribute age value integer;
+      attribute karma value double;
+      attribute ref value integer;
+      attribute start-date value datetime;
+      attribute end-date value datetime;
+      attribute achievement @abstract;
+      attribute company-achievement sub achievement, value string;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $n isa nothing;
+      $p1 isa person, has person-name "Alice", has person-name "Allie", has age 10, has karma 123.4567891, has ref 0;
+      $p2 isa person, has person-name "Bob", has ref 1;
+      $c1 isa company, has company-name "TypeDB", has ref 2, has description "Nice and shy guys", has company-achievement "Green BDD tests for fetch";
+      $f1 links (friend: $p1, friend: $p2), isa friendship, has ref 3;
+      $e1 links (employee: $p1, employer: $c1), isa employment, has ref 4, has start-date 2020-01-01T13:13:13.999, has end-date 2021-01-01;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable 'e' cannot be used in a fetch entry without '?'. Use '?' to propagate the empty optional into the fetch entry."
+      """
+        match
+          $p isa person;
+          try { employment (employee: $p, employer: $e); };
+          fetch {
+            "person": { $p.* },
+            "employer": { $e.* }
+          };
+      """
+
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { employment (employee: $p, employer: $e); };
+          fetch {
+            "person": { $p.* },
+            "employer": { $e?.* }
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Alice", "Allie" ],
+          "age": 10.0,
+          "karma": [ 123.4567891 ],
+          "ref": 0.0
+        },
+        "employer": {
+          "company-name": "TypeDB",
+          "description": [ "Nice and shy guys" ],
+          "company-achievement": "Green BDD tests for fetch",
+          "ref": 2.0
+        }
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Bob" ],
+          "ref": 1.0
+        },
+        "employer": null
+      }
+      """
+
+    Then get answers of typeql read query
+      """
+        match
+          $p isa person;
+          try { employment (employee: $p, employer: $e); };
+          fetch {
+            "person": { $p.* },
+            "employer": [
+              match
+                isset $e;
+                $e has company-name $name;
+                return { $name };
+              ]
+          };
+      """
+    Then answer size is: 2
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Alice", "Allie" ],
+          "age": 10.0,
+          "karma": [ 123.4567891 ],
+          "ref": 0.0
+        },
+        "employer": [ "TypeDB" ]
+      }
+      """
+    Then answer contains document:
+      """
+      {
+        "person": {
+          "person-name": [ "Bob" ],
+          "ref": 1.0
+        },
+        "employer": []
+      }
+      """
+
+
+  # variables.feature
+  Scenario: Referencing optional variables without an unwrap fails
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # Optional function returns
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # In same stage
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # Originating from a reduce
+   When get answers of typeql read query
+    """
+    match
+      try { let $x = 1; $x == 0; };
+    reduce
+      $mean = mean($x);
+    match
+      isset $mean;
+      let $twice_mean = 2 * $mean;
+    """
+    Then answer size is: 0
+
+
+  Scenario: Optionally assigned variables are unsafe to reference unless unwrapped
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not { isset $x; $x > -1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not {
+        {
+          not { isset $x; };
+        } or {
+          isset $x;
+          $x > -1;
+        };
+      };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x? = none_integer(); };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      try { isset $x; let $y = $x + 1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+
+  Scenario: Referencing optional variables in a write stage outside an if fails
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    insert
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    put
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    update
+      if { isset $x; } then {
+        $x has ref 54321;
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    delete
+      if { isset $x; } then {
+        $x;
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+
+  Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      try { let $y = $x; };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      try { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      not { let $y = $x; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      not { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      { let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      { isset $x; let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 1
+
+
+  Scenario: Variables unwrapped in the root of a stage is unwrapped in downstream stages
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    Then answer size is: 1
+
+
+  Scenario: A variable that is optionally assigned in one branch and bound in the other, is optional in the parent
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 4; $x == 5; }; }
+      or { let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |
+
+    When get answers of typeql read query
+    """
+    match
+      { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When get answers of typeql read query
+    """
+      match
+        { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+      match
+        isset $x;
+        let $y = $x + 1;
+      """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |

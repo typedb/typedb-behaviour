@@ -297,6 +297,8 @@ Feature: TypeQL Variable binding tests
     """
 
   # Unwrapping optionals
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Referencing optional variables without an unwrap fails
     Given connection open read transaction for database: typedb
     When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -379,6 +381,8 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 0
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Optionally assigned variables are unsafe to reference unless unwrapped
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -448,6 +452,8 @@ Feature: TypeQL Variable binding tests
       | none |
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Referencing optional variables in a write stage outside an if fails
     Given connection open write transaction for database: typedb
     When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -534,6 +540,8 @@ Feature: TypeQL Variable binding tests
     Given transaction closes
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
     Given connection open read transaction for database: typedb
     When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -613,6 +621,8 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 1
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Variables unwrapped in the root of a stage is unwrapped in downstream stages
     Given connection open read transaction for database: typedb
     When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -635,6 +645,7 @@ Feature: TypeQL Variable binding tests
       let $z = $x + 2;
     """
     Then answer size is: 1
+
 
   # This would be cool behaviour but not really needed or intuitive.
   @ignore
@@ -659,6 +670,8 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 2
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: A variable that is optionally assigned in one branch and bound in the other, is optional in the parent
     Given connection open read transaction for database: typedb
     When get answers of typeql read query

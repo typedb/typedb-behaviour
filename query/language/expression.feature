@@ -2415,7 +2415,8 @@ Feature: TypeQL Query with Expressions
   ###############
   # OPTIONALITY #
   ###############
-
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Expressions may return optional values.
     Given connection open read transaction for database: typedb
     When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -2451,6 +2452,8 @@ Feature: TypeQL Query with Expressions
       | none            | none            | none            |
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
@@ -2487,6 +2490,8 @@ Feature: TypeQL Query with Expressions
       | none            | none              |
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Short-circuits cannot be used where optional results are not allowed
     Given connection open read transaction for database: typedb
     Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where optionals are not permitted"

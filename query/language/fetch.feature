@@ -879,6 +879,8 @@ Feature: TypeQL Fetch Query
       """
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: fetch can handle optional objects
     Then typeql read query; fails with a message containing: "The optional variable 'e' cannot be used in a fetch entry without '?'. Use '?' to propagate the empty optional into the fetch entry."
       """
@@ -984,7 +986,8 @@ Feature: TypeQL Fetch Query
       }
       """
 
-
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: fetch can handle optional objects
     Then typeql read query; fails with a message containing: "The optional variable 'k' was used in a context where optionals are not permitted"
       """
