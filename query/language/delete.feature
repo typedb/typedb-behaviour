@@ -2845,7 +2845,7 @@ Feature: TypeQL Delete Query
     When get answers of typeql write query
     """
     match $p isa person, has name $name; try { $p has email $email; };
-    delete try { isset $email; $email; };
+    delete if { isset $email; } then { $email; };
     """
     Then uniquely identify answer concepts
       | p             | name           |
@@ -2870,7 +2870,7 @@ Feature: TypeQL Delete Query
     When get answers of typeql write query
     """
     match $p isa person, has name $name; try { $p has email $email; };
-    delete try { isset $email; has $email of $p; };
+    delete if { isset $email; } then { has $email of $p; };
     """
     Then uniquely identify answer concepts
       | p             | name           | email                   |
@@ -2900,7 +2900,7 @@ Feature: TypeQL Delete Query
       $p isa person;
       try { $p has email $email; };
       try { $p has age $age; };
-    delete try { isset $email, $age;  has $email of $p; has $age of $p; };
+    delete if { isset $email, $age; } then {  has $email of $p; has $age of $p; };
     """
     Then uniquely identify answer concepts
       | p              | email                   | age         |
@@ -2938,7 +2938,7 @@ Feature: TypeQL Delete Query
     When get answers of typeql write query
     """
     match $p isa person, has name $name; try { $f isa friendship, links ($p); };
-    delete try { isset $f; $f; };
+    delete if { isset $f; } then { $f; };
     """
     Then uniquely identify answer concepts
       | p             | name           |
@@ -2966,7 +2966,7 @@ Feature: TypeQL Delete Query
     When get answers of typeql write query
     """
     match $p isa person, has name $name; try { $f isa friendship, links ($p); };
-    delete try { isset $f; links ($p) of $f; };
+    delete if { isset $f; } then { links ($p) of $f; };
     """
     Then uniquely identify answer concepts
       | p             | name           | f         |
@@ -2993,8 +2993,48 @@ Feature: TypeQL Delete Query
 
 
   Scenario: nested try blocks in delete are disallowed
-    Given typeql write query; parsing fails
+    Given typeql write query; fails
     """
     match $p isa person; try { $p has email $email, has age $age; };
     delete try { has $email of $p; try { has $age of $p; }; };
     """
+
+
+  Scenario: nested if blocks in delete are allowed
+    Given typeql write query
+    """
+    insert
+      $p isa person, has name "John", has age 30, has email "john@example.com";
+      $q isa person, has name "James", has email "james@example.com";
+      $r isa person, has name "Joe", has age 40;
+    """
+    When typeql write query
+    """
+    match
+      $p isa person, has name $name;
+      try { $p has email $email; };
+      try { $p has age $age; };
+    delete
+      if { isset $email; } then {
+        has $email of $p;
+        if { isset $age; } then {
+          has $age of $p;
+        };
+      };
+    """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $p isa person;
+      try { $p has email $e; };
+      try { $p has age $a; };
+    """
+    Then uniquely identify answer concepts
+      | p              | e               | a           |
+      | key:name:John  | none            | none        |
+      | key:name:James | none            | none        |
+      | key:name:Joe   | none            | attr:age:40 |
+

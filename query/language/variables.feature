@@ -156,7 +156,6 @@ Feature: TypeQL Variable binding tests
       | value:integer:13 |
 
 
-
   Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a common ancestor conjunction
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -217,8 +216,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
     When get answers of typeql read query
     """
@@ -230,8 +229,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
 
     Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
@@ -342,6 +341,12 @@ Feature: TypeQL Variable binding tests
       let $x = none_integer(); # Add ? when enforced
       let $y = $x;
     """
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      { let $y = 2 * $x; } or { let $y = 2 * $x + 1; };
+    """
     When get answers of typeql read query
     """
     match
@@ -374,8 +379,76 @@ Feature: TypeQL Variable binding tests
     Then answer size is: 0
 
 
-  # TODO: Do we even want to allow this behaviour?
-  Scenario: Referencing optional variables in a write stage without an unwrap fails
+  Scenario: Optionally assigned variables are unsafe to reference unless unwrapped
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      let $y = $x + 1;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not { isset $x; $x > -1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not {
+        {
+          not { isset $x; };
+        } or {
+          isset $x;
+          $x > -1;
+        };
+      };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x? = none_integer(); };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      try { let $y = $x + 1; };
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      try { isset $x; let $y = $x + 1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+
+  Scenario: Referencing optional variables in a write stage outside an if fails
     Given connection open write transaction for database: typedb
     When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
     """
@@ -390,8 +463,9 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     insert
-      isset $x;
-      $x has name "Steve";
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
     """
     Then answer size is: 1
     Given transaction closes
@@ -410,8 +484,9 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     put
-      isset $x;
-      $x has name "Steve";
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
     """
     Then answer size is: 1
     Given transaction closes
@@ -422,7 +497,7 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     update
-      $x has ref 54321;
+        $x has ref 54321;
     """
     Given connection open write transaction for database: typedb
     When get answers of typeql write query
@@ -430,8 +505,9 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     update
-      isset $x;
-      $x has ref 54321;
+      if { isset $x; } then {
+        $x has ref 54321;
+      };
     """
     Then answer size is: 1
     Given transaction closes
@@ -450,8 +526,9 @@ Feature: TypeQL Variable binding tests
     match
       try { $x isa person; };
     delete
-      isset $x;
-      $x;
+      if { isset $x; } then {
+        $x;
+      };
     """
     Then answer size is: 1
     Given transaction closes
@@ -581,14 +658,61 @@ Feature: TypeQL Variable binding tests
     """
     Then answer size is: 2
 
-  # This would also be cool behaviour.
-  @ignore
+
   Scenario: A variable that is optionally assigned in one branch and bound in the other, is optional in the parent
     Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 4; $x == 5; }; }
+      or { let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { let $x = 5; };
+    match
+      let $y = $x + 1;
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |
+
+    # Ok this is a weird one, but it's useful to have
     When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
     """
     match
       { let $x? = none_integer(); } or { let $x = 5; };
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { let $x? = none_integer(); } or { isset $x; let $x = 5; };
     match
       let $y = $x + 1;
     """
@@ -596,7 +720,7 @@ Feature: TypeQL Variable binding tests
     When get answers of typeql read query
     """
       match
-        { let $x? = none_integer(); } or { let $x = 5; };
+        { let $x? = none_integer(); } or { isset $x; let $x = 5; };
       match
         isset $x;
         let $y = $x + 1;
