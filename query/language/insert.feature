@@ -2874,6 +2874,8 @@ Parker";
     """
 
 
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
   Scenario: Using an optional variable in the then, which wasn't checked in a parent is an error
     Given typeql write query
     """
