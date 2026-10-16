@@ -255,7 +255,7 @@ Feature: TypeQL Given Clause
       given $x: integer, $y: integer?;
       match
         let $p = $x;
-       try { isset $y; let $q = $x + $y; };
+        try { isset $y; let $q = $x + $y; };
       """
 
 
@@ -386,7 +386,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
     Then transaction commits
 
@@ -417,7 +417,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
     Given set query given rows
       | ref               |
@@ -427,7 +427,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
 
     Then transaction commits
