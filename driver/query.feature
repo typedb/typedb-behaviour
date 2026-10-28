@@ -1626,6 +1626,37 @@ Feature: Driver Query
     Given transaction closes
 
 
+  Scenario: Driver processes vector search query structure correctly
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql analyze
+      """
+      match
+        let $e, $_ in cosine_similarity_search(embedding, vector([1.0, 0.0, 0.0], "float32"), 0.5);
+        $d isa document, has embedding $e;
+      """
+    Then analyzed query pipeline structure is:
+    """
+    Pipeline([
+      Match([
+        VectorSearch($e, embedding, [1.0, 0.0, 0.0], 0.5, $_),
+        Isa($d, document),
+        Has($d, $e),
+        Isa($e, embedding)
+      ])
+    ])
+    """
+    Given transaction closes
+
+
   Scenario: Analyze returns the annotations of variables in the query
     Given connection open schema transaction for database: typedb
     Given typeql schema query
@@ -1953,3 +1984,31 @@ Feature: Driver Query
 #  write results + schema query (not) interrupting them
 #  write results + write query (not) interrupting them
 #  Consider adding tests for commit, rollback, and close doing the same!
+
+
+  Scenario: Driver reads vector values back from query answers
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $d isa document, has embedding vector([1.0, 0.0, 0.5], "float32");
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $e isa embedding;
+      """
+    Then answer size is: 1
+    Then answer get row(0) get attribute(e) get type get label: embedding
+    Then answer get row(0) get attribute(e) get value is: vector([1.0, 0.0, 0.5], "float32")
+    Then answer get row(0) get attribute(e) try get value is: vector([1.0, 0.0, 0.5], "float32")
