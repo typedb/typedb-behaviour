@@ -1080,6 +1080,91 @@ Feature: TypeQL Define Query
       | duration    | procedure-duration |
 
 
+  Scenario: an attribute type can be defined with a fixed-size vector value type
+    When typeql schema query
+      """
+      define attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      """
+    Then transaction commits
+
+
+  Scenario: an entity type can own an embedding attribute type
+    When typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x label document, owns $e;
+        $e label embedding;
+      """
+    Then answer size is: 1
+
+
+  Scenario: a vector attribute type must declare an index annotation
+    When typeql schema query
+      """
+      define attribute embedding value vector(3, "float32");
+      """
+    Then transaction commits; fails with a message containing: "must declare an index annotation"
+
+
+  Scenario: an index annotation is not allowed on a non-vector value type
+    Then typeql schema query; fails with a message containing: "not compatible with index annotation"
+      """
+      define attribute name value string @index(hnsw:cosine);
+      """
+
+
+  Scenario: undefining the index annotation of a vector attribute type errors at commit
+    Given typeql schema query
+      """
+      define attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    # value-type annotations are addressed through the value constraint, like @regex
+    Then typeql schema query; fails with a message containing: "Illegal annotation"
+      """
+      undefine @index from embedding;
+      """
+
+    Given connection open schema transaction for database: typedb
+    When typeql schema query
+      """
+      undefine @index from embedding value vector(3, "float32");
+      """
+    Then transaction commits; fails with a message containing: "must declare an index annotation"
+
+
+  Scenario: defining an embedding value type with a non-integer length errors
+    Then typeql schema query; parsing fails
+      """
+      define attribute embedding value vector(3.0, "float32");
+      """
+
+
+  Scenario: defining an embedding value type with an invalid encoding errors
+    Then typeql schema query; parsing fails
+      """
+      define attribute embedding value vector(3, "an-invalid-encoding");
+      """
+
+
+  Scenario: defining an embedding value type with a negative length errors
+    Then typeql schema query; parsing fails
+      """
+      define attribute embedding value vector(-3, "float32");
+      """
+
+
   Scenario: new attribute type declaration should contain kind
     Then typeql schema query; fails
       """
