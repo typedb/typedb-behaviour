@@ -467,7 +467,7 @@ Feature: TypeQL Given Clause
       """
     Given transaction commits
     Given connection open read transaction for database: typedb
-    Given query is given rows
+    Given set query given rows
       | v: vector                    |
       | value:vector:[1.0, 0.0, 0.0] |
     When get answers of typeql read query with given rows
