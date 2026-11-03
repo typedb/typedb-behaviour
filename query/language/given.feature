@@ -255,7 +255,7 @@ Feature: TypeQL Given Clause
       given $x: integer, $y: integer?;
       match
         let $p = $x;
-       try { isset $y; let $q = $x + $y; };
+        try { isset $y; let $q = $x + $y; };
       """
 
 
@@ -369,7 +369,9 @@ Feature: TypeQL Given Clause
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    Then typeql write query with given rows; fails with a message containing: "The optional variable 'name' was used in a context where optionals are not permitted"
+    # The message will change when we're done with the transition:
+    # Then typeql write query with given rows; fails with a message containing: "The optional variable 'name' was used in a context where optionals are not permitted"
+    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
         """
         given $ref: integer, $name: string?;
         insert $p isa person, has ref == $ref, has name == $name;
@@ -386,7 +388,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
     Then transaction commits
 
@@ -417,7 +419,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
     Given set query given rows
       | ref               |
@@ -427,7 +429,7 @@ Feature: TypeQL Given Clause
         given $ref: integer, $name: string?;
         insert
           $p isa person, has ref == $ref;
-          try { isset $name; $p has name == $name; };
+          if { isset $name; } then { $p has name == $name; };
         """
 
     Then transaction commits

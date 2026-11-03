@@ -2983,7 +2983,9 @@ Feature: TypeQL Delete Query
 
 
   Scenario: In a delete stage, using an optional variable outside a try block errors.
-    Then typeql write query; fails with a message containing: "The optional variable 'name' was used in a context where optionals are not permitted"
+    # The message will change when we're done with the transition:
+    # Then typeql write query; fails with a message containing: "The optional variable 'name' was used in a context where optionals are not permitted"
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
     """
     match
       $john isa person; try { $john has name $name; };
