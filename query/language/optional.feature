@@ -153,17 +153,47 @@ Feature: TypeQL Optional
       | key:ref:12 | key:ref:13 | key:ref:14 |
 
 
-  Scenario: an optional cannot be used within a disjunction
-    Then typeql read query; fails with a message containing: "must be bound to a value before it's used"
+  Scenario: an optional can be used within a disjunction
+    Given typeql write query
       """
-      match $x isa person, has name "Frank";
+      insert
+      $x isa person, has name "Dave", has ref 7;
+      $y isa company, has name "Microsoft", has ref 8;
+      $r1 isa employment, links (employee: $x, employer: $y), has ref 9;
+      $z isa company, has name "Apple", has ref 10;
+      $r2 isa employment, links (employee: $x, employer: $z), has ref 11;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "Dave";
       {
-        $y isa company, has name "Tesla";
+        $y isa company, has name "Microsoft";
         $r isa employment ($x, $y);
       } or {
         try { $y isa company, has name "Tesla"; $r isa employment ($x, $y); };
       };
       """
+    Then uniquely identify answer concepts
+      | x         | y         | r         |
+      | key:ref:7 | key:ref:8 | key:ref:9 |
+      | key:ref:7 | none      | none      |
+
+    When get answers of typeql read query
+      """
+      match $x isa person, has name "Dave";
+      {
+        try { $y isa company, has name "Microsoft"; $r isa employment ($x, $y); };
+      } or {
+        try { $y isa company, has name "Tesla"; $r isa employment ($x, $y); };
+      };
+      """
+    Then uniquely identify answer concepts
+      | x         | y         | r         |
+      | key:ref:7 | key:ref:8 | key:ref:9 |
+      | key:ref:7 | none      | none      |
 
 
   Scenario: an optional cannot be used in a negation
