@@ -19,6 +19,10 @@ Feature: TypeQL Variable binding tests
       attribute name, value string;
       attribute ref, value integer;
       attribute number @independent, value integer;
+
+      fun none_integer() -> integer?:
+      match try { let $none = 1; $none == 0; };
+      return first $none;
       """
     Given transaction commits
 
@@ -152,7 +156,6 @@ Feature: TypeQL Variable binding tests
       | value:integer:13 |
 
 
-
   Scenario: Variables which occur in only some branches of two separate disjunctions MUST BE BOUND in a common ancestor conjunction
     Given connection open read transaction for database: typedb
     When get answers of typeql read query
@@ -213,8 +216,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
     When get answers of typeql read query
     """
@@ -226,8 +229,8 @@ Feature: TypeQL Variable binding tests
       let $y = $x + 2;
     """
     Then uniquely identify answer concepts
-      | y                |
-      | value:integer:3  |
+      | y               |
+      | value:integer:3 |
 
 
     Then typeql read query; fails with a message containing: "The variable 'x' must be bound to a value before it's used"
@@ -292,3 +295,449 @@ Feature: TypeQL Variable binding tests
     match
       let $x = ident($x);
     """
+
+  # Unwrapping optionals
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Referencing optional variables without an unwrap fails
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # Optional function returns
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      let $y = $x;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+    match
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # In same stage
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      let $y = $x;
+    """
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      { let $y = 2 * $x; } or { let $y = 2 * $x + 1; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x = none_integer(); # Add ? when enforced
+      isset $x;
+      let $y = $x;
+    """
+    Then answer size is: 0
+
+    # Originating from a reduce
+    When typeql read query; fails with a message containing: "The optional variable 'mean' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 1; $x == 0; };
+    reduce
+      $mean = mean($x);
+    match
+      let $twice_mean = 2 * $mean;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 1; $x == 0; };
+    reduce
+      $mean = mean($x);
+    match
+      isset $mean;
+      let $twice_mean = 2 * $mean;
+    """
+    Then answer size is: 0
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Optionally assigned variables are unsafe to reference unless unwrapped
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      let $y = $x + 1;
+    """
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not { isset $x; $x > -1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      not {
+        {
+          not { isset $x; };
+        } or {
+          isset $x;
+          $x > -1;
+        };
+      };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x? = none_integer(); };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      let $x? = none_integer();
+      try { let $y = $x + 1; };
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      let $x? = none_integer();
+      try { isset $x; let $y = $x + 1; };
+    """
+    Then uniquely identify answer concepts
+      | x    |
+      | none |
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Referencing optional variables in a write stage outside an if fails
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { $x isa person; };
+    insert
+      $x has name "Steve";
+    """
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    insert
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { $x isa person; };
+    put
+      $x has name "Steve";
+    """
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    put
+      if { isset $x; } then {
+        $x has name "Steve";
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { $x isa person; };
+    update
+        $x has ref 54321;
+    """
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    update
+      if { isset $x; } then {
+        $x has ref 54321;
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+    Given connection open write transaction for database: typedb
+    When typeql write query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { $x isa person; };
+    delete
+      $x;
+    """
+    Given connection open write transaction for database: typedb
+    When get answers of typeql write query
+    """
+    match
+      try { $x isa person; };
+    delete
+      if { isset $x; } then {
+        $x;
+      };
+    """
+    Then answer size is: 1
+    Given transaction closes
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Unwrapped variables are non-optional in the pattern and all sub-patterns of the unwrap
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      try { let $y = $x; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      try { let $y = $x; };
+    """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      try { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      not { let $y = $x; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      not { let $y = $x; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      not { isset $x; let $y = $x; };
+    """
+    Then answer size is: 1
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      { let $y = $x; } or { let $z = 1; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      isset $x;
+      { let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 0
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; $x == 4; };
+    match
+      { isset $x; let $y = $x; } or { let $z = 1; };
+    """
+    Then answer size is: 1
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Variables unwrapped in the root of a stage is unwrapped in downstream stages
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; };
+    match
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    match
+      let $z = $x + 2;
+    """
+    Then answer size is: 1
+
+
+  # This would be cool behaviour but not really needed or intuitive.
+  @ignore
+  Scenario: Variables unwrapped in all branches of a disjunction are unwrapped in the parent
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      try { let $x = 5; };
+    match
+      { let $y = $x +1; } or { let $y = $x +2; };
+    """
+    When get answers of typeql read query
+    """
+    match
+      try { let $x = 5; };
+    match
+      { isset $x; let $y = $x +1; } or { isset $x; let $y = $x +2; };
+    match
+      let $z = $x + $y;
+    """
+    Then answer size is: 2
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: A variable that is optionally assigned in one branch and bound in the other, is optional in the parent
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 4; $x == 5; }; }
+      or { let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { let $x = 5; };
+    match
+      let $y = $x + 1;
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { let $x = 5; };
+    match
+      isset $x;
+      let $y = $x + 1;
+    """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |
+
+    # Ok this is a weird one, but it's useful to have
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { let $x? = none_integer(); } or { let $x = 5; };
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+    """
+    Then uniquely identify answer concepts
+      | x               |
+      | none            |
+      | value:integer:5 |
+
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+    match
+      let $y = $x + 1;
+    """
+
+    When get answers of typeql read query
+    """
+      match
+        { let $x? = none_integer(); } or { isset $x; let $x = 5; };
+      match
+        isset $x;
+        let $y = $x + 1;
+      """
+    Then uniquely identify answer concepts
+      | y               |
+      | value:integer:6 |

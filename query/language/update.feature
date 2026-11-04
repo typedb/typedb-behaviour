@@ -2960,7 +2960,7 @@ Feature: TypeQL Update Query
         $p has age $age;
         let $new-age-val = $age + 1;
       };
-    update try { $p has age == $new-age-val; };
+    update if { isset $new-age-val; } then { $p has age == $new-age-val; };
     """
     Then uniquely identify answer concepts
       | p             | age           | new-age-val      |
@@ -2999,7 +2999,7 @@ Feature: TypeQL Update Query
       $p isa person; $q isa person; not { $p is $q; };
       try { $f links ($p); };
     update
-      try { $f links (friend: $q); };
+      if { isset $f; } then { $f links (friend: $q); };
     """
     Then uniquely identify answer concepts
       | p         | q         | f         |
@@ -3045,7 +3045,7 @@ Feature: TypeQL Update Query
       try { $p has age $age; };
       try { $p has name $name; };
     insert $q isa also-person, has $ref;
-    update try { $q has $age, has $name; };
+    update if { isset $age, $name; } then { $q has $age, has $name; };
     """
     Then uniquely identify answer concepts
       | p         | q         | age         | name           |
@@ -3072,7 +3072,9 @@ Feature: TypeQL Update Query
 
 
   Scenario: In an update stage, using an optional variable outside a try block errors.
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    # The message will change when we're done with the transition:
+    #Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where optionals are not permitted"
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block"
     """
     match
       $john isa person, has name "John";
@@ -3082,9 +3084,48 @@ Feature: TypeQL Update Query
     """
 
 
-  Scenario: nested try blocks in insert are disallowed
+  Scenario: nested try blocks in update are disallowed
     Given typeql write query; fails
     """
     match $p isa person; try { $p has name $name, has age $age; };
     update try { $p has $name; try { $p has $age; }; };
     """
+
+
+  Scenario: nested if blocks in update are allowed
+    Given typeql write query
+    """
+    insert
+      $p isa person, has ref 0, has name "John", has age 30;
+      $q isa person, has ref 1, has name "James";
+      $r isa person, has ref 2, has age 40;
+    """
+    When typeql write query
+    """
+    match
+      $p isa person;
+      try { $p has name $name; let $new-name = "Mr. " + $name; };
+      try { $p has age $age; let $new-age = $age + 1; };
+    update
+      if { isset $new-name; } then {
+        $p has name == $new-name;
+        if { isset $new-age; } then {
+          $p has age == $new-age;
+        };
+      };
+    """
+    Then transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+    """
+    match
+      $p isa person;
+      try { $p has name $n; };
+      try { $p has age $a; };
+    """
+    Then uniquely identify answer concepts
+      | p          | n                   | a           |
+      | key:ref:0  | attr:name:Mr. John  | attr:age:31 |
+      | key:ref:1  | attr:name:Mr. James | none        |
+      | key:ref:2 | none                | attr:age:40 |

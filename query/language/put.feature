@@ -648,7 +648,7 @@ Feature: TypeQL Put Query
     """
     match
       $p isa person, has ref $ref; try { $p has age $age; };
-    put $q isa also-person, has $ref; try { $q has $age; };
+    put $q isa also-person, has $ref; if { isset $age; } then { $q has $age; };
     """
     Then uniquely identify answer concepts
       | p         | q         | age         |
@@ -691,7 +691,7 @@ Feature: TypeQL Put Query
       $p isa person;
       try { $q isa person, has email $_; not { $q is $p; }; };
     put
-      try { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
+      if { isset $q; } then { $f isa friendship, links (friend: $p, friend: $q), has ref 0; };
     """
     Then uniquely identify answer concepts
       | p         | q         | f    |
@@ -704,7 +704,7 @@ Feature: TypeQL Put Query
       try { $q isa person, has email $_; not { $q is $p; }; };
     put
       $f isa friendship, links(friend: $p), has $ref;
-      try { $f links (friend: $q); };
+      if { isset $q; } then { $f links (friend: $q); };
     """
     Then uniquely identify answer concepts
       | p         | q         | f         |
@@ -720,9 +720,11 @@ Feature: TypeQL Put Query
     Then answer size is: 2
 
 
-  Scenario: In a put stage, using an optional variable outside a try block errors.
+  Scenario: In a put stage, using an optional variable outside an if block errors.
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    # The message will change when we're done with the transition:
+    #Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where optionals are not permitted"
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block"
     """
     match
       $p isa person;
@@ -733,9 +735,14 @@ Feature: TypeQL Put Query
 
 
   Scenario: nested try blocks in put are disallowed
+    # Nested try blocks are dis-allowed
     Given connection open write transaction for database: typedb
     Given typeql write query; fails
     """
     match $p isa person; try { $p has name $name, has age $age; };
-    put $q isa person; try { $q has $name; try { $q has $age; }; };
+    put $q isa person; try { isset $name; $q has $name; try { isset $age; $q has $age; }; };
     """
+
+
+  Scenario: nested if blocks in put are allowed
+    TODO

@@ -217,10 +217,8 @@ Feature: TypeQL Query with Expressions
     Given transaction closes
 
     # Non-cyclic query, just inverted dependencies in two branches.
-    # TODO: This is legal, but currently fails because our validation is too coarse.
-    # The validation introduced in #7900 is finer and permits this.
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "illegal circular expression assignment & usage"
+    When get answers of typeql read query
     """
       match
         { let $x = 5; let $y = $x; } or
@@ -228,7 +226,7 @@ Feature: TypeQL Query with Expressions
       select
         $x, $y;
       """
-    #Then verify answer size is: 2
+    Then answer size is: 2
     Given transaction closes
 
 
@@ -2412,3 +2410,106 @@ Feature: TypeQL Query with Expressions
       | function       | a       | b       | result_type | result  |
       | std::math::min | 10.2dec | 13.5dec | decimal     | 10.2dec |
       | std::math::max | 10.2dec | 13.5dec | decimal     | 13.5dec |
+
+
+  ###############
+  # OPTIONALITY #
+  ###############
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Expressions may return optional values.
+    Given connection open read transaction for database: typedb
+    When typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x;
+    match
+      let $z = $y;
+    """
+    When typeql read query; fails with a message containing: "The optional variable 'y' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x?;
+    match
+      let $z = $y;
+    """
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x?;
+    match
+      let $z = $y?;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               | z               |
+      | value:integer:5 | value:integer:5 | value:integer:5 |
+      | none            | none            | none            |
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Sub-expressions returning optional values can short-circuit the expression to return None using '?'
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable 'x' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x + 1;
+    """
+
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = $x? + 1;
+    """
+    Then uniquely identify answer concepts
+      | x               | y               |
+      | value:integer:5 | value:integer:6 |
+      | none            | none            |
+
+    # Further nested expression
+    When get answers of typeql read query
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y = ($x? * 2) + 3;
+    """
+    Then uniquely identify answer concepts
+      | x               | y                 |
+      | value:integer:5 | value:integer:13  |
+      | none            | none              |
+
+
+  # TODO: Reenable when we are done transitioning to the new behaviour.
+  @ignore-optional-transition
+  Scenario: Short-circuits cannot be used where optional results are not allowed
+    Given connection open read transaction for database: typedb
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where optionals are not permitted"
+    """
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      $x? + 5 > 7;
+    """
+
+    Then typeql read query; fails with a message containing: "The optional variable '_anonymous' was used in a context where optionals are not permitted"
+    """
+    with fun plus_one($x: integer) -> { integer }:
+    match let $y = $x + 1;
+    return { $y };
+
+    match
+      { try { let $x = 5; }; } or { try { let $x = 5; $x == 4; }; };
+    match
+      let $y in plus_one($x? + 1);
+    """
