@@ -1516,6 +1516,7 @@ Feature: Driver Query
         $f sub friendship, relates friend;
         $p1 plays friendship:friend;
         $p2 plays $role;
+        isset $p1, $p2;
       """
     Then analyzed query pipeline structure is:
     """
@@ -1527,7 +1528,8 @@ Feature: Driver Query
         Value($n1, string),
         Sub($f, friendship), Relates($f, friend),
         Plays($p1, friendship:friend),
-        Plays($p2, $role)
+        Plays($p2, $role),
+        IsSet([$p1, $p2])
       ])
     ])
     """
