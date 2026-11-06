@@ -1529,7 +1529,7 @@ Feature: Driver Query
         Sub($f, friendship), Relates($f, friend),
         Plays($p1, friendship:friend),
         Plays($p2, $role),
-        Isset([$p1, $p2])
+        IsSet([$p1, $p2])
       ])
     ])
     """
