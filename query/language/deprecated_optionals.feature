@@ -1000,7 +1000,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
     Given transaction commits
 
     Given connection open read transaction for database: typedb
-    Then typeql read query; fails with a message containing: "The optional variable 'e' cannot be used in a fetch entry without '?'. Use '?' to propagate the empty optional into the fetch entry."
+    Then typeql read query
       """
         match
           $p isa person;
