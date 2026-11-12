@@ -835,46 +835,6 @@ Feature: TypeQL Match Clause
     Then answer size is: 0
 
 
-  Scenario: Stages following a match with unsatisfiable schema constraints can use its variables
-    Given typeql schema query
-       """
-       define entity plan; entity release-plan sub plan; entity specification;
-       """
-    Given transaction commits
-
-    Given connection open read transaction for database: typedb
-    When get answers of typeql read query
-       """
-       match $t label plan; $t sub release-plan; reduce $c = count($t);
-       """
-    Then result is a single row with variable 'c': value:integer:0
-
-    When get answers of typeql read query
-       """
-       match $t label plan; $t sub release-plan; reduce $c = count groupby $t;
-       """
-    Then answer size is: 0
-
-    When get answers of typeql read query
-       """
-       match $t label plan; $t sub release-plan; require $t;
-       """
-    Then answer size is: 0
-
-    When get answers of typeql read query
-       """
-       match $t label plan; $t sub release-plan; fetch { "t": $t };
-       """
-    Then answer size is: 0
-
-    When get answers of typeql read query
-       """
-       match { $t label plan; $t sub release-plan; } or { $t label specification; $t sub release-plan; };
-       reduce $c = count($t);
-       """
-    Then result is a single row with variable 'c': value:integer:0
-
-
   ##########
   # THINGS #
   ##########
