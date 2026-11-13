@@ -724,7 +724,7 @@ Feature: TypeQL Put Query
     Given connection open write transaction for database: typedb
     # The message will change when we're done with the transition:
     #Then typeql write query; fails with a message containing: "The optional variable 'age' was used in a context where optionals are not permitted"
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block"
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside an 'if' block"
     """
     match
       $p isa person;

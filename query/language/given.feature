@@ -371,7 +371,7 @@ Feature: TypeQL Given Clause
       | value:integer:111 | none               |
     # The message will change when we're done with the transition:
     # Then typeql write query with given rows; fails with a message containing: "The optional variable 'name' was used in a context where optionals are not permitted"
-    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
+    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside an 'if' block"
         """
         given $ref: integer, $name: string?;
         insert $p isa person, has ref == $ref, has name == $name;
