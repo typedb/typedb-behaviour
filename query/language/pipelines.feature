@@ -353,3 +353,49 @@ Feature: TypeQL pipelines
       select $p2, $c;
       """
     Given transaction closes
+
+
+  Scenario: A query pipeline can contain unsatisfiable clauses at different points
+    Given typeql write query
+      """
+      insert $p isa person, has ref 0;
+      """
+    Given transaction commits
+
+    Given connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $t label company;
+        $t sub person;
+      reduce $c = count($t);
+      """
+    Then result is a single row with variable 'c': value:integer:0
+
+    When get answers of typeql read query
+      """
+      match
+        $t label company;
+        $t sub person;
+      require $t;
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $t label company;
+        $t sub person;
+      fetch { "t": $t };
+      """
+    Then answer size is: 0
+
+    When get answers of typeql read query
+      """
+      match
+        $p isa person;
+      match
+        $t label company;
+        $t sub person;
+      """
+    Then answer size is: 0
