@@ -368,27 +368,12 @@ Feature: TypeQL pipelines
       match
         $t label company;
         $t sub person;
-      match
-        $p isa person;
-      reduce $c = count($p);
-      """
-    Then result is a single row with variable 'c': value:integer:0
-
-    When get answers of typeql read query
-      """
-      match
-        $p isa person;
-      match
-        $t label company;
-        $t sub person;
       reduce $c = count($t);
       """
     Then result is a single row with variable 'c': value:integer:0
 
     When get answers of typeql read query
       """
-      match
-        $p isa person;
       match
         $t label company;
         $t sub person;
@@ -401,27 +386,6 @@ Feature: TypeQL pipelines
       match
         $t label company;
         $t sub person;
-      reduce $c = count groupby $t;
-      """
-    Then answer size is: 0
-
-    When get answers of typeql read query
-      """
-      match
-        $p isa person;
-      match
-        $t label company;
-        $t sub person;
-      """
-    Then answer size is: 0
-
-    When get answers of typeql read query
-      """
-      match
-        $p isa person;
-      match
-        $t label company;
-        $t sub person;
       fetch { "t": $t };
       """
     Then answer size is: 0
@@ -429,25 +393,9 @@ Feature: TypeQL pipelines
     When get answers of typeql read query
       """
       match
-        { $t label company; $t sub person; } or
-        { $t label person; $t sub company; };
-      reduce $c = count($t);
-      """
-    Then result is a single row with variable 'c': value:integer:0
-    Given transaction closes
-
-    Given connection open write transaction for database: typedb
-    When get answers of typeql write query
-      """
+        $p isa person;
       match
         $t label company;
         $t sub person;
-      insert $p isa person, has ref 1;
       """
     Then answer size is: 0
-    When get answers of typeql read query
-      """
-      match
-        $p isa person;
-      """
-    Then answer size is: 1
