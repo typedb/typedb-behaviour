@@ -194,7 +194,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
 
   Scenario: In a delete stage, using an optional variable outside a try block errors.
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block."
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'name' outside an 'if' block."
     """
     match
       $john isa person; try { $john has name $name; };
@@ -280,7 +280,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
       | ref               | name               |
       | value:integer:110 | value:string:James |
       | value:integer:111 | none               |
-    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside a 'try' block"
+    Then typeql write query with given rows; fails with a message containing: "A write stage uses the optional variable 'name' outside an 'if' block"
         """
         given $ref: integer, $name: string?;
         insert $p isa person, has ref == $ref, has name == $name;
@@ -473,7 +473,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
     insert
       $john isa person, has ref 0, has name "John";
     """
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside an 'if' block."
     """
     match
       $p isa person;
@@ -619,7 +619,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
 
   Scenario: In a put stage, using an optional variable outside a try block errors.
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside an 'if' block."
     """
     match
       $p isa person;
@@ -774,7 +774,7 @@ Feature: TypeQL tests ensuring old behaviour is not broken during the transition
 
   Scenario: In an update stage, using an optional variable outside a try block errors.
     Given connection open write transaction for database: typedb
-    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside a 'try' block."
+    Then typeql write query; fails with a message containing: "A write stage uses the optional variable 'age' outside an 'if' block."
     """
     match
       $john isa person, has name "John";
