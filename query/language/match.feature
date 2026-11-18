@@ -7304,7 +7304,7 @@ Feature: TypeQL Match Clause
       | attr:name:opposite   | value:double:-1.0  |
 
 
-  Scenario: cosine similarity search treats zero vectors as similarity 0 to any vector and 1 to another zero vector
+  Scenario: cosine similarity search scores stored zero vectors as similarity 0 and rejects a zero query vector
     Given typeql schema query
       """
       define
@@ -7350,8 +7350,8 @@ Feature: TypeQL Match Clause
     Then uniquely identify answer concepts
       | name           |
       | attr:name:unit |
-    # a zero query vector scores 1 against the zero vector and 0 against everything else
-    When get answers of typeql read query
+    # a zero query vector has no direction, so the search rejects it
+    Then typeql read query; fails with a message containing: "zero norm"
       """
       match
         let $e, $_ in cosine_similarity_search(embedding, vector([0.0, 0.0, 0.0], "float32"), 0.5);
@@ -7359,10 +7359,6 @@ Feature: TypeQL Match Clause
       select
         $name;
       """
-    Then answer size is: 1
-    Then uniquely identify answer concepts
-      | name           |
-      | attr:name:zero |
 
 
   Scenario: cosine similarity search returns every owner of a shared matching embedding
