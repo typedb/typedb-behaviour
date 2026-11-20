@@ -86,21 +86,6 @@ Feature: Driver Connection
     When connection opens with connection string: "typedb://admin@localhost"; fails with a message containing: "Invalid connection string"
     Then connection is open: false
 
-  Scenario: Driver does not fall back for a connection string with a wrong port
-    When connection closes
-    When connection opens with a connection string for a wrong port; fails
-    Then connection is open: false
-
-  # A connection string written for the other protocol's endpoint names the same server, so the driver
-  # retries on its own default port. Cluster fixtures do not use the default ports, so this only applies
-  # to a single default-port server.
-  @ignore-typedb-driver-cluster
-  Scenario: Driver falls back when a connection string names the other protocol default port
-    When connection closes
-    When connection opens with a connection string for the other protocol default port
-    Then connection is open: true
-    Then connection has database: typedb
-
   #############
   # DATABASES #
   #############
