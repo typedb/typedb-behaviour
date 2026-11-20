@@ -75,6 +75,17 @@ Feature: Driver Connection
     When set driver option request_timeout_millis to: 1
     Then connection opens with default authentication; fails with a message containing: "timed out"
 
+  Scenario: Driver can connect with a connection string
+    When connection closes
+    When connection opens with a connection string for the default address
+    Then connection is open: true
+    Then connection has database: typedb
+
+  Scenario: Driver rejects a malformed connection string
+    When connection closes
+    When connection opens with connection string: "typedb://admin@localhost"; fails with a message containing: "Invalid connection string"
+    Then connection is open: false
+
   #############
   # DATABASES #
   #############
