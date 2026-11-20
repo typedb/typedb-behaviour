@@ -1150,6 +1150,81 @@ Feature: Driver Migration
     Then answer size is: 3
 
 
+  Scenario Outline: Export with compression: <compression> and import of a database succeeds
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+        entity person, owns name @key, owns age, plays employment:employee;
+        entity company, owns name @key, plays employment:employer;
+        relation employment, relates employee, relates employer, owns salary;
+        attribute name, value string;
+        attribute age, value integer;
+        attribute salary, value double;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+        $alice isa person, has name "Alice", has age 30;
+        $bob isa person, has name "Bob", has age 25;
+        $acme isa company, has name "Acme";
+        employment (employee: $alice, employer: $acme), has salary 1000.5;
+        employment (employee: $bob, employer: $acme), has salary 900.25;
+      """
+    Given transaction commits
+
+    Given file(schema.tql) does not exist
+    Given file(data.typedb) does not exist
+    When connection get database(typedb) export to schema file(schema.tql), data file(data.typedb) with compression: <compression>
+    Then file(data.typedb) has compression: <compression>
+
+    When connection import database(typedb-clone) from schema file(schema.tql), data file(data.typedb)
+    Then connection get database(typedb-clone) has schema:
+      """
+      define
+        entity person, owns name @key, owns age, plays employment:employee;
+        entity company, owns name @key, plays employment:employer;
+        relation employment, relates employee, relates employer, owns salary;
+        attribute name, value string;
+        attribute age, value integer;
+        attribute salary, value double;
+      """
+    When connection open read transaction for database: typedb-clone
+    When get answers of typeql read query
+      """
+      match $p isa person;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match $e isa employment;
+      """
+    Then answer size is: 2
+    When get answers of typeql read query
+      """
+      match
+        $alice isa person, has name "Alice", has age 30;
+        $acme isa company, has name "Acme";
+        employment (employee: $alice, employer: $acme), has salary 1000.5;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match
+        $bob isa person, has name "Bob", has age 25;
+        $acme isa company, has name "Acme";
+        employment (employee: $bob, employer: $acme), has salary 900.25;
+      """
+    Then answer size is: 1
+
+    Examples:
+      | compression  |
+      | uncompressed |
+      | zstd         |
+
+
   Scenario: Export and import of a database with attribute hierarchies declared in either order succeeds
     Given connection open schema transaction for database: typedb
     Given typeql schema query
