@@ -1291,6 +1291,40 @@ Feature: TypeQL Undefine Query
       """
 
 
+  Scenario: removing a played role in the transaction that deletes its instances validates the inherited cardinality
+    Given typeql schema query
+      """
+      define
+      relation part-time-employment sub employment, relates part-time-employee as employee;
+      person plays part-time-employment:part-time-employee;
+      """
+    Given typeql schema query
+      """
+      redefine person plays employment:employee @card(1..);
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has email "smith@typedb.com";
+      (part-time-employee: $x) isa part-time-employment;
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+      """
+      match $x isa person; $e isa part-time-employment, links (part-time-employee: $x);
+      delete links (part-time-employee: $x) of $e;
+      """
+    When typeql schema query
+      """
+      undefine plays part-time-employment:part-time-employee from person;
+      """
+    Then transaction commits; fails
+
+
   Scenario: undefining inherited plays is not allowed
     When typeql schema query
       """
@@ -1423,6 +1457,34 @@ Feature: TypeQL Undefine Query
       """
       undefine owns name from person;
       """
+
+
+  Scenario: removing an ownership in the transaction that deletes its instances validates the inherited cardinality
+    Given typeql schema query
+      """
+      define
+      attribute surname sub name;
+      person owns name @card(1..), owns surname;
+      """
+    Given transaction commits
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert $x isa person, has surname "Smith", has email "smith@typedb.com";
+      """
+    Given transaction commits
+
+    Given connection open schema transaction for database: typedb
+    When typeql write query
+      """
+      match $x isa person, has surname $s;
+      delete has $s of $x;
+      """
+    When typeql schema query
+      """
+      undefine owns surname from person;
+      """
+    Then transaction commits; fails
 
 
   Scenario: undefining a key ownership errors if it is owned by existing instances

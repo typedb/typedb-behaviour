@@ -884,6 +884,113 @@ Feature: TypeQL Delete Query
     Then answer size is: 0
 
 
+  Scenario: when a relation's last role player is replaced by a new relation without role players, both relations get cleaned up
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      relation club, relates member, owns ref @key;
+      friendship plays club:member;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Alex";
+      $f isa friendship, links (friend: $x), has ref 0;
+      $c isa club, links (member: $f), has ref 1;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $c isa club, has ref 1;
+      insert
+        $f isa friendship, has ref 2;
+        $c links (member: $f);
+      """
+    When typeql write query
+      """
+      match
+        $f isa friendship, has ref 0;
+      delete
+        $f;
+      """
+    When get answers of typeql read query
+      """
+      match $c isa club, links (member: $f);
+      """
+    Then uniquely identify answer concepts
+      | c         | f         |
+      | key:ref:1 | key:ref:2 |
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r has ref $_;
+      """
+    Then answer size is: 0
+
+
+  Scenario: when a new relation's only role player is a relation that loses its last role player, both relations get cleaned up
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      relation club, relates member, owns ref @key;
+      friendship plays club:member;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given typeql write query
+      """
+      insert
+      $x isa person, has name "Alex";
+      $f isa friendship, links (friend: $x), has ref 0;
+      """
+    Given transaction commits
+
+    When connection open write transaction for database: typedb
+    When typeql write query
+      """
+      match
+        $x isa person, has name "Alex";
+        $f isa friendship, has ref 0;
+      delete
+        links (friend: $x) of $f;
+      """
+    When typeql write query
+      """
+      match
+        $f isa friendship, has ref 0;
+      insert
+        $c isa club, links (member: $f), has ref 1;
+      """
+    When get answers of typeql read query
+      """
+      match $c isa club, links (member: $f);
+      """
+    Then uniquely identify answer concepts
+      | c         | f         |
+      | key:ref:1 | key:ref:0 |
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $r has ref $_;
+      """
+    Then answer size is: 0
+
+
   Scenario: deleting a role player with a too-specific (downcasting) role errors
     Given transaction closes
     Given connection open schema transaction for database: typedb
