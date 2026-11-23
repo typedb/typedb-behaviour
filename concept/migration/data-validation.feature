@@ -4716,6 +4716,68 @@ Feature: Data validation
     Then transaction commits
 
 
+  Scenario: Cardinality is validated by the inherited owns if owns is unset with its instances deletions
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create attribute type: name
+    Given attribute(name) set value type: string
+    Given create attribute type: surname
+    Given attribute(surname) set supertype: name
+    Given create entity type: person
+    Given entity(person) set owns: ref
+    Given entity(person) get owns(ref) set annotation: @key
+    Given entity(person) set owns: name
+    Given entity(person) get owns(name) set annotation: @card(1..)
+    Given entity(person) set owns: surname
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $p = entity(person) create new instance with key(ref): "p"
+    Given $s = attribute(surname) put instance with value: "smith"
+    Given entity $p set has: $s
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $p = entity(person) get instance with key(ref): "p"
+    When $s = attribute(surname) get instance with value: "smith"
+    When entity $p unset has: $s
+    When entity(person) unset owns: surname
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+
+  Scenario: Cardinality is validated by the inherited plays if plays is unset with its instances deletions
+    Given create attribute type: ref
+    Given attribute(ref) set value type: string
+    Given create relation type: employment
+    Given relation(employment) create role: employee
+    Given create relation type: part-time-employment
+    Given relation(part-time-employment) set supertype: employment
+    Given relation(part-time-employment) create role: part-time-employee
+    Given relation(part-time-employment) get role(part-time-employee) set specialise: employee
+    Given relation(part-time-employment) set owns: ref
+    Given relation(part-time-employment) get owns(ref) set annotation: @key
+    Given create entity type: person
+    Given entity(person) set owns: ref
+    Given entity(person) get owns(ref) set annotation: @key
+    Given entity(person) set plays: employment:employee
+    Given entity(person) get plays(employment:employee) set annotation: @card(1..)
+    Given entity(person) set plays: part-time-employment:part-time-employee
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Given $p = entity(person) create new instance with key(ref): "p"
+    Given $e = relation(part-time-employment) create new instance with key(ref): "e"
+    Given relation $e add player for role(part-time-employee): $p
+    Given transaction commits
+
+    When connection open schema transaction for database: typedb
+    When $p = entity(person) get instance with key(ref): "p"
+    When $e = relation(part-time-employment) get instance with key(ref): "e"
+    When relation $e remove player for role(part-time-employee): $p
+    When entity(person) unset plays: part-time-employment:part-time-employee
+    Then transaction commits; fails with a message containing: "@card(1..)"
+
+
   Scenario: Cardinality is not validated if cardinality is unset to the default value with the owns unsetting
     Given create attribute type: attr0
     Given attribute(attr0) set value type: string
