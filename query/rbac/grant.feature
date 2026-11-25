@@ -262,3 +262,231 @@ Feature: Assigning permissions & RBAC roles
 
     Given create user with username 'user-no-grant', password 'mypassword'
     Then ungrant user 'user-no-grant' database role: mydb:post-readers; fails with a message containing: "Unable to revoke role 'post-readers' on database 'mydb' from 'user:user-no-grant'"
+
+  # --- Enforcement: system permissions ---
+  Scenario: A user without manage-databases cannot create or delete a database
+    Given create user with username 'user-enf-mdb', password 'mypassword'
+
+    Given connection closes
+    Given connection opens with username 'user-enf-mdb', password 'mypassword'
+    Then connection create database: newdb; fails with a message containing: ""
+
+    Given connection closes
+    Given connection opens with default authentication
+    Given grant user 'user-enf-mdb' permission: manage-databases
+    Given connection closes
+    Given connection opens with username 'user-enf-mdb', password 'mypassword'
+    Then connection create database: newdb
+
+#  Scenario: A user without manage-users cannot create or delete a user
+#    Given create user with username 'user-enf-mu', password 'mypassword'
+#
+#    Given connection closes
+#    Given connection opens with username 'user-enf-mu', password 'mypassword'
+#    Then create user with username 'newuser', password 'newpassword'; fails
+#
+#    Given connection closes
+#    Given connection opens with default authentication
+#    Given grant user 'user-enf-mu' permission: manage-users
+#    Given connection closes
+#    Given connection opens with username 'user-enf-mu', password 'mypassword'
+#    Then create user with username 'newuser', password 'newpassword'
+#
+
+## TODO: Review because Claude has been garbage.
+#  # --- Enforcement: system permissions ---
+#
+#  Scenario Outline: A user with the '<permission>' permission can open a '<tx-type>' transaction; without it, they cannot
+#    Given connection create database: mydb
+#
+#    Given create user with username 'user-enf', password 'mypassword'
+#
+#    # Without permission: blocked
+#    Given connection closes
+#    Given connection opens with username 'user-enf', password 'mypassword'
+#    Then connection open <tx-type> transaction for database: mydb; fails
+#
+#    # With permission: allowed
+#    Given connection closes
+#    Given connection opens with default authentication
+#    Given grant user 'user-enf' permission: <permission>:mydb
+#    Given connection closes
+#    Given connection opens with username 'user-enf', password 'mypassword'
+#    Then connection open <tx-type> transaction for database: mydb
+#
+#    Examples:
+#      | permission        | tx-type |
+#      | transaction-read  | read    |
+#      | transaction-write | write   |
+#      | schema-types      | schema  |
+#
+#  Scenario: A user with transaction-read cannot open a write transaction
+#    Given connection create database: mydb
+#
+#    Given create user with username 'user-read-only', password 'mypassword'
+#    Given grant user 'user-read-only' permission: transaction-read:mydb
+#
+#    Given connection closes
+#    Given connection opens with username 'user-read-only', password 'mypassword'
+#    Then connection open write transaction for database: mydb; fails
+#    Then connection open schema transaction for database: mydb; fails
+#
+#  Scenario: A user with transaction-write cannot open a schema transaction
+#    Given connection create database: mydb
+#
+#    Given create user with username 'user-write-only', password 'mypassword'
+#    Given grant user 'user-write-only' permission: transaction-write:mydb
+#
+#    Given connection closes
+#    Given connection opens with username 'user-write-only', password 'mypassword'
+#    Then connection open schema transaction for database: mydb; fails
+#    Then connection open read transaction for database: mydb; fails
+
+
+#  Scenario: A user without grant-permissions cannot grant or ungrant permissions
+#    Given create user with username 'user-enf-gp', password 'mypassword'
+#    Given create user with username 'user-target', password 'mypassword'
+#
+#    Given connection closes
+#    Given connection opens with username 'user-enf-gp', password 'mypassword'
+#    Then grant user 'user-target' permission: manage-databases; fails
+#
+#    Given connection closes
+#    Given connection opens with default authentication
+#    Given grant user 'user-enf-gp' permission: grant-permissions
+#    Given connection closes
+#    Given connection opens with username 'user-enf-gp', password 'mypassword'
+#    Then grant user 'user-target' permission: manage-databases
+#
+#  Scenario: A user without schema-roles cannot define or undefine RBAC roles
+#    Given connection create database: mydb
+#    Given create user with username 'user-enf-sr', password 'mypassword'
+#    Given grant user 'user-enf-sr' permission: schema-types:mydb
+#
+#    Given connection closes
+#    Given connection opens with username 'user-enf-sr', password 'mypassword'
+#    Given connection open schema transaction for database: mydb
+#    Then typeql schema query; fails
+#    """
+#    define
+#      entity post;
+#      rbac readers, reads { post };
+#    """
+#
+#    Given connection closes
+#    Given connection opens with default authentication
+#    Given grant user 'user-enf-sr' permission: schema-roles:mydb
+#    Given connection closes
+#    Given connection opens with username 'user-enf-sr', password 'mypassword'
+#    Given connection open schema transaction for database: mydb
+#    Then typeql schema query
+#    """
+#    define
+#      entity post;
+#      rbac readers, reads { post };
+#    """
+#    Then transaction commits
+#
+#
+#  # --- Enforcement: RBAC role access ---
+#
+#  Scenario: A user with a database role can read types that the role grants read access on, but not types outside the role
+#    Given connection create database: mydb
+#
+#    Given connection open schema transaction for database: mydb
+#    Given typeql schema query
+#    """
+#    define
+#      attribute name, value string;
+#      entity post, owns name;
+#      entity comment, owns name;
+#      entity secret, owns name;
+#      rbac readers, reads { post, comment };
+#    """
+#    Given transaction commits
+#
+#    Given create user with username 'user-rbac-read', password 'mypassword'
+#
+#    # Without role: cannot open a transaction at all (no transaction-read permission)
+#    Given connection closes
+#    Given connection opens with username 'user-rbac-read', password 'mypassword'
+#    Then connection open read transaction for database: mydb; fails
+#
+#    # Grant the role (which implies transaction-read access to the declared types)
+#    Given connection closes
+#    Given connection opens with default authentication
+#    Given grant user 'user-rbac-read' database role: mydb:readers
+#
+#    Given connection closes
+#    Given connection opens with username 'user-rbac-read', password 'mypassword'
+#    Given connection open read transaction for database: mydb
+#    When typeql read query
+#    """
+#    match $p isa post;
+#    """
+#    Then answer size is: 0
+#    Then typeql read query; fails with a message containing: "TODO: access to type 'secret' denied"
+#    """
+#    match $s isa secret;
+#    """
+#    Given connection open write transaction for database: mydb
+#    Then typeql write query; fails with a message containing: "TODO: write access to type 'post' denied"
+#    """
+#    insert $p isa post, has name "hello";
+#    """
+#
+#  Scenario: A user with a read-only role cannot write to types in that role
+#    Given connection create database: mydb
+#
+#    Given connection open schema transaction for database: mydb
+#    Given typeql schema query
+#    """
+#    define
+#      attribute name, value string;
+#      entity post, owns name;
+#      rbac readers, reads { post };
+#    """
+#    Given transaction commits
+#
+#    Given create user with username 'user-rbac-read-only', password 'mypassword'
+#    Given grant user 'user-rbac-read-only' database role: mydb:readers
+#
+#    Given connection closes
+#    Given connection opens with username 'user-rbac-read-only', password 'mypassword'
+#    Given connection open write transaction for database: mydb
+#    Then typeql write query; fails
+#    """
+#    insert $p isa post, has name "hello";
+#    """
+#
+#  Scenario: A user with a write role can write to types in that role, but not types outside it or types it only reads
+#    Given connection create database: mydb
+#
+#    Given connection open schema transaction for database: mydb
+#    Given typeql schema query
+#    """
+#    define
+#      attribute name, value string;
+#      entity post, owns name;
+#      entity secret, owns name;
+#      rbac writers, writes { post };
+#    """
+#    Given transaction commits
+#
+#    Given create user with username 'user-rbac-write', password 'mypassword'
+#    Given grant user 'user-rbac-write' database role: mydb:writers
+#
+#    Given connection closes
+#    Given connection opens with username 'user-rbac-write', password 'mypassword'
+#    Given connection open write transaction for database: mydb
+#    When typeql write query
+#    """
+#    insert $p isa post, has name "hello";
+#    """
+#    Then transaction commits
+#
+#    Given connection open write transaction for database: mydb
+#    Then typeql write query; fails with a message containing: "TODO: access to type 'secret' denied"
+#    """
+#    insert $s isa secret, has name "shh";
+#    """
