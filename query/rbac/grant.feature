@@ -264,19 +264,21 @@ Feature: Assigning permissions & RBAC roles
     Then ungrant user 'user-no-grant' database role: mydb:post-readers; fails with a message containing: "Unable to revoke role 'post-readers' on database 'mydb' from 'user:user-no-grant'"
 
   # --- Enforcement: system permissions ---
-  Scenario: A user without manage-databases cannot create or delete a database
-    Given create user with username 'user-enf-mdb', password 'mypassword'
+  Scenario: A user must have the "manage-databases" permission to create or delete a database
+    Given connection create database: db-delete-me
+    Given create user with username 'user-enf-mdb-yes', password 'mypassword'
+    Given create user with username 'user-enf-mdb-no', password 'mypassword'
+    Given grant user 'user-enf-mdb-yes' permission: manage-databases
+    Given connection closes
 
+    Given connection opens with username 'user-enf-mdb-no', password 'mypassword'
+    Then connection create database: db-create-me; fails with a message containing: "The user 'user-enf-mdb-no' is not permitted to perform this operation"
+    Then connection delete database: db-delete-me; fails with a message containing: "The user 'user-enf-mdb-no' is not permitted to perform this operation"
     Given connection closes
-    Given connection opens with username 'user-enf-mdb', password 'mypassword'
-    Then connection create database: newdb; fails with a message containing: ""
 
-    Given connection closes
-    Given connection opens with default authentication
-    Given grant user 'user-enf-mdb' permission: manage-databases
-    Given connection closes
-    Given connection opens with username 'user-enf-mdb', password 'mypassword'
-    Then connection create database: newdb
+    Given connection opens with username 'user-enf-mdb-yes', password 'mypassword'
+    Then connection create database: db-create-me
+    Then connection delete database: db-delete-me
 
 #  Scenario: A user without manage-users cannot create or delete a user
 #    Given create user with username 'user-enf-mu', password 'mypassword'
