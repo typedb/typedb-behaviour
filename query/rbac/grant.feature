@@ -280,20 +280,20 @@ Feature: Assigning permissions & RBAC roles
     Then connection create database: db-create-me
     Then connection delete database: db-delete-me
 
-#  Scenario: A user without manage-users cannot create or delete a user
-#    Given create user with username 'user-enf-mu', password 'mypassword'
-#
-#    Given connection closes
-#    Given connection opens with username 'user-enf-mu', password 'mypassword'
-#    Then create user with username 'newuser', password 'newpassword'; fails
-#
-#    Given connection closes
-#    Given connection opens with default authentication
-#    Given grant user 'user-enf-mu' permission: manage-users
-#    Given connection closes
-#    Given connection opens with username 'user-enf-mu', password 'mypassword'
-#    Then create user with username 'newuser', password 'newpassword'
-#
+  Scenario: A user must have the "manage-users" permission to create or delete a user
+    Given create user with username 'user-enf-mu-yes', password 'mypassword'
+    Given create user with username 'user-enf-mu-no', password 'mypassword'
+    Given grant user 'user-enf-mu-yes' permission: manage-users
+    Given connection closes
+
+    Given connection opens with username 'user-enf-mu-no', password 'mypassword'
+    Then create user with username 'newuser', password 'newpassword'; fails with a message containing: "The user 'user-enf-mu-no' is not permitted to perform this operation"
+    Then delete user 'user-enf-mu-no'; fails with a message containing: "The user 'user-enf-mu-no' is not permitted to perform this operation"
+    Given connection closes
+
+    Given connection opens with username 'user-enf-mu-yes', password 'mypassword'
+    Then create user with username 'newuser', password 'newpassword'
+    Then delete user 'newuser'
 
 ## TODO: Review because Claude has been garbage.
 #  # --- Enforcement: system permissions ---
