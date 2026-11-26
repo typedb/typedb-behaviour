@@ -360,27 +360,59 @@ Feature: Assigning permissions & RBAC roles
     Then transaction commits
     Given connection closes
 
-
   Scenario: A user must have the "grant-permissions" permission to grant or revoke permissions
     Given connection create database: mydb
     Given create user with username 'user-enf-gp-yes', password 'mypassword'
     Given create user with username 'user-enf-gp-no', password 'mypassword'
-    Given create user with username 'user-target', password 'mypassword'
+    Given create user with username 'user-enf-gp-target', password 'mypassword'
     Given grant user 'user-enf-gp-yes' permission: grant-permissions
     Given connection closes
 
+    # grant failure
     Given connection opens with username 'user-enf-gp-no', password 'mypassword'
-    Then grant user 'user-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
-    Then grant user 'user-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
-    Then ungrant user 'user-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
-    Then ungrant user 'user-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then grant user 'user-enf-gp-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then grant user 'user-enf-gp-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
     Given connection closes
 
+    # test failure
+    Given connection opens with username 'user-enf-gp-target', password 'mypassword'
+    Then connection create database: db-enf-gp-createme; fails with a message containing: "The user 'user-enf-gp-target' is not permitted to perform this operation"
+    Then connection open read transaction for database: mydb; fails with a message containing: "The user 'user-enf-gp-target' is not permitted to perform this operation"
+    Given connection closes
+
+    # grant success
     Given connection opens with username 'user-enf-gp-yes', password 'mypassword'
-    Then grant user 'user-target' permission: manage-databases
-    Then grant user 'user-target' permission: transaction-read:mydb
-    Then ungrant user 'user-target' permission: manage-databases
-    Then ungrant user 'user-target' permission: transaction-read:mydb
+    Then grant user 'user-enf-gp-target' permission: manage-databases
+    Then grant user 'user-enf-gp-target' permission: transaction-read:mydb
+    Given connection closes
+
+    # test success
+    Given connection opens with username 'user-enf-gp-target', password 'mypassword'
+    Then connection create database: db-enf-gp-createme
+    Then connection open read transaction for database: mydb
+    Then transaction closes
+    Given connection closes
+
+    # revoke failure
+    Given connection opens with username 'user-enf-gp-no', password 'mypassword'
+    Then ungrant user 'user-enf-gp-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then ungrant user 'user-enf-gp-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Given connection closes
+
+    # revoke success
+    Given connection opens with username 'user-enf-gp-yes', password 'mypassword'
+    Then ungrant user 'user-enf-gp-target' permission: manage-databases
+    Then ungrant user 'user-enf-gp-target' permission: transaction-read:mydb
+    Given connection closes
+
+    # test-failure
+    Given connection opens with username 'user-enf-gp-target', password 'mypassword'
+    Then connection create database: db-enf-gp-createme-2; fails with a message containing: "The user 'user-enf-gp-target' is not permitted to perform this operation"
+    Then connection open read transaction for database: mydb; fails with a message containing: "The user 'user-enf-gp-target' is not permitted to perform this operation"
+    Given connection closes
+
+
+
 #  Scenario: A user without schema-roles cannot define or undefine RBAC roles
 #    Given connection create database: mydb
 #    Given create user with username 'user-enf-sr', password 'mypassword'
