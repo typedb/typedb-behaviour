@@ -360,71 +360,27 @@ Feature: Assigning permissions & RBAC roles
     Then transaction commits
     Given connection closes
 
-## TODO: Review because Claude has been garbage.
-#  # --- Enforcement: system permissions ---
-#
-#  Scenario Outline: A user with the '<permission>' permission can open a '<tx-type>' transaction; without it, they cannot
-#    Given connection create database: mydb
-#
-#    Given create user with username 'user-enf', password 'mypassword'
-#
-#    # Without permission: blocked
-#    Given connection closes
-#    Given connection opens with username 'user-enf', password 'mypassword'
-#    Then connection open <tx-type> transaction for database: mydb; fails
-#
-#    # With permission: allowed
-#    Given connection closes
-#    Given connection opens with default authentication
-#    Given grant user 'user-enf' permission: <permission>:mydb
-#    Given connection closes
-#    Given connection opens with username 'user-enf', password 'mypassword'
-#    Then connection open <tx-type> transaction for database: mydb
-#
-#    Examples:
-#      | permission        | tx-type |
-#      | transaction-read  | read    |
-#      | transaction-write | write   |
-#      | schema-types      | schema  |
-#
-#  Scenario: A user with transaction-read cannot open a write transaction
-#    Given connection create database: mydb
-#
-#    Given create user with username 'user-read-only', password 'mypassword'
-#    Given grant user 'user-read-only' permission: transaction-read:mydb
-#
-#    Given connection closes
-#    Given connection opens with username 'user-read-only', password 'mypassword'
-#    Then connection open write transaction for database: mydb; fails
-#    Then connection open schema transaction for database: mydb; fails
-#
-#  Scenario: A user with transaction-write cannot open a schema transaction
-#    Given connection create database: mydb
-#
-#    Given create user with username 'user-write-only', password 'mypassword'
-#    Given grant user 'user-write-only' permission: transaction-write:mydb
-#
-#    Given connection closes
-#    Given connection opens with username 'user-write-only', password 'mypassword'
-#    Then connection open schema transaction for database: mydb; fails
-#    Then connection open read transaction for database: mydb; fails
 
+  Scenario: A user must have the "grant-permissions" permission to grant or revoke permissions
+    Given connection create database: mydb
+    Given create user with username 'user-enf-gp-yes', password 'mypassword'
+    Given create user with username 'user-enf-gp-no', password 'mypassword'
+    Given create user with username 'user-target', password 'mypassword'
+    Given grant user 'user-enf-gp-yes' permission: grant-permissions
+    Given connection closes
 
-#  Scenario: A user without grant-permissions cannot grant or ungrant permissions
-#    Given create user with username 'user-enf-gp', password 'mypassword'
-#    Given create user with username 'user-target', password 'mypassword'
-#
-#    Given connection closes
-#    Given connection opens with username 'user-enf-gp', password 'mypassword'
-#    Then grant user 'user-target' permission: manage-databases; fails
-#
-#    Given connection closes
-#    Given connection opens with default authentication
-#    Given grant user 'user-enf-gp' permission: grant-permissions
-#    Given connection closes
-#    Given connection opens with username 'user-enf-gp', password 'mypassword'
-#    Then grant user 'user-target' permission: manage-databases
-#
+    Given connection opens with username 'user-enf-gp-no', password 'mypassword'
+    Then grant user 'user-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then grant user 'user-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then ungrant user 'user-target' permission: manage-databases; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Then ungrant user 'user-target' permission: transaction-read:mydb; fails with a message containing: "The user 'user-enf-gp-no' is not permitted to perform this operation"
+    Given connection closes
+
+    Given connection opens with username 'user-enf-gp-yes', password 'mypassword'
+    Then grant user 'user-target' permission: manage-databases
+    Then grant user 'user-target' permission: transaction-read:mydb
+    Then ungrant user 'user-target' permission: manage-databases
+    Then ungrant user 'user-target' permission: transaction-read:mydb
 #  Scenario: A user without schema-roles cannot define or undefine RBAC roles
 #    Given connection create database: mydb
 #    Given create user with username 'user-enf-sr', password 'mypassword'
