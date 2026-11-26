@@ -137,11 +137,13 @@ Feature: Assigning permissions & RBAC roles
     Then user 'user-role-both' has database role: mydb:post-readers
     Then user 'user-role-both' has database role: mydb:post-writers
 
+
   Scenario: Granting a database role that is not defined fails
     Given connection create database: mydb
 
     Given create user with username 'user-no-role', password 'mypassword'
     Then grant user 'user-no-role' database role: mydb:nonexistent-role; fails with a message containing: "The referenced role 'nonexistent-role' was not found in the database 'mydb'"
+
 
   Scenario: Granting a database role after its definition has been deleted fails
     Given connection create database: mydb
@@ -184,6 +186,7 @@ Feature: Assigning permissions & RBAC roles
       | user-rv-gp-md  | manage-databases  |
       | user-rv-gp-gp  | grant-permissions |
 
+
   Scenario: Revoking a database-scoped permission removes it without affecting other permissions
     Given connection create database: mydb
     Given connection create database: otherdb
@@ -200,7 +203,6 @@ Feature: Assigning permissions & RBAC roles
 
 
   # --- Revoking database roles ---
-
   Scenario: Revoking a database role removes it without affecting other roles
     Given connection create database: mydb
 
@@ -246,6 +248,7 @@ Feature: Assigning permissions & RBAC roles
     Then user 'user-revoke-role' does not have database role: mydb:post-readers
     Then user 'user-revoke-role' has database role: mydb:post-writers
 
+
   Scenario: Revoking a database role that was not granted fails
     Given connection create database: mydb
 
@@ -279,6 +282,8 @@ Feature: Assigning permissions & RBAC roles
     Given connection opens with username 'user-enf-mdb-yes', password 'mypassword'
     Then connection create database: db-create-me
     Then connection delete database: db-delete-me
+    Given connection closes
+
 
   Scenario: A user must have the "manage-users" permission to create or delete a user
     Given create user with username 'user-enf-mu-yes', password 'mypassword'
@@ -294,6 +299,66 @@ Feature: Assigning permissions & RBAC roles
     Given connection opens with username 'user-enf-mu-yes', password 'mypassword'
     Then create user with username 'newuser', password 'newpassword'
     Then delete user 'newuser'
+    Given connection closes
+
+  # --- Enforcement: database permissions ---
+  Scenario: A user must have the "transaction-read" permission to open a read transaction
+    Given connection create database: mydb
+    Given create user with username 'user-enf-tr-yes', password 'mypassword'
+    Given create user with username 'user-enf-tr-no', password 'mypassword'
+    Given grant user 'user-enf-tr-yes' permission: transaction-read:mydb
+
+    Given connection open schema transaction for database: mydb
+    Given typeql schema query
+      """
+      define entity dummy;
+      """
+    Given transaction commits
+    Given connection closes
+
+    Given connection opens with username 'user-enf-tr-no', password 'mypassword'
+    Then connection open read transaction for database: mydb; fails with a message containing: "The user 'user-enf-tr-no' is not permitted to perform this operation"
+    Given connection closes
+
+    Given connection opens with username 'user-enf-tr-yes', password 'mypassword'
+    Then connection open read transaction for database: mydb
+    Then get answers of typeql read query
+    """
+    # match $t sub dummy;
+    match let $x =1;
+    """
+    Then answer size is: 1
+    Given transaction closes
+    Given connection closes
+
+
+  Scenario: A user must have the "transaction-write" permission to open a write transaction
+    Given connection create database: mydb
+    Given connection open schema transaction for database: mydb
+    Given typeql schema query
+      """
+      define entity dummy;
+      """
+    Given transaction commits
+
+    Given create user with username 'user-enf-tw-yes', password 'mypassword'
+    Given create user with username 'user-enf-tw-no', password 'mypassword'
+    Given grant user 'user-enf-tw-yes' permission: transaction-write:mydb
+    Given connection closes
+
+    Given connection opens with username 'user-enf-tw-no', password 'mypassword'
+    Then connection open write transaction for database: mydb; fails with a message containing: "The user 'user-enf-tw-no' is not permitted to perform this operation"
+    Given connection closes
+
+    Given connection opens with username 'user-enf-tw-yes', password 'mypassword'
+    Then connection open write transaction for database: mydb
+    When get answers of typeql write query
+      """
+      insert $x isa dummy;
+      """
+    Then answer size is: 1
+    Then transaction commits
+    Given connection closes
 
 ## TODO: Review because Claude has been garbage.
 #  # --- Enforcement: system permissions ---
