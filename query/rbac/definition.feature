@@ -133,7 +133,7 @@ Feature: Defining RBAC roles
     When typeql schema query
     """
     undefine
-      rbac post-readers reads { post };
+      reads { post } from post-readers;
     """
     Then list rbac declared access for role: post-readers
       | type    | access |

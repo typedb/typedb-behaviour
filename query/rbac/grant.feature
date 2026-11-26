@@ -3,8 +3,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #noinspection CucumberUndefinedStep
-# TODO: dropping a database with granted roles — are role-assignments cleaned up or left dangling?
-# TODO: enforcement tests — a user without a permission is blocked, a user with one is allowed through
+
 Feature: Assigning permissions & RBAC roles
 
   Background:
