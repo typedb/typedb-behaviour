@@ -3020,3 +3020,87 @@ Parker";
       | key:ref:0 | attr:name:Sam        |
       # | key:ref:0 | attr:name:Big Sam    | # For when we do support comparisons
       # | key:ref:0 | attr:name:Person Sam | # For when we do support isa
+
+
+  Scenario: an embedding value can be inserted
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match
+        $x isa document, has embedding $e;
+      """
+    Then answer size is: 1
+
+
+  Scenario: inserting an embedding whose length differs from the declared array size errors
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    Then typeql write query; fails
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2], "float32");
+      """
+
+
+  Scenario: inserting the same embedding twice results in a single attribute instance
+    Given transaction closes
+    Given connection open schema transaction for database: typedb
+    Given typeql schema query
+      """
+      define
+      attribute embedding value vector(3, "float32") @index(hnsw:cosine);
+      entity document owns embedding;
+      """
+    Given transaction commits
+
+    Given connection open write transaction for database: typedb
+    When typeql write query
+      """
+      insert
+      $x isa document,
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      $y isa document,
+        has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Then transaction commits
+
+    When connection open read transaction for database: typedb
+    When get answers of typeql read query
+      """
+      match $e isa embedding;
+      """
+    Then answer size is: 1
+    When get answers of typeql read query
+      """
+      match $x isa document, has embedding vector([0.1, 0.2, 0.3], "float32");
+      """
+    Then answer size is: 2
